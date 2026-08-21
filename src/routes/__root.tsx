@@ -152,6 +152,7 @@ function RootComponent() {
             <Footer />
           </div>
           <MobileTabBar />
+          <StickyBottomAd />
           <SocialBar />
           <CookieBanner />
           <VipModal />
