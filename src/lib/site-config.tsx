@@ -92,6 +92,12 @@ function loadZone(id: string, format: string, zone: string, src: string) {
   document.body.appendChild(script);
 }
 
+/** Claim a cap slot only when the script is not already on the page. */
+function shouldLoad(id: string, format: "popunder" | "vignette" | "inpage_push", cap: { perHour: number; perSession: number }) {
+  if (typeof document === "undefined" || document.getElementById(id)) return false;
+  return claimFormat(format, cap);
+}
+
 function MonetagLoader() {
   const config = useContext(SiteConfigContext);
   const { isVip } = useVip();
@@ -123,7 +129,7 @@ function MonetagLoader() {
     }
 
     // In-page push: highest sustained RPM, loads immediately site-wide.
-    if (ads.monetag_inpage_push && claimFormat("inpage_push", caps.inpage_push)) {
+    if (ads.monetag_inpage_push && shouldLoad("monetag-push", "inpage_push", caps.inpage_push)) {
       loadZone(
         "monetag-push",
         "inpage_push",
@@ -134,7 +140,7 @@ function MonetagLoader() {
 
     // Vignette interstitial: delayed slightly to keep first paint fast.
     let vignetteTimer: number | undefined;
-    if (ads.monetag_vignette && claimFormat("vignette", caps.vignette)) {
+    if (ads.monetag_vignette && shouldLoad("monetag-vignette", "vignette", caps.vignette)) {
       vignetteTimer = window.setTimeout(() => {
         loadZone(
           "monetag-vignette",
@@ -150,7 +156,7 @@ function MonetagLoader() {
     const loadPop = () => {
       if (popLoaded) return;
       popLoaded = true;
-      if (!claimFormat("popunder", caps.popunder)) return;
+      if (!shouldLoad("monetag-popunder", "popunder", caps.popunder)) return;
       loadZone(
         "monetag-popunder",
         "popunder",
