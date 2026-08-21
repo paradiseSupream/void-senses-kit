@@ -19,6 +19,40 @@ const EVENT_TYPES = new Set([
 
 const MAX_EVENTS = 25;
 
+/** Obvious crawler / headless signatures — flagged so reports can exclude them. */
+const BOT_UA =
+  /(bot|crawl|spider|slurp|headless|phantomjs|puppeteer|playwright|selenium|curl|wget|python-requests|axios|lighthouse|gtmetrix|pingdom)/i;
+
+/** Salted, non-reversible visitor hash (never stores the raw IP). */
+async function sha(value: string): Promise<string> {
+  const salt = process.env["ADMIN_SESSION_SECRET"] ?? "sov";
+  const bytes = new TextEncoder().encode(`${salt}:${value}`);
+  const digest = await crypto.subtle.digest("SHA-256", bytes);
+  return [...new Uint8Array(digest)]
+    .slice(0, 12)
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+}
+
+function countryOf(request: Request): string | null {
+  const raw =
+    request.headers.get("cf-ipcountry") ??
+    request.headers.get("x-vercel-ip-country") ??
+    request.headers.get("x-country-code");
+  if (!raw) return null;
+  const code = raw.trim().toUpperCase().slice(0, 2);
+  return /^[A-Z]{2}$/.test(code) ? code : null;
+}
+
+function clientIp(request: Request): string {
+  return (
+    request.headers.get("cf-connecting-ip") ??
+    request.headers.get("x-real-ip") ??
+    (request.headers.get("x-forwarded-for") ?? "").split(",")[0]?.trim() ??
+    "unknown"
+  );
+}
+
 function str(value: unknown, max = 200): string | null {
   if (typeof value !== "string") return null;
   const trimmed = value.trim().slice(0, max);
@@ -35,6 +69,12 @@ export const Route = createFileRoute("/api/public/track")({
         } catch {
           return new Response("Invalid JSON", { status: 400 });
         }
+
+        const userAgent = request.headers.get("user-agent") ?? "";
+        const country = countryOf(request);
+        const ipHash = await sha(clientIp(request));
+        const uaHash = await sha(userAgent || "none");
+        const suspect = userAgent.length < 10 || BOT_UA.test(userAgent);
 
         const raw = Array.isArray(body.events) ? body.events.slice(0, MAX_EVENTS) : [];
         const rows = raw
@@ -68,6 +108,10 @@ export const Route = createFileRoute("/api/public/track")({
               duration_ms: e["duration_ms"] != null && Number.isFinite(Number(e["duration_ms"]))
                 ? Math.max(0, Math.min(600_000, Math.round(Number(e["duration_ms"]))))
                 : null,
+              country,
+              ip_hash: ipHash,
+              ua_hash: uaHash,
+              suspect,
               metric_value: e["metric_value"] != null && Number.isFinite(Number(e["metric_value"]))
                 ? Number(e["metric_value"])
                 : null,
