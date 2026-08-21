@@ -1,7 +1,16 @@
 import { useEffect, useRef, useState } from "react";
 
 import { useVip } from "@/lib/vip";
+import { useSiteConfig } from "@/lib/site-config";
 import { claimImpression, partnerLink, track } from "@/lib/monetization";
+
+function slotKind(slot: string): "result" | "gate" | "sticky_mobile" | "native_feed" {
+  if (slot.startsWith("sticky")) return "sticky_mobile";
+  if (slot.startsWith("gate")) return "gate";
+  if (slot.startsWith("native")) return "native_feed";
+  return "result";
+}
+
 
 /**
  * Inline banner ad container (responsive: 320x100 on mobile, 728x90 up).
