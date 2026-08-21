@@ -375,3 +375,25 @@
   }
 }
 
+
+/* Mobile-first refinements: lighter effects, safe areas, comfortable type. */
+@media (max-width: 640px) {
+  .panel,
+  .glass {
+    backdrop-filter: blur(14px) saturate(125%);
+  }
+
+  .aurora::before {
+    filter: blur(22px);
+    animation: none;
+  }
+
+  body {
+    font-size: 0.95rem;
+  }
+
+  html,
+  body {
+    overflow-x: hidden;
+  }
+}

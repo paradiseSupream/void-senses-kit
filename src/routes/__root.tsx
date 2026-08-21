@@ -15,6 +15,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { CookieBanner } from "@/components/layout/CookieBanner";
+import { MobileTabBar } from "@/components/layout/MobileTabBar";
 import { SocialBar } from "@/components/monetization/SocialBar";
 import { VipModal } from "@/components/monetization/VipModal";
 import { ActionGateProvider } from "@/components/monetization/ActionGate";
@@ -140,7 +141,7 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <VipProvider>
         <ActionGateProvider>
-          <div className="flex min-h-screen flex-col">
+          <div className="flex min-h-screen flex-col pb-16 sm:pb-0">
             <Header />
             <main className="flex-1">
               {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
@@ -148,6 +149,7 @@ function RootComponent() {
             </main>
             <Footer />
           </div>
+          <MobileTabBar />
           <SocialBar />
           <CookieBanner />
           <VipModal />

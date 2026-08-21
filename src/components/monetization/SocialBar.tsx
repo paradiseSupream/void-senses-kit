@@ -32,7 +32,7 @@ export function SocialBar() {
   return (
     <aside
       aria-label="Sponsored offer"
-      className="glass fixed right-4 bottom-4 z-40 flex max-w-[min(20rem,calc(100vw-2rem))] items-center gap-3 rounded-full py-2 pr-2 pl-4 duration-500 animate-in slide-in-from-bottom-4"
+      className="glass fixed right-4 bottom-20 z-40 sm:bottom-4 flex max-w-[min(20rem,calc(100vw-2rem))] items-center gap-3 rounded-full py-2 pr-2 pl-4 duration-500 animate-in slide-in-from-bottom-4"
     >
       <Sparkles className="size-4 shrink-0 text-primary" aria-hidden="true" />
       <a
