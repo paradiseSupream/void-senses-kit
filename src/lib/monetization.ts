@@ -22,12 +22,28 @@ export type AdEvent = {
     | "tool_start"
     | "tool_complete"
     | "gate_shown"
-    | "gate_completed";
+    | "gate_completed"
+    | "script_load"
+    | "script_error"
+    | "script_blocked"
+    | "web_vital"
+    | "consent";
   slot: string;
   tool_slug?: string | null;
   revenue_cents?: number;
   click_id?: string | null;
+  format?: string | null;
+  zone?: string | null;
+  duration_ms?: number | null;
+  metric_value?: number | null;
 };
+
+/** Set by the VIP provider so every event can be split VIP vs non-VIP. */
+let vipFlag = false;
+export function setVipFlag(value: boolean) {
+  vipFlag = value;
+}
+
 
 /* ------------------------------------------------------------------ session */
 
