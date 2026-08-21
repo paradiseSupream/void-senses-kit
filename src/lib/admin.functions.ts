@@ -235,6 +235,7 @@ export const getPublicConfig = createServerFn({ method: "GET" }).handler(
     return {
       ads: {
         enabled: ads.enabled,
+        lean_mode: ads.lean_mode ?? false,
         monetag_zone: ads.monetag_zone,
         monetag_popunder: ads.monetag_popunder,
         monetag_popunder_zone: ads.monetag_popunder_zone,
