@@ -9,6 +9,14 @@ import {
   type LucideIcon,
 } from "lucide-react";
 
+import coverChildTrauma from "@/assets/cover-child-trauma.jpg.asset.json";
+import coverIq from "@/assets/cover-iq.jpg.asset.json";
+import coverDark from "@/assets/cover-dark-personality.jpg.asset.json";
+import coverLove from "@/assets/cover-love-match.jpg.asset.json";
+import coverRoast from "@/assets/cover-roast.jpg.asset.json";
+import coverPrompt from "@/assets/cover-prompt-maker.jpg.asset.json";
+import coverVault from "@/assets/cover-vault.jpg.asset.json";
+
 export type ToolMeta = {
   slug: string;
   path: string;
@@ -22,6 +30,16 @@ export type ToolMeta = {
   /** Design-token reference used as --tool-accent for per-tool theming. */
   accent: string;
   highlights: [string, string, string];
+  /** CDN cover art giving each tool its own visual identity. */
+  cover: string;
+  /** One-line promise shown under the cover on mobile cards. */
+  promise: string;
+  /** "What you'll get" facts rendered on the tool intro card. */
+  facts: { steps: string; time: string; output: string };
+  /** A teaser line that shows what the first screen feels like. */
+  teaser: string;
+  /** Slugs suggested after a result, to chain the session. */
+  related: string[];
 };
 
 export const TOOLS: ToolMeta[] = [
@@ -38,6 +56,11 @@ export const TOOLS: ToolMeta[] = [
     icon: HeartCrack,
     accent: "var(--chart-2)",
     highlights: ["6 emotional axes", "Radar visual", "PDF report"],
+    cover: coverChildTrauma.url,
+    promise: "See which childhood patterns still shape how you react today.",
+    facts: { steps: "10 questions", time: "about 4 minutes", output: "Radar chart + PDF report" },
+    teaser: "“When plans changed suddenly at home, I usually…”",
+    related: ["dark-personality", "love-match"],
   },
   {
     slug: "iq",
@@ -52,6 +75,11 @@ export const TOOLS: ToolMeta[] = [
     icon: BrainCircuit,
     accent: "var(--chart-4)",
     highlights: ["15 timed items", "Percentile band", "PNG certificate"],
+    cover: coverIq.url,
+    promise: "Fifteen timed puzzles, then a certificate with your score band.",
+    facts: { steps: "15 items · 15s each", time: "about 4 minutes", output: "PNG certificate" },
+    teaser: "“2, 6, 12, 20, 30, … what comes next?”",
+    related: ["prompt-maker", "dark-personality"],
   },
   {
     slug: "dark-personality",
@@ -66,6 +94,11 @@ export const TOOLS: ToolMeta[] = [
     icon: VenetianMask,
     accent: "var(--chart-5)",
     highlights: ["8 calibrated sliders", "12 archetypes", "Share card"],
+    cover: coverDark.url,
+    promise: "Slide eight traits and meet the archetype hiding in your shadow.",
+    facts: { steps: "8 sliders", time: "about 2 minutes", output: "Archetype share card" },
+    teaser: "“I read the room before I say what I actually think.”",
+    related: ["child-trauma", "roast"],
   },
   {
     slug: "love-match",
@@ -80,6 +113,11 @@ export const TOOLS: ToolMeta[] = [
     icon: HeartHandshake,
     accent: "var(--chart-3)",
     highlights: ["Deterministic score", "Vibe breakdown", "One-tap copy"],
+    cover: coverLove.url,
+    promise: "Two names in, one stable chemistry score out — ready for stories.",
+    facts: { steps: "2 names", time: "under a minute", output: "Score + copyable summary" },
+    teaser: "“Aria + Kabir → 87% resonance”",
+    related: ["dark-personality", "roast"],
   },
   {
     slug: "roast",
@@ -94,6 +132,11 @@ export const TOOLS: ToolMeta[] = [
     icon: Flame,
     accent: "var(--chart-1)",
     highlights: ["Live token stream", "3 intensities", "10 free per hour"],
+    cover: coverRoast.url,
+    promise: "Paste your bio and watch an AI take you apart, live, line by line.",
+    facts: { steps: "1 bio · 3 intensities", time: "about 30 seconds", output: "Streamed roast" },
+    teaser: "“$ roast --intensity brutal”",
+    related: ["prompt-maker", "love-match"],
   },
   {
     slug: "prompt-maker",
@@ -108,6 +151,11 @@ export const TOOLS: ToolMeta[] = [
     icon: Wand2,
     accent: "var(--secondary)",
     highlights: ["Model-aware syntax", "Style presets", "Copy ready"],
+    cover: coverPrompt.url,
+    promise: "Build a Midjourney or Flux prompt that actually renders what you meant.",
+    facts: { steps: "Pick model + style", time: "instant", output: "Copy-ready prompt" },
+    teaser: "“cyberpunk portrait, volumetric rim light --ar 16:9”",
+    related: ["roast", "iq"],
   },
   {
     slug: "vault",
@@ -122,8 +170,25 @@ export const TOOLS: ToolMeta[] = [
     icon: FolderDown,
     accent: "var(--primary)",
     highlights: ["Curated assets", "Always free", "Direct Drive links"],
+    cover: coverVault.url,
+    promise: "Download UI kits, starters and prompt packs — free, no signup.",
+    facts: { steps: "Browse by category", time: "as long as you like", output: "Direct downloads" },
+    teaser: "“Glass UI Kit · 240 components · free”",
+    related: ["prompt-maker", "iq"],
   },
 ];
+
+export function getTool(slug: string): ToolMeta | undefined {
+  return TOOLS.find((tool) => tool.slug === slug);
+}
+
+export function relatedTools(slug: string): ToolMeta[] {
+  const tool = getTool(slug);
+  if (!tool) return [];
+  return tool.related
+    .map((s) => getTool(s))
+    .filter((t): t is ToolMeta => Boolean(t));
+}
 
 export function searchTools(query: string): ToolMeta[] {
   const q = query.trim().toLowerCase();
