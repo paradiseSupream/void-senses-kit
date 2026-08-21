@@ -1,18 +1,30 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowUpRight } from "lucide-react";
+import { useEffect, useState } from "react";
 
 import { AdSlot } from "@/components/monetization/AdSlot";
+import { adVariant, track } from "@/lib/monetization";
 import { relatedTools } from "@/lib/tools";
 
 /** Chains the session after a result: two accent-themed suggestions. */
 export function NextTools({ slug, heading = "Try next" }: { slug: string; heading?: string }) {
   const next = relatedTools(slug);
+  const [variant, setVariant] = useState<string | null>(null);
+
+  useEffect(() => {
+    setVariant(adVariant());
+    track({ event_type: "tool_complete", slot: `result-${slug}`, tool_slug: slug });
+  }, [slug]);
+
   if (next.length === 0) return null;
 
   return (
     <section className="mt-14">
-      {/* Post-result slot: highest-attention, lowest-friction ad position. */}
-      <AdSlot id={`result-${slug}`} className="mb-10" />
+      {/* A/B: the result slot only renders in the result-heavy variant, so its
+          RPM/CTR can be compared against the gate-heavy arm. */}
+      {variant === "result_heavy" ? (
+        <AdSlot id={`result-${slug}`} toolSlug={slug} className="mb-10" />
+      ) : null}
       <span className="label-mono">{heading}</span>
 
       <div className="mt-4 grid gap-3 sm:grid-cols-2">
