@@ -4,6 +4,7 @@ import { FileDown, RotateCcw } from "lucide-react";
 import { toast } from "sonner";
 
 import { ToolShell } from "@/components/layout/ToolShell";
+import { QuizVipNudge } from "@/components/monetization/QuizVipNudge";
 import { useActionGate } from "@/components/monetization/ActionGate";
 
 export const Route = createFileRoute("/tools/child-trauma")({
