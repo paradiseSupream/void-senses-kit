@@ -146,23 +146,26 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <VipProvider>
-        <ActionGateProvider>
-          <div className="flex min-h-screen flex-col pb-16 sm:pb-0">
-            <Header />
-            <main className="flex-1">
-              {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-              <Outlet />
-            </main>
-            <Footer />
-          </div>
-          <MobileTabBar />
-          <StickyBottomAd />
-          <SocialBar />
-          <CookieBanner />
-          <VipModal />
-          <Toaster theme="dark" position="top-center" richColors />
-        </ActionGateProvider>
+        <SiteConfigProvider>
+          <ActionGateProvider>
+            <div className="flex min-h-screen flex-col pb-16 sm:pb-0">
+              <Header />
+              <main className="flex-1">
+                {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+                <Outlet />
+              </main>
+              <Footer />
+            </div>
+            <MobileTabBar />
+            <StickyBottomAd />
+            <SocialBar />
+            <CookieBanner />
+            <VipModal />
+            <Toaster theme="dark" position="top-center" richColors />
+          </ActionGateProvider>
+        </SiteConfigProvider>
       </VipProvider>
+
     </QueryClientProvider>
   );
 }
