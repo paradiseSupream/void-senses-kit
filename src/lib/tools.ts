@@ -1,3 +1,14 @@
+import {
+  BrainCircuit,
+  Flame,
+  FolderDown,
+  HeartCrack,
+  HeartHandshake,
+  VenetianMask,
+  Wand2,
+  type LucideIcon,
+} from "lucide-react";
+
 export type ToolMeta = {
   slug: string;
   path: string;
@@ -7,6 +18,10 @@ export type ToolMeta = {
   category: "Psyche" | "Cognition" | "Social" | "AI" | "Assets";
   keywords: string[];
   duration: string;
+  icon: LucideIcon;
+  /** Design-token reference used as --tool-accent for per-tool theming. */
+  accent: string;
+  highlights: [string, string, string];
 };
 
 export const TOOLS: ToolMeta[] = [
@@ -20,6 +35,9 @@ export const TOOLS: ToolMeta[] = [
     category: "Psyche",
     keywords: ["trauma", "childhood", "emotional", "reflection", "radar", "pdf"],
     duration: "~4 min",
+    icon: HeartCrack,
+    accent: "var(--chart-2)",
+    highlights: ["6 emotional axes", "Radar visual", "PDF report"],
   },
   {
     slug: "iq",
@@ -31,6 +49,9 @@ export const TOOLS: ToolMeta[] = [
     category: "Cognition",
     keywords: ["iq", "logic", "pattern", "math", "certificate", "timer"],
     duration: "~4 min",
+    icon: BrainCircuit,
+    accent: "var(--chart-4)",
+    highlights: ["15 timed items", "Percentile band", "PNG certificate"],
   },
   {
     slug: "dark-personality",
@@ -42,6 +63,9 @@ export const TOOLS: ToolMeta[] = [
     category: "Psyche",
     keywords: ["dark", "personality", "machiavellian", "shadow", "archetype", "sliders"],
     duration: "~2 min",
+    icon: VenetianMask,
+    accent: "var(--chart-5)",
+    highlights: ["8 calibrated sliders", "12 archetypes", "Share card"],
   },
   {
     slug: "love-match",
@@ -53,6 +77,9 @@ export const TOOLS: ToolMeta[] = [
     category: "Social",
     keywords: ["love", "match", "vibe", "compatibility", "names", "share"],
     duration: "~1 min",
+    icon: HeartHandshake,
+    accent: "var(--chart-3)",
+    highlights: ["Deterministic score", "Vibe breakdown", "One-tap copy"],
   },
   {
     slug: "roast",
@@ -64,6 +91,9 @@ export const TOOLS: ToolMeta[] = [
     category: "AI",
     keywords: ["roast", "ai", "bio", "github", "savage", "terminal"],
     duration: "~30 sec",
+    icon: Flame,
+    accent: "var(--chart-1)",
+    highlights: ["Live token stream", "3 intensities", "10 free per hour"],
   },
   {
     slug: "prompt-maker",
@@ -75,6 +105,9 @@ export const TOOLS: ToolMeta[] = [
     category: "AI",
     keywords: ["prompt", "midjourney", "flux", "chatgpt", "cyberpunk", "builder"],
     duration: "instant",
+    icon: Wand2,
+    accent: "var(--secondary)",
+    highlights: ["Model-aware syntax", "Style presets", "Copy ready"],
   },
   {
     slug: "vault",
@@ -86,6 +119,9 @@ export const TOOLS: ToolMeta[] = [
     category: "Assets",
     keywords: ["vault", "drive", "download", "ui kit", "boilerplate", "free", "assets"],
     duration: "browse",
+    icon: FolderDown,
+    accent: "var(--primary)",
+    highlights: ["Curated assets", "Always free", "Direct Drive links"],
   },
 ];
 
