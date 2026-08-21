@@ -20,6 +20,7 @@ import { Route as ToolsLoveMatchRouteImport } from './routes/tools.love-match'
 import { Route as ToolsPromptMakerRouteImport } from './routes/tools.prompt-maker'
 import { Route as ToolsRoastRouteImport } from './routes/tools.roast'
 import { Route as ApiPublicRoastRouteImport } from './routes/api/public/roast'
+import { Route as ApiPublicTrackRouteImport } from './routes/api/public/track'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -76,6 +77,11 @@ const ApiPublicRoastRoute = ApiPublicRoastRouteImport.update({
   path: '/api/public/roast',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicTrackRoute = ApiPublicTrackRouteImport.update({
+  id: '/api/public/track',
+  path: '/api/public/track',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -89,6 +95,7 @@ export interface FileRoutesByFullPath {
   '/tools/prompt-maker': typeof ToolsPromptMakerRoute
   '/tools/roast': typeof ToolsRoastRoute
   '/api/public/roast': typeof ApiPublicRoastRoute
+  '/api/public/track': typeof ApiPublicTrackRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -102,6 +109,7 @@ export interface FileRoutesByTo {
   '/tools/prompt-maker': typeof ToolsPromptMakerRoute
   '/tools/roast': typeof ToolsRoastRoute
   '/api/public/roast': typeof ApiPublicRoastRoute
+  '/api/public/track': typeof ApiPublicTrackRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -116,6 +124,7 @@ export interface FileRoutesById {
   '/tools/prompt-maker': typeof ToolsPromptMakerRoute
   '/tools/roast': typeof ToolsRoastRoute
   '/api/public/roast': typeof ApiPublicRoastRoute
+  '/api/public/track': typeof ApiPublicTrackRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -131,6 +140,7 @@ export interface FileRouteTypes {
     | '/tools/prompt-maker'
     | '/tools/roast'
     | '/api/public/roast'
+    | '/api/public/track'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -144,6 +154,7 @@ export interface FileRouteTypes {
     | '/tools/prompt-maker'
     | '/tools/roast'
     | '/api/public/roast'
+    | '/api/public/track'
   id:
     | '__root__'
     | '/'
@@ -157,6 +168,7 @@ export interface FileRouteTypes {
     | '/tools/prompt-maker'
     | '/tools/roast'
     | '/api/public/roast'
+    | '/api/public/track'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -171,6 +183,7 @@ export interface RootRouteChildren {
   ToolsPromptMakerRoute: typeof ToolsPromptMakerRoute
   ToolsRoastRoute: typeof ToolsRoastRoute
   ApiPublicRoastRoute: typeof ApiPublicRoastRoute
+  ApiPublicTrackRoute: typeof ApiPublicTrackRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -252,6 +265,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicRoastRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/track': {
+      id: '/api/public/track'
+      path: '/api/public/track'
+      fullPath: '/api/public/track'
+      preLoaderRoute: typeof ApiPublicTrackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -267,6 +287,7 @@ const rootRouteChildren: RootRouteChildren = {
   ToolsPromptMakerRoute: ToolsPromptMakerRoute,
   ToolsRoastRoute: ToolsRoastRoute,
   ApiPublicRoastRoute: ApiPublicRoastRoute,
+  ApiPublicTrackRoute: ApiPublicTrackRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
