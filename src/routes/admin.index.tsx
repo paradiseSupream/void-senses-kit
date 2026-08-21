@@ -477,6 +477,14 @@ function SettingsTab({ token, which }: { token: string; which: "Ads" | "Site" })
                 onChange={(e) => setAds({ ...ads, adsterra_native_key: e.target.value })}
               />
             </Field>
+            <Field label="Adsterra social bar script URL">
+              <input
+                className={inputCls}
+                value={ads.adsterra_social_bar_src ?? ""}
+                placeholder="https://pl30960638.profitableratecpmnetwork.com/..."
+                onChange={(e) => setAds({ ...ads, adsterra_social_bar_src: e.target.value })}
+              />
+            </Field>
             <Field label="RPM estimate (cents per 1000 impressions)">
               <input
                 className={inputCls}
@@ -506,6 +514,11 @@ function SettingsTab({ token, which }: { token: string; which: "Ads" | "Site" })
               label="Monetag pop-under"
               checked={ads.monetag_popunder}
               onChange={(v) => setAds({ ...ads, monetag_popunder: v })}
+            />
+            <Toggle
+              label="Adsterra social bar"
+              checked={ads.adsterra_social_bar ?? false}
+              onChange={(v) => setAds({ ...ads, adsterra_social_bar: v })}
             />
             <Toggle
               label="Result page banner"
