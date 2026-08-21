@@ -105,6 +105,7 @@ function RoastMe() {
   return (
     <ToolShell
       eyebrow="Tool 05 · AI"
+      slug="roast"
       title="AI Roast Me"
       intro="Paste a bio, a GitHub handle or any snippet about yourself, choose your pain tolerance, and watch it come in live."
     >

@@ -91,6 +91,7 @@ function LoveMatch() {
   return (
     <ToolShell
       eyebrow="Tool 04 · Social"
+      slug="love-match"
       title="Love & Vibe Matcher"
       intro="A deterministic read: the same two names always return the same score, so you can share it and it stays true."
     >

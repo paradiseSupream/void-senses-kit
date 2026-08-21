@@ -41,14 +41,15 @@ export function Header() {
   }, [query, assets]);
 
   return (
-    <header className="sticky top-0 z-30 border-b border-hairline bg-background/80 backdrop-blur-xl">
+    <header className="sticky top-0 z-30 border-b border-hairline bg-background/70 backdrop-blur-2xl">
       <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-3 px-4 py-3 sm:px-6">
-        <Link to="/" className="flex shrink-0 items-center gap-2.5">
-          <LogoMark className="size-8" />
+        <Link to="/" className="group flex shrink-0 items-center gap-2.5">
+          <LogoMark className="size-8 transition-transform duration-500 group-hover:rotate-90" />
           <span className="font-display text-base font-bold tracking-tight sm:text-lg">
             Senses of Void
           </span>
         </Link>
+
 
         <div ref={boxRef} className="relative order-3 w-full sm:order-none sm:mx-auto sm:max-w-md">
           <label htmlFor="global-search" className="sr-only">

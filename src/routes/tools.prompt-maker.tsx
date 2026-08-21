@@ -110,6 +110,7 @@ function PromptMaker() {
   return (
     <ToolShell
       eyebrow="Tool 06 · AI"
+      slug="prompt-maker"
       title="AI Prompt Maker"
       intro="Pick a target model and stack your modifiers. Everything is composed in your browser, so it is instant and costs nothing."
     >
