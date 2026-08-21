@@ -23,6 +23,7 @@ import { Route as ToolsPromptMakerRouteImport } from './routes/tools.prompt-make
 import { Route as ToolsRoastRouteImport } from './routes/tools.roast'
 import { Route as ApiPublicRoastRouteImport } from './routes/api/public/roast'
 import { Route as ApiPublicTrackRouteImport } from './routes/api/public/track'
+import { Route as ApiPublicWeeklyReportRouteImport } from './routes/api/public/weekly-report'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -94,6 +95,11 @@ const ApiPublicTrackRoute = ApiPublicTrackRouteImport.update({
   path: '/api/public/track',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicWeeklyReportRoute = ApiPublicWeeklyReportRouteImport.update({
+  id: '/api/public/weekly-report',
+  path: '/api/public/weekly-report',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -110,6 +116,7 @@ export interface FileRoutesByFullPath {
   '/admin/': typeof AdminIndexRoute
   '/api/public/roast': typeof ApiPublicRoastRoute
   '/api/public/track': typeof ApiPublicTrackRoute
+  '/api/public/weekly-report': typeof ApiPublicWeeklyReportRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -126,6 +133,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminIndexRoute
   '/api/public/roast': typeof ApiPublicRoastRoute
   '/api/public/track': typeof ApiPublicTrackRoute
+  '/api/public/weekly-report': typeof ApiPublicWeeklyReportRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -143,6 +151,7 @@ export interface FileRoutesById {
   '/admin/': typeof AdminIndexRoute
   '/api/public/roast': typeof ApiPublicRoastRoute
   '/api/public/track': typeof ApiPublicTrackRoute
+  '/api/public/weekly-report': typeof ApiPublicWeeklyReportRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -161,6 +170,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/api/public/roast'
     | '/api/public/track'
+    | '/api/public/weekly-report'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -177,6 +187,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/api/public/roast'
     | '/api/public/track'
+    | '/api/public/weekly-report'
   id:
     | '__root__'
     | '/'
@@ -193,6 +204,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/api/public/roast'
     | '/api/public/track'
+    | '/api/public/weekly-report'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -210,6 +222,7 @@ export interface RootRouteChildren {
   AdminIndexRoute: typeof AdminIndexRoute
   ApiPublicRoastRoute: typeof ApiPublicRoastRoute
   ApiPublicTrackRoute: typeof ApiPublicTrackRoute
+  ApiPublicWeeklyReportRoute: typeof ApiPublicWeeklyReportRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -312,6 +325,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicTrackRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/weekly-report': {
+      id: '/api/public/weekly-report'
+      path: '/api/public/weekly-report'
+      fullPath: '/api/public/weekly-report'
+      preLoaderRoute: typeof ApiPublicWeeklyReportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -330,6 +350,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminIndexRoute: AdminIndexRoute,
   ApiPublicRoastRoute: ApiPublicRoastRoute,
   ApiPublicTrackRoute: ApiPublicTrackRoute,
+  ApiPublicWeeklyReportRoute: ApiPublicWeeklyReportRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

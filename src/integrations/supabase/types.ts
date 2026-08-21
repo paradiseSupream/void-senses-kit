@@ -17,12 +17,14 @@ export type Database = {
       ad_events: {
         Row: {
           click_id: string | null
+          country: string | null
           created_at: string
           device: string | null
           duration_ms: number | null
           event_type: string
           format: string | null
           id: number
+          ip_hash: string | null
           is_vip: boolean
           metric_value: number | null
           path: string | null
@@ -30,7 +32,9 @@ export type Database = {
           revenue_cents: number
           session_id: string
           slot: string
+          suspect: boolean
           tool_slug: string | null
+          ua_hash: string | null
           utm_campaign: string | null
           utm_medium: string | null
           utm_source: string | null
@@ -39,12 +43,14 @@ export type Database = {
         }
         Insert: {
           click_id?: string | null
+          country?: string | null
           created_at?: string
           device?: string | null
           duration_ms?: number | null
           event_type: string
           format?: string | null
           id?: number
+          ip_hash?: string | null
           is_vip?: boolean
           metric_value?: number | null
           path?: string | null
@@ -52,7 +58,9 @@ export type Database = {
           revenue_cents?: number
           session_id: string
           slot: string
+          suspect?: boolean
           tool_slug?: string | null
+          ua_hash?: string | null
           utm_campaign?: string | null
           utm_medium?: string | null
           utm_source?: string | null
@@ -61,12 +69,14 @@ export type Database = {
         }
         Update: {
           click_id?: string | null
+          country?: string | null
           created_at?: string
           device?: string | null
           duration_ms?: number | null
           event_type?: string
           format?: string | null
           id?: number
+          ip_hash?: string | null
           is_vip?: boolean
           metric_value?: number | null
           path?: string | null
@@ -74,7 +84,9 @@ export type Database = {
           revenue_cents?: number
           session_id?: string
           slot?: string
+          suspect?: boolean
           tool_slug?: string | null
+          ua_hash?: string | null
           utm_campaign?: string | null
           utm_medium?: string | null
           utm_source?: string | null
@@ -245,6 +257,27 @@ export type Database = {
           id?: string
           is_active?: boolean
           stripe_customer_id?: string | null
+        }
+        Relationships: []
+      }
+      weekly_reports: {
+        Row: {
+          created_at: string
+          id: string
+          payload: Json
+          week_start: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          payload?: Json
+          week_start: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          payload?: Json
+          week_start?: string
         }
         Relationships: []
       }

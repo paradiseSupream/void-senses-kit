@@ -1,0 +1,96 @@
+import { readFileSync, readdirSync, statSync } from "node:fs";
+import { join } from "node:path";
+import { describe, expect, it } from "vitest";
+
+import { plannedAdScripts, smartlinkSurfacesAllowed, type PolicyInput } from "@/lib/ad-policy";
+import { DEFAULT_PUBLIC_CONFIG } from "@/lib/admin-types";
+
+const FULL: PolicyInput = {
+  enabled: true,
+  lean_mode: false,
+  monetag_inpage_push: true,
+  monetag_vignette: true,
+  monetag_popunder: true,
+};
+
+const LEAN: PolicyInput = { ...FULL, lean_mode: true };
+const CONSENTED = { isVip: false, consentAllowsAds: true } as const;
+
+describe("ad policy", () => {
+  it("loads the three Monetag formats when everything is on and consent is given", () => {
+    expect(plannedAdScripts(FULL, CONSENTED)).toEqual(["inpage_push", "vignette", "popunder"]);
+  });
+
+  it("LEAN MODE: only Free Vault + smartlink surfaces, zero third-party scripts", () => {
+    expect(plannedAdScripts(LEAN, CONSENTED)).toEqual([]);
+    // First-party smartlink anchors (vault CTAs, native cards, sticky bar) stay live.
+    expect(smartlinkSurfacesAllowed(LEAN, CONSENTED)).toBe(true);
+  });
+
+  it("never loads a script without consent, for VIPs, or when ads are off", () => {
+    expect(plannedAdScripts(FULL, { isVip: false, consentAllowsAds: false })).toEqual([]);
+    expect(plannedAdScripts(FULL, { isVip: false, consentAllowsAds: undefined })).toEqual([]);
+    expect(plannedAdScripts(FULL, { isVip: true, consentAllowsAds: true })).toEqual([]);
+    expect(plannedAdScripts({ ...FULL, enabled: false }, CONSENTED)).toEqual([]);
+    expect(smartlinkSurfacesAllowed(FULL, { isVip: true, consentAllowsAds: true })).toBe(false);
+  });
+
+  it("respects per-format toggles", () => {
+    expect(
+      plannedAdScripts({ ...FULL, monetag_vignette: false, monetag_popunder: false }, CONSENTED),
+    ).toEqual(["inpage_push"]);
+  });
+
+  it("ships a public config that still carries the lean-mode switch", () => {
+    expect(DEFAULT_PUBLIC_CONFIG.ads).toHaveProperty("lean_mode");
+  });
+});
+
+/* ------------------------------------------------------------------ sources */
+
+const SRC = join(process.cwd(), "src");
+/** The only module allowed to inject a third-party ad script. */
+const SCRIPT_INJECTOR = join(SRC, "lib", "site-config.tsx");
+const AD_HOSTS = /(al5sm\.com|n6wxm\.com|nap5k\.com|adsterra|propellerads|profitableratecpm)/i;
+
+function walk(dir: string): string[] {
+  return readdirSync(dir).flatMap((entry) => {
+    const full = join(dir, entry);
+    if (statSync(full).isDirectory()) return walk(full);
+    return /\.(ts|tsx)$/.test(full) ? [full] : [];
+  });
+}
+
+describe("no page loads an unapproved ad format", () => {
+  const files = walk(SRC).filter((f) => !f.includes("__tests__"));
+
+  it("only site-config.tsx creates <script> elements for ads", () => {
+    const offenders = files.filter(
+      (file) =>
+        file !== SCRIPT_INJECTOR &&
+        /createElement\(\s*["']script["']\s*\)/.test(readFileSync(file, "utf8")),
+    );
+    expect(offenders).toEqual([]);
+  });
+
+  it("no route or component hardcodes a third-party ad host", () => {
+    const offenders = files.filter((file) => {
+      // Allowed: the zone registry, server defaults and the admin control panel.
+      if (file.endsWith(join("lib", "admin-types.ts"))) return false;
+      if (file.endsWith(join("lib", "admin-core.server.ts"))) return false;
+      if (file.endsWith(join("routes", "admin.index.tsx"))) return false;
+      if (file === SCRIPT_INJECTOR) return false;
+      return AD_HOSTS.test(readFileSync(file, "utf8"));
+    });
+    expect(offenders).toEqual([]);
+  });
+
+  it("every ad surface component is VIP-aware", () => {
+    const surfaces = walk(join(SRC, "components", "monetization"));
+    for (const file of surfaces) {
+      const source = readFileSync(file, "utf8");
+      if (!/partnerLink|AdSlot|track\(/.test(source)) continue;
+      expect(source, `${file} must check useVip()`).toMatch(/useVip\(\)/);
+    }
+  });
+});

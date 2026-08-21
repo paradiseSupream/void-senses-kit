@@ -14,6 +14,8 @@ export type PrivacySettings = {
 
 export type AdsSettings = {
   enabled: boolean;
+  /** Safety switch: only Free Vault + smartlink surfaces, no third-party scripts. */
+  lean_mode: boolean;
   monetag_verify: string;
   monetag_zone: string;
   monetag_popunder: boolean;
@@ -42,6 +44,7 @@ export type SiteSettings = {
 export type PublicAdsConfig = Pick<
   AdsSettings,
   | "enabled"
+  | "lean_mode"
   | "monetag_zone"
   | "monetag_popunder"
   | "monetag_popunder_zone"
@@ -84,6 +87,7 @@ export const DEFAULT_PRIVACY: PrivacySettings = {
 export const DEFAULT_PUBLIC_CONFIG: PublicConfig = {
   ads: {
     enabled: true,
+    lean_mode: false,
     monetag_zone: "",
     monetag_popunder: true,
     monetag_popunder_zone: MONETAG.popunder.zone,
