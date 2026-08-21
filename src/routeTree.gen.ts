@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as VaultRouteImport } from './routes/vault'
+import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AdminMonetizationRouteImport } from './routes/admin.monetization'
 import { Route as ToolsChildTraumaRouteImport } from './routes/tools.child-trauma'
 import { Route as ToolsDarkPersonalityRouteImport } from './routes/tools.dark-personality'
@@ -41,6 +42,11 @@ const TermsRoute = TermsRouteImport.update({
 const VaultRoute = VaultRouteImport.update({
   id: '/vault',
   path: '/vault',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/admin/',
+  path: '/admin/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminMonetizationRoute = AdminMonetizationRouteImport.update({
@@ -101,6 +107,7 @@ export interface FileRoutesByFullPath {
   '/tools/love-match': typeof ToolsLoveMatchRoute
   '/tools/prompt-maker': typeof ToolsPromptMakerRoute
   '/tools/roast': typeof ToolsRoastRoute
+  '/admin/': typeof AdminIndexRoute
   '/api/public/roast': typeof ApiPublicRoastRoute
   '/api/public/track': typeof ApiPublicTrackRoute
 }
@@ -116,6 +123,7 @@ export interface FileRoutesByTo {
   '/tools/love-match': typeof ToolsLoveMatchRoute
   '/tools/prompt-maker': typeof ToolsPromptMakerRoute
   '/tools/roast': typeof ToolsRoastRoute
+  '/admin': typeof AdminIndexRoute
   '/api/public/roast': typeof ApiPublicRoastRoute
   '/api/public/track': typeof ApiPublicTrackRoute
 }
@@ -132,6 +140,7 @@ export interface FileRoutesById {
   '/tools/love-match': typeof ToolsLoveMatchRoute
   '/tools/prompt-maker': typeof ToolsPromptMakerRoute
   '/tools/roast': typeof ToolsRoastRoute
+  '/admin/': typeof AdminIndexRoute
   '/api/public/roast': typeof ApiPublicRoastRoute
   '/api/public/track': typeof ApiPublicTrackRoute
 }
@@ -149,6 +158,7 @@ export interface FileRouteTypes {
     | '/tools/love-match'
     | '/tools/prompt-maker'
     | '/tools/roast'
+    | '/admin/'
     | '/api/public/roast'
     | '/api/public/track'
   fileRoutesByTo: FileRoutesByTo
@@ -164,6 +174,7 @@ export interface FileRouteTypes {
     | '/tools/love-match'
     | '/tools/prompt-maker'
     | '/tools/roast'
+    | '/admin'
     | '/api/public/roast'
     | '/api/public/track'
   id:
@@ -179,6 +190,7 @@ export interface FileRouteTypes {
     | '/tools/love-match'
     | '/tools/prompt-maker'
     | '/tools/roast'
+    | '/admin/'
     | '/api/public/roast'
     | '/api/public/track'
   fileRoutesById: FileRoutesById
@@ -195,6 +207,7 @@ export interface RootRouteChildren {
   ToolsLoveMatchRoute: typeof ToolsLoveMatchRoute
   ToolsPromptMakerRoute: typeof ToolsPromptMakerRoute
   ToolsRoastRoute: typeof ToolsRoastRoute
+  AdminIndexRoute: typeof AdminIndexRoute
   ApiPublicRoastRoute: typeof ApiPublicRoastRoute
   ApiPublicTrackRoute: typeof ApiPublicTrackRoute
 }
@@ -227,6 +240,13 @@ declare module '@tanstack/react-router' {
       path: '/vault'
       fullPath: '/vault'
       preLoaderRoute: typeof VaultRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/': {
+      id: '/admin/'
+      path: '/admin'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/monetization': {
@@ -307,6 +327,7 @@ const rootRouteChildren: RootRouteChildren = {
   ToolsLoveMatchRoute: ToolsLoveMatchRoute,
   ToolsPromptMakerRoute: ToolsPromptMakerRoute,
   ToolsRoastRoute: ToolsRoastRoute,
+  AdminIndexRoute: AdminIndexRoute,
   ApiPublicRoastRoute: ApiPublicRoastRoute,
   ApiPublicTrackRoute: ApiPublicTrackRoute,
 }
