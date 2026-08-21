@@ -102,7 +102,6 @@ function shouldLoad(id: string, format: "popunder" | "vignette" | "inpage_push",
   if (claimedThisPage.has(format) || claimedThisPage.has(id)) return false;
   claimedThisPage.add(id);
   claimedThisPage.add(format);
-  console.log("[ads] claim", format);
   if (claimFormat(format, cap)) return true;
   return false;
 }
