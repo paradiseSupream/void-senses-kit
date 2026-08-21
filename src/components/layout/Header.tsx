@@ -34,14 +34,24 @@ export function Header() {
           ))}
         </nav>
 
-        <button
-          type="button"
-          onClick={openVipModal}
-          className="ml-auto inline-flex shrink-0 items-center gap-2 rounded-full bg-primary px-3.5 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
-        >
-          <Crown className="size-4" aria-hidden="true" />
-          {isVip ? "VIP active" : "$19 Lifetime VIP"}
-        </button>
+        {isVip ? (
+          <button
+            type="button"
+            onClick={openVipModal}
+            className="ml-auto inline-flex shrink-0 items-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-3 py-1.5 text-xs font-semibold text-primary"
+          >
+            <Crown className="size-3.5" aria-hidden="true" />
+            VIP active
+          </button>
+        ) : (
+          <Link
+            to="/vault"
+            className="ml-auto inline-flex shrink-0 items-center gap-2 rounded-full border border-hairline bg-surface/60 px-3.5 py-2 text-sm font-semibold transition-colors hover:bg-surface-2"
+          >
+            Free vault
+          </Link>
+        )}
+
       </div>
     </header>
   );
