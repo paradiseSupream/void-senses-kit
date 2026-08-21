@@ -10,12 +10,18 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ToolsDarkPersonalityRouteImport } from './routes/tools.dark-personality'
 import { Route as ToolsLoveMatchRouteImport } from './routes/tools.love-match'
 import { Route as ToolsPromptMakerRouteImport } from './routes/tools.prompt-maker'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ToolsDarkPersonalityRoute = ToolsDarkPersonalityRouteImport.update({
+  id: '/tools/dark-personality',
+  path: '/tools/dark-personality',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ToolsLoveMatchRoute = ToolsLoveMatchRouteImport.update({
@@ -31,30 +37,47 @@ const ToolsPromptMakerRoute = ToolsPromptMakerRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/tools/dark-personality': typeof ToolsDarkPersonalityRoute
   '/tools/love-match': typeof ToolsLoveMatchRoute
   '/tools/prompt-maker': typeof ToolsPromptMakerRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/tools/dark-personality': typeof ToolsDarkPersonalityRoute
   '/tools/love-match': typeof ToolsLoveMatchRoute
   '/tools/prompt-maker': typeof ToolsPromptMakerRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/tools/dark-personality': typeof ToolsDarkPersonalityRoute
   '/tools/love-match': typeof ToolsLoveMatchRoute
   '/tools/prompt-maker': typeof ToolsPromptMakerRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/tools/love-match' | '/tools/prompt-maker'
+  fullPaths:
+    | '/'
+    | '/tools/dark-personality'
+    | '/tools/love-match'
+    | '/tools/prompt-maker'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/tools/love-match' | '/tools/prompt-maker'
-  id: '__root__' | '/' | '/tools/love-match' | '/tools/prompt-maker'
+  to:
+    | '/'
+    | '/tools/dark-personality'
+    | '/tools/love-match'
+    | '/tools/prompt-maker'
+  id:
+    | '__root__'
+    | '/'
+    | '/tools/dark-personality'
+    | '/tools/love-match'
+    | '/tools/prompt-maker'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ToolsDarkPersonalityRoute: typeof ToolsDarkPersonalityRoute
   ToolsLoveMatchRoute: typeof ToolsLoveMatchRoute
   ToolsPromptMakerRoute: typeof ToolsPromptMakerRoute
 }
@@ -66,6 +89,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tools/dark-personality': {
+      id: '/tools/dark-personality'
+      path: '/tools/dark-personality'
+      fullPath: '/tools/dark-personality'
+      preLoaderRoute: typeof ToolsDarkPersonalityRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/tools/love-match': {
@@ -87,6 +117,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ToolsDarkPersonalityRoute: ToolsDarkPersonalityRoute,
   ToolsLoveMatchRoute: ToolsLoveMatchRoute,
   ToolsPromptMakerRoute: ToolsPromptMakerRoute,
 }
