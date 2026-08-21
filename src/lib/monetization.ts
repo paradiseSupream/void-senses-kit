@@ -142,10 +142,10 @@ export function shouldGate(): boolean {
 /* -------------------------------------------------------------- attribution */
 
 export type Attribution = {
-  utm_source?: string;
-  utm_medium?: string;
-  utm_campaign?: string;
-  referrer?: string;
+  utm_source?: string | undefined;
+  utm_medium?: string | undefined;
+  utm_campaign?: string | undefined;
+  referrer?: string | undefined;
 };
 
 /** Captures first-touch UTM/referrer once per visitor. */
