@@ -8,9 +8,18 @@ import {
   Scripts,
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
+import { Toaster } from "sonner";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { Header } from "@/components/layout/Header";
+import { Footer } from "@/components/layout/Footer";
+import { CookieBanner } from "@/components/layout/CookieBanner";
+import { SocialBar } from "@/components/monetization/SocialBar";
+import { VipModal } from "@/components/monetization/VipModal";
+import { ActionGateProvider } from "@/components/monetization/ActionGate";
+import { VipProvider } from "@/lib/vip";
+
 
 function NotFoundComponent() {
   return (
