@@ -14,6 +14,60 @@ export type Database = {
   }
   public: {
     Tables: {
+      ad_events: {
+        Row: {
+          click_id: string | null
+          created_at: string
+          device: string | null
+          event_type: string
+          id: number
+          path: string | null
+          referrer: string | null
+          revenue_cents: number
+          session_id: string
+          slot: string
+          tool_slug: string | null
+          utm_campaign: string | null
+          utm_medium: string | null
+          utm_source: string | null
+          variant: string
+        }
+        Insert: {
+          click_id?: string | null
+          created_at?: string
+          device?: string | null
+          event_type: string
+          id?: number
+          path?: string | null
+          referrer?: string | null
+          revenue_cents?: number
+          session_id: string
+          slot: string
+          tool_slug?: string | null
+          utm_campaign?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          variant?: string
+        }
+        Update: {
+          click_id?: string | null
+          created_at?: string
+          device?: string | null
+          event_type?: string
+          id?: number
+          path?: string | null
+          referrer?: string | null
+          revenue_cents?: number
+          session_id?: string
+          slot?: string
+          tool_slug?: string | null
+          utm_campaign?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          variant?: string
+        }
+        Relationships: []
+      }
       roast_requests: {
         Row: {
           id: string

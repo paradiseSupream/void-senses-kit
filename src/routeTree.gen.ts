@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as VaultRouteImport } from './routes/vault'
+import { Route as AdminMonetizationRouteImport } from './routes/admin.monetization'
 import { Route as ToolsChildTraumaRouteImport } from './routes/tools.child-trauma'
 import { Route as ToolsDarkPersonalityRouteImport } from './routes/tools.dark-personality'
 import { Route as ToolsIqRouteImport } from './routes/tools.iq'
@@ -20,6 +21,7 @@ import { Route as ToolsLoveMatchRouteImport } from './routes/tools.love-match'
 import { Route as ToolsPromptMakerRouteImport } from './routes/tools.prompt-maker'
 import { Route as ToolsRoastRouteImport } from './routes/tools.roast'
 import { Route as ApiPublicRoastRouteImport } from './routes/api/public/roast'
+import { Route as ApiPublicTrackRouteImport } from './routes/api/public/track'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -39,6 +41,11 @@ const TermsRoute = TermsRouteImport.update({
 const VaultRoute = VaultRouteImport.update({
   id: '/vault',
   path: '/vault',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminMonetizationRoute = AdminMonetizationRouteImport.update({
+  id: '/admin/monetization',
+  path: '/admin/monetization',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ToolsChildTraumaRoute = ToolsChildTraumaRouteImport.update({
@@ -76,12 +83,18 @@ const ApiPublicRoastRoute = ApiPublicRoastRouteImport.update({
   path: '/api/public/roast',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicTrackRoute = ApiPublicTrackRouteImport.update({
+  id: '/api/public/track',
+  path: '/api/public/track',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
   '/vault': typeof VaultRoute
+  '/admin/monetization': typeof AdminMonetizationRoute
   '/tools/child-trauma': typeof ToolsChildTraumaRoute
   '/tools/dark-personality': typeof ToolsDarkPersonalityRoute
   '/tools/iq': typeof ToolsIqRoute
@@ -89,12 +102,14 @@ export interface FileRoutesByFullPath {
   '/tools/prompt-maker': typeof ToolsPromptMakerRoute
   '/tools/roast': typeof ToolsRoastRoute
   '/api/public/roast': typeof ApiPublicRoastRoute
+  '/api/public/track': typeof ApiPublicTrackRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
   '/vault': typeof VaultRoute
+  '/admin/monetization': typeof AdminMonetizationRoute
   '/tools/child-trauma': typeof ToolsChildTraumaRoute
   '/tools/dark-personality': typeof ToolsDarkPersonalityRoute
   '/tools/iq': typeof ToolsIqRoute
@@ -102,6 +117,7 @@ export interface FileRoutesByTo {
   '/tools/prompt-maker': typeof ToolsPromptMakerRoute
   '/tools/roast': typeof ToolsRoastRoute
   '/api/public/roast': typeof ApiPublicRoastRoute
+  '/api/public/track': typeof ApiPublicTrackRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -109,6 +125,7 @@ export interface FileRoutesById {
   '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
   '/vault': typeof VaultRoute
+  '/admin/monetization': typeof AdminMonetizationRoute
   '/tools/child-trauma': typeof ToolsChildTraumaRoute
   '/tools/dark-personality': typeof ToolsDarkPersonalityRoute
   '/tools/iq': typeof ToolsIqRoute
@@ -116,6 +133,7 @@ export interface FileRoutesById {
   '/tools/prompt-maker': typeof ToolsPromptMakerRoute
   '/tools/roast': typeof ToolsRoastRoute
   '/api/public/roast': typeof ApiPublicRoastRoute
+  '/api/public/track': typeof ApiPublicTrackRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -124,6 +142,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/terms'
     | '/vault'
+    | '/admin/monetization'
     | '/tools/child-trauma'
     | '/tools/dark-personality'
     | '/tools/iq'
@@ -131,12 +150,14 @@ export interface FileRouteTypes {
     | '/tools/prompt-maker'
     | '/tools/roast'
     | '/api/public/roast'
+    | '/api/public/track'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/privacy'
     | '/terms'
     | '/vault'
+    | '/admin/monetization'
     | '/tools/child-trauma'
     | '/tools/dark-personality'
     | '/tools/iq'
@@ -144,12 +165,14 @@ export interface FileRouteTypes {
     | '/tools/prompt-maker'
     | '/tools/roast'
     | '/api/public/roast'
+    | '/api/public/track'
   id:
     | '__root__'
     | '/'
     | '/privacy'
     | '/terms'
     | '/vault'
+    | '/admin/monetization'
     | '/tools/child-trauma'
     | '/tools/dark-personality'
     | '/tools/iq'
@@ -157,6 +180,7 @@ export interface FileRouteTypes {
     | '/tools/prompt-maker'
     | '/tools/roast'
     | '/api/public/roast'
+    | '/api/public/track'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -164,6 +188,7 @@ export interface RootRouteChildren {
   PrivacyRoute: typeof PrivacyRoute
   TermsRoute: typeof TermsRoute
   VaultRoute: typeof VaultRoute
+  AdminMonetizationRoute: typeof AdminMonetizationRoute
   ToolsChildTraumaRoute: typeof ToolsChildTraumaRoute
   ToolsDarkPersonalityRoute: typeof ToolsDarkPersonalityRoute
   ToolsIqRoute: typeof ToolsIqRoute
@@ -171,6 +196,7 @@ export interface RootRouteChildren {
   ToolsPromptMakerRoute: typeof ToolsPromptMakerRoute
   ToolsRoastRoute: typeof ToolsRoastRoute
   ApiPublicRoastRoute: typeof ApiPublicRoastRoute
+  ApiPublicTrackRoute: typeof ApiPublicTrackRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -201,6 +227,13 @@ declare module '@tanstack/react-router' {
       path: '/vault'
       fullPath: '/vault'
       preLoaderRoute: typeof VaultRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/monetization': {
+      id: '/admin/monetization'
+      path: '/admin/monetization'
+      fullPath: '/admin/monetization'
+      preLoaderRoute: typeof AdminMonetizationRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/tools/child-trauma': {
@@ -252,6 +285,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicRoastRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/track': {
+      id: '/api/public/track'
+      path: '/api/public/track'
+      fullPath: '/api/public/track'
+      preLoaderRoute: typeof ApiPublicTrackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -260,6 +300,7 @@ const rootRouteChildren: RootRouteChildren = {
   PrivacyRoute: PrivacyRoute,
   TermsRoute: TermsRoute,
   VaultRoute: VaultRoute,
+  AdminMonetizationRoute: AdminMonetizationRoute,
   ToolsChildTraumaRoute: ToolsChildTraumaRoute,
   ToolsDarkPersonalityRoute: ToolsDarkPersonalityRoute,
   ToolsIqRoute: ToolsIqRoute,
@@ -267,6 +308,7 @@ const rootRouteChildren: RootRouteChildren = {
   ToolsPromptMakerRoute: ToolsPromptMakerRoute,
   ToolsRoastRoute: ToolsRoastRoute,
   ApiPublicRoastRoute: ApiPublicRoastRoute,
+  ApiPublicTrackRoute: ApiPublicTrackRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

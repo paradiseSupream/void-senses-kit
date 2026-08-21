@@ -1,9 +1,10 @@
-import type { ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
 import { ChevronLeft, Clock, Download, ListChecks, ShieldCheck } from "lucide-react";
 
 import { TOOLS } from "@/lib/tools";
 import { NextTools } from "@/components/tools/NextTools";
+import { track } from "@/lib/monetization";
 
 export function ToolShell({
   eyebrow,
@@ -21,6 +22,11 @@ export function ToolShell({
 }) {
   const tool = TOOLS.find((item) => item.slug === slug);
   const Icon = tool?.icon;
+
+  useEffect(() => {
+    if (!slug) return;
+    track({ event_type: "tool_start", slot: `tool-${slug}`, tool_slug: slug });
+  }, [slug]);
 
   return (
     <div style={tool ? ({ ["--tool-accent" as string]: tool.accent } as never) : undefined}>

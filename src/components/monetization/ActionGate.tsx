@@ -3,12 +3,13 @@ import type { ReactNode } from "react";
 import { ScanLine } from "lucide-react";
 
 import { useVip } from "@/lib/vip";
+import { adVariant, claimImpression, partnerLink, shouldGate, track } from "@/lib/monetization";
 
-const SMARTLINK = "https://sensesofvoid.app/go/partner-placeholder";
+const SLOT = "gate-interstitial";
 
 type GateContextValue = {
   /** Resolves when the user may proceed (instantly for VIP). */
-  runGated: (options?: { openPartnerTab?: boolean }) => Promise<void>;
+  runGated: (options?: { openPartnerTab?: boolean; toolSlug?: string }) => Promise<void>;
 };
 
 const GateContext = createContext<GateContextValue | null>(null);
@@ -18,10 +19,18 @@ export function ActionGateProvider({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
   const [progress, setProgress] = useState(0);
   const resolver = useRef<(() => void) | null>(null);
+  const clickId = useRef<string | null>(null);
+  const toolRef = useRef<string | null>(null);
 
   const finish = useCallback(() => {
     setOpen(false);
     setProgress(0);
+    track({
+      event_type: "gate_completed",
+      slot: SLOT,
+      tool_slug: toolRef.current,
+      click_id: clickId.current,
+    });
     resolver.current?.();
     resolver.current = null;
   }, []);
@@ -41,13 +50,43 @@ export function ActionGateProvider({ children }: { children: ReactNode }) {
   }, [open, finish]);
 
   const runGated = useCallback<GateContextValue["runGated"]>(
-    ({ openPartnerTab = true } = {}) => {
+    ({ openPartnerTab = true, toolSlug } = {}) => {
       if (isVip) return Promise.resolve();
-      if (openPartnerTab) {
-        // Dual action: partner link opens in a background tab while the file
-        // is produced in the active tab.
-        window.open(SMARTLINK, "_blank", "noopener,noreferrer");
+
+      toolRef.current = toolSlug ?? null;
+      // Session-based gating: first export of a session is friction-free, and
+      // the interstitial is frequency-capped so heavy users are not punished.
+      if (!shouldGate() || !claimImpression("gate")) return Promise.resolve();
+
+      const variant = adVariant();
+      const partner = partnerLink(SLOT, toolSlug ?? null);
+      clickId.current = partner.clickId;
+
+      track({
+        event_type: "gate_shown",
+        slot: SLOT,
+        tool_slug: toolSlug ?? null,
+        click_id: partner.clickId,
+      });
+      track({
+        event_type: "impression",
+        slot: SLOT,
+        tool_slug: toolSlug ?? null,
+        click_id: partner.clickId,
+      });
+
+      // In the gate-heavy variant the partner smartlink opens alongside the
+      // download; in the result-heavy variant the gate stays ad-light.
+      if (openPartnerTab && variant === "gate_heavy") {
+        window.open(partner.url, "_blank", "noopener,noreferrer");
+        track({
+          event_type: "click",
+          slot: SLOT,
+          tool_slug: toolSlug ?? null,
+          click_id: partner.clickId,
+        });
       }
+
       setProgress(0);
       setOpen(true);
       return new Promise<void>((resolve) => {
