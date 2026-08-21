@@ -1,11 +1,37 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
-import { BarChart3, MousePointerClick, Eye, DollarSign, Users, ShieldCheck } from "lucide-react";
+import {
+  BarChart3,
+  MousePointerClick,
+  Eye,
+  DollarSign,
+  Users,
+  ShieldCheck,
+  ShieldAlert,
+  Radio,
+} from "lucide-react";
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Legend,
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 
-import { getMonetizationStats } from "@/lib/analytics.functions";
-import type { MonetizationStats, SlotStat } from "@/lib/analytics-agg";
+import {
+  adminWeeklyReports,
+  getMonetizationStats,
+  type StatsResult,
+} from "@/lib/analytics.functions";
+import type { WeeklyReport } from "@/lib/weekly-report.types";
+import type { SlotStat } from "@/lib/analytics-agg";
 
 export const Route = createFileRoute("/admin/monetization")({
   head: () => ({
