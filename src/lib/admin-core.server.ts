@@ -65,6 +65,7 @@ export type { AdsSettings, SiteSettings } from "@/lib/admin-types";
 import {
   DEFAULT_CAPS,
   DEFAULT_PRIVACY,
+  ADSTERRA,
   MONETAG,
   type AdsSettings,
   type SiteSettings,
@@ -85,6 +86,8 @@ export const DEFAULT_ADS: AdsSettings = {
   smartlink_url: MONETAG.smartlink,
   adsterra_banner_key: "",
   adsterra_native_key: "",
+  adsterra_social_bar: true,
+  adsterra_social_bar_src: ADSTERRA.social_bar,
   slots: { result: true, gate: true, sticky_mobile: true, native_feed: true },
   caps: DEFAULT_CAPS,
   privacy: DEFAULT_PRIVACY,
