@@ -17,6 +17,7 @@ import { Footer } from "@/components/layout/Footer";
 import { CookieBanner } from "@/components/layout/CookieBanner";
 import { MobileTabBar } from "@/components/layout/MobileTabBar";
 import { SocialBar } from "@/components/monetization/SocialBar";
+import { StickyBottomAd } from "@/components/monetization/StickyBottomAd";
 import { VipModal } from "@/components/monetization/VipModal";
 import { ActionGateProvider } from "@/components/monetization/ActionGate";
 import { VipProvider } from "@/lib/vip";
