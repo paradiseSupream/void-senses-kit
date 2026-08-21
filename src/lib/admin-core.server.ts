@@ -94,7 +94,7 @@ export const DEFAULT_SITE: SiteSettings = {
   maintenance: false,
   announcement: "",
   vip_price_cents: 1900,
-  vip_sol_address: "",
+  vip_sol_address: "8y9Bo4hHAead7VnkbMEMBUgwxSUMBZzPDKodE1PFs9vP",
   stripe_enabled: false,
 };
 

@@ -345,6 +345,24 @@
   }
 }
 
+/* Lightweight entrance animation (replaces JS animation libs on the hero). */
+@utility reveal {
+  animation: reveal-up 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes reveal-up {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 18px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+
+
 /* Accent-tinted icon tile used on every tool card and tool header. */
 @utility accent-tile {
   display: grid;
