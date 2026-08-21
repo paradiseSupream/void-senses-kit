@@ -85,37 +85,78 @@ export const Route = createFileRoute("/api/public/roast")({
           }
         }
 
-        const upstream = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${apiKey}`,
-            "X-Lovable-AIG-SDK": "fetch",
-          },
-          body: JSON.stringify({
-            model: "google/gemini-3.5-flash",
-            stream: true,
-            messages: [
-              {
-                role: "system",
-                content: `You are a stand-up comedian writing a roast. ${LEVELS[level]} Never reference protected characteristics (race, religion, gender identity, disability, nationality), never make medical or psychological claims, and never threaten. Output plain text only.`,
-              },
-              { role: "user", content: `Roast this: ${target}` },
-            ],
-          }),
-        });
+        const system = `You are a stand-up comedian writing a roast. ${LEVELS[level]} Never reference protected characteristics (race, religion, gender identity, disability, nationality), never make medical or psychological claims, and never threaten. Output plain text only.`;
+        const messages = [
+          { role: "system", content: system },
+          { role: "user", content: `Roast this: ${target}` },
+        ];
 
-        if (!upstream.ok || !upstream.body) {
-          const detail = await upstream.text().catch(() => "");
-          const message =
-            upstream.status === 429
-              ? "The AI is rate limited right now. Try again in a moment."
-              : upstream.status === 402
-                ? "AI credits are exhausted for this workspace."
-                : "The roast engine could not be reached.";
-          console.error("roast upstream error", upstream.status, detail.slice(0, 400));
-          return json({ error: message }, upstream.status === 429 ? 429 : 502);
+        type Attempt = { url: string; key: string; model: string; extra?: Record<string, string> };
+        const attempts: Attempt[] = [];
+        if (openRouterKey) {
+          for (const model of [
+            "google/gemini-2.0-flash-lite-001",
+            "meta-llama/llama-3.1-8b-instruct",
+            "deepseek/deepseek-chat",
+          ]) {
+            attempts.push({
+              url: "https://openrouter.ai/api/v1/chat/completions",
+              key: openRouterKey,
+              model,
+              extra: {
+                "HTTP-Referer": "https://sensesofvoid.app",
+                "X-Title": "Senses of Void",
+              },
+            });
+          }
         }
+        if (apiKey) {
+          attempts.push({
+            url: "https://ai.gateway.lovable.dev/v1/chat/completions",
+            key: apiKey,
+            model: "google/gemini-3.5-flash",
+            extra: { "X-Lovable-AIG-SDK": "fetch" },
+          });
+        }
+
+        let upstream: Response | null = null;
+        let lastStatus = 502;
+        for (const attempt of attempts) {
+          let res: Response;
+          try {
+            res = await fetch(attempt.url, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${attempt.key}`,
+                ...(attempt.extra ?? {}),
+              },
+              body: JSON.stringify({ model: attempt.model, stream: true, messages }),
+            });
+          } catch (err) {
+            console.error("roast network error", attempt.model, String(err).slice(0, 200));
+            continue;
+          }
+          if (res.ok && res.body) {
+            upstream = res;
+            break;
+          }
+          lastStatus = res.status;
+          const detail = await res.text().catch(() => "");
+          console.error("roast upstream error", attempt.model, res.status, detail.slice(0, 300));
+          // 401/403 (bad key) and 5xx/404 => try next provider; 429 also worth failing over once.
+        }
+
+        if (!upstream || !upstream.body) {
+          const message =
+            lastStatus === 429
+              ? "The AI is rate limited right now. Try again in a moment."
+              : lastStatus === 402
+                ? "AI credits are exhausted right now."
+                : "The roast engine could not be reached.";
+          return json({ error: message }, lastStatus === 429 ? 429 : 502);
+        }
+
 
         return new Response(upstream.body, {
           headers: {
