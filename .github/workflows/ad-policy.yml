@@ -1,0 +1,34 @@
+name: Ad policy & weekly report
+
+on:
+  push:
+  pull_request:
+  schedule:
+    # Every Monday 03:00 UTC: enforce policy, then generate the weekly report.
+    - cron: "0 3 * * 1"
+  workflow_dispatch:
+
+jobs:
+  ad-policy:
+    name: Only Free Vault + smartlink may load
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install --frozen-lockfile
+      - name: Assert ad policy (lean mode = no third-party scripts)
+        run: bun run check:ads
+
+  weekly-report:
+    name: Generate weekly ad performance report
+    needs: ad-policy
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger report endpoint
+        env:
+          SITE_URL: ${{ vars.SITE_URL || 'https://sensesofvoid.app' }}
+          TOKEN: ${{ secrets.ANALYTICS_ADMIN_TOKEN }}
+        run: |
+          curl -fsS -X POST "$SITE_URL/api/public/weekly-report" \
+            -H "authorization: Bearer $TOKEN" | head -c 2000
