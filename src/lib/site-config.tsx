@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect } from "react";
+import { createContext, useContext, useEffect, useMemo } from "react";
 import type { ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -38,8 +38,10 @@ export function SiteConfigProvider({ children }: { children: ReactNode }) {
     staleTime: 5 * 60_000,
   });
 
+  const value = useMemo(() => normalize(data as PublicConfig | undefined), [data]);
+
   return (
-    <SiteConfigContext.Provider value={normalize(data as PublicConfig | undefined)}>
+    <SiteConfigContext.Provider value={value}>
       <MonetagLoader />
       {children}
     </SiteConfigContext.Provider>
