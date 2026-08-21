@@ -66,7 +66,9 @@ describe("ad policy", () => {
 const SRC = join(process.cwd(), "src");
 /** The only module allowed to inject a third-party ad script. */
 const SCRIPT_INJECTOR = join(SRC, "lib", "site-config.tsx");
-const AD_HOSTS = /(al5sm\.com|n6wxm\.com|nap5k\.com|adsterra|propellerads|profitableratecpm)/i;
+// Real script hosts only — setting *names* like `adsterra_social_bar` are fine.
+const AD_HOSTS =
+  /(al5sm\.com|n6wxm\.com|nap5k\.com|adsterra\.com|propellerads\.com|profitableratecpmnetwork\.com)/i;
 
 function walk(dir: string): string[] {
   return readdirSync(dir).flatMap((entry) => {
