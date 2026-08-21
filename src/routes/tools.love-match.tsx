@@ -82,7 +82,7 @@ function LoveMatch() {
 
   const copy = async () => {
     if (!result) return;
-    await runGated("love-match");
+    await runGated({ toolSlug: "love-match" });
     const text = `${a.trim()} × ${b.trim()} = ${result.score}% vibe match ⚡\n${result.line}\n— sensesofvoid.app`;
     try {
       await navigator.clipboard.writeText(text);

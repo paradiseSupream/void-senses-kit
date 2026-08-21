@@ -102,7 +102,7 @@ function PromptMaker() {
   const runGated = useActionGate();
 
   const copy = async () => {
-    await runGated("prompt-maker");
+    await runGated({ toolSlug: "prompt-maker" });
     try {
       await navigator.clipboard.writeText(prompt);
       toast.success("Prompt copied to clipboard.");
