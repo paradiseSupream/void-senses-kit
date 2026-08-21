@@ -19,8 +19,12 @@ export type Database = {
           click_id: string | null
           created_at: string
           device: string | null
+          duration_ms: number | null
           event_type: string
+          format: string | null
           id: number
+          is_vip: boolean
+          metric_value: number | null
           path: string | null
           referrer: string | null
           revenue_cents: number
@@ -31,13 +35,18 @@ export type Database = {
           utm_medium: string | null
           utm_source: string | null
           variant: string
+          zone: string | null
         }
         Insert: {
           click_id?: string | null
           created_at?: string
           device?: string | null
+          duration_ms?: number | null
           event_type: string
+          format?: string | null
           id?: number
+          is_vip?: boolean
+          metric_value?: number | null
           path?: string | null
           referrer?: string | null
           revenue_cents?: number
@@ -48,13 +57,18 @@ export type Database = {
           utm_medium?: string | null
           utm_source?: string | null
           variant?: string
+          zone?: string | null
         }
         Update: {
           click_id?: string | null
           created_at?: string
           device?: string | null
+          duration_ms?: number | null
           event_type?: string
+          format?: string | null
           id?: number
+          is_vip?: boolean
+          metric_value?: number | null
           path?: string | null
           referrer?: string | null
           revenue_cents?: number
@@ -65,6 +79,7 @@ export type Database = {
           utm_medium?: string | null
           utm_source?: string | null
           variant?: string
+          zone?: string | null
         }
         Relationships: []
       }
