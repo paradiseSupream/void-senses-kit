@@ -92,10 +92,15 @@ function loadZone(id: string, format: string, zone: string, src: string) {
   document.body.appendChild(script);
 }
 
-/** Claim a cap slot only when the script is not already on the page. */
+const claimedThisPage = new Set<string>();
+
+/** Claim a cap slot once per page load, and only if not already injected. */
 function shouldLoad(id: string, format: "popunder" | "vignette" | "inpage_push", cap: { perHour: number; perSession: number }) {
   if (typeof document === "undefined" || document.getElementById(id)) return false;
-  return claimFormat(format, cap);
+  if (claimedThisPage.has(format)) return false;
+  claimedThisPage.add(format);
+  if (claimFormat(format, cap)) return true;
+  return false;
 }
 
 function MonetagLoader() {
