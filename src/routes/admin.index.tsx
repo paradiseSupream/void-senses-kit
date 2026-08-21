@@ -488,6 +488,11 @@ function SettingsTab({ token, which }: { token: string; which: "Ads" | "Site" })
           </div>
           <div className="grid gap-2 sm:grid-cols-2">
             <Toggle
+              label="Lean mode (Free Vault + smartlink only)"
+              checked={ads.lean_mode ?? false}
+              onChange={(v) => setAds({ ...ads, lean_mode: v })}
+            />
+            <Toggle
               label="Monetag in-page push"
               checked={ads.monetag_inpage_push}
               onChange={(v) => setAds({ ...ads, monetag_inpage_push: v })}
