@@ -73,6 +73,7 @@ import {
 
 export const DEFAULT_ADS: AdsSettings = {
   enabled: true,
+  lean_mode: false,
   monetag_verify: "d7498800db613e1e682b5c72b66a050b",
   monetag_zone: "",
   monetag_popunder: true,
