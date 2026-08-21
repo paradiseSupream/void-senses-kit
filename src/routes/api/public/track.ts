@@ -9,7 +9,13 @@ const EVENT_TYPES = new Set([
   "tool_complete",
   "gate_shown",
   "gate_completed",
+  "script_load",
+  "script_error",
+  "script_blocked",
+  "web_vital",
+  "consent",
 ]);
+
 
 const MAX_EVENTS = 25;
 
