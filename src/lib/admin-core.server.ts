@@ -88,7 +88,9 @@ export const DEFAULT_ADS: AdsSettings = {
   adsterra_native_key: "",
   adsterra_social_bar: true,
   adsterra_social_bar_src: ADSTERRA.social_bar,
-  slots: { result: true, gate: true, sticky_mobile: true, native_feed: true },
+  // Adsterra Social Bar occupies the bottom of the mobile viewport, so the
+  // first-party sticky mobile ad is off by default to avoid double-stacking.
+  slots: { result: true, gate: true, sticky_mobile: false, native_feed: true },
   caps: DEFAULT_CAPS,
   privacy: DEFAULT_PRIVACY,
   rpm_estimate_cents: 120,
