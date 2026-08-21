@@ -61,25 +61,9 @@ export function admin(): SupabaseClient {
   return createClient(url, key, { auth: { persistSession: false } });
 }
 
-export type AdsSettings = {
-  enabled: boolean;
-  monetag_verify: string;
-  monetag_zone: string;
-  monetag_popunder: boolean;
-  monetag_inpage_push: boolean;
-  adsterra_banner_key: string;
-  adsterra_native_key: string;
-  slots: { result: boolean; gate: boolean; sticky_mobile: boolean; native_feed: boolean };
-  rpm_estimate_cents: number;
-};
+export type { AdsSettings, SiteSettings } from "@/lib/admin-types";
+import type { AdsSettings, SiteSettings } from "@/lib/admin-types";
 
-export type SiteSettings = {
-  maintenance: boolean;
-  announcement: string;
-  vip_price_cents: number;
-  vip_sol_address: string;
-  stripe_enabled: boolean;
-};
 
 export const DEFAULT_ADS: AdsSettings = {
   enabled: true,
