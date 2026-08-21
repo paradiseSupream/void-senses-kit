@@ -63,7 +63,8 @@ export function useAdSlotEnabled(kind: keyof PublicConfig["ads"]["slots"]): bool
  * admin dashboard can show the real performance impact of each format.
  */
 function loadZone(id: string, format: string, zone: string, src: string) {
-  if (!zone || document.getElementById(id)) return;
+  if (!zone || injected.has(id)) return;
+  injected.add(id);
   const started = performance.now();
   const script = document.createElement("script");
   script.id = id;
@@ -93,11 +94,13 @@ function loadZone(id: string, format: string, zone: string, src: string) {
 }
 
 const claimedThisPage = new Set<string>();
+const injected = new Set<string>();
 
 /** Claim a cap slot once per page load, and only if not already injected. */
 function shouldLoad(id: string, format: "popunder" | "vignette" | "inpage_push", cap: { perHour: number; perSession: number }) {
-  if (typeof document === "undefined" || document.getElementById(id)) return false;
-  if (claimedThisPage.has(format)) return false;
+  if (typeof document === "undefined") return false;
+  if (claimedThisPage.has(format) || claimedThisPage.has(id)) return false;
+  claimedThisPage.add(id);
   claimedThisPage.add(format);
   if (claimFormat(format, cap)) return true;
   return false;
