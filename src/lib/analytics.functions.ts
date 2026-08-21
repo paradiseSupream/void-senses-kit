@@ -22,7 +22,7 @@ export const getMonetizationStats = createServerFn({ method: "POST" })
     const since = new Date(Date.now() - data.days * 86_400_000).toISOString();
     const { data: rows, error } = await admin
       .from("ad_events")
-      .select("event_type,slot,variant,session_id,tool_slug,revenue_cents,device,utm_source")
+      .select("event_type,slot,variant,session_id,tool_slug,revenue_cents,device,utm_source,format,zone,is_vip,duration_ms,metric_value")
       .gte("created_at", since)
       .limit(50000);
     if (error) throw new Error(error.message);

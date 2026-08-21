@@ -62,7 +62,13 @@ export function admin(): SupabaseClient {
 }
 
 export type { AdsSettings, SiteSettings } from "@/lib/admin-types";
-import { MONETAG, type AdsSettings, type SiteSettings } from "@/lib/admin-types";
+import {
+  DEFAULT_CAPS,
+  DEFAULT_PRIVACY,
+  MONETAG,
+  type AdsSettings,
+  type SiteSettings,
+} from "@/lib/admin-types";
 
 
 export const DEFAULT_ADS: AdsSettings = {
@@ -79,6 +85,8 @@ export const DEFAULT_ADS: AdsSettings = {
   adsterra_banner_key: "",
   adsterra_native_key: "",
   slots: { result: true, gate: true, sticky_mobile: true, native_feed: true },
+  caps: DEFAULT_CAPS,
+  privacy: DEFAULT_PRIVACY,
   rpm_estimate_cents: 120,
 };
 
@@ -94,8 +102,15 @@ export async function readSettings(): Promise<{ ads: AdsSettings; site: SiteSett
   const db = admin();
   const { data } = await db.from("app_settings").select("key,value");
   const map = new Map((data ?? []).map((row) => [row.key as string, row.value as object]));
+  const storedAds = (map.get("ads") ?? {}) as Partial<AdsSettings>;
   return {
-    ads: { ...DEFAULT_ADS, ...(map.get("ads") as AdsSettings | undefined) },
+    ads: {
+      ...DEFAULT_ADS,
+      ...storedAds,
+      slots: { ...DEFAULT_ADS.slots, ...(storedAds.slots ?? {}) },
+      caps: { ...DEFAULT_CAPS, ...(storedAds.caps ?? {}) },
+      privacy: { ...DEFAULT_PRIVACY, ...(storedAds.privacy ?? {}) },
+    },
     site: { ...DEFAULT_SITE, ...(map.get("site") as SiteSettings | undefined) },
   };
 }

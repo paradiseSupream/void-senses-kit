@@ -1,32 +1,18 @@
-import { useEffect, useState } from "react";
-
-const KEY = "sov.cookies";
+import { useSiteConfig } from "@/lib/site-config";
+import { useConsent, writeConsent, type ConsentValue } from "@/lib/consent";
+import { track } from "@/lib/monetization";
+import { DEFAULT_PRIVACY } from "@/lib/admin-types";
 
 export function CookieBanner() {
-  const [visible, setVisible] = useState(false);
+  const consent = useConsent();
+  const config = useSiteConfig();
+  const privacy = config.ads.privacy ?? DEFAULT_PRIVACY;
 
-  useEffect(() => {
-    const check = () => {
-      try {
-        setVisible(!window.localStorage.getItem(KEY));
-      } catch {
-        setVisible(false);
-      }
-    };
-    check();
-    window.addEventListener("sov:cookies-reset", check);
-    return () => window.removeEventListener("sov:cookies-reset", check);
-  }, []);
+  if (consent !== null) return null;
 
-  if (!visible) return null;
-
-  const choose = (value: "all" | "essential") => {
-    try {
-      window.localStorage.setItem(KEY, value);
-    } catch {
-      /* storage unavailable */
-    }
-    setVisible(false);
+  const choose = (value: ConsentValue) => {
+    writeConsent(value);
+    track({ event_type: "consent", slot: value, format: "consent" });
   };
 
   return (
@@ -35,10 +21,7 @@ export function CookieBanner() {
       aria-label="Cookie consent"
       className="glass fixed inset-x-4 bottom-20 z-40 mx-auto max-w-2xl rounded-xl p-4 sm:bottom-4 sm:left-4 sm:mx-0 sm:max-w-sm"
     >
-      <p className="text-sm text-muted-foreground">
-        We use essential storage to remember your preferences, and advertising cookies to keep the
-        tools free.
-      </p>
+      <p className="text-sm text-muted-foreground">{privacy.banner_text}</p>
       <div className="mt-3 flex gap-2">
         <button
           type="button"

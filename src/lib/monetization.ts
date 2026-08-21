@@ -22,12 +22,28 @@ export type AdEvent = {
     | "tool_start"
     | "tool_complete"
     | "gate_shown"
-    | "gate_completed";
+    | "gate_completed"
+    | "script_load"
+    | "script_error"
+    | "script_blocked"
+    | "web_vital"
+    | "consent";
   slot: string;
   tool_slug?: string | null;
   revenue_cents?: number;
   click_id?: string | null;
+  format?: string | null;
+  zone?: string | null;
+  duration_ms?: number | null;
+  metric_value?: number | null;
 };
+
+/** Set by the VIP provider so every event can be split VIP vs non-VIP. */
+let vipFlag = false;
+export function setVipFlag(value: boolean) {
+  vipFlag = value;
+}
+
 
 /* ------------------------------------------------------------------ session */
 
@@ -126,6 +142,38 @@ export function claimImpression(slot: string): boolean {
   return true;
 }
 
+/**
+ * Per-format (script) frequency cap, admin-configurable. Counts are kept per
+ * clock hour in localStorage and per session in sessionStorage, so the same
+ * visitor never exceeds the configured number of pop-unders / vignettes /
+ * push loads.
+ */
+export function claimFormat(
+  format: "popunder" | "vignette" | "inpage_push",
+  cap: { perHour: number; perSession: number },
+): boolean {
+  if (typeof window === "undefined") return false;
+  const key = `fmt:${format}`;
+  const state = readCaps();
+  const hourCount = state.counts[key] ?? 0;
+  const sessionCount = state.session[key] ?? 0;
+  if (hourCount >= Math.max(0, cap.perHour) || sessionCount >= Math.max(0, cap.perSession)) {
+    return false;
+  }
+  state.counts[key] = hourCount + 1;
+  state.session[key] = sessionCount + 1;
+  writeCaps(state);
+  return true;
+}
+
+/** Current per-format usage, for debugging in the console/admin. */
+export function formatUsage(): { hour: Record<string, number>; session: Record<string, number> } {
+  const state = readCaps();
+  return { hour: state.counts, session: state.session };
+}
+
+
+
 /** Session-based gating: skip the interstitial for the first action of a session. */
 export function shouldGate(): boolean {
   if (typeof window === "undefined") return false;
@@ -195,6 +243,15 @@ export function partnerLink(slot: string, toolSlug?: string | null) {
 let queue: Array<Record<string, unknown>> = [];
 let flushTimer: number | null = null;
 
+/** VIP flag for reporting; read from storage so tracking stays hook-free. */
+function isVipVisitor(): boolean {
+  try {
+    return window.localStorage.getItem("sov.vip") === "1";
+  } catch {
+    return false;
+  }
+}
+
 function payload(event: AdEvent) {
   const attr = attribution();
   return {
@@ -211,8 +268,14 @@ function payload(event: AdEvent) {
     referrer: attr.referrer ?? null,
     device: window.matchMedia("(max-width: 640px)").matches ? "mobile" : "desktop",
     path: window.location.pathname,
+    format: event.format ?? null,
+    zone: event.zone ?? null,
+    duration_ms: event.duration_ms ?? null,
+    metric_value: event.metric_value ?? null,
+    is_vip: vipFlag || isVipVisitor(),
   };
 }
+
 
 function flush(sync = false) {
   if (typeof window === "undefined" || queue.length === 0) return;
