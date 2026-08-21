@@ -168,17 +168,25 @@ export function attribution(): Attribution {
   }
 }
 
-const PARTNER_BASE = "https://sensesofvoid.app/go/partner-placeholder";
+/** Monetag smartlink (CPA). Overridable at runtime from the admin panel. */
+const PARTNER_BASE = "https://omg10.com/4/11624273";
+let partnerBase = PARTNER_BASE;
+
+export function setPartnerBase(url: string) {
+  if (url && /^https?:\/\//.test(url)) partnerBase = url;
+}
 
 /** Builds a partner smartlink with a unique click id for attribution. */
 export function partnerLink(slot: string, toolSlug?: string | null) {
   const clickId = `${sessionId()}-${rid().slice(0, 6)}`;
-  const url = new URL(PARTNER_BASE);
+  const url = new URL(partnerBase);
   url.searchParams.set("utm_source", "sensesofvoid");
   url.searchParams.set("utm_medium", slot);
   url.searchParams.set("utm_campaign", toolSlug ?? "site");
   url.searchParams.set("subid", clickId);
   url.searchParams.set("variant", adVariant());
+  // Monetag smartlink passes `var` through to reporting.
+  url.searchParams.set("var", `${slot}:${toolSlug ?? "site"}`);
   return { url: url.toString(), clickId };
 }
 
