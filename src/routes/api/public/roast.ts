@@ -41,7 +41,10 @@ export const Route = createFileRoute("/api/public/roast")({
         }
 
         const apiKey = process.env["LOVABLE_API_KEY"];
-        if (!apiKey) return json({ error: "AI is not configured for this project." }, 500);
+        const openRouterKey = process.env["OPENROUTER_API_KEY"];
+        if (!apiKey && !openRouterKey)
+          return json({ error: "AI is not configured for this project." }, 500);
+
 
         const supabaseUrl = process.env["SUPABASE_URL"];
         const serviceKey = process.env["SUPABASE_SERVICE_ROLE_KEY"];
