@@ -4,6 +4,7 @@ import { Copy, HeartPulse } from "lucide-react";
 import { toast } from "sonner";
 
 import { ToolShell } from "@/components/layout/ToolShell";
+import { useActionGate } from "@/components/monetization/ActionGate";
 
 export const Route = createFileRoute("/tools/love-match")({
   head: () => ({
@@ -77,8 +78,11 @@ function LoveMatch() {
     return { score, traits, line, band };
   }, [a, b, da, db]);
 
+  const runGated = useActionGate();
+
   const copy = async () => {
     if (!result) return;
+    await runGated("love-match");
     const text = `${a.trim()} × ${b.trim()} = ${result.score}% vibe match ⚡\n${result.line}\n— sensesofvoid.app`;
     try {
       await navigator.clipboard.writeText(text);

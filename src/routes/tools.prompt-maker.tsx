@@ -4,6 +4,7 @@ import { Copy, Wand2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { ToolShell } from "@/components/layout/ToolShell";
+import { useActionGate } from "@/components/monetization/ActionGate";
 
 export const Route = createFileRoute("/tools/prompt-maker")({
   head: () => ({
@@ -98,7 +99,10 @@ function PromptMaker() {
       .join("\n");
   }, [keyword, target, quality, engine, style, light, ratio]);
 
+  const runGated = useActionGate();
+
   const copy = async () => {
+    await runGated("prompt-maker");
     try {
       await navigator.clipboard.writeText(prompt);
       toast.success("Prompt copied to clipboard.");
