@@ -14,7 +14,81 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      roast_requests: {
+        Row: {
+          id: string
+          ip_hash: string
+          last_request: string
+          request_count: number
+        }
+        Insert: {
+          id?: string
+          ip_hash: string
+          last_request?: string
+          request_count?: number
+        }
+        Update: {
+          id?: string
+          ip_hash?: string
+          last_request?: string
+          request_count?: number
+        }
+        Relationships: []
+      }
+      vault_assets: {
+        Row: {
+          category: string
+          created_at: string
+          description: string
+          download_count: number
+          drive_link: string
+          id: string
+          title: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          description?: string
+          download_count?: number
+          drive_link: string
+          id?: string
+          title: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string
+          download_count?: number
+          drive_link?: string
+          id?: string
+          title?: string
+        }
+        Relationships: []
+      }
+      vip_users: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          is_active: boolean
+          stripe_customer_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          is_active?: boolean
+          stripe_customer_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          is_active?: boolean
+          stripe_customer_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
