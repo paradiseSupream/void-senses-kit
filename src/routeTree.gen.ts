@@ -10,14 +10,21 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as VaultRouteImport } from './routes/vault'
 import { Route as ToolsChildTraumaRouteImport } from './routes/tools.child-trauma'
 import { Route as ToolsDarkPersonalityRouteImport } from './routes/tools.dark-personality'
+import { Route as ToolsIqRouteImport } from './routes/tools.iq'
 import { Route as ToolsLoveMatchRouteImport } from './routes/tools.love-match'
 import { Route as ToolsPromptMakerRouteImport } from './routes/tools.prompt-maker'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VaultRoute = VaultRouteImport.update({
+  id: '/vault',
+  path: '/vault',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ToolsChildTraumaRoute = ToolsChildTraumaRouteImport.update({
@@ -28,6 +35,11 @@ const ToolsChildTraumaRoute = ToolsChildTraumaRouteImport.update({
 const ToolsDarkPersonalityRoute = ToolsDarkPersonalityRouteImport.update({
   id: '/tools/dark-personality',
   path: '/tools/dark-personality',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ToolsIqRoute = ToolsIqRouteImport.update({
+  id: '/tools/iq',
+  path: '/tools/iq',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ToolsLoveMatchRoute = ToolsLoveMatchRouteImport.update({
@@ -43,23 +55,29 @@ const ToolsPromptMakerRoute = ToolsPromptMakerRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/vault': typeof VaultRoute
   '/tools/child-trauma': typeof ToolsChildTraumaRoute
   '/tools/dark-personality': typeof ToolsDarkPersonalityRoute
+  '/tools/iq': typeof ToolsIqRoute
   '/tools/love-match': typeof ToolsLoveMatchRoute
   '/tools/prompt-maker': typeof ToolsPromptMakerRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/vault': typeof VaultRoute
   '/tools/child-trauma': typeof ToolsChildTraumaRoute
   '/tools/dark-personality': typeof ToolsDarkPersonalityRoute
+  '/tools/iq': typeof ToolsIqRoute
   '/tools/love-match': typeof ToolsLoveMatchRoute
   '/tools/prompt-maker': typeof ToolsPromptMakerRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/vault': typeof VaultRoute
   '/tools/child-trauma': typeof ToolsChildTraumaRoute
   '/tools/dark-personality': typeof ToolsDarkPersonalityRoute
+  '/tools/iq': typeof ToolsIqRoute
   '/tools/love-match': typeof ToolsLoveMatchRoute
   '/tools/prompt-maker': typeof ToolsPromptMakerRoute
 }
@@ -67,30 +85,38 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/vault'
     | '/tools/child-trauma'
     | '/tools/dark-personality'
+    | '/tools/iq'
     | '/tools/love-match'
     | '/tools/prompt-maker'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/vault'
     | '/tools/child-trauma'
     | '/tools/dark-personality'
+    | '/tools/iq'
     | '/tools/love-match'
     | '/tools/prompt-maker'
   id:
     | '__root__'
     | '/'
+    | '/vault'
     | '/tools/child-trauma'
     | '/tools/dark-personality'
+    | '/tools/iq'
     | '/tools/love-match'
     | '/tools/prompt-maker'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  VaultRoute: typeof VaultRoute
   ToolsChildTraumaRoute: typeof ToolsChildTraumaRoute
   ToolsDarkPersonalityRoute: typeof ToolsDarkPersonalityRoute
+  ToolsIqRoute: typeof ToolsIqRoute
   ToolsLoveMatchRoute: typeof ToolsLoveMatchRoute
   ToolsPromptMakerRoute: typeof ToolsPromptMakerRoute
 }
@@ -102,6 +128,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/vault': {
+      id: '/vault'
+      path: '/vault'
+      fullPath: '/vault'
+      preLoaderRoute: typeof VaultRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/tools/child-trauma': {
@@ -116,6 +149,13 @@ declare module '@tanstack/react-router' {
       path: '/tools/dark-personality'
       fullPath: '/tools/dark-personality'
       preLoaderRoute: typeof ToolsDarkPersonalityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tools/iq': {
+      id: '/tools/iq'
+      path: '/tools/iq'
+      fullPath: '/tools/iq'
+      preLoaderRoute: typeof ToolsIqRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/tools/love-match': {
@@ -137,8 +177,10 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  VaultRoute: VaultRoute,
   ToolsChildTraumaRoute: ToolsChildTraumaRoute,
   ToolsDarkPersonalityRoute: ToolsDarkPersonalityRoute,
+  ToolsIqRoute: ToolsIqRoute,
   ToolsLoveMatchRoute: ToolsLoveMatchRoute,
   ToolsPromptMakerRoute: ToolsPromptMakerRoute,
 }
