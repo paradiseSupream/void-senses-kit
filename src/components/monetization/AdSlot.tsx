@@ -62,9 +62,10 @@ export function AdSlot({
     );
     observer.observe(node);
     return () => observer.disconnect();
-  }, [id, isVip, toolSlug]);
+  }, [enabled, id, isVip, toolSlug]);
 
-  if (isVip) return null;
+  if (isVip || !enabled) return null;
+
 
   return (
     <div ref={ref} className={allowed ? className : "hidden"}>
