@@ -420,7 +420,36 @@ function SettingsTab({ token, which }: { token: string; which: "Ads" | "Site" })
                 onChange={(e) => setAds({ ...ads, monetag_verify: e.target.value })}
               />
             </Field>
-            <Field label="Monetag zone id">
+            <Field label="Monetag smartlink URL">
+              <input
+                className={inputCls}
+                value={ads.smartlink_url}
+                placeholder="https://omg10.com/4/11624273"
+                onChange={(e) => setAds({ ...ads, smartlink_url: e.target.value })}
+              />
+            </Field>
+            <Field label="Pop-under zone id">
+              <input
+                className={inputCls}
+                value={ads.monetag_popunder_zone}
+                onChange={(e) => setAds({ ...ads, monetag_popunder_zone: e.target.value })}
+              />
+            </Field>
+            <Field label="Vignette zone id">
+              <input
+                className={inputCls}
+                value={ads.monetag_vignette_zone}
+                onChange={(e) => setAds({ ...ads, monetag_vignette_zone: e.target.value })}
+              />
+            </Field>
+            <Field label="In-page push zone id">
+              <input
+                className={inputCls}
+                value={ads.monetag_push_zone}
+                onChange={(e) => setAds({ ...ads, monetag_push_zone: e.target.value })}
+              />
+            </Field>
+            <Field label="Monetag zone id (legacy)">
               <input
                 className={inputCls}
                 value={ads.monetag_zone}
@@ -456,6 +485,11 @@ function SettingsTab({ token, which }: { token: string; which: "Ads" | "Site" })
               label="Monetag in-page push"
               checked={ads.monetag_inpage_push}
               onChange={(v) => setAds({ ...ads, monetag_inpage_push: v })}
+            />
+            <Toggle
+              label="Monetag vignette (interstitial)"
+              checked={ads.monetag_vignette}
+              onChange={(v) => setAds({ ...ads, monetag_vignette: v })}
             />
             <Toggle
               label="Monetag pop-under"

@@ -1,6 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 
-import type { AdsSettings, SiteSettings } from "@/lib/admin-types";
+import type { AdsSettings, PublicAdsConfig, SiteSettings } from "@/lib/admin-types";
 import type { MonetizationStats } from "@/lib/analytics-agg";
 
 export type AdminOverview = {
@@ -227,10 +227,7 @@ export const adminAddAffiliate = createServerFn({ method: "POST" })
 /** Public, non-secret runtime config used by the ad + VIP layer. */
 export const getPublicConfig = createServerFn({ method: "GET" }).handler(
   async (): Promise<{
-    ads: Pick<
-      AdsSettings,
-      "enabled" | "monetag_zone" | "monetag_popunder" | "monetag_inpage_push" | "slots"
-    >;
+    ads: PublicAdsConfig;
     site: Pick<SiteSettings, "announcement" | "vip_price_cents" | "vip_sol_address">;
   }> => {
     const { readSettings } = await import("@/lib/admin-core.server");
@@ -240,7 +237,12 @@ export const getPublicConfig = createServerFn({ method: "GET" }).handler(
         enabled: ads.enabled,
         monetag_zone: ads.monetag_zone,
         monetag_popunder: ads.monetag_popunder,
+        monetag_popunder_zone: ads.monetag_popunder_zone,
         monetag_inpage_push: ads.monetag_inpage_push,
+        monetag_push_zone: ads.monetag_push_zone,
+        monetag_vignette: ads.monetag_vignette,
+        monetag_vignette_zone: ads.monetag_vignette_zone,
+        smartlink_url: ads.smartlink_url,
         slots: ads.slots,
       },
       site: {

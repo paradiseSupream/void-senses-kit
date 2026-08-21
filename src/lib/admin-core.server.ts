@@ -62,15 +62,20 @@ export function admin(): SupabaseClient {
 }
 
 export type { AdsSettings, SiteSettings } from "@/lib/admin-types";
-import type { AdsSettings, SiteSettings } from "@/lib/admin-types";
+import { MONETAG, type AdsSettings, type SiteSettings } from "@/lib/admin-types";
 
 
 export const DEFAULT_ADS: AdsSettings = {
   enabled: true,
   monetag_verify: "d7498800db613e1e682b5c72b66a050b",
   monetag_zone: "",
-  monetag_popunder: false,
-  monetag_inpage_push: false,
+  monetag_popunder: true,
+  monetag_popunder_zone: MONETAG.popunder.zone,
+  monetag_inpage_push: true,
+  monetag_push_zone: MONETAG.push.zone,
+  monetag_vignette: true,
+  monetag_vignette_zone: MONETAG.vignette.zone,
+  smartlink_url: MONETAG.smartlink,
   adsterra_banner_key: "",
   adsterra_native_key: "",
   slots: { result: true, gate: true, sticky_mobile: true, native_feed: true },
