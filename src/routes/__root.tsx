@@ -21,6 +21,8 @@ import { StickyBottomAd } from "@/components/monetization/StickyBottomAd";
 import { VipModal } from "@/components/monetization/VipModal";
 import { ActionGateProvider } from "@/components/monetization/ActionGate";
 import { VipProvider } from "@/lib/vip";
+import { SiteConfigProvider } from "@/lib/site-config";
+
 
 
 function NotFoundComponent() {
