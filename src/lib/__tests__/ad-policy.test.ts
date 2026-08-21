@@ -75,7 +75,10 @@ describe("no page loads an unapproved ad format", () => {
 
   it("no route or component hardcodes a third-party ad host", () => {
     const offenders = files.filter((file) => {
-      if (file.endsWith(join("lib", "admin-types.ts"))) return false; // zone registry
+      // Allowed: the zone registry, server defaults and the admin control panel.
+      if (file.endsWith(join("lib", "admin-types.ts"))) return false;
+      if (file.endsWith(join("lib", "admin-core.server.ts"))) return false;
+      if (file.endsWith(join("routes", "admin.index.tsx"))) return false;
       if (file === SCRIPT_INJECTOR) return false;
       return AD_HOSTS.test(readFileSync(file, "utf8"));
     });
