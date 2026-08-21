@@ -169,6 +169,7 @@ function ChildTrauma() {
     return (
       <ToolShell
         eyebrow="Tool 01 · Psyche"
+        slug="child-trauma"
         title="Child Trauma Test"
         intro="Ten short scenarios. Answer with your first instinct — there is no scoring against anyone else."
       >
@@ -251,6 +252,7 @@ function ChildTrauma() {
   return (
     <ToolShell
       eyebrow="Tool 01 · Psyche"
+      slug="child-trauma"
       title="Your emotional radar"
       intro="Six dimensions, scored from your answers. Higher means the dimension felt more dependable growing up."
     >

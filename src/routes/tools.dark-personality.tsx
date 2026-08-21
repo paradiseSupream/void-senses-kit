@@ -139,6 +139,7 @@ function DarkPersonality() {
   return (
     <ToolShell
       eyebrow="Tool 03 · Psyche"
+      slug="dark-personality"
       title="Dark Personality Test"
       intro="Eight statements, eight sliders. Move each one to how true it feels, then read the archetype your answers lean toward."
     >

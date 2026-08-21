@@ -122,6 +122,7 @@ function IqTest() {
     return (
       <ToolShell
         eyebrow="Tool 02 · Cognition"
+        slug="iq"
         title="Quick IQ Test"
         intro="Fifteen puzzles, fifteen seconds each. The clock auto-advances, so trust your instinct."
       >
@@ -152,6 +153,7 @@ function IqTest() {
     return (
       <ToolShell
         eyebrow="Tool 02 · Cognition"
+        slug="iq"
         title="Cognitive performance certificate"
         intro="An estimate based on speed and accuracy across fifteen timed items."
       >
@@ -196,6 +198,7 @@ function IqTest() {
   return (
     <ToolShell
       eyebrow="Tool 02 · Cognition"
+      slug="iq"
       title="Quick IQ Test"
       intro="Answer before the timer empties — unanswered items auto-advance and count as missed."
     >
