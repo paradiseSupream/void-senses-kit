@@ -7,37 +7,9 @@
  */
 import { aggregate, detectFraud, filterRows, type Row } from "@/lib/analytics-agg";
 import { admin } from "@/lib/admin-core.server";
+import type { WeeklyReport } from "@/lib/weekly-report.types";
 
-export type WeeklyReport = {
-  week_start: string;
-  generated_at: string;
-  sessions: number;
-  impressions: number;
-  clicks: number;
-  ctr: number;
-  rpm: number;
-  revenue_cents: number;
-  estimated_revenue_cents: number;
-  fraud_rate: number;
-  filtered_clicks: number;
-  scripts: Array<{
-    format: string;
-    loads: number;
-    errors: number;
-    avgLoadMs: number;
-    p75LoadMs: number;
-  }>;
-  vitals: Array<{ metric: string; samples: number; avg: number; p75: number }>;
-  top_countries: Array<{ country: string; impressions: number; clicks: number; ctr: number }>;
-  deltas: {
-    impressions: number;
-    clicks: number;
-    revenue_cents: number;
-    lcp: number;
-    fcp: number;
-  } | null;
-  verdict: string[];
-};
+export type { WeeklyReport };
 
 const SELECT =
   "event_type,slot,variant,session_id,tool_slug,revenue_cents,device,utm_source,created_at,format,zone,is_vip,duration_ms,metric_value,country,ip_hash,suspect,click_id";
