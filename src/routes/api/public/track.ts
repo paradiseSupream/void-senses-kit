@@ -65,10 +65,10 @@ export const Route = createFileRoute("/api/public/track")({
               format: str(e["format"], 32),
               zone: str(e["zone"], 32),
               is_vip: e["is_vip"] === true,
-              duration_ms: Number.isFinite(Number(e["duration_ms"]))
+              duration_ms: e["duration_ms"] != null && Number.isFinite(Number(e["duration_ms"]))
                 ? Math.max(0, Math.min(600_000, Math.round(Number(e["duration_ms"]))))
                 : null,
-              metric_value: Number.isFinite(Number(e["metric_value"]))
+              metric_value: e["metric_value"] != null && Number.isFinite(Number(e["metric_value"]))
                 ? Number(e["metric_value"])
                 : null,
 
