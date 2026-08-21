@@ -1,3 +1,17 @@
+export type FormatCaps = { perHour: number; perSession: number };
+
+export type AdCapSettings = {
+  popunder: FormatCaps;
+  vignette: FormatCaps;
+  inpage_push: FormatCaps;
+};
+
+export type PrivacySettings = {
+  consent_required: boolean;
+  banner_text: string;
+  block_until_consent: boolean;
+};
+
 export type AdsSettings = {
   enabled: boolean;
   monetag_verify: string;
@@ -12,6 +26,8 @@ export type AdsSettings = {
   adsterra_banner_key: string;
   adsterra_native_key: string;
   slots: { result: boolean; gate: boolean; sticky_mobile: boolean; native_feed: boolean };
+  caps: AdCapSettings;
+  privacy: PrivacySettings;
   rpm_estimate_cents: number;
 };
 
@@ -35,6 +51,8 @@ export type PublicAdsConfig = Pick<
   | "monetag_vignette_zone"
   | "smartlink_url"
   | "slots"
+  | "caps"
+  | "privacy"
 >;
 
 export type PublicConfig = {
@@ -50,6 +68,19 @@ export const MONETAG = {
   push: { zone: "11624286", src: "https://nap5k.com/tag.min.js" },
 } as const;
 
+export const DEFAULT_CAPS: AdCapSettings = {
+  popunder: { perHour: 2, perSession: 1 },
+  vignette: { perHour: 4, perSession: 3 },
+  inpage_push: { perHour: 6, perSession: 4 },
+};
+
+export const DEFAULT_PRIVACY: PrivacySettings = {
+  consent_required: true,
+  block_until_consent: true,
+  banner_text:
+    "We use essential storage to remember your preferences, and advertising cookies to keep the tools free.",
+};
+
 export const DEFAULT_PUBLIC_CONFIG: PublicConfig = {
   ads: {
     enabled: true,
@@ -62,6 +93,8 @@ export const DEFAULT_PUBLIC_CONFIG: PublicConfig = {
     monetag_vignette_zone: MONETAG.vignette.zone,
     smartlink_url: MONETAG.smartlink,
     slots: { result: true, gate: true, sticky_mobile: true, native_feed: true },
+    caps: DEFAULT_CAPS,
+    privacy: DEFAULT_PRIVACY,
   },
   site: { announcement: "", vip_price_cents: 1900, vip_sol_address: "" },
 };
