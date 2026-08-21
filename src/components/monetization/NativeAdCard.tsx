@@ -63,7 +63,7 @@ export function NativeAdCard({ index = 0, toolSlug }: { index?: number; toolSlug
   if (isVip || !enabled) return null;
 
   return (
-    <div ref={ref} className={link ? "contents" : "hidden"}>
+    <div ref={ref} className={link ? "contents" : "min-h-px"} aria-hidden={!link}>
       {link ? (
         <a
           href={link.url}

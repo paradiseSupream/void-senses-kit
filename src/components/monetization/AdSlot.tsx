@@ -68,7 +68,7 @@ export function AdSlot({
 
 
   return (
-    <div ref={ref} className={allowed ? className : "hidden"}>
+    <div ref={ref} className={allowed ? className : "min-h-px"} aria-hidden={!allowed}>
       {allowed && link ? (
         <a
           href={link.url}
