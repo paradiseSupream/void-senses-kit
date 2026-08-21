@@ -10,33 +10,167 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as TermsRouteImport } from './routes/terms'
+import { Route as VaultRouteImport } from './routes/vault'
+import { Route as ToolsChildTraumaRouteImport } from './routes/tools.child-trauma'
+import { Route as ToolsDarkPersonalityRouteImport } from './routes/tools.dark-personality'
+import { Route as ToolsIqRouteImport } from './routes/tools.iq'
+import { Route as ToolsLoveMatchRouteImport } from './routes/tools.love-match'
+import { Route as ToolsPromptMakerRouteImport } from './routes/tools.prompt-maker'
+import { Route as ToolsRoastRouteImport } from './routes/tools.roast'
+import { Route as ApiPublicRoastRouteImport } from './routes/api/public/roast'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VaultRoute = VaultRouteImport.update({
+  id: '/vault',
+  path: '/vault',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ToolsChildTraumaRoute = ToolsChildTraumaRouteImport.update({
+  id: '/tools/child-trauma',
+  path: '/tools/child-trauma',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ToolsDarkPersonalityRoute = ToolsDarkPersonalityRouteImport.update({
+  id: '/tools/dark-personality',
+  path: '/tools/dark-personality',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ToolsIqRoute = ToolsIqRouteImport.update({
+  id: '/tools/iq',
+  path: '/tools/iq',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ToolsLoveMatchRoute = ToolsLoveMatchRouteImport.update({
+  id: '/tools/love-match',
+  path: '/tools/love-match',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ToolsPromptMakerRoute = ToolsPromptMakerRouteImport.update({
+  id: '/tools/prompt-maker',
+  path: '/tools/prompt-maker',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ToolsRoastRoute = ToolsRoastRouteImport.update({
+  id: '/tools/roast',
+  path: '/tools/roast',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicRoastRoute = ApiPublicRoastRouteImport.update({
+  id: '/api/public/roast',
+  path: '/api/public/roast',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/privacy': typeof PrivacyRoute
+  '/terms': typeof TermsRoute
+  '/vault': typeof VaultRoute
+  '/tools/child-trauma': typeof ToolsChildTraumaRoute
+  '/tools/dark-personality': typeof ToolsDarkPersonalityRoute
+  '/tools/iq': typeof ToolsIqRoute
+  '/tools/love-match': typeof ToolsLoveMatchRoute
+  '/tools/prompt-maker': typeof ToolsPromptMakerRoute
+  '/tools/roast': typeof ToolsRoastRoute
+  '/api/public/roast': typeof ApiPublicRoastRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/privacy': typeof PrivacyRoute
+  '/terms': typeof TermsRoute
+  '/vault': typeof VaultRoute
+  '/tools/child-trauma': typeof ToolsChildTraumaRoute
+  '/tools/dark-personality': typeof ToolsDarkPersonalityRoute
+  '/tools/iq': typeof ToolsIqRoute
+  '/tools/love-match': typeof ToolsLoveMatchRoute
+  '/tools/prompt-maker': typeof ToolsPromptMakerRoute
+  '/tools/roast': typeof ToolsRoastRoute
+  '/api/public/roast': typeof ApiPublicRoastRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/privacy': typeof PrivacyRoute
+  '/terms': typeof TermsRoute
+  '/vault': typeof VaultRoute
+  '/tools/child-trauma': typeof ToolsChildTraumaRoute
+  '/tools/dark-personality': typeof ToolsDarkPersonalityRoute
+  '/tools/iq': typeof ToolsIqRoute
+  '/tools/love-match': typeof ToolsLoveMatchRoute
+  '/tools/prompt-maker': typeof ToolsPromptMakerRoute
+  '/tools/roast': typeof ToolsRoastRoute
+  '/api/public/roast': typeof ApiPublicRoastRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/privacy'
+    | '/terms'
+    | '/vault'
+    | '/tools/child-trauma'
+    | '/tools/dark-personality'
+    | '/tools/iq'
+    | '/tools/love-match'
+    | '/tools/prompt-maker'
+    | '/tools/roast'
+    | '/api/public/roast'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/privacy'
+    | '/terms'
+    | '/vault'
+    | '/tools/child-trauma'
+    | '/tools/dark-personality'
+    | '/tools/iq'
+    | '/tools/love-match'
+    | '/tools/prompt-maker'
+    | '/tools/roast'
+    | '/api/public/roast'
+  id:
+    | '__root__'
+    | '/'
+    | '/privacy'
+    | '/terms'
+    | '/vault'
+    | '/tools/child-trauma'
+    | '/tools/dark-personality'
+    | '/tools/iq'
+    | '/tools/love-match'
+    | '/tools/prompt-maker'
+    | '/tools/roast'
+    | '/api/public/roast'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  PrivacyRoute: typeof PrivacyRoute
+  TermsRoute: typeof TermsRoute
+  VaultRoute: typeof VaultRoute
+  ToolsChildTraumaRoute: typeof ToolsChildTraumaRoute
+  ToolsDarkPersonalityRoute: typeof ToolsDarkPersonalityRoute
+  ToolsIqRoute: typeof ToolsIqRoute
+  ToolsLoveMatchRoute: typeof ToolsLoveMatchRoute
+  ToolsPromptMakerRoute: typeof ToolsPromptMakerRoute
+  ToolsRoastRoute: typeof ToolsRoastRoute
+  ApiPublicRoastRoute: typeof ApiPublicRoastRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +182,91 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/vault': {
+      id: '/vault'
+      path: '/vault'
+      fullPath: '/vault'
+      preLoaderRoute: typeof VaultRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tools/child-trauma': {
+      id: '/tools/child-trauma'
+      path: '/tools/child-trauma'
+      fullPath: '/tools/child-trauma'
+      preLoaderRoute: typeof ToolsChildTraumaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tools/dark-personality': {
+      id: '/tools/dark-personality'
+      path: '/tools/dark-personality'
+      fullPath: '/tools/dark-personality'
+      preLoaderRoute: typeof ToolsDarkPersonalityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tools/iq': {
+      id: '/tools/iq'
+      path: '/tools/iq'
+      fullPath: '/tools/iq'
+      preLoaderRoute: typeof ToolsIqRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tools/love-match': {
+      id: '/tools/love-match'
+      path: '/tools/love-match'
+      fullPath: '/tools/love-match'
+      preLoaderRoute: typeof ToolsLoveMatchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tools/prompt-maker': {
+      id: '/tools/prompt-maker'
+      path: '/tools/prompt-maker'
+      fullPath: '/tools/prompt-maker'
+      preLoaderRoute: typeof ToolsPromptMakerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tools/roast': {
+      id: '/tools/roast'
+      path: '/tools/roast'
+      fullPath: '/tools/roast'
+      preLoaderRoute: typeof ToolsRoastRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/roast': {
+      id: '/api/public/roast'
+      path: '/api/public/roast'
+      fullPath: '/api/public/roast'
+      preLoaderRoute: typeof ApiPublicRoastRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  PrivacyRoute: PrivacyRoute,
+  TermsRoute: TermsRoute,
+  VaultRoute: VaultRoute,
+  ToolsChildTraumaRoute: ToolsChildTraumaRoute,
+  ToolsDarkPersonalityRoute: ToolsDarkPersonalityRoute,
+  ToolsIqRoute: ToolsIqRoute,
+  ToolsLoveMatchRoute: ToolsLoveMatchRoute,
+  ToolsPromptMakerRoute: ToolsPromptMakerRoute,
+  ToolsRoastRoute: ToolsRoastRoute,
+  ApiPublicRoastRoute: ApiPublicRoastRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
