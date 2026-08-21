@@ -174,6 +174,10 @@ function DarkPersonality() {
         </ul>
       </div>
 
+      <QuizVipNudge step={1} total={2} />
+
+
+
       <div className="glass mt-6 rounded-xl p-6">
         <span className="label-mono flex items-center gap-2">
           <Ghost className="size-3.5 text-secondary" aria-hidden="true" /> live result
