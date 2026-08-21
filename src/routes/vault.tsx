@@ -5,6 +5,7 @@ import { Download, FolderOpen } from "lucide-react";
 
 import { NativeAdCard, withNativeAds } from "@/components/monetization/NativeAdCard";
 import { useActionGate } from "@/components/monetization/ActionGate";
+import { AdSlot } from "@/components/monetization/AdSlot";
 import { VAULT_CATEGORIES, vaultQueryOptions, type VaultAsset } from "@/lib/vault";
 
 export const Route = createFileRoute("/vault")({
@@ -47,7 +48,7 @@ function Vault() {
   const slots = useMemo(() => withNativeAds(filtered), [filtered]);
 
   const download = async (asset: VaultAsset) => {
-    await runGated();
+    await runGated({ toolSlug: "vault" });
     window.open(asset.drive_link, "_blank", "noopener,noreferrer");
   };
 
@@ -98,6 +99,8 @@ function Vault() {
         </div>
       </div>
 
+      <AdSlot id="result-vault" toolSlug="vault" className="mt-8" />
+
       <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {slots.map((slot, i) =>
           "ad" in slot ? (
@@ -125,6 +128,8 @@ function Vault() {
           ),
         )}
       </div>
+
+      <AdSlot id="result-vault-footer" toolSlug="vault" className="mt-10" />
 
       {filtered.length === 0 ? (
         <p className="flex items-center justify-center gap-2 py-16 text-sm text-muted-foreground">
