@@ -141,9 +141,9 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <VipProvider>
         <ActionGateProvider>
-          <div className="flex min-h-screen flex-col">
+          <div className="flex min-h-screen flex-col pb-16 sm:pb-0">
             <Header />
-            <main className="flex-1 pb-16 sm:pb-0">
+            <main className="flex-1">
               {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
               <Outlet />
             </main>
