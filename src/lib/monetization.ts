@@ -262,11 +262,6 @@ function payload(event: AdEvent) {
     tool_slug: event.tool_slug ?? null,
     revenue_cents: event.revenue_cents ?? 0,
     click_id: event.click_id ?? null,
-    format: event.format ?? null,
-    zone: event.zone ?? null,
-    duration_ms: event.duration_ms ?? null,
-    metric_value: event.metric_value ?? null,
-    is_vip: isVipVisitor(),
     utm_source: attr.utm_source ?? null,
     utm_medium: attr.utm_medium ?? null,
     utm_campaign: attr.utm_campaign ?? null,
@@ -277,7 +272,7 @@ function payload(event: AdEvent) {
     zone: event.zone ?? null,
     duration_ms: event.duration_ms ?? null,
     metric_value: event.metric_value ?? null,
-    is_vip: vipFlag,
+    is_vip: vipFlag || isVipVisitor(),
   };
 }
 
