@@ -109,7 +109,7 @@ export const DEFAULT_PUBLIC_CONFIG: PublicConfig = {
     smartlink_url: MONETAG.smartlink,
     adsterra_social_bar: true,
     adsterra_social_bar_src: ADSTERRA.social_bar,
-    slots: { result: true, gate: true, sticky_mobile: true, native_feed: true },
+    slots: { result: true, gate: true, sticky_mobile: false, native_feed: true },
     caps: DEFAULT_CAPS,
     privacy: DEFAULT_PRIVACY,
   },
