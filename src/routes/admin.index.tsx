@@ -30,6 +30,8 @@ import {
   type VipMember,
 } from "@/lib/admin.functions";
 import type { AdsSettings, SiteSettings } from "@/lib/admin-types";
+import { DEFAULT_CAPS, DEFAULT_PRIVACY } from "@/lib/admin-types";
+import { ReportsTab } from "@/components/admin/ReportsTab";
 
 export const Route = createFileRoute("/admin/")({
   head: () => ({
@@ -54,7 +56,7 @@ const TOKEN_KEY = "sov.adminToken";
 const money = (cents: number) => `$${(cents / 100).toFixed(2)}`;
 const pct = (value: number) => `${value.toFixed(2)}%`;
 
-const TABS = ["Overview", "Ads", "VIP", "Affiliates", "Site"] as const;
+const TABS = ["Overview", "Reports", "Ads", "VIP", "Affiliates", "Site"] as const;
 type Tab = (typeof TABS)[number];
 
 function Field({
@@ -237,6 +239,7 @@ function AdminPanel() {
 
       <div className="mt-6">
         {tab === "Overview" ? <OverviewTab token={token} /> : null}
+        {tab === "Reports" ? <ReportsTab token={token} /> : null}
         {tab === "Ads" || tab === "Site" ? <SettingsTab token={token} which={tab} /> : null}
         {tab === "VIP" ? <VipTab token={token} /> : null}
         {tab === "Affiliates" ? <AffiliateTab token={token} /> : null}
@@ -400,6 +403,9 @@ function SettingsTab({ token, which }: { token: string; which: "Ads" | "Site" })
 
   if (!ads || !site) return <p className="label-mono">loading…</p>;
 
+  const caps = { ...DEFAULT_CAPS, ...(ads.caps ?? {}) };
+  const privacy = { ...DEFAULT_PRIVACY, ...(ads.privacy ?? {}) };
+
   return (
     <div className="space-y-4">
       {which === "Ads" ? (
@@ -517,6 +523,79 @@ function SettingsTab({ token, which }: { token: string; which: "Ads" | "Site" })
               onChange={(v) => setAds({ ...ads, slots: { ...ads.slots, native_feed: v } })}
             />
           </div>
+          <div className="space-y-3 rounded-lg border border-hairline p-3">
+            <h3 className="label-mono">Frequency caps per visitor</h3>
+            <div className="grid gap-3 sm:grid-cols-3">
+              {(["popunder", "vignette", "inpage_push"] as const).map((format) => (
+                <div key={format} className="space-y-2">
+                  <p className="font-mono text-xs text-foreground">{format}</p>
+                  <Field label="max / hour">
+                    <input
+                      className={inputCls}
+                      type="number"
+                      min={0}
+                      value={caps[format].perHour}
+                      onChange={(e) =>
+                        setAds({
+                          ...ads,
+                          caps: {
+                            ...caps,
+                            [format]: { ...caps[format], perHour: Number(e.target.value) },
+                          },
+                        })
+                      }
+                    />
+                  </Field>
+                  <Field label="max / session">
+                    <input
+                      className={inputCls}
+                      type="number"
+                      min={0}
+                      value={caps[format].perSession}
+                      onChange={(e) =>
+                        setAds({
+                          ...ads,
+                          caps: {
+                            ...caps,
+                            [format]: { ...caps[format], perSession: Number(e.target.value) },
+                          },
+                        })
+                      }
+                    />
+                  </Field>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="space-y-3 rounded-lg border border-hairline p-3">
+            <h3 className="label-mono">Privacy & cookie consent</h3>
+            <Toggle
+              label="Ask for cookie consent"
+              checked={privacy.consent_required}
+              onChange={(v) =>
+                setAds({ ...ads, privacy: { ...privacy, consent_required: v } })
+              }
+            />
+            <Toggle
+              label="Block ad scripts until consent is given"
+              checked={privacy.block_until_consent}
+              onChange={(v) =>
+                setAds({ ...ads, privacy: { ...privacy, block_until_consent: v } })
+              }
+            />
+            <Field label="Consent banner text">
+              <textarea
+                className={inputCls}
+                rows={3}
+                value={privacy.banner_text}
+                onChange={(e) =>
+                  setAds({ ...ads, privacy: { ...privacy, banner_text: e.target.value } })
+                }
+              />
+            </Field>
+          </div>
+
           <button
             type="button"
             disabled={saver.isPending}
