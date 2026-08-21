@@ -244,6 +244,8 @@ export const getPublicConfig = createServerFn({ method: "GET" }).handler(
         monetag_vignette_zone: ads.monetag_vignette_zone,
         smartlink_url: ads.smartlink_url,
         slots: ads.slots,
+        caps: ads.caps,
+        privacy: ads.privacy,
       },
       site: {
         announcement: site.announcement,
