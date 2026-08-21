@@ -15,6 +15,7 @@ import { useVip } from "@/lib/vip";
 import { claimFormat, setPartnerBase, setVipFlag, track } from "@/lib/monetization";
 import { adsAllowed, useConsent } from "@/lib/consent";
 import { startWebVitals } from "@/lib/web-vitals";
+import { plannedAdScripts } from "@/lib/ad-policy";
 
 const SiteConfigContext = createContext<PublicConfig>(DEFAULT_PUBLIC_CONFIG);
 
@@ -130,14 +131,17 @@ function MonetagLoader() {
 
   useEffect(() => {
     if (consent === undefined) return; // not hydrated yet
-    if (isVip || !ads.enabled || typeof document === "undefined") return;
-    if (!allowed) {
+    if (typeof document === "undefined") return;
+    if (!allowed && !isVip && ads.enabled) {
       track({ event_type: "script_blocked", slot: "consent", format: "consent" });
-      return;
     }
 
+    // Single source of truth for "which third-party script may run" (CI-checked).
+    const planned = plannedAdScripts(ads, { isVip, consentAllowsAds: allowed });
+    if (planned.length === 0) return;
+
     // In-page push: highest sustained RPM, loads immediately site-wide.
-    if (ads.monetag_inpage_push && shouldLoad("monetag-push", "inpage_push", caps.inpage_push)) {
+    if (planned.includes("inpage_push") && shouldLoad("monetag-push", "inpage_push", caps.inpage_push)) {
       loadZone(
         "monetag-push",
         "inpage_push",
@@ -148,7 +152,7 @@ function MonetagLoader() {
 
     // Vignette interstitial: delayed slightly to keep first paint fast.
     let vignetteTimer: number | undefined;
-    if (ads.monetag_vignette && shouldLoad("monetag-vignette", "vignette", caps.vignette)) {
+    if (planned.includes("vignette") && shouldLoad("monetag-vignette", "vignette", caps.vignette)) {
       vignetteTimer = window.setTimeout(() => {
         loadZone(
           "monetag-vignette",
@@ -172,7 +176,7 @@ function MonetagLoader() {
         MONETAG.popunder.src,
       );
     };
-    if (ads.monetag_popunder) {
+    if (planned.includes("popunder")) {
       window.addEventListener("pointerdown", loadPop, { once: true });
       window.addEventListener("scroll", loadPop, { once: true, passive: true });
     }
@@ -187,7 +191,9 @@ function MonetagLoader() {
     consent,
     allowed,
     caps,
+    ads,
     ads.enabled,
+    ads.lean_mode,
     ads.monetag_inpage_push,
     ads.monetag_push_zone,
     ads.monetag_vignette,
