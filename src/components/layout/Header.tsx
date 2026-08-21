@@ -99,7 +99,7 @@ export function Header() {
         <button
           type="button"
           onClick={openVipModal}
-          className="ml-auto inline-flex shrink-0 items-center gap-2 rounded-full bg-primary px-3.5 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 sm:ml-0"
+          className="ml-auto hidden shrink-0 sm:inline-flex items-center gap-2 rounded-full bg-primary px-3.5 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 sm:ml-0"
         >
           <Crown className="size-4" aria-hidden="true" />
           {isVip ? "VIP active" : "$19 Lifetime VIP"}
