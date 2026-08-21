@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowUpRight } from "lucide-react";
 
+import { AdSlot } from "@/components/monetization/AdSlot";
 import { relatedTools } from "@/lib/tools";
 
 /** Chains the session after a result: two accent-themed suggestions. */
@@ -10,7 +11,10 @@ export function NextTools({ slug, heading = "Try next" }: { slug: string; headin
 
   return (
     <section className="mt-14">
+      {/* Post-result slot: highest-attention, lowest-friction ad position. */}
+      <AdSlot id={`result-${slug}`} className="mb-10" />
       <span className="label-mono">{heading}</span>
+
       <div className="mt-4 grid gap-3 sm:grid-cols-2">
         {next.map((tool) => {
           const Icon = tool.icon;
