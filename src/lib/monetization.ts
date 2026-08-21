@@ -227,8 +227,14 @@ function payload(event: AdEvent) {
     referrer: attr.referrer ?? null,
     device: window.matchMedia("(max-width: 640px)").matches ? "mobile" : "desktop",
     path: window.location.pathname,
+    format: event.format ?? null,
+    zone: event.zone ?? null,
+    duration_ms: event.duration_ms ?? null,
+    metric_value: event.metric_value ?? null,
+    is_vip: vipFlag,
   };
 }
+
 
 function flush(sync = false) {
   if (typeof window === "undefined" || queue.length === 0) return;
