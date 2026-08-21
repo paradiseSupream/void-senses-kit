@@ -1,12 +1,21 @@
 import { useEffect, useState } from "react";
 import { X, Sparkles } from "lucide-react";
 
+import { useVip } from "@/lib/vip";
+import { useSiteConfig } from "@/lib/site-config";
+import { claimImpression, partnerLink, track } from "@/lib/monetization";
+
 const KEY = "sov.socialbar.dismissed";
+const SLOT = "social-bar";
 
 export function SocialBar() {
-  const [visible, setVisible] = useState(false);
+  const { isVip } = useVip();
+  const config = useSiteConfig();
+  const enabled = config.ads.enabled;
+  const [link, setLink] = useState<{ url: string; clickId: string } | null>(null);
 
   useEffect(() => {
+    if (isVip || !enabled) return;
     let dismissed = false;
     try {
       dismissed = window.localStorage.getItem(KEY) === "1";
@@ -14,14 +23,24 @@ export function SocialBar() {
       /* storage unavailable */
     }
     if (dismissed) return;
-    const t = window.setTimeout(() => setVisible(true), 2500);
+    const t = window.setTimeout(() => {
+      if (!claimImpression(SLOT)) return;
+      const partner = partnerLink(SLOT, null);
+      setLink(partner);
+      track({
+        event_type: "impression",
+        slot: SLOT,
+        format: "social_bar",
+        click_id: partner.clickId,
+      });
+    }, 2500);
     return () => window.clearTimeout(t);
-  }, []);
+  }, [enabled, isVip]);
 
-  if (!visible) return null;
+  if (isVip || !enabled || !link) return null;
 
   const dismiss = () => {
-    setVisible(false);
+    setLink(null);
     try {
       window.localStorage.setItem(KEY, "1");
     } catch {
@@ -36,9 +55,12 @@ export function SocialBar() {
     >
       <Sparkles className="size-4 shrink-0 text-primary" aria-hidden="true" />
       <a
-        href="#sponsored-placeholder"
+        href={link.url}
         target="_blank"
         rel="noopener noreferrer sponsored"
+        onClick={() =>
+          track({ event_type: "click", slot: SLOT, format: "social_bar", click_id: link.clickId })
+        }
         className="min-w-0 flex-1 truncate text-sm text-foreground hover:text-primary"
       >
         <span className="label-mono mr-2">Sponsored</span>
