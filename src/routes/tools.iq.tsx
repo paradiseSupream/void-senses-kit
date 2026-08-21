@@ -5,6 +5,7 @@ import { toast } from "sonner";
 
 import { ToolShell } from "@/components/layout/ToolShell";
 import { useActionGate } from "@/components/monetization/ActionGate";
+import { QuizVipNudge } from "@/components/monetization/QuizVipNudge";
 import { drawBrandedCard, downloadCanvas } from "@/lib/canvas-card";
 
 export const Route = createFileRoute("/tools/iq")({
@@ -236,6 +237,8 @@ function IqTest() {
           ))}
         </div>
       </div>
+      <QuizVipNudge step={index} total={ITEMS.length} />
+
     </ToolShell>
   );
 }

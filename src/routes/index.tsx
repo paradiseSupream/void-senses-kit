@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { motion } from "framer-motion";
+
 import {
   ArrowRight,
   Cpu,
@@ -85,11 +85,6 @@ const PILLARS = [
   },
 ];
 
-const fadeUp = {
-  hidden: { opacity: 0, y: 18 },
-  show: { opacity: 1, y: 0 },
-};
-
 function Home() {
   const [query, setQuery] = useState("");
   const { openVipModal, isVip } = useVip();
@@ -106,46 +101,37 @@ function Home() {
       <section className="aurora grain relative overflow-hidden border-b border-hairline">
         <div className="void-grid absolute inset-0 -z-10" aria-hidden="true" />
         <div className="mx-auto max-w-5xl px-4 py-14 text-center sm:px-6 sm:py-28">
-          <motion.div
-            initial="hidden"
-            animate="show"
-            transition={{ staggerChildren: 0.08 }}
-            variants={{ hidden: {}, show: {} }}
-          >
-            <motion.span
-              variants={fadeUp}
-              transition={{ duration: 0.5, ease: "easeOut" }}
-              className="label-mono inline-flex items-center gap-2 rounded-full border border-hairline bg-surface/60 px-3.5 py-1.5 backdrop-blur-xl"
+          <div>
+            <span
+              className="reveal label-mono inline-flex items-center gap-2 rounded-full border border-hairline bg-surface/60 px-3.5 py-1.5 backdrop-blur-xl"
+              style={{ animationDelay: "0ms" }}
             >
               <span className="relative flex size-1.5">
                 <span className="absolute inline-flex size-full animate-ping rounded-full bg-primary opacity-70" />
                 <span className="relative inline-flex size-1.5 rounded-full bg-primary" />
               </span>
               7 tools · no signup · free
-            </motion.span>
+            </span>
 
-            <motion.h1
-              variants={fadeUp}
-              transition={{ duration: 0.55, ease: "easeOut" }}
-              className="mt-5 font-display text-[2.15rem] leading-[1.05] font-bold tracking-tight text-balance sm:mt-7 sm:text-7xl"
+            <h1
+              className="reveal mt-5 font-display text-[2.15rem] leading-[1.05] font-bold tracking-tight text-balance sm:mt-7 sm:text-7xl"
+              style={{ animationDelay: "60ms" }}
             >
               Free psychology &amp; IQ tests
               <span className="text-gradient mt-1 block">with instant visual results</span>
-            </motion.h1>
+            </h1>
 
-            <motion.p
-              variants={fadeUp}
-              transition={{ duration: 0.55, ease: "easeOut" }}
-              className="mx-auto mt-4 max-w-xl text-[0.95rem] leading-relaxed text-pretty text-muted-foreground sm:mt-6 sm:text-lg"
+            <p
+              className="reveal mx-auto mt-4 max-w-xl text-[0.95rem] leading-relaxed text-pretty text-muted-foreground sm:mt-6 sm:text-lg"
+              style={{ animationDelay: "120ms" }}
             >
               Take a 2–4 minute test and get a radar report, certificate or share card — scored
               entirely in your browser. Plus a permanently free vault of design and dev assets.
-            </motion.p>
+            </p>
 
-            <motion.div
-              variants={fadeUp}
-              transition={{ duration: 0.55, ease: "easeOut" }}
-              className="mt-7 flex flex-col gap-3 sm:mt-9 sm:flex-row sm:flex-wrap sm:justify-center"
+            <div
+              className="reveal mt-7 flex flex-col gap-3 sm:mt-9 sm:flex-row sm:flex-wrap sm:justify-center"
+              style={{ animationDelay: "180ms" }}
             >
               <a
                 href="#suite"
@@ -159,21 +145,11 @@ function Home() {
               >
                 Browse the free vault
               </Link>
-              {!isVip ? (
-                <button
-                  type="button"
-                  onClick={openVipModal}
-                  className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full px-4 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-                >
-                  or remove ads for $19 →
-                </button>
-              ) : null}
-            </motion.div>
+            </div>
 
-            <motion.dl
-              variants={fadeUp}
-              transition={{ duration: 0.55, ease: "easeOut" }}
-              className="mx-auto mt-10 grid max-w-3xl grid-cols-2 gap-2.5 sm:mt-14 sm:grid-cols-4 sm:gap-3"
+            <dl
+              className="reveal mx-auto mt-10 grid max-w-3xl grid-cols-2 gap-2.5 sm:mt-14 sm:grid-cols-4 sm:gap-3"
+              style={{ animationDelay: "240ms" }}
             >
               {STATS.map(({ icon: Icon, k, v }) => (
                 <div key={k} className="glass rounded-xl px-3 py-3.5 sm:py-4">
@@ -182,10 +158,11 @@ function Home() {
                   <dd className="label-mono mt-0.5">{v}</dd>
                 </div>
               ))}
-            </motion.dl>
-          </motion.div>
+            </dl>
+          </div>
         </div>
       </section>
+
 
       {/* ---------------- How it works ---------------- */}
       <section className="border-b border-hairline bg-surface/20">

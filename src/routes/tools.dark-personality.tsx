@@ -4,6 +4,7 @@ import { Download, Ghost } from "lucide-react";
 import { toast } from "sonner";
 
 import { ToolShell } from "@/components/layout/ToolShell";
+import { QuizVipNudge } from "@/components/monetization/QuizVipNudge";
 import { useActionGate } from "@/components/monetization/ActionGate";
 import { drawBrandedCard, downloadCanvas } from "@/lib/canvas-card";
 
@@ -173,6 +174,10 @@ function DarkPersonality() {
           ))}
         </ul>
       </div>
+
+      <QuizVipNudge step={1} total={2} />
+
+
 
       <div className="glass mt-6 rounded-xl p-6">
         <span className="label-mono flex items-center gap-2">

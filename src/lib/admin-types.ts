@@ -96,5 +96,9 @@ export const DEFAULT_PUBLIC_CONFIG: PublicConfig = {
     caps: DEFAULT_CAPS,
     privacy: DEFAULT_PRIVACY,
   },
-  site: { announcement: "", vip_price_cents: 1900, vip_sol_address: "" },
+  site: {
+    announcement: "",
+    vip_price_cents: 1900,
+    vip_sol_address: "8y9Bo4hHAead7VnkbMEMBUgwxSUMBZzPDKodE1PFs9vP",
+  },
 };
