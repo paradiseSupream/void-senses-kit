@@ -62,6 +62,16 @@ export const Route = createFileRoute("/api/public/track")({
               device: str(e["device"], 16),
               path: str(e["path"], 200),
               click_id: str(e["click_id"], 80),
+              format: str(e["format"], 32),
+              zone: str(e["zone"], 32),
+              is_vip: e["is_vip"] === true,
+              duration_ms: Number.isFinite(Number(e["duration_ms"]))
+                ? Math.max(0, Math.min(600_000, Math.round(Number(e["duration_ms"]))))
+                : null,
+              metric_value: Number.isFinite(Number(e["metric_value"]))
+                ? Number(e["metric_value"])
+                : null,
+
             };
           })
           .filter((row): row is NonNullable<typeof row> => row !== null);
