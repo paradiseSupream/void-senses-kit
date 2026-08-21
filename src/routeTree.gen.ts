@@ -10,33 +10,53 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ToolsLoveMatchRouteImport } from './routes/tools.love-match'
+import { Route as ToolsPromptMakerRouteImport } from './routes/tools.prompt-maker'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ToolsLoveMatchRoute = ToolsLoveMatchRouteImport.update({
+  id: '/tools/love-match',
+  path: '/tools/love-match',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ToolsPromptMakerRoute = ToolsPromptMakerRouteImport.update({
+  id: '/tools/prompt-maker',
+  path: '/tools/prompt-maker',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/tools/love-match': typeof ToolsLoveMatchRoute
+  '/tools/prompt-maker': typeof ToolsPromptMakerRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/tools/love-match': typeof ToolsLoveMatchRoute
+  '/tools/prompt-maker': typeof ToolsPromptMakerRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/tools/love-match': typeof ToolsLoveMatchRoute
+  '/tools/prompt-maker': typeof ToolsPromptMakerRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/tools/love-match' | '/tools/prompt-maker'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/tools/love-match' | '/tools/prompt-maker'
+  id: '__root__' | '/' | '/tools/love-match' | '/tools/prompt-maker'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ToolsLoveMatchRoute: typeof ToolsLoveMatchRoute
+  ToolsPromptMakerRoute: typeof ToolsPromptMakerRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +68,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/tools/love-match': {
+      id: '/tools/love-match'
+      path: '/tools/love-match'
+      fullPath: '/tools/love-match'
+      preLoaderRoute: typeof ToolsLoveMatchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tools/prompt-maker': {
+      id: '/tools/prompt-maker'
+      path: '/tools/prompt-maker'
+      fullPath: '/tools/prompt-maker'
+      preLoaderRoute: typeof ToolsPromptMakerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ToolsLoveMatchRoute: ToolsLoveMatchRoute,
+  ToolsPromptMakerRoute: ToolsPromptMakerRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
