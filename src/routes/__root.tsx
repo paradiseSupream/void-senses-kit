@@ -21,6 +21,8 @@ import { StickyBottomAd } from "@/components/monetization/StickyBottomAd";
 import { VipModal } from "@/components/monetization/VipModal";
 import { ActionGateProvider } from "@/components/monetization/ActionGate";
 import { VipProvider } from "@/lib/vip";
+import { SiteConfigProvider } from "@/lib/site-config";
+
 
 
 function NotFoundComponent() {
@@ -103,7 +105,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "monetag", content: "d7498800db613e1e682b5c72b66a050b" },
     ],
+
     links: [
       { rel: "stylesheet", href: appCss },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -142,23 +146,26 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <VipProvider>
-        <ActionGateProvider>
-          <div className="flex min-h-screen flex-col pb-16 sm:pb-0">
-            <Header />
-            <main className="flex-1">
-              {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-              <Outlet />
-            </main>
-            <Footer />
-          </div>
-          <MobileTabBar />
-          <StickyBottomAd />
-          <SocialBar />
-          <CookieBanner />
-          <VipModal />
-          <Toaster theme="dark" position="top-center" richColors />
-        </ActionGateProvider>
+        <SiteConfigProvider>
+          <ActionGateProvider>
+            <div className="flex min-h-screen flex-col pb-16 sm:pb-0">
+              <Header />
+              <main className="flex-1">
+                {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+                <Outlet />
+              </main>
+              <Footer />
+            </div>
+            <MobileTabBar />
+            <StickyBottomAd />
+            <SocialBar />
+            <CookieBanner />
+            <VipModal />
+            <Toaster theme="dark" position="top-center" richColors />
+          </ActionGateProvider>
+        </SiteConfigProvider>
       </VipProvider>
+
     </QueryClientProvider>
   );
 }

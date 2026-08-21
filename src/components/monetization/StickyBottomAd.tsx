@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { X } from "lucide-react";
 
 import { useVip } from "@/lib/vip";
+import { useAdSlotEnabled } from "@/lib/site-config";
 import { claimImpression, partnerLink, track } from "@/lib/monetization";
 
 const SLOT = "sticky-bottom-mobile";
@@ -14,11 +15,12 @@ const DISMISS_KEY = "sov.stickyDismissed";
  */
 export function StickyBottomAd() {
   const { isVip, openVipModal } = useVip();
+  const enabled = useAdSlotEnabled("sticky_mobile");
   const [visible, setVisible] = useState(false);
   const [link, setLink] = useState<{ url: string; clickId: string } | null>(null);
 
   useEffect(() => {
-    if (isVip) return;
+    if (isVip || !enabled) return;
     let dismissed = false;
     try {
       dismissed = window.sessionStorage.getItem(DISMISS_KEY) === "1";
@@ -37,9 +39,9 @@ export function StickyBottomAd() {
     }, 4000);
 
     return () => window.clearTimeout(timer);
-  }, [isVip]);
+  }, [enabled, isVip]);
 
-  if (isVip || !visible || !link) return null;
+  if (isVip || !enabled || !visible || !link) return null;
 
   return (
     <div

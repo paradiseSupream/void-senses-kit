@@ -3,6 +3,7 @@ import { Bitcoin, Check, CreditCard, X } from "lucide-react";
 import { toast } from "sonner";
 
 import { useVip } from "@/lib/vip";
+import { useSiteConfig } from "@/lib/site-config";
 
 const PERKS = [
   "No interstitial gate on any export",
@@ -15,6 +16,8 @@ const PERKS = [
 export function VipModal() {
   const { vipModalOpen, closeVipModal, setVip, isVip } = useVip();
   const [tab, setTab] = useState<"card" | "crypto">("card");
+  const { site } = useSiteConfig();
+  const price = `$${(site.vip_price_cents / 100).toFixed(0)}`;
 
   if (!vipModalOpen) return null;
 
@@ -44,7 +47,7 @@ export function VipModal() {
         </p>
 
         <div className="mt-5 flex items-baseline gap-2">
-          <span className="font-display text-4xl font-bold text-primary">$19</span>
+          <span className="font-display text-4xl font-bold text-primary">{price}</span>
           <span className="text-sm text-muted-foreground">once — no subscription</span>
         </div>
 
@@ -91,17 +94,35 @@ export function VipModal() {
             Continue to secure checkout
           </button>
         ) : (
-          <div className="mt-4 rounded-lg border border-dashed border-border p-4 text-center">
-            <p className="text-sm text-muted-foreground">
-              Crypto checkout (USDC / BTC / ETH) is coming soon.
-            </p>
-            <button
-              type="button"
-              disabled
-              className="mt-3 w-full cursor-not-allowed rounded-lg border border-hairline px-4 py-2.5 text-sm font-medium text-muted-foreground"
-            >
-              Pay with Crypto — placeholder
-            </button>
+          <div className="mt-4 rounded-lg border border-dashed border-border p-4">
+            {site.vip_sol_address ? (
+              <>
+                <p className="text-sm text-foreground">
+                  Send exactly {price} worth of SOL or USDC (Solana) to:
+                </p>
+                <code className="mt-2 block break-all rounded-md bg-surface-2 px-3 py-2 font-mono text-xs">
+                  {site.vip_sol_address}
+                </code>
+                <button
+                  type="button"
+                  onClick={() => {
+                    void navigator.clipboard?.writeText(site.vip_sol_address);
+                    toast.success("Address copied — email your tx signature to unlock VIP.");
+                  }}
+                  className="mt-3 w-full rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground"
+                >
+                  Copy Solana address
+                </button>
+                <p className="mt-2 text-center text-xs text-muted-foreground">
+                  After paying, send the transaction signature and your email — VIP is activated
+                  within minutes.
+                </p>
+              </>
+            ) : (
+              <p className="text-center text-sm text-muted-foreground">
+                Crypto checkout opens as soon as the receiving wallet is configured.
+              </p>
+            )}
           </div>
         )}
 

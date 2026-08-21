@@ -1,7 +1,16 @@
 import { useEffect, useRef, useState } from "react";
 
 import { useVip } from "@/lib/vip";
+import { useSiteConfig } from "@/lib/site-config";
 import { claimImpression, partnerLink, track } from "@/lib/monetization";
+
+function slotKind(slot: string): "result" | "gate" | "sticky_mobile" | "native_feed" {
+  if (slot.startsWith("sticky")) return "sticky_mobile";
+  if (slot.startsWith("gate")) return "gate";
+  if (slot.startsWith("native")) return "native_feed";
+  return "result";
+}
+
 
 /**
  * Inline banner ad container (responsive: 320x100 on mobile, 728x90 up).
@@ -19,15 +28,18 @@ export function AdSlot({
   className?: string;
 }) {
   const { isVip } = useVip();
+  const config = useSiteConfig();
+  const enabled = config.ads.enabled && config.ads.slots[slotKind(id)] !== false;
   const ref = useRef<HTMLDivElement>(null);
   const [allowed, setAllowed] = useState(false);
   const [link, setLink] = useState<{ url: string; clickId: string } | null>(null);
 
   useEffect(() => {
-    if (isVip) return;
+    if (isVip || !enabled) return;
     const node = ref.current;
     if (!node) return;
     let done = false;
+
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -50,9 +62,10 @@ export function AdSlot({
     );
     observer.observe(node);
     return () => observer.disconnect();
-  }, [id, isVip, toolSlug]);
+  }, [enabled, id, isVip, toolSlug]);
 
-  if (isVip) return null;
+  if (isVip || !enabled) return null;
+
 
   return (
     <div ref={ref} className={allowed ? className : "hidden"}>

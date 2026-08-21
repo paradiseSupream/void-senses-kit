@@ -68,6 +68,57 @@ export type Database = {
         }
         Relationships: []
       }
+      affiliates: {
+        Row: {
+          active: boolean
+          code: string
+          commission_pct: number
+          contact: string | null
+          created_at: string
+          id: string
+          name: string
+          payout_notes: string | null
+        }
+        Insert: {
+          active?: boolean
+          code: string
+          commission_pct?: number
+          contact?: string | null
+          created_at?: string
+          id?: string
+          name: string
+          payout_notes?: string | null
+        }
+        Update: {
+          active?: boolean
+          code?: string
+          commission_pct?: number
+          contact?: string | null
+          created_at?: string
+          id?: string
+          name?: string
+          payout_notes?: string | null
+        }
+        Relationships: []
+      }
+      app_settings: {
+        Row: {
+          key: string
+          updated_at: string
+          value: Json
+        }
+        Insert: {
+          key: string
+          updated_at?: string
+          value?: Json
+        }
+        Update: {
+          key?: string
+          updated_at?: string
+          value?: Json
+        }
+        Relationships: []
+      }
       roast_requests: {
         Row: {
           id: string
@@ -116,6 +167,45 @@ export type Database = {
           drive_link?: string
           id?: string
           title?: string
+        }
+        Relationships: []
+      }
+      vip_members: {
+        Row: {
+          active: boolean
+          amount_cents: number
+          created_at: string
+          email: string
+          id: string
+          license_key: string
+          payment_ref: string | null
+          plan: string
+          source: string
+          wallet: string | null
+        }
+        Insert: {
+          active?: boolean
+          amount_cents?: number
+          created_at?: string
+          email: string
+          id?: string
+          license_key?: string
+          payment_ref?: string | null
+          plan?: string
+          source?: string
+          wallet?: string | null
+        }
+        Update: {
+          active?: boolean
+          amount_cents?: number
+          created_at?: string
+          email?: string
+          id?: string
+          license_key?: string
+          payment_ref?: string | null
+          plan?: string
+          source?: string
+          wallet?: string | null
         }
         Relationships: []
       }
