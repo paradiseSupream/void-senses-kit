@@ -28,15 +28,18 @@ export function AdSlot({
   className?: string;
 }) {
   const { isVip } = useVip();
+  const config = useSiteConfig();
+  const enabled = config.ads.enabled && config.ads.slots[slotKind(id)] !== false;
   const ref = useRef<HTMLDivElement>(null);
   const [allowed, setAllowed] = useState(false);
   const [link, setLink] = useState<{ url: string; clickId: string } | null>(null);
 
   useEffect(() => {
-    if (isVip) return;
+    if (isVip || !enabled) return;
     const node = ref.current;
     if (!node) return;
     let done = false;
+
 
     const observer = new IntersectionObserver(
       (entries) => {
