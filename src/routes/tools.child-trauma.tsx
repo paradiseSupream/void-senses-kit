@@ -245,7 +245,9 @@ function ChildTrauma() {
             </button>
           </div>
         </div>
+        <QuizVipNudge step={step} total={QUESTIONS.length} />
       </ToolShell>
+
     );
   }
 
