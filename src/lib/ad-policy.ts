@@ -10,7 +10,7 @@
  * in-page push) must stay off.
  */
 
-export type AdFormat = "inpage_push" | "vignette" | "popunder";
+export type AdFormat = "inpage_push" | "vignette" | "popunder" | "adsterra_social_bar";
 
 /** Formats that are always allowed because they inject no third-party script. */
 export const FIRST_PARTY_SURFACES = ["free_vault", "smartlink"] as const;
@@ -21,6 +21,8 @@ export type PolicyInput = {
   monetag_inpage_push: boolean;
   monetag_vignette: boolean;
   monetag_popunder: boolean;
+  adsterra_social_bar?: boolean | undefined;
+  adsterra_social_bar_src?: string | undefined;
 };
 
 export type PolicyContext = {
@@ -43,6 +45,7 @@ export function plannedAdScripts(ads: PolicyInput, ctx: PolicyContext): AdFormat
   if (ads.monetag_inpage_push) planned.push("inpage_push");
   if (ads.monetag_vignette) planned.push("vignette");
   if (ads.monetag_popunder) planned.push("popunder");
+  if (ads.adsterra_social_bar && ads.adsterra_social_bar_src) planned.push("adsterra_social_bar");
   return planned;
 }
 

@@ -27,6 +27,9 @@ export type AdsSettings = {
   smartlink_url: string;
   adsterra_banner_key: string;
   adsterra_native_key: string;
+  /** Adsterra Social Bar (third-party script, high RPM sticky bar). */
+  adsterra_social_bar: boolean;
+  adsterra_social_bar_src: string;
   slots: { result: boolean; gate: boolean; sticky_mobile: boolean; native_feed: boolean };
   caps: AdCapSettings;
   privacy: PrivacySettings;
@@ -53,6 +56,8 @@ export type PublicAdsConfig = Pick<
   | "monetag_vignette"
   | "monetag_vignette_zone"
   | "smartlink_url"
+  | "adsterra_social_bar"
+  | "adsterra_social_bar_src"
   | "slots"
   | "caps"
   | "privacy"
@@ -69,6 +74,12 @@ export const MONETAG = {
   popunder: { zone: "11624275", src: "https://al5sm.com/tag.min.js" },
   vignette: { zone: "11624278", src: "https://n6wxm.com/vignette.min.js" },
   push: { zone: "11624286", src: "https://nap5k.com/tag.min.js" },
+} as const;
+
+/** Live Adsterra placements for sensesofvoid.app. */
+export const ADSTERRA = {
+  social_bar:
+    "https://pl30960638.profitableratecpmnetwork.com/68/e2/ce/68e2ce9955813c71eea7a3705a5d4a1e.js",
 } as const;
 
 export const DEFAULT_CAPS: AdCapSettings = {
@@ -96,6 +107,8 @@ export const DEFAULT_PUBLIC_CONFIG: PublicConfig = {
     monetag_vignette: true,
     monetag_vignette_zone: MONETAG.vignette.zone,
     smartlink_url: MONETAG.smartlink,
+    adsterra_social_bar: true,
+    adsterra_social_bar_src: ADSTERRA.social_bar,
     slots: { result: true, gate: true, sticky_mobile: true, native_feed: true },
     caps: DEFAULT_CAPS,
     privacy: DEFAULT_PRIVACY,

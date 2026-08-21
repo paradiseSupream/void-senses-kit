@@ -7,6 +7,7 @@ import { getPublicConfig } from "@/lib/admin.functions";
 import {
   DEFAULT_CAPS,
   DEFAULT_PRIVACY,
+  ADSTERRA,
   DEFAULT_PUBLIC_CONFIG,
   MONETAG,
   type PublicConfig,
@@ -150,6 +151,17 @@ function MonetagLoader() {
       );
     }
 
+    // Adsterra Social Bar: persistent sticky bar, loads once per page, no cap
+    // (it is a single always-on surface, not an interruptive interstitial).
+    if (planned.includes("adsterra_social_bar")) {
+      loadZone(
+        "adsterra-social-bar",
+        "adsterra_social_bar",
+        "social_bar",
+        ads.adsterra_social_bar_src || ADSTERRA.social_bar,
+      );
+    }
+
     // Vignette interstitial: delayed slightly to keep first paint fast.
     let vignetteTimer: number | undefined;
     if (planned.includes("vignette") && shouldLoad("monetag-vignette", "vignette", caps.vignette)) {
@@ -200,6 +212,8 @@ function MonetagLoader() {
     ads.monetag_vignette_zone,
     ads.monetag_popunder,
     ads.monetag_popunder_zone,
+    ads.adsterra_social_bar,
+    ads.adsterra_social_bar_src,
   ]);
 
   return null;

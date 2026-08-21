@@ -11,6 +11,8 @@ const FULL: PolicyInput = {
   monetag_inpage_push: true,
   monetag_vignette: true,
   monetag_popunder: true,
+  adsterra_social_bar: false,
+  adsterra_social_bar_src: "",
 };
 
 const LEAN: PolicyInput = { ...FULL, lean_mode: true };
@@ -19,6 +21,19 @@ const CONSENTED = { isVip: false, consentAllowsAds: true } as const;
 describe("ad policy", () => {
   it("loads the three Monetag formats when everything is on and consent is given", () => {
     expect(plannedAdScripts(FULL, CONSENTED)).toEqual(["inpage_push", "vignette", "popunder"]);
+  });
+
+  it("loads the Adsterra social bar only when enabled with a script URL", () => {
+    const withBar: PolicyInput = {
+      ...FULL,
+      adsterra_social_bar: true,
+      adsterra_social_bar_src: "https://example.com/bar.js",
+    };
+    expect(plannedAdScripts(withBar, CONSENTED)).toContain("adsterra_social_bar");
+    expect(plannedAdScripts({ ...withBar, lean_mode: true }, CONSENTED)).toEqual([]);
+    expect(plannedAdScripts({ ...withBar, adsterra_social_bar_src: "" }, CONSENTED)).not.toContain(
+      "adsterra_social_bar",
+    );
   });
 
   it("LEAN MODE: only Free Vault + smartlink surfaces, zero third-party scripts", () => {
@@ -51,7 +66,9 @@ describe("ad policy", () => {
 const SRC = join(process.cwd(), "src");
 /** The only module allowed to inject a third-party ad script. */
 const SCRIPT_INJECTOR = join(SRC, "lib", "site-config.tsx");
-const AD_HOSTS = /(al5sm\.com|n6wxm\.com|nap5k\.com|adsterra|propellerads|profitableratecpm)/i;
+// Real script hosts only — setting *names* like `adsterra_social_bar` are fine.
+const AD_HOSTS =
+  /(al5sm\.com|n6wxm\.com|nap5k\.com|adsterra\.com|propellerads\.com|profitableratecpmnetwork\.com)/i;
 
 function walk(dir: string): string[] {
   return readdirSync(dir).flatMap((entry) => {
