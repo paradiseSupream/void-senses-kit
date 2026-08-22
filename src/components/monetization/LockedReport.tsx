@@ -24,11 +24,14 @@ export function LockedReport({
   toolSlug,
   title = "Full report",
   blurb = "Trait-by-trait breakdown, what it means and how it usually plays out.",
+  share,
   children,
 }: {
   toolSlug: string;
   title?: string;
   blurb?: string;
+  /** Enables the free "share to unlock" path — the K-factor engine. */
+  share?: ComparePayload;
   children: React.ReactNode;
 }) {
   const { isVip, openVipModal } = useVip();
@@ -53,9 +56,11 @@ export function LockedReport({
       <div>
         {children}
         {!isVip ? <AdSlot id="result-deep" toolSlug={toolSlug} className="mt-6" /> : null}
+        {!isVip ? <EmailCapture toolSlug={toolSlug} className="mt-6" /> : null}
       </div>
     );
   }
+
 
   const price = `$${(site.vip_price_cents / 100).toFixed(0)}`;
 
