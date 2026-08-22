@@ -61,6 +61,8 @@ export function markQuizInteraction(): void {
  * Runs `cb` once the visitor interacts with a tool, or after `fallbackMs` of
  * dwell time (so pure readers still monetise). Returns a cleanup function.
  */
+const mountedAt = typeof performance === "undefined" ? 0 : performance.now();
+
 export function whenEngaged(cb: () => void, fallbackMs = 12_000): () => void {
   if (typeof window === "undefined") return () => undefined;
   let done = false;
