@@ -98,7 +98,7 @@ function ComparePage() {
         )}
 
         <div className="mt-10">
-          <AdSlot placement="result" toolSlug="compare" />
+          <AdSlot id="result-compare" toolSlug="compare" />
         </div>
       </div>
     </div>
