@@ -2,7 +2,15 @@ import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
-import { plannedAdScripts, smartlinkSurfacesAllowed, type PolicyInput } from "@/lib/ad-policy";
+import {
+  plannedAdScripts,
+  smartlinkSurfacesAllowed,
+  tierAdjust,
+  tierCapScale,
+  tierOf,
+  type AdFormat,
+  type PolicyInput,
+} from "@/lib/ad-policy";
 import { DEFAULT_PUBLIC_CONFIG } from "@/lib/admin-types";
 
 const FULL: PolicyInput = {
