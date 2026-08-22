@@ -3,6 +3,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Timer } from "lucide-react";
 
 import { ToolShell } from "@/components/layout/ToolShell";
+import { useAutoStart } from "@/lib/autostart";
+import { markQuizInteraction } from "@/lib/engagement";
 import { QuizVipNudge } from "@/components/monetization/QuizVipNudge";
 import { ResultActions } from "@/components/tools/ResultActions";
 import { TraitBars } from "@/components/tools/TraitBars";
@@ -74,6 +76,9 @@ function IqTest() {
   const [seed, setSeed] = useState(() => newSeed());
   const [name, setName] = useState("");
   const [phase, setPhase] = useState<"intro" | "quiz" | "result">("intro");
+
+  // Chained sessions: /tools/x?auto=1 skips the intro and starts immediately.
+  useAutoStart(() => setPhase("quiz"));
   const [index, setIndex] = useState(0);
   const [hits, setHits] = useState<Record<string, boolean>>({});
   const [left, setLeft] = useState(LIMIT);
@@ -99,6 +104,7 @@ function IqTest() {
     (choice: number | null) => {
       if (lockRef.current) return;
       lockRef.current = true;
+      markQuizInteraction();
       const item = items[index]!;
       const correct = choice !== null && choice === item.correctIndex;
       setHits((h) => ({ ...h, [item.id]: correct }));
