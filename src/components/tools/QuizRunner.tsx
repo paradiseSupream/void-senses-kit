@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { ChevronLeft, RefreshCw } from "lucide-react";
 
 import { QuizVipNudge } from "@/components/monetization/QuizVipNudge";
+import { markQuizInteraction } from "@/lib/engagement";
 import { SCALE, type Likert } from "@/lib/quiz-engine";
 
 /**
@@ -33,6 +34,7 @@ export function QuizRunner({
   const choose = useCallback(
     (weight: number) => {
       if (!item) return;
+      markQuizInteraction();
       const next = { ...answers, [item.id]: weight };
       setAnswers(next);
       if (index === items.length - 1) onComplete(next);

@@ -3,6 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { HeartPulse } from "lucide-react";
 
 import { ToolShell } from "@/components/layout/ToolShell";
+import { useAutoStart } from "@/lib/autostart";
 import { QuizRunner } from "@/components/tools/QuizRunner";
 import { RadarChart } from "@/components/tools/RadarChart";
 import { ResultActions } from "@/components/tools/ResultActions";
@@ -62,6 +63,9 @@ export const Route = createFileRoute("/tools/love-match")({
 function LoveMatch() {
   const [seed, setSeed] = useState(() => newSeed());
   const [phase, setPhase] = useState<"intro" | "quiz" | "result">("intro");
+
+  // Chained sessions: /tools/x?auto=1 skips the intro and starts immediately.
+  useAutoStart(() => setPhase("quiz"));
   const [a, setA] = useState("");
   const [b, setB] = useState("");
   const [answers, setAnswers] = useState<Record<string, number>>({});

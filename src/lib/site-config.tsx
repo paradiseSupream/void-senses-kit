@@ -1,4 +1,5 @@
-import { createContext, useContext, useEffect, useMemo } from "react";
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { useRouterState } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -19,6 +20,10 @@ import { Ga4Loader } from "@/components/Ga4Loader";
 import { startWebVitals } from "@/lib/web-vitals";
 import { plannedAdScripts, tierAdjust, tierCapScale, type Tier } from "@/lib/ad-policy";
 import { startFunnel, stopFunnel } from "@/lib/funnel";
+import { bumpPageView, whenEngaged } from "@/lib/engagement";
+
+/** Vignettes never fire on the first page view — it is the biggest bounce driver. */
+const VIGNETTE_MIN_PAGEVIEWS = 2;
 
 const SiteConfigContext = createContext<PublicConfig>(DEFAULT_PUBLIC_CONFIG);
 
@@ -144,6 +149,8 @@ function MonetagLoader() {
   const { isVip } = useVip();
   const consent = useConsent();
   const tier = useTier();
+  const pathname = useRouterState({ select: (state) => state.location.pathname });
+  const [depth, setDepth] = useState(0);
   const ads = config.ads;
   const privacy = ads.privacy ?? DEFAULT_PRIVACY;
   const caps = useMemo(
@@ -155,6 +162,11 @@ function MonetagLoader() {
     startFunnel();
     return stopFunnel;
   }, []);
+
+  // Page-view depth per session (drives the vignette delay below).
+  useEffect(() => {
+    setDepth(bumpPageView());
+  }, [pathname]);
 
   useEffect(() => {
     if (ads.smartlink_url) setPartnerBase(ads.smartlink_url);
@@ -184,30 +196,40 @@ function MonetagLoader() {
     const planned = tierAdjust(plannedAdScripts(ads, { isVip, consentAllowsAds: allowed }), tier);
     if (planned.length === 0) return;
 
-    // In-page push: highest sustained RPM, loads immediately site-wide.
-    if (planned.includes("inpage_push") && shouldLoad("monetag-push", "inpage_push", caps.inpage_push)) {
-      loadZone(
-        "monetag-push",
-        "inpage_push",
-        ads.monetag_push_zone || MONETAG.push.zone,
-        MONETAG.push.src,
-      );
-    }
+    // In-page push: lazy — waits for the first quiz interaction (or 10s of
+    // dwell) so early leavers are never hit with a push prompt.
+    const cancelPush = planned.includes("inpage_push")
+      ? whenEngaged(() => {
+          if (!shouldLoad("monetag-push", "inpage_push", caps.inpage_push)) return;
+          loadZone(
+            "monetag-push",
+            "inpage_push",
+            ads.monetag_push_zone || MONETAG.push.zone,
+            MONETAG.push.src,
+          );
+        }, 10_000)
+      : () => undefined;
 
-    // Adsterra Social Bar: persistent sticky bar, loads once per page, no cap
-    // (it is a single always-on surface, not an interruptive interstitial).
-    if (planned.includes("adsterra_social_bar")) {
-      loadZone(
-        "adsterra-social-bar",
-        "adsterra_social_bar",
-        "social_bar",
-        ads.adsterra_social_bar_src || ADSTERRA.social_bar,
-      );
-    }
+    // Adsterra Social Bar: persistent sticky bar; also held back until the
+    // visitor engages (or 6s), keeping the first paint clean.
+    const cancelBar = planned.includes("adsterra_social_bar")
+      ? whenEngaged(() => {
+          loadZone(
+            "adsterra-social-bar",
+            "adsterra_social_bar",
+            "social_bar",
+            ads.adsterra_social_bar_src || ADSTERRA.social_bar,
+          );
+        }, 6_000)
+      : () => undefined;
 
     // Vignette interstitial: delayed slightly to keep first paint fast.
     let vignetteTimer: number | undefined;
-    if (planned.includes("vignette") && shouldLoad("monetag-vignette", "vignette", caps.vignette)) {
+    if (
+      planned.includes("vignette") &&
+      depth >= VIGNETTE_MIN_PAGEVIEWS &&
+      shouldLoad("monetag-vignette", "vignette", caps.vignette)
+    ) {
       vignetteTimer = window.setTimeout(() => {
         loadZone(
           "monetag-vignette",
@@ -237,11 +259,14 @@ function MonetagLoader() {
     }
 
     return () => {
+      cancelPush();
+      cancelBar();
       if (vignetteTimer) window.clearTimeout(vignetteTimer);
       window.removeEventListener("pointerdown", loadPop);
       window.removeEventListener("scroll", loadPop);
     };
   }, [
+    depth,
     tier,
     isVip,
     consent,

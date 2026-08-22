@@ -72,7 +72,24 @@ export type ToolRevenue = SlotStat & {
   sessionConversion: number;
 };
 
+/** One geo / device / landing-source segment with full acquisition metrics. */
+export type Cohort = {
+  key: string;
+  sessions: number;
+  bounces: number;
+  bounceRate: number;
+  starts: number;
+  startRate: number;
+  completes: number;
+  completionRate: number;
+  revenueCents: number;
+  rpm: number;
+  vips: number;
+  vipRate: number;
+};
+
 export type MonetizationStats = {
+  cohorts: { geo: Cohort[]; device: Cohort[]; source: Cohort[] };
   funnel: FunnelStep[];
   byTool: ToolRevenue[];
   experiments: Array<{
@@ -314,6 +331,80 @@ const FUNNEL_ORDER = [
 ] as const;
 
 /** Rebuilds the visit → test → dwell → result → VIP funnel from event rows. */
+/**
+ * Session-level acquisition cohorts.
+ *
+ * A session counts as: started when it fired `test_start` / `tool_start`,
+ * completed when it fired `result_view` / `tool_complete`, bounced when it
+ * never started anything, and converted when it fired `vip_purchase`.
+ */
+export function buildCohorts(list: Row[], pick: (row: Row) => string): Cohort[] {
+  type Agg = {
+    started: boolean;
+    completed: boolean;
+    vip: boolean;
+    revenueCents: number;
+  };
+  const dim = new Map<string, string>();
+  const sessions = new Map<string, Agg>();
+
+  for (const row of list) {
+    const sid = row.session_id || "unknown";
+    if (!dim.has(sid)) dim.set(sid, pick(row) || "unknown");
+    const agg = sessions.get(sid) ?? {
+      started: false,
+      completed: false,
+      vip: false,
+      revenueCents: 0,
+    };
+    const funnelStep = row.event_type === "funnel" ? row.slot : "";
+    if (row.event_type === "tool_start" || funnelStep === "test_start") agg.started = true;
+    if (row.event_type === "tool_complete" || funnelStep === "result_view") agg.completed = true;
+    if (funnelStep === "vip_purchase" || row.event_type === "conversion") agg.vip = true;
+    agg.revenueCents += row.revenue_cents ?? 0;
+    sessions.set(sid, agg);
+  }
+
+  const map = new Map<string, Cohort>();
+  for (const [sid, agg] of sessions) {
+    const key = dim.get(sid) ?? "unknown";
+    const cohort =
+      map.get(key) ??
+      {
+        key,
+        sessions: 0,
+        bounces: 0,
+        bounceRate: 0,
+        starts: 0,
+        startRate: 0,
+        completes: 0,
+        completionRate: 0,
+        revenueCents: 0,
+        rpm: 0,
+        vips: 0,
+        vipRate: 0,
+      };
+    cohort.sessions += 1;
+    if (agg.started) cohort.starts += 1;
+    else cohort.bounces += 1;
+    if (agg.completed) cohort.completes += 1;
+    if (agg.vip) cohort.vips += 1;
+    cohort.revenueCents += agg.revenueCents;
+    map.set(key, cohort);
+  }
+
+  return [...map.values()]
+    .map((c) => ({
+      ...c,
+      bounceRate: c.sessions > 0 ? (c.bounces / c.sessions) * 100 : 0,
+      startRate: c.sessions > 0 ? (c.starts / c.sessions) * 100 : 0,
+      completionRate: c.starts > 0 ? (c.completes / c.starts) * 100 : 0,
+      rpm: c.sessions > 0 ? (c.revenueCents / 100 / c.sessions) * 1000 : 0,
+      vipRate: c.sessions > 0 ? (c.vips / c.sessions) * 100 : 0,
+    }))
+    .sort((a, b) => b.sessions - a.sessions);
+}
+
 export function buildFunnel(list: Row[]): FunnelStep[] {
   const sessions = new Map<string, Set<string>>();
   const dwell = new Map<string, number[]>();
@@ -486,6 +577,11 @@ export function aggregate(list: Row[], days: number): MonetizationStats {
     days,
     totals,
     funnel: buildFunnel(list),
+    cohorts: {
+      geo: buildCohorts(list, (r) => r.country ?? "??"),
+      device: buildCohorts(list, (r) => r.device ?? "unknown"),
+      source: buildCohorts(list, (r) => r.utm_source ?? "direct"),
+    },
     byTool: buildToolRevenue(list),
     experiments: buildExperiments(list),
     bySlot: group(adRows, (r) => r.slot),
