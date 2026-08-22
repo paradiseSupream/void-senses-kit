@@ -8,6 +8,7 @@ import { QuizRunner } from "@/components/tools/QuizRunner";
 import { RadarChart } from "@/components/tools/RadarChart";
 import { ResultActions } from "@/components/tools/ResultActions";
 import { TraitBars } from "@/components/tools/TraitBars";
+import { LockedReport } from "@/components/monetization/LockedReport";
 import { LOVE_BANK, LOVE_PER_DIM, LOVE_SESSION_SIZE, loveVerdict } from "@/lib/banks/love";
 import { newSeed, pickBalanced, rngFrom, scoreDimensions, type Likert } from "@/lib/quiz-engine";
 
@@ -169,7 +170,11 @@ function LoveMatch() {
           </div>
 
           <div className="mt-8">
-            <TraitBars data={result.scores} />
+            <LockedReport toolSlug="love-match" title="Full compatibility breakdown">
+          <div className="mt-8">
+              <TraitBars data={result.scores} />
+            </div>
+            </LockedReport>
           </div>
 
           <ResultActions

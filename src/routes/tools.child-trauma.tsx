@@ -8,6 +8,7 @@ import { QuizRunner } from "@/components/tools/QuizRunner";
 import { RadarChart } from "@/components/tools/RadarChart";
 import { ResultActions } from "@/components/tools/ResultActions";
 import { TraitBars } from "@/components/tools/TraitBars";
+import { LockedReport } from "@/components/monetization/LockedReport";
 import {
   TRAUMA_BANK,
   TRAUMA_NOTES,
@@ -174,7 +175,11 @@ function ChildTrauma() {
           </div>
 
           <div className="mt-8">
-            <TraitBars data={result.scores} notes={notes} />
+            <LockedReport toolSlug="child-trauma" title="Dimension-by-dimension breakdown">
+          <div className="mt-8">
+              <TraitBars data={result.scores} notes={notes} />
+            </div>
+            </LockedReport>
           </div>
 
           <ResultActions

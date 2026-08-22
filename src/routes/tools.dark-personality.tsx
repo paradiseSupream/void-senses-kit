@@ -8,6 +8,7 @@ import { QuizRunner } from "@/components/tools/QuizRunner";
 import { RadarChart } from "@/components/tools/RadarChart";
 import { ResultActions } from "@/components/tools/ResultActions";
 import { TraitBars } from "@/components/tools/TraitBars";
+import { LockedReport } from "@/components/monetization/LockedReport";
 import {
   DARK_ARCHETYPES,
   DARK_BANK,
@@ -163,7 +164,11 @@ function DarkPersonality() {
           </div>
 
           <div className="mt-8">
-            <TraitBars data={result.scores} notes={DARK_NOTES} />
+            <LockedReport toolSlug="dark-personality" title="Trait-by-trait shadow breakdown">
+          <div className="mt-8">
+              <TraitBars data={result.scores} notes={DARK_NOTES} />
+            </div>
+            </LockedReport>
           </div>
 
           <ResultActions
