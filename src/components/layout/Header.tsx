@@ -5,7 +5,8 @@ import { LogoMark } from "@/components/brand/LogoMark";
 import { useVip } from "@/lib/vip";
 
 const NAV = [
-  { label: "Tools", to: "/" as const },
+  { label: "Home", to: "/" as const },
+  { label: "Tools", to: "/tools" as const },
   { label: "Vault", to: "/vault" as const },
 ];
 
