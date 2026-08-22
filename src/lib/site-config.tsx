@@ -261,7 +261,7 @@ function MonetagLoader() {
         MONETAG.popunder.src,
       );
     };
-    if (planned.includes("popunder")) {
+    if (planned.includes("popunder") && depth >= 2) {
       window.addEventListener("pointerdown", loadPop, { once: true });
       window.addEventListener("scroll", loadPop, { once: true, passive: true });
     }
