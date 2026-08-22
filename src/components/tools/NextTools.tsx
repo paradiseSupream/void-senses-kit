@@ -1,9 +1,9 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { ArrowUpRight, Play } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 
 import { AdSlot } from "@/components/monetization/AdSlot";
-import { adVariant, track } from "@/lib/monetization";
+import { track } from "@/lib/monetization";
 import { trackFunnel } from "@/lib/funnel";
 import { relatedTools } from "@/lib/tools";
 
