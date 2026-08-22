@@ -19,6 +19,7 @@ import { CookieBanner } from "@/components/layout/CookieBanner";
 import { MobileTabBar } from "@/components/layout/MobileTabBar";
 import { SocialBar } from "@/components/monetization/SocialBar";
 import { StickyBottomAd } from "@/components/monetization/StickyBottomAd";
+import { DesktopStickyAd } from "@/components/monetization/DesktopStickyAd";
 import { VipModal } from "@/components/monetization/VipModal";
 import { ExitIntentOffer } from "@/components/monetization/ExitIntentOffer";
 import { ActionGateProvider } from "@/components/monetization/ActionGate";
