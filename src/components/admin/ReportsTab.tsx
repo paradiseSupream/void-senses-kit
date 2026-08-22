@@ -15,7 +15,7 @@ import {
 } from "recharts";
 
 import { adminOverview, type AdminOverview } from "@/lib/admin.functions";
-import type { SlotStat } from "@/lib/analytics-agg";
+import type { Cohort, SlotStat } from "@/lib/analytics-agg";
 
 const pct = (v: number) => `${v.toFixed(2)}%`;
 const money = (cents: number) => `$${(cents / 100).toFixed(2)}`;
@@ -99,6 +99,47 @@ function Chart({ rows }: { rows: SlotStat[] }) {
   );
 }
 
+/** Acquisition quality per segment: bounce → start → completion → RPM → VIP. */
+function CohortTable({ rows, label }: { rows: Cohort[]; label: string }) {
+  if (rows.length === 0) {
+    return <p className="text-sm text-muted-foreground">No sessions recorded yet.</p>;
+  }
+  return (
+    <div className="overflow-x-auto">
+      <table className="w-full text-sm">
+        <thead>
+          <tr className="label-mono text-left text-muted-foreground">
+            <th className="py-2 pr-3 font-normal">{label}</th>
+            <th className="py-2 pr-3 font-normal">Sessions</th>
+            <th className="py-2 pr-3 font-normal">Bounce</th>
+            <th className="py-2 pr-3 font-normal">Quiz start</th>
+            <th className="py-2 pr-3 font-normal">Completion</th>
+            <th className="py-2 pr-3 font-normal">Revenue</th>
+            <th className="py-2 pr-3 font-normal">RPM</th>
+            <th className="py-2 font-normal">VIP conv.</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((row) => (
+            <tr key={row.key} className="border-t border-hairline/60">
+              <td className="py-2 pr-3 font-mono text-xs">{row.key}</td>
+              <td className="py-2 pr-3">{row.sessions}</td>
+              <td className={`py-2 pr-3 ${row.bounceRate > 70 ? "text-destructive" : ""}`}>
+                {pct(row.bounceRate)}
+              </td>
+              <td className="py-2 pr-3">{pct(row.startRate)}</td>
+              <td className="py-2 pr-3">{pct(row.completionRate)}</td>
+              <td className="py-2 pr-3">{money(row.revenueCents)}</td>
+              <td className="py-2 pr-3">${row.rpm.toFixed(2)}</td>
+              <td className="py-2">{pct(row.vipRate)}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
 export function ReportsTab({ token }: { token: string }) {
   const fetchOverview = useServerFn(adminOverview);
   const [days, setDays] = useState(7);
@@ -139,6 +180,18 @@ export function ReportsTab({ token }: { token: string }) {
 
       {stats ? (
         <>
+          <Panel title="Acquisition quality by country (bounce → start → completion → RPM → VIP)">
+            <CohortTable rows={stats.cohorts?.geo ?? []} label="Country" />
+          </Panel>
+
+          <Panel title="Acquisition quality by device">
+            <CohortTable rows={stats.cohorts?.device ?? []} label="Device" />
+          </Panel>
+
+          <Panel title="Acquisition quality by landing source">
+            <CohortTable rows={stats.cohorts?.source ?? []} label="Source" />
+          </Panel>
+
           <Panel title="Conversion funnel (visit → test → dwell → result → VIP)">
             {stats.funnel[0]?.sessions ? (
               <div className="space-y-2">
