@@ -36,6 +36,8 @@ export const Route = createFileRoute("/tools/iq")({
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { property: "og:image", content: "https://sensesofvoid.app/__l5e/assets-v1/ef330493-5525-426d-a192-99382f531ffd/cover-iq.jpg" },
+      { name: "twitter:image", content: "https://sensesofvoid.app/__l5e/assets-v1/ef330493-5525-426d-a192-99382f531ffd/cover-iq.jpg" },
       { property: "og:url", content: "https://sensesofvoid.app/tools/iq" },
       { property: "og:site_name", content: "Senses of Void" },
     ],

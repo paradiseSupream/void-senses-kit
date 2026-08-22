@@ -28,6 +28,8 @@ export const Route = createFileRoute("/tools/love-match")({
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { property: "og:image", content: "https://sensesofvoid.app/__l5e/assets-v1/053c4668-7074-4003-b960-9c801cb16d90/cover-love-match.jpg" },
+      { name: "twitter:image", content: "https://sensesofvoid.app/__l5e/assets-v1/053c4668-7074-4003-b960-9c801cb16d90/cover-love-match.jpg" },
       { property: "og:url", content: "https://sensesofvoid.app/tools/love-match" },
       { property: "og:site_name", content: "Senses of Void" },
     ],

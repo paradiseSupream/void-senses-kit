@@ -22,6 +22,8 @@ export const Route = createFileRoute("/tools/prompt-maker")({
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { property: "og:image", content: "https://sensesofvoid.app/__l5e/assets-v1/42378ec0-4756-4243-964d-fe8a705ba63f/cover-prompt-maker.jpg" },
+      { name: "twitter:image", content: "https://sensesofvoid.app/__l5e/assets-v1/42378ec0-4756-4243-964d-fe8a705ba63f/cover-prompt-maker.jpg" },
       { property: "og:url", content: "https://sensesofvoid.app/tools/prompt-maker" },
       { property: "og:site_name", content: "Senses of Void" },
     ],
