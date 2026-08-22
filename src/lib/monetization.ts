@@ -117,10 +117,10 @@ export function trackExperiment(slot: string, arm: string) {
 type CapState = { hour: number; counts: Record<string, number>; session: Record<string, number> };
 
 const CAPS: Record<string, { perHour: number; perSession: number }> = {
-  default: { perHour: 24, perSession: 12 },
-  sticky: { perHour: 8, perSession: 4 },
-  gate: { perHour: 6, perSession: 4 },
-  result: { perHour: 12, perSession: 8 },
+  default: { perHour: 60, perSession: 40 },
+  sticky: { perHour: 30, perSession: 20 },
+  gate: { perHour: 20, perSession: 15 },
+  result: { perHour: 40, perSession: 30 },
 };
 
 function capKind(slot: string) {
@@ -205,17 +205,20 @@ export function formatUsage(): { hour: Record<string, number>; session: Record<s
 
 
 
-/** Session-based gating: skip the interstitial for the first action of a session. */
+/**
+ * Session-based gating. Every export/download by a free user passes the
+ * sponsor gate — the gate is the highest-RPM surface on the site, so skipping
+ * it wasted the single most valuable free-user action.
+ */
 export function shouldGate(): boolean {
   if (typeof window === "undefined") return false;
   try {
     const seen = Number(window.sessionStorage.getItem("sov.gateCount") ?? "0");
     window.sessionStorage.setItem("sov.gateCount", String(seen + 1));
-    // First export of a session is friction-free; then gate every action.
-    return seen >= 1;
   } catch {
-    return true;
+    /* storage unavailable */
   }
+  return true;
 }
 
 /* -------------------------------------------------------------- attribution */
