@@ -78,21 +78,14 @@ export function tierOf(country: string | null | undefined): Tier {
 }
 
 /**
- * Revenue-per-annoyance tuning by market.
- * - tier1: everything (highest eCPM justifies pop-under + vignette + social bar)
- * - tier2: drop the vignette interstitial
- * - tier3: cheap traffic — keep the high-fill, low-bounce formats
- *   (in-page push, Adsterra social bar, pop-under) and drop only the vignette.
+ * No geo blocking: every market gets the full ad stack.
+ * VIP + consent are the only gates (handled in plannedAdScripts).
  */
-export function tierAdjust(planned: AdFormat[], tier: Tier): AdFormat[] {
-  if (tier === "tier1") return planned;
-  return planned.filter((f) => f !== "vignette");
+export function tierAdjust(planned: AdFormat[], _tier: Tier): AdFormat[] {
+  return planned;
 }
 
-
-/** Frequency caps scale down as CPM drops, so cheap traffic isn't burned out. */
-export function tierCapScale(tier: Tier): number {
-  if (tier === "tier1") return 1;
-  if (tier === "tier2") return 0.75;
-  return 0.5;
+/** Frequency caps are uniform worldwide. */
+export function tierCapScale(_tier: Tier): number {
+  return 1;
 }
