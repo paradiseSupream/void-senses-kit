@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { useVip, type VipPlan } from "@/lib/vip";
 import { useSiteConfig } from "@/lib/site-config";
 import { trackFunnel } from "@/lib/funnel";
+import { OFFER_CENTS, useVipOffer } from "@/lib/vip-offer";
 
 /** Monthly no-ads pass — a low-friction entry point next to lifetime VIP. */
 export const VIP_MONTHLY_CENTS = 499;
@@ -22,7 +23,9 @@ export function VipModal() {
   const [tab, setTab] = useState<"card" | "crypto">("card");
   const [plan, setPlan] = useState<VipPlan>("lifetime");
   const { site } = useSiteConfig();
-  const lifetimePrice = `$${(site.vip_price_cents / 100).toFixed(0)}`;
+  const offerActive = useVipOffer();
+  const lifetimeCents = offerActive ? OFFER_CENTS : site.vip_price_cents;
+  const lifetimePrice = `$${(lifetimeCents / 100).toFixed(0)}`;
   const monthlyPrice = `$${(VIP_MONTHLY_CENTS / 100).toFixed(2)}`;
   const price = plan === "lifetime" ? lifetimePrice : monthlyPrice;
 
@@ -73,7 +76,9 @@ export function VipModal() {
                 key: "lifetime" as const,
                 label: "Lifetime VIP",
                 amount: lifetimePrice,
-                note: "one payment, every future tool",
+                note: offerActive
+                  ? `one-visit offer — normally $${(site.vip_price_cents / 100).toFixed(0)}`
+                  : "one payment, every future tool",
               },
             ]
           ).map((option) => {
