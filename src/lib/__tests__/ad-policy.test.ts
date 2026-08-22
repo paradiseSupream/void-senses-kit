@@ -135,9 +135,14 @@ describe("geo tiering", () => {
     expect(tierAdjust(all, tierOf("BR"))).toContain("popunder");
   });
 
-  it("keeps only in-page push in tier-3 markets", () => {
-    expect(tierAdjust(all, tierOf("BD"))).toEqual(["inpage_push"]);
+  it("keeps push, social bar and pop-under (but no vignette) in tier-3 markets", () => {
+    expect(tierAdjust(all, tierOf("BD"))).toEqual([
+      "inpage_push",
+      "popunder",
+      "adsterra_social_bar",
+    ]);
   });
+
 
   it("scales frequency caps down as CPM drops", () => {
     expect(tierCapScale("tier1")).toBeGreaterThan(tierCapScale("tier2"));
