@@ -2,9 +2,12 @@ import { useEffect, useState } from "react";
 import { Bitcoin, Check, CreditCard, X } from "lucide-react";
 import { toast } from "sonner";
 
-import { useVip } from "@/lib/vip";
+import { useVip, type VipPlan } from "@/lib/vip";
 import { useSiteConfig } from "@/lib/site-config";
 import { trackFunnel } from "@/lib/funnel";
+
+/** Monthly no-ads pass — a low-friction entry point next to lifetime VIP. */
+export const VIP_MONTHLY_CENTS = 499;
 
 const PERKS = [
   "No interstitial gate on any export",
@@ -17,8 +20,11 @@ const PERKS = [
 export function VipModal() {
   const { vipModalOpen, closeVipModal, setVip, isVip } = useVip();
   const [tab, setTab] = useState<"card" | "crypto">("card");
+  const [plan, setPlan] = useState<VipPlan>("lifetime");
   const { site } = useSiteConfig();
-  const price = `$${(site.vip_price_cents / 100).toFixed(0)}`;
+  const lifetimePrice = `$${(site.vip_price_cents / 100).toFixed(0)}`;
+  const monthlyPrice = `$${(VIP_MONTHLY_CENTS / 100).toFixed(2)}`;
+  const price = plan === "lifetime" ? lifetimePrice : monthlyPrice;
 
   useEffect(() => {
     if (vipModalOpen) trackFunnel("vip_gate_shown");
@@ -46,17 +52,52 @@ export function VipModal() {
           <X className="size-4" aria-hidden="true" />
         </button>
 
-        <span className="label-mono">Lifetime access</span>
+        <span className="label-mono">Ad-free access</span>
         <h2 id="vip-title" className="mt-2 font-display text-2xl font-bold">
           Senses of Void VIP
         </h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          One payment. Every tool, forever, with nothing in the way.
+          Pick a month to try it, or pay once and keep it forever.
         </p>
 
-        <div className="mt-5 flex items-baseline gap-2">
-          <span className="font-display text-4xl font-bold text-primary">{price}</span>
-          <span className="text-sm text-muted-foreground">once — no subscription</span>
+        <div className="mt-5 grid gap-2 sm:grid-cols-2">
+          {(
+            [
+              {
+                key: "monthly" as const,
+                label: "1 month, no ads",
+                amount: monthlyPrice,
+                note: "cancel anytime — nothing auto-renews",
+              },
+              {
+                key: "lifetime" as const,
+                label: "Lifetime VIP",
+                amount: lifetimePrice,
+                note: "one payment, every future tool",
+              },
+            ]
+          ).map((option) => {
+            const active = plan === option.key;
+            return (
+              <button
+                key={option.key}
+                type="button"
+                onClick={() => setPlan(option.key)}
+                aria-pressed={active}
+                className={`rounded-xl border p-3.5 text-left transition-colors ${
+                  active
+                    ? "border-primary/60 bg-primary/10"
+                    : "border-hairline bg-surface-2/50 hover:bg-surface-2"
+                }`}
+              >
+                <span className="label-mono block">{option.label}</span>
+                <span className="mt-1 block font-display text-2xl font-bold text-primary">
+                  {option.amount}
+                </span>
+                <span className="mt-1 block text-xs text-muted-foreground">{option.note}</span>
+              </button>
+            );
+          })}
         </div>
 
         <ul className="mt-5 space-y-2">
@@ -100,7 +141,7 @@ export function VipModal() {
             }}
             className="mt-4 w-full rounded-lg bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
           >
-            Continue to secure checkout
+            Continue to secure checkout — {price}
           </button>
         ) : (
           <div className="mt-4 rounded-lg border border-dashed border-border p-4">
@@ -138,7 +179,7 @@ export function VipModal() {
         <button
           type="button"
           onClick={() => {
-            setVip(!isVip);
+            setVip(!isVip, plan);
             toast.success(isVip ? "VIP preview disabled." : "VIP preview enabled on this device.");
           }}
           className="mt-4 w-full text-center text-xs text-muted-foreground underline underline-offset-4 hover:text-foreground"
