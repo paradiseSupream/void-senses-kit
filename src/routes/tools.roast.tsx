@@ -21,6 +21,34 @@ export const Route = createFileRoute("/tools/roast")({
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { property: "og:url", content: "https://sensesofvoid.app/tools/roast" },
+      { property: "og:site_name", content: "Senses of Void" },
+    ],
+    links: [{ rel: "canonical", href: "https://sensesofvoid.app/tools/roast" }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        name: "AI Roast Me",
+        url: "https://sensesofvoid.app/tools/roast",
+        applicationCategory: "UtilitiesApplication",
+        operatingSystem: "Any",
+        offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+      }),
+      },
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          itemListElement: [
+            { "@type": "ListItem", position: 1, name: "Home", item: "https://sensesofvoid.app" },
+            { "@type": "ListItem", position: 2, name: "AI Roast Me", item: "https://sensesofvoid.app/tools/roast" },
+          ],
+        }),
+      },
     ],
   }),
   component: RoastMe,

@@ -40,6 +40,34 @@ export const Route = createFileRoute("/tools/child-trauma")({
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { property: "og:url", content: "https://sensesofvoid.app/tools/child-trauma" },
+      { property: "og:site_name", content: "Senses of Void" },
+    ],
+    links: [{ rel: "canonical", href: "https://sensesofvoid.app/tools/child-trauma" }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "Quiz",
+        name: "Child Trauma Test",
+        url: "https://sensesofvoid.app/tools/child-trauma",
+        educationalLevel: "beginner",
+        isAccessibleForFree: true,
+        publisher: { "@type": "Organization", name: "Senses of Void", url: "https://sensesofvoid.app" },
+      }),
+      },
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          itemListElement: [
+            { "@type": "ListItem", position: 1, name: "Home", item: "https://sensesofvoid.app" },
+            { "@type": "ListItem", position: 2, name: "Child Trauma Test", item: "https://sensesofvoid.app/tools/child-trauma" },
+          ],
+        }),
+      },
     ],
   }),
   component: ChildTrauma,
