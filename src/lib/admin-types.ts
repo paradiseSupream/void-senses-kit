@@ -82,10 +82,15 @@ export const ADSTERRA = {
     "https://pl30960638.profitableratecpmnetwork.com/68/e2/ce/68e2ce9955813c71eea7a3705a5d4a1e.js",
 } as const;
 
+/**
+ * Balanced caps: intrusive formats stay rare (so bounce rate stays low and
+ * sessions run long), while the high-RPM first-party surfaces — smartlink
+ * gate, sticky anchor, result native cards — carry the revenue.
+ */
 export const DEFAULT_CAPS: AdCapSettings = {
-  popunder: { perHour: 6, perSession: 4 },
-  vignette: { perHour: 12, perSession: 8 },
-  inpage_push: { perHour: 16, perSession: 12 },
+  popunder: { perHour: 1, perSession: 1 },
+  vignette: { perHour: 2, perSession: 1 },
+  inpage_push: { perHour: 3, perSession: 2 },
 };
 
 export const DEFAULT_PRIVACY: PrivacySettings = {

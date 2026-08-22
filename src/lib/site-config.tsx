@@ -22,8 +22,11 @@ import { plannedAdScripts, tierAdjust, tierCapScale, type Tier } from "@/lib/ad-
 import { startFunnel, stopFunnel } from "@/lib/funnel";
 import { bumpPageView, whenEngaged } from "@/lib/engagement";
 
-/** Vignettes fire from the very first navigation to maximize session value. */
-const VIGNETTE_MIN_PAGEVIEWS = 1;
+/**
+ * Vignettes never fire on the landing view — an interstitial before the
+ * visitor has seen any value is the single biggest bounce driver.
+ */
+const VIGNETTE_MIN_PAGEVIEWS = 3;
 
 const SiteConfigContext = createContext<PublicConfig>(DEFAULT_PUBLIC_CONFIG);
 
