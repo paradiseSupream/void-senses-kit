@@ -15,6 +15,7 @@ import {
 import { useVip } from "@/lib/vip";
 import { claimFormat, setPartnerBase, setVipFlag, track } from "@/lib/monetization";
 import { adsAllowed, useConsent } from "@/lib/consent";
+import { Ga4Loader } from "@/components/Ga4Loader";
 import { startWebVitals } from "@/lib/web-vitals";
 import { plannedAdScripts, tierAdjust, tierCapScale, type Tier } from "@/lib/ad-policy";
 import { startFunnel, stopFunnel } from "@/lib/funnel";
@@ -46,6 +47,7 @@ export function SiteConfigProvider({ children }: { children: ReactNode }) {
   return (
     <SiteConfigContext.Provider value={value}>
       <MonetagLoader />
+      <Ga4Loader />
       {children}
     </SiteConfigContext.Provider>
   );
