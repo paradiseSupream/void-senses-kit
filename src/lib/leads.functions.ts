@@ -19,11 +19,11 @@ export const subscribeLead = createServerFn({ method: "POST" })
     sessionId: input?.sessionId ? String(input.sessionId).slice(0, 80) : null,
     utmSource: input?.utmSource ? String(input.utmSource).slice(0, 80) : null,
   }))
-  .handler(async ({ data, request }): Promise<{ ok: boolean }> => {
+  .handler(async ({ data }): Promise<{ ok: boolean }> => {
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(data.email)) return { ok: false };
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const country =
-      request?.headers.get("cf-ipcountry") ?? request?.headers.get("x-vercel-ip-country") ?? null;
+    const { getRequestHeader } = await import("@tanstack/react-start/server");
+    const country = getRequestHeader("cf-ipcountry") ?? null;
 
     const { error } = await supabaseAdmin.from("email_leads").upsert(
       {
