@@ -6,7 +6,7 @@ import { useVip } from "@/lib/vip";
 const ITEMS = [
   { to: "/", label: "Home", icon: Home, match: (p: string) => p === "/" },
   {
-    to: "/tools/iq",
+    to: "/tools",
     label: "Tools",
     icon: LayoutGrid,
     match: (p: string) => p.startsWith("/tools"),
