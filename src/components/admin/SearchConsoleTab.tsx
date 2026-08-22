@@ -26,7 +26,7 @@ export function SearchConsoleTab({ token }: { token: string }) {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      setResult(await gscSnapshot({ data: { token, days, siteUrl } }));
+      setResult(await gscSnapshot({ data: siteUrl ? { token, days, siteUrl } : { token, days } }));
     } catch (error) {
       setResult({ status: "error", message: (error as Error).message });
     } finally {

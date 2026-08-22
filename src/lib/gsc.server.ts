@@ -103,21 +103,21 @@ export type SearchConsoleSnapshot = {
   byCountry: Array<{ country: string; clicks: number; impressions: number }>;
   sitemap: {
     path: string;
-    lastSubmitted?: string;
-    lastDownloaded?: string;
-    errors?: string;
-    warnings?: string;
-    submitted?: string;
-    indexed?: string;
+    lastSubmitted?: string | undefined;
+    lastDownloaded?: string | undefined;
+    errors?: string | undefined;
+    warnings?: string | undefined;
+    submitted?: string | undefined;
+    indexed?: string | undefined;
   } | null;
   coverage: {
-    verdict?: string;
-    coverageState?: string;
-    indexingState?: string;
-    googleCanonical?: string;
-    userCanonical?: string;
-    lastCrawlTime?: string;
-    robotsTxtState?: string;
+    verdict?: string | undefined;
+    coverageState?: string | undefined;
+    indexingState?: string | undefined;
+    googleCanonical?: string | undefined;
+    userCanonical?: string | undefined;
+    lastCrawlTime?: string | undefined;
+    robotsTxtState?: string | undefined;
   } | null;
   refreshedAt: string;
 };
