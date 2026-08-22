@@ -244,10 +244,11 @@ function MonetagLoader() {
           ads.monetag_vignette_zone || MONETAG.vignette.zone,
           MONETAG.vignette.src,
         );
-      }, 500);
+      }, 4_000);
     }
 
-    // Pop-under: only after real engagement (scroll or first tap).
+    // Pop-under: the most intrusive format — only for returning-depth sessions
+    // (2+ page views) and only after a real scroll or tap.
     let popLoaded = false;
     const loadPop = () => {
       if (popLoaded) return;
