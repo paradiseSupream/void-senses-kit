@@ -34,6 +34,7 @@ export function QuizRunner({
   const choose = useCallback(
     (weight: number) => {
       if (!item) return;
+      markQuizInteraction();
       const next = { ...answers, [item.id]: weight };
       setAnswers(next);
       if (index === items.length - 1) onComplete(next);
