@@ -7,6 +7,10 @@ export type SlotStat = {
   revenueCents: number;
   ctr: number;
   rpm: number;
+  /** Revenue per 1000 ad impressions. */
+  ecpm: number;
+  /** Distinct sessions that produced these rows. */
+  sessions: number;
 };
 
 export type FormatPerf = {
@@ -49,7 +53,32 @@ export type TimePoint = {
   revenueCents: number;
 };
 
+export type FunnelStep = {
+  step: string;
+  sessions: number;
+  /** % of the sessions that reached the first step. */
+  ofVisit: number;
+  /** % of the sessions that reached the previous step. */
+  ofPrevious: number;
+  dropOff: number;
+  avgDwellMs: number;
+};
+
+export type ToolRevenue = SlotStat & {
+  starts: number;
+  completes: number;
+  completion: number;
+  /** Ad revenue per 1000 sessions that touched this tool. */
+  sessionConversion: number;
+};
+
 export type MonetizationStats = {
+  funnel: FunnelStep[];
+  byTool: ToolRevenue[];
+  experiments: Array<{
+    slot: string;
+    arms: Array<{ arm: string; exposures: number; conversions: number; rate: number }>;
+  }>;
   byCountry: SlotStat[];
   timeseries: TimePoint[];
   fraud: FraudSummary;
@@ -111,19 +140,31 @@ function empty(key: string): SlotStat {
     revenueCents: 0,
     ctr: 0,
     rpm: 0,
+    ecpm: 0,
+    sessions: 0,
   };
 }
 
 function finalize(stat: SlotStat): SlotStat {
+  const dollars = stat.revenueCents / 100;
   return {
     ...stat,
     ctr: stat.impressions > 0 ? (stat.clicks / stat.impressions) * 100 : 0,
-    rpm: stat.impressions > 0 ? (stat.revenueCents / 100 / stat.impressions) * 1000 : 0,
+    // RPM = revenue per 1000 sessions (falls back to impressions when we have
+    // no session information, e.g. imported rows).
+    rpm:
+      stat.sessions > 0
+        ? (dollars / stat.sessions) * 1000
+        : stat.impressions > 0
+          ? (dollars / stat.impressions) * 1000
+          : 0,
+    ecpm: stat.impressions > 0 ? (dollars / stat.impressions) * 1000 : 0,
   };
 }
 
 function group(rows: Row[], pick: (row: Row) => string): SlotStat[] {
   const map = new Map<string, SlotStat>();
+  const sessions = new Map<string, Set<string>>();
   for (const row of rows) {
     const key = pick(row) || "unknown";
     const stat = map.get(key) ?? empty(key);
@@ -132,7 +173,11 @@ function group(rows: Row[], pick: (row: Row) => string): SlotStat[] {
     if (row.event_type === "conversion") stat.conversions += 1;
     stat.revenueCents += row.revenue_cents ?? 0;
     map.set(key, stat);
+    const seen = sessions.get(key) ?? new Set<string>();
+    seen.add(row.session_id);
+    sessions.set(key, seen);
   }
+  for (const [key, stat] of map) stat.sessions = sessions.get(key)?.size ?? 0;
   return [...map.values()].map(finalize).sort((a, b) => b.revenueCents - a.revenueCents || b.impressions - a.impressions);
 }
 
