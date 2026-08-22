@@ -33,7 +33,7 @@ export function SocialBar() {
         format: "social_bar",
         click_id: partner.clickId,
       });
-    }, 2500);
+    }, 1200);
     return () => window.clearTimeout(t);
   }, [enabled, isVip]);
 

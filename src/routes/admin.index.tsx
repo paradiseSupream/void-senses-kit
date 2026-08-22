@@ -538,6 +538,11 @@ function SettingsTab({ token, which }: { token: string; which: "Ads" | "Site" })
               onChange={(v) => setAds({ ...ads, slots: { ...ads.slots, sticky_mobile: v } })}
             />
             <Toggle
+              label="Desktop sticky corner"
+              checked={ads.slots.sticky_desktop ?? false}
+              onChange={(v) => setAds({ ...ads, slots: { ...ads.slots, sticky_desktop: v } })}
+            />
+            <Toggle
               label="Native in-feed cards"
               checked={ads.slots.native_feed}
               onChange={(v) => setAds({ ...ads, slots: { ...ads.slots, native_feed: v } })}

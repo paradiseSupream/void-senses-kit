@@ -1,9 +1,9 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { ArrowUpRight, Play } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 
 import { AdSlot } from "@/components/monetization/AdSlot";
-import { adVariant, track } from "@/lib/monetization";
+import { track } from "@/lib/monetization";
 import { trackFunnel } from "@/lib/funnel";
 import { relatedTools } from "@/lib/tools";
 
@@ -11,11 +11,9 @@ import { relatedTools } from "@/lib/tools";
 export function NextTools({ slug, heading = "Try next" }: { slug: string; heading?: string }) {
   const next = relatedTools(slug);
   const navigate = useNavigate();
-  const [variant, setVariant] = useState<string | null>(null);
   const firedRef = useRef(false);
 
   useEffect(() => {
-    setVariant(adVariant());
     track({ event_type: "tool_complete", slot: `result-${slug}`, tool_slug: slug });
     trackFunnel("result_view", slug);
   }, [slug]);
@@ -32,11 +30,8 @@ export function NextTools({ slug, heading = "Try next" }: { slug: string; headin
 
   return (
     <section className="mt-14">
-      {/* A/B: the result slot only renders in the result-heavy variant, so its
-          RPM/CTR can be compared against the gate-heavy arm. */}
-      {variant === "result_heavy" ? (
-        <AdSlot id={`result-${slug}`} toolSlug={slug} className="mb-10" />
-      ) : null}
+      {/* Revenue-max: the result-page ad slot always renders for free users. */}
+      <AdSlot id={`result-${slug}`} toolSlug={slug} className="mb-10" />
 
       {upNext ? (
         <div

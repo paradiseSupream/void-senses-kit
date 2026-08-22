@@ -22,8 +22,8 @@ import { plannedAdScripts, tierAdjust, tierCapScale, type Tier } from "@/lib/ad-
 import { startFunnel, stopFunnel } from "@/lib/funnel";
 import { bumpPageView, whenEngaged } from "@/lib/engagement";
 
-/** Vignettes never fire on the first page view — it is the biggest bounce driver. */
-const VIGNETTE_MIN_PAGEVIEWS = 2;
+/** Vignettes fire from the very first navigation to maximize session value. */
+const VIGNETTE_MIN_PAGEVIEWS = 1;
 
 const SiteConfigContext = createContext<PublicConfig>(DEFAULT_PUBLIC_CONFIG);
 
@@ -199,8 +199,7 @@ function MonetagLoader() {
     const planned = tierAdjust(plannedAdScripts(ads, { isVip, consentAllowsAds: allowed }), tier);
     if (planned.length === 0) return;
 
-    // In-page push: lazy — waits for the first quiz interaction (or 10s of
-    // dwell) so early leavers are never hit with a push prompt.
+    // In-page push: fire quickly once the visitor is invested (or 2s dwell).
     const cancelPush = planned.includes("inpage_push")
       ? whenEngaged(() => {
           if (!shouldLoad("monetag-push", "inpage_push", caps.inpage_push)) return;
@@ -210,11 +209,11 @@ function MonetagLoader() {
             ads.monetag_push_zone || MONETAG.push.zone,
             MONETAG.push.src,
           );
-        }, 5_000)
+        }, 2_000)
       : () => undefined;
 
-    // Adsterra Social Bar: persistent sticky bar; also held back until the
-    // visitor engages (or 6s), keeping the first paint clean.
+    // Adsterra Social Bar: persistent sticky bar; fire quickly after the
+    // visitor engages (or 2s) to monetize short sessions too.
     const cancelBar = planned.includes("adsterra_social_bar")
       ? whenEngaged(() => {
           loadZone(
@@ -223,7 +222,7 @@ function MonetagLoader() {
             "social_bar",
             ads.adsterra_social_bar_src || ADSTERRA.social_bar,
           );
-        }, 4_000)
+        }, 2_000)
       : () => undefined;
 
     // Vignette interstitial: delayed slightly to keep first paint fast.
@@ -240,7 +239,7 @@ function MonetagLoader() {
           ads.monetag_vignette_zone || MONETAG.vignette.zone,
           MONETAG.vignette.src,
         );
-      }, 1500);
+      }, 500);
     }
 
     // Pop-under: only after real engagement (scroll or first tap).

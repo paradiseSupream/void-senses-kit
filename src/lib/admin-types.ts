@@ -30,7 +30,7 @@ export type AdsSettings = {
   /** Adsterra Social Bar (third-party script, high RPM sticky bar). */
   adsterra_social_bar: boolean;
   adsterra_social_bar_src: string;
-  slots: { result: boolean; gate: boolean; sticky_mobile: boolean; native_feed: boolean };
+  slots: { result: boolean; gate: boolean; sticky_mobile: boolean; sticky_desktop: boolean; native_feed: boolean };
   caps: AdCapSettings;
   privacy: PrivacySettings;
   rpm_estimate_cents: number;
@@ -83,9 +83,9 @@ export const ADSTERRA = {
 } as const;
 
 export const DEFAULT_CAPS: AdCapSettings = {
-  popunder: { perHour: 4, perSession: 3 },
-  vignette: { perHour: 8, perSession: 6 },
-  inpage_push: { perHour: 12, perSession: 10 },
+  popunder: { perHour: 6, perSession: 4 },
+  vignette: { perHour: 12, perSession: 8 },
+  inpage_push: { perHour: 16, perSession: 12 },
 };
 
 export const DEFAULT_PRIVACY: PrivacySettings = {
@@ -109,7 +109,7 @@ export const DEFAULT_PUBLIC_CONFIG: PublicConfig = {
     smartlink_url: MONETAG.smartlink,
     adsterra_social_bar: true,
     adsterra_social_bar_src: ADSTERRA.social_bar,
-    slots: { result: true, gate: true, sticky_mobile: true, native_feed: true },
+    slots: { result: true, gate: true, sticky_mobile: true, sticky_desktop: true, native_feed: true },
     caps: DEFAULT_CAPS,
     privacy: DEFAULT_PRIVACY,
   },
