@@ -46,6 +46,7 @@ export function SiteConfigProvider({ children }: { children: ReactNode }) {
   return (
     <SiteConfigContext.Provider value={value}>
       <MonetagLoader />
+      <Ga4Loader />
       {children}
     </SiteConfigContext.Provider>
   );
