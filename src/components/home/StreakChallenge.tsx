@@ -30,7 +30,7 @@ export function StreakChallenge() {
 
   const steps = CHAIN.map((slug) => TOOLS.find((t) => t.slug === slug)).filter(Boolean) as typeof TOOLS;
   const completed = steps.filter((t) => done.includes(t.slug)).length;
-  const next = steps.find((t) => !done.includes(t.slug)) ?? steps[0];
+  const next = steps.find((t) => !done.includes(t.slug)) ?? steps[0]!;
   const pct = Math.round((completed / steps.length) * 100);
 
   return (

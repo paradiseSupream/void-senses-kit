@@ -114,7 +114,7 @@ function Home() {
   const { openVipModal, isVip } = useVip();
 
   const results = useMemo<ToolMeta[]>(() => {
-    const active = GOALS.find((g) => g.id === goal) ?? GOALS[0];
+    const active = GOALS.find((g) => g.id === goal) ?? GOALS[0]!;
     return searchTools(query).filter((t) => active.slugs.includes(t.slug));
   }, [query, goal]);
   const slots = useMemo(() => withNativeAds(results), [results]);
