@@ -202,7 +202,8 @@ function MonetagLoader() {
     const planned = tierAdjust(plannedAdScripts(ads, { isVip, consentAllowsAds: allowed }), tier);
     if (planned.length === 0) return;
 
-    // In-page push: fire quickly once the visitor is invested (or 2s dwell).
+    // In-page push: only for visitors who actually started a tool (or after a
+    // long 25s dwell), so bouncers never see it and CTR stays high.
     const cancelPush = planned.includes("inpage_push")
       ? whenEngaged(() => {
           if (!shouldLoad("monetag-push", "inpage_push", caps.inpage_push)) return;
@@ -212,11 +213,11 @@ function MonetagLoader() {
             ads.monetag_push_zone || MONETAG.push.zone,
             MONETAG.push.src,
           );
-        }, 2_000)
+        }, 25_000)
       : () => undefined;
 
-    // Adsterra Social Bar: persistent sticky bar; fire quickly after the
-    // visitor engages (or 2s) to monetize short sessions too.
+    // Adsterra Social Bar: persistent sticky bar; waits for engagement (or 15s)
+    // so it never competes with the first impression of the page.
     const cancelBar = planned.includes("adsterra_social_bar")
       ? whenEngaged(() => {
           loadZone(
@@ -225,10 +226,11 @@ function MonetagLoader() {
             "social_bar",
             ads.adsterra_social_bar_src || ADSTERRA.social_bar,
           );
-        }, 2_000)
+        }, 15_000)
       : () => undefined;
 
-    // Vignette interstitial: delayed slightly to keep first paint fast.
+    // Vignette interstitial: deep in the session only, and never during the
+    // first seconds of a page view.
     let vignetteTimer: number | undefined;
     if (
       planned.includes("vignette") &&
