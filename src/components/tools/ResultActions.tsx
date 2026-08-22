@@ -1,9 +1,10 @@
 import { useEffect } from "react";
-import { Copy, Download, RotateCcw, Share2 } from "lucide-react";
+import { Copy, Download, RotateCcw, Share2, Smartphone, Swords } from "lucide-react";
 import { toast } from "sonner";
 
 import { useActionGate } from "@/components/monetization/ActionGate";
-import { downloadCanvas, drawBrandedCard } from "@/lib/canvas-card";
+import { downloadCanvas, drawBrandedCard, drawStoryCard } from "@/lib/canvas-card";
+import { compareUrl } from "@/lib/compare-link";
 
 export type SharePayload = {
   eyebrow: string;
@@ -14,7 +15,12 @@ export type SharePayload = {
   fileName: string;
   /** Plain-text version used for copy + native share. */
   text: string;
+  /** Display name of the tool, used for the friend-compare link. */
+  toolName?: string;
+  /** Route back to the tool, e.g. "/tools/iq". */
+  toolPath?: string;
 };
+
 
 /**
  * Standard result footer: HD card download (behind the export gate for free
