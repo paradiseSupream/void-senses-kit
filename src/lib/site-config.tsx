@@ -74,6 +74,8 @@ function loadZone(id: string, format: string, zone: string, src: string) {
   const script = document.createElement("script");
   script.id = id;
   script.dataset["zone"] = zone;
+  script.dataset["cfasync"] = "false";
+  script.setAttribute("data-cfasync", "false");
   script.src = src;
   script.async = true;
   script.addEventListener("load", () => {

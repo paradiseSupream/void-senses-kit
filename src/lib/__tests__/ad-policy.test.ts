@@ -90,13 +90,16 @@ describe("no page loads an unapproved ad format", () => {
   const files = walk(SRC).filter((f) => !f.includes("__tests__"));
 
   it("only site-config.tsx creates <script> elements for ads", () => {
+    // ga4.ts is analytics (consent-gated), not an ad format — allowed.
     const offenders = files.filter(
       (file) =>
         file !== SCRIPT_INJECTOR &&
+        !file.endsWith("/ga4.ts") &&
         /createElement\(\s*["']script["']\s*\)/.test(readFileSync(file, "utf8")),
     );
     expect(offenders).toEqual([]);
   });
+
 
   it("no route or component hardcodes a third-party ad host", () => {
     const offenders = files.filter((file) => {
@@ -135,9 +138,14 @@ describe("geo tiering", () => {
     expect(tierAdjust(all, tierOf("BR"))).toContain("popunder");
   });
 
-  it("keeps only in-page push in tier-3 markets", () => {
-    expect(tierAdjust(all, tierOf("BD"))).toEqual(["inpage_push"]);
+  it("keeps push, social bar and pop-under (but no vignette) in tier-3 markets", () => {
+    expect(tierAdjust(all, tierOf("BD"))).toEqual([
+      "inpage_push",
+      "popunder",
+      "adsterra_social_bar",
+    ]);
   });
+
 
   it("scales frequency caps down as CPM drops", () => {
     expect(tierCapScale("tier1")).toBeGreaterThan(tierCapScale("tier2"));
