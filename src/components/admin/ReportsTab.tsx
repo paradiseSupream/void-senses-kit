@@ -116,6 +116,7 @@ function CohortTable({ rows, label }: { rows: Cohort[]; label: string }) {
             <th className="py-2 pr-3 font-normal">Completion</th>
             <th className="py-2 pr-3 font-normal">Revenue</th>
             <th className="py-2 pr-3 font-normal">RPM</th>
+            <th className="py-2 pr-3 font-normal">RPV</th>
             <th className="py-2 font-normal">VIP conv.</th>
           </tr>
         </thead>
@@ -131,6 +132,7 @@ function CohortTable({ rows, label }: { rows: Cohort[]; label: string }) {
               <td className="py-2 pr-3">{pct(row.completionRate)}</td>
               <td className="py-2 pr-3">{money(row.revenueCents)}</td>
               <td className="py-2 pr-3">${row.rpm.toFixed(2)}</td>
+              <td className="py-2 pr-3 font-semibold">${row.rpv.toFixed(4)}</td>
               <td className="py-2">{pct(row.vipRate)}</td>
             </tr>
           ))}
@@ -180,6 +182,38 @@ export function ReportsTab({ token }: { token: string }) {
 
       {stats ? (
         <>
+          <Panel title="Traffic value — what you may pay per click">
+            <div className="grid gap-3 sm:grid-cols-3">
+              <div className="rounded-xl border border-hairline bg-surface-2/40 p-4">
+                <p className="label-mono text-muted-foreground">Revenue per visitor</p>
+                <p className="mt-1 font-display text-2xl font-semibold">
+                  ${(stats.rpv ?? 0).toFixed(4)}
+                </p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {stats.sessions} sessions · {money(stats.totals.revenueCents)} total
+                </p>
+              </div>
+              <div className="rounded-xl border border-hairline bg-surface-2/40 p-4">
+                <p className="label-mono text-muted-foreground">Break-even CPC</p>
+                <p className="mt-1 font-display text-2xl font-semibold text-primary">
+                  ${(stats.rpv ?? 0).toFixed(4)}
+                </p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Never bid above this. Profit starts below it.
+                </p>
+              </div>
+              <div className="rounded-xl border border-hairline bg-surface-2/40 p-4">
+                <p className="label-mono text-muted-foreground">Target CPC (2× ROI)</p>
+                <p className="mt-1 font-display text-2xl font-semibold">
+                  ${((stats.rpv ?? 0) / 2).toFixed(4)}
+                </p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  $100 spend at this CPC returns roughly {money(Math.round((stats.rpv ?? 0) > 0 ? 20000 : 0))}.
+                </p>
+              </div>
+            </div>
+          </Panel>
+
           <Panel title="Acquisition quality by country (bounce → start → completion → RPM → VIP)">
             <CohortTable rows={stats.cohorts?.geo ?? []} label="Country" />
           </Panel>

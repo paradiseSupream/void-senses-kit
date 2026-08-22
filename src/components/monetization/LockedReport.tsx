@@ -1,13 +1,17 @@
 import { useEffect, useState } from "react";
-import { Crown, Lock, Sparkles } from "lucide-react";
+import { Crown, Lock, Sparkles, Swords } from "lucide-react";
+import { toast } from "sonner";
 
 import { useVip } from "@/lib/vip";
 import { useSiteConfig } from "@/lib/site-config";
 import { useActionGate } from "@/components/monetization/ActionGate";
 import { AdSlot } from "@/components/monetization/AdSlot";
+import { EmailCapture } from "@/components/monetization/EmailCapture";
 import { isUnlocked, onUnlock, unlockReport } from "@/lib/unlock";
 import { partnerLink, track } from "@/lib/monetization";
 import { trackFunnel } from "@/lib/funnel";
+import { compareUrl, type ComparePayload } from "@/lib/compare-link";
+
 
 /**
  * Paywall-lite for the deep half of a result.
@@ -20,11 +24,14 @@ export function LockedReport({
   toolSlug,
   title = "Full report",
   blurb = "Trait-by-trait breakdown, what it means and how it usually plays out.",
+  share,
   children,
 }: {
   toolSlug: string;
   title?: string;
   blurb?: string;
+  /** Enables the free "share to unlock" path — the K-factor engine. */
+  share?: ComparePayload;
   children: React.ReactNode;
 }) {
   const { isVip, openVipModal } = useVip();
@@ -49,9 +56,11 @@ export function LockedReport({
       <div>
         {children}
         {!isVip ? <AdSlot id="result-deep" toolSlug={toolSlug} className="mt-6" /> : null}
+        {!isVip ? <EmailCapture toolSlug={toolSlug} className="mt-6" /> : null}
       </div>
     );
   }
+
 
   const price = `$${(site.vip_price_cents / 100).toFixed(0)}`;
 
@@ -75,6 +84,39 @@ export function LockedReport({
     setBusy(false);
   };
 
+  /** Free, zero-cost unlock: the visitor pays with a share instead of a click. */
+  const shareUnlock = async () => {
+    if (!share || busy) return;
+    setBusy(true);
+    const url = compareUrl(share);
+    const text = `I got ${share.h} on ${share.n}. Think you can beat me?`;
+    let shared = false;
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: share.n, text, url });
+        shared = true;
+      } else {
+        await navigator.clipboard.writeText(`${text} ${url}`);
+        shared = true;
+        toast.success("Challenge link copied — send it to a friend.");
+      }
+    } catch {
+      try {
+        await navigator.clipboard.writeText(`${text} ${url}`);
+        shared = true;
+        toast.success("Challenge link copied — send it to a friend.");
+      } catch {
+        toast.error("Sharing blocked by your browser — try the free unlock instead.");
+      }
+    }
+    if (shared) {
+      track({ event_type: "conversion", slot: "result_lock_share", tool_slug: toolSlug });
+      unlockReport(toolSlug);
+    }
+    setBusy(false);
+  };
+
+
   return (
     <div className="relative overflow-hidden rounded-2xl border border-hairline">
       <div aria-hidden="true" className="pointer-events-none max-h-64 overflow-hidden blur-[6px] select-none">
@@ -95,6 +137,16 @@ export function LockedReport({
           >
             <Crown className="size-4" aria-hidden="true" /> Unlock forever · {price}
           </button>
+          {share ? (
+            <button
+              type="button"
+              onClick={shareUnlock}
+              disabled={busy}
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-5 text-sm font-semibold text-primary transition-colors hover:bg-primary/15 disabled:opacity-60"
+            >
+              <Swords className="size-4" aria-hidden="true" /> Share to unlock free
+            </button>
+          ) : null}
           <button
             type="button"
             onClick={rewardedUnlock}
@@ -106,8 +158,11 @@ export function LockedReport({
           </button>
         </div>
         <p className="mt-3 text-xs text-muted-foreground">
-          Free unlock opens one sponsor page — VIP skips it everywhere, forever.
+          {share
+            ? "Share with one friend to unlock instantly, or open one sponsor page — VIP skips both, forever."
+            : "Free unlock opens one sponsor page — VIP skips it everywhere, forever."}
         </p>
+
       </div>
     </div>
   );

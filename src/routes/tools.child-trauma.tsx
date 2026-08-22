@@ -175,7 +175,17 @@ function ChildTrauma() {
           </div>
 
           <div className="mt-8">
-            <LockedReport toolSlug="child-trauma" title="Dimension-by-dimension breakdown">
+            <LockedReport
+              toolSlug="child-trauma"
+              title="Dimension-by-dimension breakdown"
+              share={{
+                t: "child-trauma",
+                n: "Child Trauma Test",
+                h: `${result.archetype.name} · ${result.overall}/100`,
+                l: [result.archetype.punch],
+                p: "/tools/child-trauma",
+              }}
+            >
           <div className="mt-8">
               <TraitBars data={result.scores} notes={notes} />
             </div>
