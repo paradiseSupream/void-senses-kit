@@ -2,6 +2,10 @@ import { useEffect, useState } from "react";
 import { Bitcoin, Check, CreditCard, X } from "lucide-react";
 import { toast } from "sonner";
 
+import { useServerFn } from "@tanstack/react-start";
+
+import { subscribeLead } from "@/lib/leads.functions";
+import { attribution, sessionId } from "@/lib/monetization";
 import { useVip, type VipPlan } from "@/lib/vip";
 import { useSiteConfig } from "@/lib/site-config";
 import { trackFunnel } from "@/lib/funnel";
@@ -20,6 +24,9 @@ const PERKS = [
 
 export function VipModal() {
   const { vipModalOpen, closeVipModal, setVip, isVip } = useVip();
+  const saveLead = useServerFn(subscribeLead);
+  const [email, setEmail] = useState("");
+  const [emailSaved, setEmailSaved] = useState(false);
   const [tab, setTab] = useState<"card" | "crypto">("card");
   const [plan, setPlan] = useState<VipPlan>("lifetime");
   const { site } = useSiteConfig();
@@ -32,6 +39,30 @@ export function VipModal() {
   useEffect(() => {
     if (vipModalOpen) trackFunnel("vip_gate_shown");
   }, [vipModalOpen]);
+
+  const persistEmail = async () => {
+    if (!email.includes("@")) {
+      toast.error("Enter a valid email address.");
+      return false;
+    }
+    try {
+      await saveLead({
+        data: {
+          email,
+          source: "vip",
+          toolSlug: plan,
+          sessionId: sessionId(),
+          utmSource: attribution().utm_source ?? null,
+        },
+      });
+      setEmailSaved(true);
+      toast.success("Email saved — your VIP access is tied to it.");
+      return true;
+    } catch {
+      toast.error("Could not save your email — try again.");
+      return false;
+    }
+  };
 
   if (!vipModalOpen) return null;
 
@@ -114,6 +145,31 @@ export function VipModal() {
           ))}
         </ul>
 
+        <label htmlFor="vip-email" className="label-mono mt-6 mb-1.5 block">
+          Email for your VIP receipt & access
+        </label>
+        <div className="flex gap-2">
+          <input
+            id="vip-email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="you@example.com"
+            autoComplete="email"
+            className="min-h-11 w-full rounded-xl border border-hairline bg-surface-2/70 px-3 text-sm focus:border-primary/50"
+          />
+          <button
+            type="button"
+            onClick={() => void persistEmail()}
+            className="min-h-11 shrink-0 rounded-xl border border-primary/40 bg-primary/10 px-4 text-sm font-semibold text-primary"
+          >
+            {emailSaved ? "Saved" : "Save"}
+          </button>
+        </div>
+        <p className="mt-1.5 text-xs text-muted-foreground">
+          We store it only to restore your VIP access on any device.
+        </p>
+
         <div className="mt-6 grid grid-cols-2 gap-1 rounded-lg border border-hairline bg-surface-2/60 p-1">
           {(["card", "crypto"] as const).map((key) => (
             <button
@@ -141,6 +197,7 @@ export function VipModal() {
           <button
             type="button"
             onClick={() => {
+              if (email.includes("@")) void persistEmail();
               trackFunnel("vip_purchase");
               toast.info("Checkout opens once payments are connected to this project.");
             }}
@@ -161,6 +218,7 @@ export function VipModal() {
                 <button
                   type="button"
                   onClick={() => {
+                    if (email.includes("@")) void persistEmail();
                     void navigator.clipboard?.writeText(site.vip_sol_address);
                     toast.success("Address copied — email your tx signature to unlock VIP.");
                   }}
@@ -184,6 +242,7 @@ export function VipModal() {
         <button
           type="button"
           onClick={() => {
+            if (!isVip && email.includes("@")) void persistEmail();
             setVip(!isVip, plan);
             toast.success(isVip ? "VIP preview disabled." : "VIP preview enabled on this device.");
           }}

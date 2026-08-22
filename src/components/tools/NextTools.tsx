@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { ArrowUpRight, Play, X } from "lucide-react";
+import { ArrowUpRight, Play } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 import { AdSlot } from "@/components/monetization/AdSlot";
@@ -7,16 +7,11 @@ import { adVariant, track } from "@/lib/monetization";
 import { trackFunnel } from "@/lib/funnel";
 import { relatedTools } from "@/lib/tools";
 
-/** Seconds before the next quiz starts by itself. */
-const AUTO_SECONDS = 8;
-
 /** Chains the session after a result: two accent-themed suggestions. */
 export function NextTools({ slug, heading = "Try next" }: { slug: string; heading?: string }) {
   const next = relatedTools(slug);
   const navigate = useNavigate();
   const [variant, setVariant] = useState<string | null>(null);
-  const [left, setLeft] = useState(AUTO_SECONDS);
-  const [cancelled, setCancelled] = useState(false);
   const firedRef = useRef(false);
 
   useEffect(() => {
@@ -32,24 +27,6 @@ export function NextTools({ slug, heading = "Try next" }: { slug: string; headin
     track({ event_type: "tool_start", slot: `autochain-${slug}`, tool_slug: upNext.slug });
     void navigate({ to: upNext.path, search: { auto: "1" } as never });
   };
-
-  // Auto-chain countdown: keeps the session going without a dead-end result.
-  useEffect(() => {
-    if (!upNext || cancelled) return;
-    setLeft(AUTO_SECONDS);
-    const id = window.setInterval(() => {
-      setLeft((s) => {
-        if (s <= 1) {
-          window.clearInterval(id);
-          goNext();
-          return 0;
-        }
-        return s - 1;
-      });
-    }, 1000);
-    return () => window.clearInterval(id);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [upNext?.slug, cancelled]);
 
   if (next.length === 0) return null;
 
@@ -67,9 +44,7 @@ export function NextTools({ slug, heading = "Try next" }: { slug: string; headin
           style={{ ["--tool-accent" as string]: upNext.accent }}
         >
           <span className="min-w-0 flex-1">
-            <span className="label-mono">
-              {cancelled ? "Up next" : `Auto-starting in ${left}s`}
-            </span>
+            <span className="label-mono">Up next</span>
             <span className="mt-0.5 block truncate font-display text-sm font-semibold">
               {upNext.name}
             </span>
@@ -82,16 +57,6 @@ export function NextTools({ slug, heading = "Try next" }: { slug: string; headin
           >
             <Play className="size-3.5" aria-hidden="true" /> Start now
           </button>
-          {!cancelled ? (
-            <button
-              type="button"
-              aria-label="Cancel auto-start"
-              onClick={() => setCancelled(true)}
-              className="inline-flex size-10 items-center justify-center rounded-full border border-hairline text-muted-foreground transition-colors hover:text-foreground"
-            >
-              <X className="size-4" aria-hidden="true" />
-            </button>
-          ) : null}
         </div>
       ) : null}
 
