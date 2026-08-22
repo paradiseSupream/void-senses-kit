@@ -27,7 +27,9 @@ export type AdEvent = {
     | "script_error"
     | "script_blocked"
     | "web_vital"
-    | "consent";
+    | "consent"
+    | "funnel"
+    | "experiment";
   slot: string;
   tool_slug?: string | null;
   revenue_cents?: number;
