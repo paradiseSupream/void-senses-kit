@@ -15,6 +15,7 @@ import { Route as TermsRouteImport } from './routes/terms'
 import { Route as VaultRouteImport } from './routes/vault'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AdminMonetizationRouteImport } from './routes/admin.monetization'
+import { Route as ToolsIndexRouteImport } from './routes/tools.index'
 import { Route as ToolsChildTraumaRouteImport } from './routes/tools.child-trauma'
 import { Route as ToolsDarkPersonalityRouteImport } from './routes/tools.dark-personality'
 import { Route as ToolsIqRouteImport } from './routes/tools.iq'
@@ -54,6 +55,11 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
 const AdminMonetizationRoute = AdminMonetizationRouteImport.update({
   id: '/admin/monetization',
   path: '/admin/monetization',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ToolsIndexRoute = ToolsIndexRouteImport.update({
+  id: '/tools/',
+  path: '/tools/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ToolsChildTraumaRoute = ToolsChildTraumaRouteImport.update({
@@ -120,6 +126,7 @@ export interface FileRoutesByFullPath {
   '/tools/prompt-maker': typeof ToolsPromptMakerRoute
   '/tools/roast': typeof ToolsRoastRoute
   '/admin/': typeof AdminIndexRoute
+  '/tools/': typeof ToolsIndexRoute
   '/api/public/geo': typeof ApiPublicGeoRoute
   '/api/public/roast': typeof ApiPublicRoastRoute
   '/api/public/track': typeof ApiPublicTrackRoute
@@ -138,6 +145,7 @@ export interface FileRoutesByTo {
   '/tools/prompt-maker': typeof ToolsPromptMakerRoute
   '/tools/roast': typeof ToolsRoastRoute
   '/admin': typeof AdminIndexRoute
+  '/tools': typeof ToolsIndexRoute
   '/api/public/geo': typeof ApiPublicGeoRoute
   '/api/public/roast': typeof ApiPublicRoastRoute
   '/api/public/track': typeof ApiPublicTrackRoute
@@ -157,6 +165,7 @@ export interface FileRoutesById {
   '/tools/prompt-maker': typeof ToolsPromptMakerRoute
   '/tools/roast': typeof ToolsRoastRoute
   '/admin/': typeof AdminIndexRoute
+  '/tools/': typeof ToolsIndexRoute
   '/api/public/geo': typeof ApiPublicGeoRoute
   '/api/public/roast': typeof ApiPublicRoastRoute
   '/api/public/track': typeof ApiPublicTrackRoute
@@ -177,6 +186,7 @@ export interface FileRouteTypes {
     | '/tools/prompt-maker'
     | '/tools/roast'
     | '/admin/'
+    | '/tools/'
     | '/api/public/geo'
     | '/api/public/roast'
     | '/api/public/track'
@@ -195,6 +205,7 @@ export interface FileRouteTypes {
     | '/tools/prompt-maker'
     | '/tools/roast'
     | '/admin'
+    | '/tools'
     | '/api/public/geo'
     | '/api/public/roast'
     | '/api/public/track'
@@ -213,6 +224,7 @@ export interface FileRouteTypes {
     | '/tools/prompt-maker'
     | '/tools/roast'
     | '/admin/'
+    | '/tools/'
     | '/api/public/geo'
     | '/api/public/roast'
     | '/api/public/track'
@@ -232,6 +244,7 @@ export interface RootRouteChildren {
   ToolsPromptMakerRoute: typeof ToolsPromptMakerRoute
   ToolsRoastRoute: typeof ToolsRoastRoute
   AdminIndexRoute: typeof AdminIndexRoute
+  ToolsIndexRoute: typeof ToolsIndexRoute
   ApiPublicGeoRoute: typeof ApiPublicGeoRoute
   ApiPublicRoastRoute: typeof ApiPublicRoastRoute
   ApiPublicTrackRoute: typeof ApiPublicTrackRoute
@@ -280,6 +293,13 @@ declare module '@tanstack/react-router' {
       path: '/admin/monetization'
       fullPath: '/admin/monetization'
       preLoaderRoute: typeof AdminMonetizationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tools/': {
+      id: '/tools/'
+      path: '/tools'
+      fullPath: '/tools/'
+      preLoaderRoute: typeof ToolsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/tools/child-trauma': {
@@ -368,6 +388,7 @@ const rootRouteChildren: RootRouteChildren = {
   ToolsPromptMakerRoute: ToolsPromptMakerRoute,
   ToolsRoastRoute: ToolsRoastRoute,
   AdminIndexRoute: AdminIndexRoute,
+  ToolsIndexRoute: ToolsIndexRoute,
   ApiPublicGeoRoute: ApiPublicGeoRoute,
   ApiPublicRoastRoute: ApiPublicRoastRoute,
   ApiPublicTrackRoute: ApiPublicTrackRoute,

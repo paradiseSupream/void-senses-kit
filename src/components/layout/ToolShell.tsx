@@ -56,7 +56,7 @@ export function ToolShell({
 
         <div className="relative mx-auto max-w-3xl px-4 pt-6 pb-9 sm:px-6 sm:pt-10 sm:pb-14">
           <Link
-            to="/"
+            to="/tools"
             className="label-mono inline-flex min-h-11 items-center gap-1 transition-colors hover:text-primary"
           >
             <ChevronLeft className="size-3.5" aria-hidden="true" /> All tools
