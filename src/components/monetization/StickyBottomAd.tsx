@@ -38,7 +38,7 @@ export function StickyBottomAd() {
       setLink(partner);
       setVisible(true);
       track({ event_type: "impression", slot: SLOT, click_id: partner.clickId });
-    }, 2000);
+    }, 8000);
 
     return () => window.clearTimeout(timer);
   }, [enabled, isVip]);
