@@ -160,6 +160,8 @@ function ChildTrauma() {
               ],
               footer: "sensesofvoid.app · reflection tool, not a clinical assessment",
               fileName: "senses-of-void-childhood-map.png",
+              toolName: "Child Trauma Test",
+              toolPath: "/tools/child-trauma",
               text: `I got ${result.archetype.name} (${result.overall}/100) on the Senses of Void childhood map.`,
             }}
           />

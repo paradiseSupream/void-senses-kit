@@ -153,6 +153,8 @@ function LoveMatch() {
               ],
               footer: "sensesofvoid.app · for fun, not fate",
               fileName: "senses-of-void-vibe-match.png",
+              toolName: "Love & Vibe Matcher",
+              toolPath: "/tools/love-match",
               text: `${pair} scored ${result.score}% — ${result.verdict.title} on Senses of Void.`,
             }}
           />

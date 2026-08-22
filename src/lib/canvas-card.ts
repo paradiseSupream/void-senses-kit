@@ -154,3 +154,111 @@ function wrapText(
   if (current) lines.push(current);
   return lines;
 }
+
+/**
+ * Vertical 1080x1920 story card tuned for TikTok / Reels / Stories.
+ * Big centred headline, QR-free clean footer with the domain.
+ */
+export function drawStoryCard(options: CardOptions): HTMLCanvasElement {
+  const w = 1080;
+  const h = 1920;
+  const canvas = document.createElement("canvas");
+  canvas.width = w;
+  canvas.height = h;
+  const ctx = canvas.getContext("2d")!;
+
+  ctx.fillStyle = OBSIDIAN;
+  ctx.fillRect(0, 0, w, h);
+
+  const glow = ctx.createRadialGradient(w * 0.5, h * 0.18, 0, w * 0.5, h * 0.18, h * 0.8);
+  glow.addColorStop(0, "rgba(124,58,237,0.4)");
+  glow.addColorStop(0.55, "rgba(16,185,129,0.09)");
+  glow.addColorStop(1, "rgba(9,9,11,0)");
+  ctx.fillStyle = glow;
+  ctx.fillRect(0, 0, w, h);
+
+  ctx.strokeStyle = "rgba(255,255,255,0.045)";
+  ctx.lineWidth = 1;
+  for (let x = 0; x < w; x += 90) {
+    ctx.beginPath();
+    ctx.moveTo(x, 0);
+    ctx.lineTo(x, h);
+    ctx.stroke();
+  }
+  for (let y = 0; y < h; y += 90) {
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(w, y);
+    ctx.stroke();
+  }
+
+  const pad = 88;
+  ctx.fillStyle = SLATE;
+  ctx.globalAlpha = 0.7;
+  roundRect(ctx, pad - 32, 300, w - (pad - 32) * 2, 1140, 48);
+  ctx.fill();
+  ctx.globalAlpha = 1;
+  ctx.strokeStyle = LINE;
+  ctx.lineWidth = 2;
+  roundRect(ctx, pad - 32, 300, w - (pad - 32) * 2, 1140, 48);
+  ctx.stroke();
+
+  // logo mark, centred
+  ctx.strokeStyle = VIOLET;
+  ctx.lineWidth = 4;
+  ctx.beginPath();
+  ctx.arc(w / 2, 170, 38, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.fillStyle = EMERALD;
+  ctx.beginPath();
+  ctx.arc(w / 2, 170, 14, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.textAlign = "center";
+  ctx.fillStyle = "#fafafa";
+  ctx.font = "600 40px 'Space Grotesk', sans-serif";
+  ctx.fillText("Senses of Void", w / 2, 258);
+
+  ctx.fillStyle = "#a1a1aa";
+  ctx.font = "500 26px 'JetBrains Mono', monospace";
+  ctx.fillText(options.eyebrow.toUpperCase(), w / 2, 400);
+
+  ctx.fillStyle = "#fafafa";
+  ctx.font = "700 62px 'Space Grotesk', sans-serif";
+  wrapText(ctx, options.title, 0, 0, w - pad * 2, 74).forEach((line, i) => {
+    ctx.fillText(line, w / 2, 490 + i * 74);
+  });
+
+  ctx.fillStyle = EMERALD;
+  ctx.font = "700 150px 'Space Grotesk', sans-serif";
+  ctx.fillText(options.headline, w / 2, 720);
+
+  ctx.fillStyle = "#d4d4d8";
+  ctx.font = "400 34px Inter, sans-serif";
+  let y = 860;
+  options.lines.forEach((line) => {
+    const segments = wrapText(ctx, line, 0, 0, w - pad * 2, 48);
+    segments.forEach((segment, i) => {
+      ctx.fillText(segment, w / 2, y + i * 48);
+    });
+    y += segments.length * 48 + 18;
+  });
+
+  ctx.fillStyle = VIOLET;
+  ctx.font = "600 38px 'Space Grotesk', sans-serif";
+  ctx.fillText("Can you beat this?", w / 2, 1330);
+  ctx.fillStyle = "#fafafa";
+  ctx.font = "700 44px 'Space Grotesk', sans-serif";
+  ctx.fillText("sensesofvoid.app", w / 2, 1392);
+
+  ctx.fillStyle = "#71717a";
+  ctx.font = "400 24px 'JetBrains Mono', monospace";
+  ctx.fillText(
+    options.footer ?? "free · no signup · entertainment only",
+    w / 2,
+    h - 120,
+  );
+  ctx.textAlign = "left";
+
+  return canvas;
+}

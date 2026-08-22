@@ -147,6 +147,8 @@ function DarkPersonality() {
               ],
               footer: "sensesofvoid.app · entertainment personality read",
               fileName: "senses-of-void-shadow-archetype.png",
+              toolName: "Dark Personality Test",
+              toolPath: "/tools/dark-personality",
               text: `I'm ${result.archetype.name} — shadow intensity ${result.intensity}/100 on Senses of Void.`,
             }}
           />
