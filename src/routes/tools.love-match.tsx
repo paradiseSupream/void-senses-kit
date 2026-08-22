@@ -170,7 +170,17 @@ function LoveMatch() {
           </div>
 
           <div className="mt-8">
-            <LockedReport toolSlug="love-match" title="Full compatibility breakdown">
+            <LockedReport
+              toolSlug="love-match"
+              title="Full compatibility breakdown"
+              share={{
+                t: "love-match",
+                n: "Love & Vibe Matcher",
+                h: `${result.score}% resonance`,
+                l: [result.verdict.title, `Strongest: ${result.strongest}`],
+                p: "/tools/love-match",
+              }}
+            >
           <div className="mt-8">
               <TraitBars data={result.scores} />
             </div>

@@ -164,7 +164,17 @@ function DarkPersonality() {
           </div>
 
           <div className="mt-8">
-            <LockedReport toolSlug="dark-personality" title="Trait-by-trait shadow breakdown">
+            <LockedReport
+              toolSlug="dark-personality"
+              title="Trait-by-trait shadow breakdown"
+              share={{
+                t: "dark-personality",
+                n: "Dark Personality Test",
+                h: result.archetype.name,
+                l: [`Shadow intensity ${result.intensity}/100`, `Dominant ${result.top}`],
+                p: "/tools/dark-personality",
+              }}
+            >
           <div className="mt-8">
               <TraitBars data={result.scores} notes={DARK_NOTES} />
             </div>

@@ -217,7 +217,17 @@ function IqTest() {
           </p>
 
           <div className="mt-8">
-            <LockedReport toolSlug="iq" title="Category-by-category score breakdown">
+            <LockedReport
+              toolSlug="iq"
+              title="Category-by-category score breakdown"
+              share={{
+                t: "iq",
+                n: "Quick IQ Test",
+                h: `${result.estimate}`,
+                l: [`${result.percentile}th percentile`, `Strongest: ${result.strongest}`],
+                p: "/tools/iq",
+              }}
+            >
           <div className="mt-8 text-left">
               <TraitBars data={result.breakdown} />
             </div>
