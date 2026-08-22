@@ -59,7 +59,6 @@ export function ActionGateProvider({ children }: { children: ReactNode }) {
       if (!shouldGate() || !claimImpression("gate")) return Promise.resolve();
 
       const variant = adVariant();
-      void variant;
       const partner = partnerLink(SLOT, toolSlug ?? null);
       clickId.current = partner.clickId;
 
@@ -68,6 +67,7 @@ export function ActionGateProvider({ children }: { children: ReactNode }) {
         slot: SLOT,
         tool_slug: toolSlug ?? null,
         click_id: partner.clickId,
+        format: variant,
       });
       track({
         event_type: "impression",
