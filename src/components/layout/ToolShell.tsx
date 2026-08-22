@@ -119,7 +119,11 @@ export function ToolShell({
       </header>
 
       <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6 sm:py-12">
+        {slug ? <AdSlot id={`result-${slug}-top`} toolSlug={slug} className="mb-8" /> : null}
+
         {children}
+
+        {slug ? <NativeAdCard index={2} toolSlug={slug} /> : null}
 
         {slug ? <NextTools slug={slug} /> : null}
 
