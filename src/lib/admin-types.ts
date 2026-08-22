@@ -83,9 +83,9 @@ export const ADSTERRA = {
 } as const;
 
 export const DEFAULT_CAPS: AdCapSettings = {
-  popunder: { perHour: 4, perSession: 3 },
-  vignette: { perHour: 8, perSession: 5 },
-  inpage_push: { perHour: 10, perSession: 8 },
+  popunder: { perHour: 2, perSession: 1 },
+  vignette: { perHour: 4, perSession: 3 },
+  inpage_push: { perHour: 6, perSession: 4 },
 };
 
 export const DEFAULT_PRIVACY: PrivacySettings = {
@@ -109,7 +109,7 @@ export const DEFAULT_PUBLIC_CONFIG: PublicConfig = {
     smartlink_url: MONETAG.smartlink,
     adsterra_social_bar: true,
     adsterra_social_bar_src: ADSTERRA.social_bar,
-    slots: { result: true, gate: true, sticky_mobile: true, native_feed: true },
+    slots: { result: true, gate: true, sticky_mobile: false, native_feed: true },
     caps: DEFAULT_CAPS,
     privacy: DEFAULT_PRIVACY,
   },
