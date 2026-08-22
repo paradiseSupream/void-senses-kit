@@ -30,11 +30,8 @@ export function NextTools({ slug, heading = "Try next" }: { slug: string; headin
 
   return (
     <section className="mt-14">
-      {/* A/B: the result slot only renders in the result-heavy variant, so its
-          RPM/CTR can be compared against the gate-heavy arm. */}
-      {variant === "result_heavy" ? (
-        <AdSlot id={`result-${slug}`} toolSlug={slug} className="mb-10" />
-      ) : null}
+      {/* Revenue-max: the result-page ad slot always renders for free users. */}
+      <AdSlot id={`result-${slug}`} toolSlug={slug} className="mb-10" />
 
       {upNext ? (
         <div
