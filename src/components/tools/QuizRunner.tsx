@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { ChevronLeft, RefreshCw } from "lucide-react";
 
 import { QuizVipNudge } from "@/components/monetization/QuizVipNudge";
+import { markQuizInteraction } from "@/lib/engagement";
 import { SCALE, type Likert } from "@/lib/quiz-engine";
 
 /**
