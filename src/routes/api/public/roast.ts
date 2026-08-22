@@ -12,6 +12,105 @@ const LEVELS: Record<string, string> = {
     "Go hard and relentless, comedy-roast style, but stay clever rather than cruel. Two short paragraphs max.",
 };
 
+/* ------------------------------------------------------- cache + fair queue */
+
+/**
+ * Identical prompts are extremely common (people retry the same bio), so a
+ * short-lived in-isolate cache removes most duplicate upstream spend. Cached
+ * answers are replayed as a normal SSE stream so the client stays unchanged.
+ */
+const CACHE_TTL_MS = 6 * 60 * 60 * 1000;
+const CACHE_MAX = 300;
+const cache = new Map<string, { text: string; at: number }>();
+
+function cacheGet(key: string): string | null {
+  const hit = cache.get(key);
+  if (!hit) return null;
+  if (Date.now() - hit.at > CACHE_TTL_MS) {
+    cache.delete(key);
+    return null;
+  }
+  // refresh LRU position
+  cache.delete(key);
+  cache.set(key, hit);
+  return hit.text;
+}
+
+function cacheSet(key: string, text: string) {
+  if (text.trim().length < 20) return;
+  cache.set(key, { text, at: Date.now() });
+  while (cache.size > CACHE_MAX) {
+    const oldest = cache.keys().next().value;
+    if (oldest === undefined) break;
+    cache.delete(oldest);
+  }
+}
+
+/** Replays cached text as an OpenAI-compatible SSE stream. */
+function replay(text: string): Response {
+  const encoder = new TextEncoder();
+  const chunks = text.match(/[\s\S]{1,60}/g) ?? [text];
+  const stream = new ReadableStream({
+    async start(controller) {
+      for (const chunk of chunks) {
+        controller.enqueue(
+          encoder.encode(
+            `data: ${JSON.stringify({ choices: [{ delta: { content: chunk } }] })}\n\n`,
+          ),
+        );
+        await new Promise((r) => setTimeout(r, 18));
+      }
+      controller.enqueue(encoder.encode("data: [DONE]\n\n"));
+      controller.close();
+    },
+  });
+  return new Response(stream, {
+    headers: {
+      "Content-Type": "text/event-stream; charset=utf-8",
+      "Cache-Control": "no-store",
+      "x-roast-cache": "hit",
+    },
+  });
+}
+
+/**
+ * Rate-limit aware queue: caps concurrent upstream calls so a traffic spike
+ * queues instead of hammering the provider (and instead of crashing us), and
+ * sheds load politely once the queue is long.
+ */
+const MAX_CONCURRENT = 4;
+const MAX_QUEUE = 24;
+let inFlight = 0;
+const waiting: Array<() => void> = [];
+
+async function acquire(): Promise<boolean> {
+  if (inFlight < MAX_CONCURRENT) {
+    inFlight += 1;
+    return true;
+  }
+  if (waiting.length >= MAX_QUEUE) return false;
+  await new Promise<void>((resolve) => waiting.push(resolve));
+  inFlight += 1;
+  return true;
+}
+
+function release() {
+  inFlight = Math.max(0, inFlight - 1);
+  const next = waiting.shift();
+  if (next) next();
+}
+
+/** Models that just returned 429/5xx are skipped for a cooldown window. */
+const cooldown = new Map<string, number>();
+const COOLDOWN_MS = 60_000;
+
+function onCooldown(model: string) {
+  const until = cooldown.get(model) ?? 0;
+  if (until > Date.now()) return true;
+  if (until) cooldown.delete(model);
+  return false;
+}
+
 async function hashIp(ip: string): Promise<string> {
   const data = new TextEncoder().encode(`sov::${ip}`);
   const digest = await crypto.subtle.digest("SHA-256", data);
@@ -39,6 +138,10 @@ export const Route = createFileRoute("/api/public/roast")({
         if (!LEVELS[level]) {
           return json({ error: "Unknown roast level." }, 400);
         }
+
+        const cacheKey = `${level}::${target.toLowerCase().replace(/\s+/g, " ")}`;
+        const cached = cacheGet(cacheKey);
+        if (cached) return replay(cached);
 
         const apiKey = process.env["LOVABLE_API_KEY"];
         const openRouterKey = process.env["OPENROUTER_API_KEY"];
@@ -119,9 +222,18 @@ export const Route = createFileRoute("/api/public/roast")({
           });
         }
 
+        if (!(await acquire())) {
+          return json(
+            { error: "The roast queue is full right now — try again in a few seconds." },
+            429,
+          );
+        }
+
         let upstream: Response | null = null;
         let lastStatus = 502;
+        try {
         for (const attempt of attempts) {
+          if (onCooldown(attempt.model)) continue;
           let res: Response;
           try {
             res = await fetch(attempt.url, {
@@ -142,9 +254,15 @@ export const Route = createFileRoute("/api/public/roast")({
             break;
           }
           lastStatus = res.status;
+          if (res.status === 429 || res.status >= 500) {
+            cooldown.set(attempt.model, Date.now() + COOLDOWN_MS);
+          }
           const detail = await res.text().catch(() => "");
           console.error("roast upstream error", attempt.model, res.status, detail.slice(0, 300));
           // 401/403 (bad key) and 5xx/404 => try next provider; 429 also worth failing over once.
+        }
+        } finally {
+          if (!upstream) release();
         }
 
         if (!upstream || !upstream.body) {
@@ -158,10 +276,46 @@ export const Route = createFileRoute("/api/public/roast")({
         }
 
 
-        return new Response(upstream.body, {
+        // Pass the stream straight through while accumulating the text so the
+        // next identical request is served from cache for free.
+        const decoder = new TextDecoder();
+        let collected = "";
+        const reader = upstream.body.getReader();
+        const passthrough = new ReadableStream({
+          async pull(controller) {
+            const { done, value } = await reader.read();
+            if (done) {
+              cacheSet(cacheKey, collected);
+              release();
+              controller.close();
+              return;
+            }
+            const text = decoder.decode(value, { stream: true });
+            for (const line of text.split("\n")) {
+              const trimmed = line.trim();
+              if (!trimmed.startsWith("data:")) continue;
+              const raw = trimmed.slice(5).trim();
+              if (!raw || raw === "[DONE]") continue;
+              try {
+                const parsed = JSON.parse(raw) as { choices?: { delta?: { content?: string } }[] };
+                collected += parsed.choices?.[0]?.delta?.content ?? "";
+              } catch {
+                /* partial chunk */
+              }
+            }
+            controller.enqueue(value);
+          },
+          cancel() {
+            release();
+            void reader.cancel();
+          },
+        });
+
+        return new Response(passthrough, {
           headers: {
             "Content-Type": "text/event-stream; charset=utf-8",
             "Cache-Control": "no-store",
+            "x-roast-cache": "miss",
           },
         });
       },

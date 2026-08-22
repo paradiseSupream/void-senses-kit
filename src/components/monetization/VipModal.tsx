@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Bitcoin, Check, CreditCard, X } from "lucide-react";
 import { toast } from "sonner";
 
 import { useVip } from "@/lib/vip";
 import { useSiteConfig } from "@/lib/site-config";
+import { trackFunnel } from "@/lib/funnel";
 
 const PERKS = [
   "No interstitial gate on any export",
@@ -19,6 +20,10 @@ export function VipModal() {
   const { site } = useSiteConfig();
   const price = `$${(site.vip_price_cents / 100).toFixed(0)}`;
 
+  useEffect(() => {
+    if (vipModalOpen) trackFunnel("vip_gate_shown");
+  }, [vipModalOpen]);
+
   if (!vipModalOpen) return null;
 
   return (
@@ -31,7 +36,10 @@ export function VipModal() {
       <div className="glass relative w-full max-w-md rounded-2xl p-7">
         <button
           type="button"
-          onClick={closeVipModal}
+          onClick={() => {
+            trackFunnel("vip_downgrade");
+            closeVipModal();
+          }}
           aria-label="Close"
           className="absolute top-4 right-4 grid size-8 place-items-center rounded-full text-muted-foreground hover:bg-surface-2 hover:text-foreground"
         >
@@ -87,6 +95,7 @@ export function VipModal() {
           <button
             type="button"
             onClick={() => {
+              trackFunnel("vip_purchase");
               toast.info("Checkout opens once payments are connected to this project.");
             }}
             className="mt-4 w-full rounded-lg bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"

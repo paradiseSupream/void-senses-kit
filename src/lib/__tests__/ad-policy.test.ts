@@ -2,7 +2,15 @@ import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
-import { plannedAdScripts, smartlinkSurfacesAllowed, type PolicyInput } from "@/lib/ad-policy";
+import {
+  plannedAdScripts,
+  smartlinkSurfacesAllowed,
+  tierAdjust,
+  tierCapScale,
+  tierOf,
+  type AdFormat,
+  type PolicyInput,
+} from "@/lib/ad-policy";
 import { DEFAULT_PUBLIC_CONFIG } from "@/lib/admin-types";
 
 const FULL: PolicyInput = {
@@ -109,5 +117,30 @@ describe("no page loads an unapproved ad format", () => {
       if (!/partnerLink|AdSlot|track\(/.test(source)) continue;
       expect(source, `${file} must check useVip()`).toMatch(/useVip\(\)/);
     }
+  });
+});
+
+/* ------------------------------------------------------------- geo tiering */
+
+describe("geo tiering", () => {
+  const all: AdFormat[] = ["inpage_push", "vignette", "popunder", "adsterra_social_bar"];
+
+  it("keeps the full stack in tier-1 markets", () => {
+    expect(tierAdjust(all, tierOf("US"))).toEqual(all);
+    expect(tierOf("DE")).toBe("tier1");
+  });
+
+  it("drops the vignette in tier-2 markets", () => {
+    expect(tierAdjust(all, tierOf("BR"))).not.toContain("vignette");
+    expect(tierAdjust(all, tierOf("BR"))).toContain("popunder");
+  });
+
+  it("keeps only in-page push in tier-3 markets", () => {
+    expect(tierAdjust(all, tierOf("BD"))).toEqual(["inpage_push"]);
+  });
+
+  it("scales frequency caps down as CPM drops", () => {
+    expect(tierCapScale("tier1")).toBeGreaterThan(tierCapScale("tier2"));
+    expect(tierCapScale("tier2")).toBeGreaterThan(tierCapScale("tier3"));
   });
 });

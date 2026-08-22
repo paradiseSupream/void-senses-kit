@@ -53,3 +53,45 @@ export function plannedAdScripts(ads: PolicyInput, ctx: PolicyContext): AdFormat
 export function smartlinkSurfacesAllowed(ads: PolicyInput, ctx: PolicyContext): boolean {
   return !ctx.isVip && ads.enabled;
 }
+
+/* ------------------------------------------------------------- geo tiering */
+
+export type Tier = "tier1" | "tier2" | "tier3";
+
+/** High-CPM markets: full ad stack is worth the UX cost here. */
+const TIER1 = new Set([
+  "US", "CA", "GB", "AU", "NZ", "IE", "DE", "FR", "NL", "SE", "NO", "DK", "FI",
+  "CH", "AT", "BE", "LU", "IS", "SG", "JP", "KR", "AE", "QA", "KW", "IL", "IT", "ES",
+]);
+
+/** Mid-CPM markets: keep the high earners, drop the most intrusive format. */
+const TIER2 = new Set([
+  "PL", "CZ", "PT", "GR", "HU", "RO", "SK", "SI", "HR", "EE", "LV", "LT", "TR",
+  "MX", "BR", "AR", "CL", "CO", "ZA", "MY", "TH", "SA", "TW", "HK", "CN", "RU", "UA",
+]);
+
+export function tierOf(country: string | null | undefined): Tier {
+  const code = (country ?? "").toUpperCase();
+  if (TIER1.has(code)) return "tier1";
+  if (TIER2.has(code)) return "tier2";
+  return "tier3";
+}
+
+/**
+ * Revenue-per-annoyance tuning by market.
+ * - tier1: everything (highest eCPM justifies pop-under + vignette + social bar)
+ * - tier2: drop the vignette interstitial
+ * - tier3: cheap traffic — keep only in-page push (best fill / least bounce)
+ */
+export function tierAdjust(planned: AdFormat[], tier: Tier): AdFormat[] {
+  if (tier === "tier1") return planned;
+  if (tier === "tier2") return planned.filter((f) => f !== "vignette");
+  return planned.filter((f) => f === "inpage_push");
+}
+
+/** Frequency caps scale down as CPM drops, so cheap traffic isn't burned out. */
+export function tierCapScale(tier: Tier): number {
+  if (tier === "tier1") return 1;
+  if (tier === "tier2") return 0.75;
+  return 0.5;
+}

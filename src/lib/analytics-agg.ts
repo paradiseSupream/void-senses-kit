@@ -7,6 +7,10 @@ export type SlotStat = {
   revenueCents: number;
   ctr: number;
   rpm: number;
+  /** Revenue per 1000 ad impressions. */
+  ecpm: number;
+  /** Distinct sessions that produced these rows. */
+  sessions: number;
 };
 
 export type FormatPerf = {
@@ -49,7 +53,32 @@ export type TimePoint = {
   revenueCents: number;
 };
 
+export type FunnelStep = {
+  step: string;
+  sessions: number;
+  /** % of the sessions that reached the first step. */
+  ofVisit: number;
+  /** % of the sessions that reached the previous step. */
+  ofPrevious: number;
+  dropOff: number;
+  avgDwellMs: number;
+};
+
+export type ToolRevenue = SlotStat & {
+  starts: number;
+  completes: number;
+  completion: number;
+  /** Ad revenue per 1000 sessions that touched this tool. */
+  sessionConversion: number;
+};
+
 export type MonetizationStats = {
+  funnel: FunnelStep[];
+  byTool: ToolRevenue[];
+  experiments: Array<{
+    slot: string;
+    arms: Array<{ arm: string; exposures: number; conversions: number; rate: number }>;
+  }>;
   byCountry: SlotStat[];
   timeseries: TimePoint[];
   fraud: FraudSummary;
@@ -111,19 +140,31 @@ function empty(key: string): SlotStat {
     revenueCents: 0,
     ctr: 0,
     rpm: 0,
+    ecpm: 0,
+    sessions: 0,
   };
 }
 
 function finalize(stat: SlotStat): SlotStat {
+  const dollars = stat.revenueCents / 100;
   return {
     ...stat,
     ctr: stat.impressions > 0 ? (stat.clicks / stat.impressions) * 100 : 0,
-    rpm: stat.impressions > 0 ? (stat.revenueCents / 100 / stat.impressions) * 1000 : 0,
+    // RPM = revenue per 1000 sessions (falls back to impressions when we have
+    // no session information, e.g. imported rows).
+    rpm:
+      stat.sessions > 0
+        ? (dollars / stat.sessions) * 1000
+        : stat.impressions > 0
+          ? (dollars / stat.impressions) * 1000
+          : 0,
+    ecpm: stat.impressions > 0 ? (dollars / stat.impressions) * 1000 : 0,
   };
 }
 
 function group(rows: Row[], pick: (row: Row) => string): SlotStat[] {
   const map = new Map<string, SlotStat>();
+  const sessions = new Map<string, Set<string>>();
   for (const row of rows) {
     const key = pick(row) || "unknown";
     const stat = map.get(key) ?? empty(key);
@@ -132,7 +173,11 @@ function group(rows: Row[], pick: (row: Row) => string): SlotStat[] {
     if (row.event_type === "conversion") stat.conversions += 1;
     stat.revenueCents += row.revenue_cents ?? 0;
     map.set(key, stat);
+    const seen = sessions.get(key) ?? new Set<string>();
+    seen.add(row.session_id);
+    sessions.set(key, seen);
   }
+  for (const [key, stat] of map) stat.sessions = sessions.get(key)?.size ?? 0;
   return [...map.values()].map(finalize).sort((a, b) => b.revenueCents - a.revenueCents || b.impressions - a.impressions);
 }
 
@@ -257,6 +302,111 @@ function timeseries(rows: Row[], days: number): TimePoint[] {
   return [...map.values()].sort((a, b) => a.bucket.localeCompare(b.bucket));
 }
 
+const FUNNEL_ORDER = [
+  "visit",
+  "test_start",
+  "return_1m",
+  "return_3m",
+  "result_view",
+  "vip_gate_shown",
+  "vip_downgrade",
+  "vip_purchase",
+] as const;
+
+/** Rebuilds the visit → test → dwell → result → VIP funnel from event rows. */
+export function buildFunnel(list: Row[]): FunnelStep[] {
+  const sessions = new Map<string, Set<string>>();
+  const dwell = new Map<string, number[]>();
+  for (const row of list) {
+    if (row.event_type !== "funnel") continue;
+    const step = row.slot;
+    const set = sessions.get(step) ?? new Set<string>();
+    set.add(row.session_id);
+    sessions.set(step, set);
+    const times = dwell.get(step) ?? [];
+    times.push(Number(row.duration_ms ?? 0));
+    dwell.set(step, times);
+  }
+  const first = sessions.get("visit")?.size ?? 0;
+  let previous = 0;
+  return FUNNEL_ORDER.map((step, index) => {
+    const count = sessions.get(step)?.size ?? 0;
+    const times = dwell.get(step) ?? [];
+    const entry: FunnelStep = {
+      step,
+      sessions: count,
+      ofVisit: first > 0 ? (count / first) * 100 : 0,
+      ofPrevious: index === 0 ? 100 : previous > 0 ? (count / previous) * 100 : 0,
+      dropOff: index === 0 ? 0 : Math.max(0, previous - count),
+      avgDwellMs: times.length ? Math.round(times.reduce((a, b) => a + b, 0) / times.length) : 0,
+    };
+    previous = count;
+    return entry;
+  });
+}
+
+/** Per-tool ad economics joined with quiz start/complete rates. */
+export function buildToolRevenue(list: Row[]): ToolRevenue[] {
+  const slugs = new Set<string>();
+  for (const row of list) if (row.tool_slug) slugs.add(row.tool_slug);
+
+  const adRows = list.filter(
+    (r) => r.tool_slug && ["impression", "click", "conversion"].includes(r.event_type),
+  );
+  const stats = new Map(group(adRows, (r) => r.tool_slug ?? "site").map((s) => [s.key, s]));
+
+  return [...slugs]
+    .map((slug) => {
+      const base = stats.get(slug) ?? empty(slug);
+      const starts = list.filter((r) => r.event_type === "tool_start" && r.tool_slug === slug).length;
+      const completes = list.filter(
+        (r) => r.event_type === "tool_complete" && r.tool_slug === slug,
+      ).length;
+      const touched = new Set(list.filter((r) => r.tool_slug === slug).map((r) => r.session_id));
+      return {
+        ...base,
+        key: slug,
+        starts,
+        completes,
+        completion: starts > 0 ? (completes / starts) * 100 : 0,
+        sessionConversion: touched.size > 0 ? (completes / touched.size) * 100 : 0,
+      };
+    })
+    .sort((a, b) => b.revenueCents - a.revenueCents || b.starts - a.starts);
+}
+
+/** A/B copy experiments: exposure per arm vs. sessions that started a test. */
+export function buildExperiments(list: Row[]) {
+  const converted = new Set(
+    list.filter((r) => r.event_type === "funnel" && r.slot === "test_start").map((r) => r.session_id),
+  );
+  const bySlot = new Map<string, Map<string, { exposures: number; sessions: Set<string> }>>();
+  for (const row of list) {
+    if (row.event_type !== "experiment") continue;
+    const arm = row.format || row.variant || "control";
+    const arms = bySlot.get(row.slot) ?? new Map();
+    const entry = arms.get(arm) ?? { exposures: 0, sessions: new Set<string>() };
+    entry.exposures += 1;
+    entry.sessions.add(row.session_id);
+    arms.set(arm, entry);
+    bySlot.set(row.slot, arms);
+  }
+  return [...bySlot.entries()].map(([slot, arms]) => ({
+    slot,
+    arms: [...arms.entries()]
+      .map(([arm, v]) => {
+        const conversions = [...v.sessions].filter((id) => converted.has(id)).length;
+        return {
+          arm,
+          exposures: v.sessions.size,
+          conversions,
+          rate: v.sessions.size > 0 ? (conversions / v.sessions.size) * 100 : 0,
+        };
+      })
+      .sort((a, b) => b.rate - a.rate),
+  }));
+}
+
 export function aggregate(list: Row[], days: number): MonetizationStats {
   const totals = finalize(
     list.reduce((acc, row) => {
@@ -335,6 +485,9 @@ export function aggregate(list: Row[], days: number): MonetizationStats {
   return {
     days,
     totals,
+    funnel: buildFunnel(list),
+    byTool: buildToolRevenue(list),
+    experiments: buildExperiments(list),
     bySlot: group(adRows, (r) => r.slot),
     byVariant: group(adRows, (r) => r.variant),
     byDevice: group(adRows, (r) => r.device ?? "unknown"),

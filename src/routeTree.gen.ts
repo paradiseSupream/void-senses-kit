@@ -21,6 +21,7 @@ import { Route as ToolsIqRouteImport } from './routes/tools.iq'
 import { Route as ToolsLoveMatchRouteImport } from './routes/tools.love-match'
 import { Route as ToolsPromptMakerRouteImport } from './routes/tools.prompt-maker'
 import { Route as ToolsRoastRouteImport } from './routes/tools.roast'
+import { Route as ApiPublicGeoRouteImport } from './routes/api/public/geo'
 import { Route as ApiPublicRoastRouteImport } from './routes/api/public/roast'
 import { Route as ApiPublicTrackRouteImport } from './routes/api/public/track'
 import { Route as ApiPublicWeeklyReportRouteImport } from './routes/api/public/weekly-report'
@@ -85,6 +86,11 @@ const ToolsRoastRoute = ToolsRoastRouteImport.update({
   path: '/tools/roast',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicGeoRoute = ApiPublicGeoRouteImport.update({
+  id: '/api/public/geo',
+  path: '/api/public/geo',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicRoastRoute = ApiPublicRoastRouteImport.update({
   id: '/api/public/roast',
   path: '/api/public/roast',
@@ -114,6 +120,7 @@ export interface FileRoutesByFullPath {
   '/tools/prompt-maker': typeof ToolsPromptMakerRoute
   '/tools/roast': typeof ToolsRoastRoute
   '/admin/': typeof AdminIndexRoute
+  '/api/public/geo': typeof ApiPublicGeoRoute
   '/api/public/roast': typeof ApiPublicRoastRoute
   '/api/public/track': typeof ApiPublicTrackRoute
   '/api/public/weekly-report': typeof ApiPublicWeeklyReportRoute
@@ -131,6 +138,7 @@ export interface FileRoutesByTo {
   '/tools/prompt-maker': typeof ToolsPromptMakerRoute
   '/tools/roast': typeof ToolsRoastRoute
   '/admin': typeof AdminIndexRoute
+  '/api/public/geo': typeof ApiPublicGeoRoute
   '/api/public/roast': typeof ApiPublicRoastRoute
   '/api/public/track': typeof ApiPublicTrackRoute
   '/api/public/weekly-report': typeof ApiPublicWeeklyReportRoute
@@ -149,6 +157,7 @@ export interface FileRoutesById {
   '/tools/prompt-maker': typeof ToolsPromptMakerRoute
   '/tools/roast': typeof ToolsRoastRoute
   '/admin/': typeof AdminIndexRoute
+  '/api/public/geo': typeof ApiPublicGeoRoute
   '/api/public/roast': typeof ApiPublicRoastRoute
   '/api/public/track': typeof ApiPublicTrackRoute
   '/api/public/weekly-report': typeof ApiPublicWeeklyReportRoute
@@ -168,6 +177,7 @@ export interface FileRouteTypes {
     | '/tools/prompt-maker'
     | '/tools/roast'
     | '/admin/'
+    | '/api/public/geo'
     | '/api/public/roast'
     | '/api/public/track'
     | '/api/public/weekly-report'
@@ -185,6 +195,7 @@ export interface FileRouteTypes {
     | '/tools/prompt-maker'
     | '/tools/roast'
     | '/admin'
+    | '/api/public/geo'
     | '/api/public/roast'
     | '/api/public/track'
     | '/api/public/weekly-report'
@@ -202,6 +213,7 @@ export interface FileRouteTypes {
     | '/tools/prompt-maker'
     | '/tools/roast'
     | '/admin/'
+    | '/api/public/geo'
     | '/api/public/roast'
     | '/api/public/track'
     | '/api/public/weekly-report'
@@ -220,6 +232,7 @@ export interface RootRouteChildren {
   ToolsPromptMakerRoute: typeof ToolsPromptMakerRoute
   ToolsRoastRoute: typeof ToolsRoastRoute
   AdminIndexRoute: typeof AdminIndexRoute
+  ApiPublicGeoRoute: typeof ApiPublicGeoRoute
   ApiPublicRoastRoute: typeof ApiPublicRoastRoute
   ApiPublicTrackRoute: typeof ApiPublicTrackRoute
   ApiPublicWeeklyReportRoute: typeof ApiPublicWeeklyReportRoute
@@ -311,6 +324,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ToolsRoastRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/geo': {
+      id: '/api/public/geo'
+      path: '/api/public/geo'
+      fullPath: '/api/public/geo'
+      preLoaderRoute: typeof ApiPublicGeoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/roast': {
       id: '/api/public/roast'
       path: '/api/public/roast'
@@ -348,6 +368,7 @@ const rootRouteChildren: RootRouteChildren = {
   ToolsPromptMakerRoute: ToolsPromptMakerRoute,
   ToolsRoastRoute: ToolsRoastRoute,
   AdminIndexRoute: AdminIndexRoute,
+  ApiPublicGeoRoute: ApiPublicGeoRoute,
   ApiPublicRoastRoute: ApiPublicRoastRoute,
   ApiPublicTrackRoute: ApiPublicTrackRoute,
   ApiPublicWeeklyReportRoute: ApiPublicWeeklyReportRoute,

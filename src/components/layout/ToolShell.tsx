@@ -5,6 +5,7 @@ import { ChevronLeft, Clock, Download, ListChecks, ShieldCheck } from "lucide-re
 import { TOOLS } from "@/lib/tools";
 import { NextTools } from "@/components/tools/NextTools";
 import { track } from "@/lib/monetization";
+import { trackFunnel } from "@/lib/funnel";
 
 export function ToolShell({
   eyebrow,
@@ -26,6 +27,7 @@ export function ToolShell({
   useEffect(() => {
     if (!slug) return;
     track({ event_type: "tool_start", slot: `tool-${slug}`, tool_slug: slug });
+    trackFunnel("test_start", slug);
   }, [slug]);
 
   return (

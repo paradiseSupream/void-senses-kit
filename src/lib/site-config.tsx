@@ -16,7 +16,8 @@ import { useVip } from "@/lib/vip";
 import { claimFormat, setPartnerBase, setVipFlag, track } from "@/lib/monetization";
 import { adsAllowed, useConsent } from "@/lib/consent";
 import { startWebVitals } from "@/lib/web-vitals";
-import { plannedAdScripts } from "@/lib/ad-policy";
+import { plannedAdScripts, tierAdjust, tierCapScale, type Tier } from "@/lib/ad-policy";
+import { startFunnel, stopFunnel } from "@/lib/funnel";
 
 const SiteConfigContext = createContext<PublicConfig>(DEFAULT_PUBLIC_CONFIG);
 
@@ -108,13 +109,48 @@ function shouldLoad(id: string, format: "popunder" | "vignette" | "inpage_push",
   return false;
 }
 
+/** Visitor market tier, resolved once from the edge (cached 10 min). */
+function useTier(): Tier {
+  const { data } = useQuery({
+    queryKey: ["geo-tier"],
+    queryFn: async () => {
+      const res = await fetch("/api/public/geo");
+      return (await res.json()) as { country: string | null; tier: Tier };
+    },
+    staleTime: 30 * 60_000,
+    retry: false,
+  });
+  return data?.tier ?? "tier3";
+}
+
+function scaleCaps(caps: typeof DEFAULT_CAPS, scale: number): typeof DEFAULT_CAPS {
+  const cap = (v: { perHour: number; perSession: number }) => ({
+    perHour: Math.max(1, Math.round(v.perHour * scale)),
+    perSession: Math.max(1, Math.round(v.perSession * scale)),
+  });
+  return {
+    popunder: cap(caps.popunder),
+    vignette: cap(caps.vignette),
+    inpage_push: cap(caps.inpage_push),
+  };
+}
+
 function MonetagLoader() {
   const config = useContext(SiteConfigContext);
   const { isVip } = useVip();
   const consent = useConsent();
+  const tier = useTier();
   const ads = config.ads;
   const privacy = ads.privacy ?? DEFAULT_PRIVACY;
-  const caps = ads.caps ?? DEFAULT_CAPS;
+  const caps = useMemo(
+    () => scaleCaps(ads.caps ?? DEFAULT_CAPS, tierCapScale(tier)),
+    [ads.caps, tier],
+  );
+
+  useEffect(() => {
+    startFunnel();
+    return stopFunnel;
+  }, []);
 
   useEffect(() => {
     if (ads.smartlink_url) setPartnerBase(ads.smartlink_url);
@@ -138,7 +174,10 @@ function MonetagLoader() {
     }
 
     // Single source of truth for "which third-party script may run" (CI-checked).
-    const planned = plannedAdScripts(ads, { isVip, consentAllowsAds: allowed });
+    // Geo-tiered: Tier-1 gets the full Monetag + Adsterra stack, Tier-2 loses
+    // the vignette, Tier-3 keeps only in-page push so cheap traffic is not
+    // burned out for pennies.
+    const planned = tierAdjust(plannedAdScripts(ads, { isVip, consentAllowsAds: allowed }), tier);
     if (planned.length === 0) return;
 
     // In-page push: highest sustained RPM, loads immediately site-wide.
@@ -199,6 +238,7 @@ function MonetagLoader() {
       window.removeEventListener("scroll", loadPop);
     };
   }, [
+    tier,
     isVip,
     consent,
     allowed,
