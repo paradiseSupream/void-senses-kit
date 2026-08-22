@@ -8,7 +8,9 @@ export const AUTO_START_PARAM = "auto";
 
 export function autoStartRequested(): boolean {
   if (typeof window === "undefined") return false;
-  return new URLSearchParams(window.location.search).get(AUTO_START_PARAM) === "1";
+  const raw = new URLSearchParams(window.location.search).get(AUTO_START_PARAM);
+  // Router search serialisation can JSON-encode the value, so `1` may arrive as `"1"`.
+  return raw?.replace(/^"|"$/g, "") === "1";
 }
 
 /** Fires `start()` once on mount when the URL asked for an auto-start. */
