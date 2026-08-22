@@ -240,7 +240,7 @@ function MonetagLoader() {
           ads.monetag_vignette_zone || MONETAG.vignette.zone,
           MONETAG.vignette.src,
         );
-      }, 1500);
+      }, 500);
     }
 
     // Pop-under: only after real engagement (scroll or first tap).
