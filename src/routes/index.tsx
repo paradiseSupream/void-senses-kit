@@ -46,6 +46,25 @@ export const Route = createFileRoute("/")({
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { property: "og:url", content: "https://sensesofvoid.app/" },
+      { property: "og:site_name", content: "Senses of Void" },
+    ],
+    links: [{ rel: "canonical", href: "https://sensesofvoid.app/" }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        name: "Senses of Void",
+        url: "https://sensesofvoid.app",
+        potentialAction: {
+          "@type": "SearchAction",
+          target: "https://sensesofvoid.app/tools?q={search_term_string}",
+          "query-input": "required name=search_term_string",
+        },
+      }),
+      },
     ],
   }),
   component: Home,

@@ -26,6 +26,32 @@ export const Route = createFileRoute("/tools/")({
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { property: "og:url", content: "https://sensesofvoid.app/tools" },
+      { property: "og:site_name", content: "Senses of Void" },
+    ],
+    links: [{ rel: "canonical", href: "https://sensesofvoid.app/tools" }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "CollectionPage",
+        name: "All Tools",
+        url: "https://sensesofvoid.app/tools",
+        isPartOf: { "@type": "WebSite", name: "Senses of Void", url: "https://sensesofvoid.app" },
+      }),
+      },
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          itemListElement: [
+            { "@type": "ListItem", position: 1, name: "Home", item: "https://sensesofvoid.app" },
+            { "@type": "ListItem", position: 2, name: "All Tools", item: "https://sensesofvoid.app/tools" },
+          ],
+        }),
+      },
     ],
   }),
   component: ToolsIndex,
