@@ -8,6 +8,7 @@
  */
 
 import { track } from "@/lib/monetization";
+import { gaEvent } from "@/lib/ga4";
 
 export const FUNNEL_STEPS = [
   "visit",
@@ -54,6 +55,8 @@ export function trackFunnel(step: FunnelStep, toolSlug?: string | null) {
     format: "funnel",
     duration_ms: dwellMs(),
   });
+  // Mirror the funnel into GA4 so SEO traffic can be measured end to end.
+  gaEvent(`funnel_${step}`, { tool_slug: toolSlug ?? undefined, dwell_ms: dwellMs() });
 }
 
 let startedAt = 0;
