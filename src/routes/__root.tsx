@@ -167,6 +167,7 @@ function RootComponent() {
             </div>
             <MobileTabBar />
             {!isAdmin ? <StickyBottomAd /> : null}
+            {!isAdmin ? <DesktopStickyAd /> : null}
             {!isAdmin ? <SocialBar /> : null}
             <CookieBanner />
             <VipModal />
