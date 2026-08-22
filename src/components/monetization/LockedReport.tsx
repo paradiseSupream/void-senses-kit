@@ -137,6 +137,16 @@ export function LockedReport({
           >
             <Crown className="size-4" aria-hidden="true" /> Unlock forever · {price}
           </button>
+          {share ? (
+            <button
+              type="button"
+              onClick={shareUnlock}
+              disabled={busy}
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-5 text-sm font-semibold text-primary transition-colors hover:bg-primary/15 disabled:opacity-60"
+            >
+              <Swords className="size-4" aria-hidden="true" /> Share to unlock free
+            </button>
+          ) : null}
           <button
             type="button"
             onClick={rewardedUnlock}
@@ -148,8 +158,11 @@ export function LockedReport({
           </button>
         </div>
         <p className="mt-3 text-xs text-muted-foreground">
-          Free unlock opens one sponsor page — VIP skips it everywhere, forever.
+          {share
+            ? "Share with one friend to unlock instantly, or open one sponsor page — VIP skips both, forever."
+            : "Free unlock opens one sponsor page — VIP skips it everywhere, forever."}
         </p>
+
       </div>
     </div>
   );
