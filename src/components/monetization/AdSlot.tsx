@@ -49,7 +49,7 @@ export function AdSlot({
   toolSlug?: string;
   className?: string;
 }) {
-  const { isVip } = useVip();
+  const { isVip, openVipModal } = useVip();
   const config = useSiteConfig();
   const enabled = config.ads.enabled && config.ads.slots[slotKind(id)] !== false;
   const ref = useRef<HTMLDivElement>(null);
@@ -132,6 +132,18 @@ export function AdSlot({
             />
           </span>
         </a>
+      ) : null}
+      {allowed && link ? (
+        <button
+          type="button"
+          onClick={() => {
+            openVipModal();
+            track({ event_type: "click", slot: `${id}-vip`, click_id: link.clickId });
+          }}
+          className="label-mono mt-1.5 ml-auto block text-[0.6rem] text-muted-foreground underline underline-offset-4 hover:text-primary"
+        >
+          Browse ad-free
+        </button>
       ) : null}
     </div>
   );

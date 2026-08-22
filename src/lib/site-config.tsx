@@ -22,8 +22,11 @@ import { plannedAdScripts, tierAdjust, tierCapScale, type Tier } from "@/lib/ad-
 import { startFunnel, stopFunnel } from "@/lib/funnel";
 import { bumpPageView, whenEngaged } from "@/lib/engagement";
 
-/** Vignettes fire from the very first navigation to maximize session value. */
-const VIGNETTE_MIN_PAGEVIEWS = 1;
+/**
+ * Vignettes never fire on the landing view — an interstitial before the
+ * visitor has seen any value is the single biggest bounce driver.
+ */
+const VIGNETTE_MIN_PAGEVIEWS = 3;
 
 const SiteConfigContext = createContext<PublicConfig>(DEFAULT_PUBLIC_CONFIG);
 
@@ -199,7 +202,8 @@ function MonetagLoader() {
     const planned = tierAdjust(plannedAdScripts(ads, { isVip, consentAllowsAds: allowed }), tier);
     if (planned.length === 0) return;
 
-    // In-page push: fire quickly once the visitor is invested (or 2s dwell).
+    // In-page push: only for visitors who actually started a tool (or after a
+    // long 25s dwell), so bouncers never see it and CTR stays high.
     const cancelPush = planned.includes("inpage_push")
       ? whenEngaged(() => {
           if (!shouldLoad("monetag-push", "inpage_push", caps.inpage_push)) return;
@@ -209,11 +213,11 @@ function MonetagLoader() {
             ads.monetag_push_zone || MONETAG.push.zone,
             MONETAG.push.src,
           );
-        }, 2_000)
+        }, 25_000)
       : () => undefined;
 
-    // Adsterra Social Bar: persistent sticky bar; fire quickly after the
-    // visitor engages (or 2s) to monetize short sessions too.
+    // Adsterra Social Bar: persistent sticky bar; waits for engagement (or 15s)
+    // so it never competes with the first impression of the page.
     const cancelBar = planned.includes("adsterra_social_bar")
       ? whenEngaged(() => {
           loadZone(
@@ -222,10 +226,11 @@ function MonetagLoader() {
             "social_bar",
             ads.adsterra_social_bar_src || ADSTERRA.social_bar,
           );
-        }, 2_000)
+        }, 15_000)
       : () => undefined;
 
-    // Vignette interstitial: delayed slightly to keep first paint fast.
+    // Vignette interstitial: deep in the session only, and never during the
+    // first seconds of a page view.
     let vignetteTimer: number | undefined;
     if (
       planned.includes("vignette") &&
@@ -239,10 +244,11 @@ function MonetagLoader() {
           ads.monetag_vignette_zone || MONETAG.vignette.zone,
           MONETAG.vignette.src,
         );
-      }, 500);
+      }, 4_000);
     }
 
-    // Pop-under: only after real engagement (scroll or first tap).
+    // Pop-under: the most intrusive format — only for returning-depth sessions
+    // (2+ page views) and only after a real scroll or tap.
     let popLoaded = false;
     const loadPop = () => {
       if (popLoaded) return;
@@ -255,7 +261,7 @@ function MonetagLoader() {
         MONETAG.popunder.src,
       );
     };
-    if (planned.includes("popunder")) {
+    if (planned.includes("popunder") && depth >= 2) {
       window.addEventListener("pointerdown", loadPop, { once: true });
       window.addEventListener("scroll", loadPop, { once: true, passive: true });
     }

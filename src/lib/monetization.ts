@@ -206,19 +206,21 @@ export function formatUsage(): { hour: Record<string, number>; session: Record<s
 
 
 /**
- * Session-based gating. Every export/download by a free user passes the
- * sponsor gate — the gate is the highest-RPM surface on the site, so skipping
- * it wasted the single most valuable free-user action.
+ * Session-based gating. The first export of a session is friction-free — that
+ * "it just works" moment is what makes people finish more quizzes and share
+ * results — and every export after it passes the sponsor gate, which is the
+ * highest-RPM surface on the site.
  */
 export function shouldGate(): boolean {
   if (typeof window === "undefined") return false;
+  let seen = 0;
   try {
-    const seen = Number(window.sessionStorage.getItem("sov.gateCount") ?? "0");
+    seen = Number(window.sessionStorage.getItem("sov.gateCount") ?? "0");
     window.sessionStorage.setItem("sov.gateCount", String(seen + 1));
   } catch {
     /* storage unavailable */
   }
-  return true;
+  return seen >= 1;
 }
 
 /* -------------------------------------------------------------- attribution */

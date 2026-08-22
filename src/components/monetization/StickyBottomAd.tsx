@@ -30,13 +30,15 @@ export function StickyBottomAd() {
     if (dismissed) return;
     if (!window.matchMedia("(max-width: 640px)").matches) return;
 
+    // Wait until the visitor has settled into the page — the anchor is
+    // persistent, so showing it instantly only raises the bounce rate.
     const timer = window.setTimeout(() => {
       if (!claimImpression(SLOT)) return;
       const partner = partnerLink(SLOT, null);
       setLink(partner);
       setVisible(true);
       track({ event_type: "impression", slot: SLOT, click_id: partner.clickId });
-    }, 2000);
+    }, 8000);
 
     return () => window.clearTimeout(timer);
   }, [enabled, isVip]);
