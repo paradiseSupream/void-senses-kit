@@ -42,6 +42,8 @@ export const Route = createFileRoute("/tools/child-trauma")({
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { property: "og:image", content: "https://sensesofvoid.app/__l5e/assets-v1/de0c2b33-a0b2-46c6-a2ac-a749af315b8e/cover-child-trauma.jpg" },
+      { name: "twitter:image", content: "https://sensesofvoid.app/__l5e/assets-v1/de0c2b33-a0b2-46c6-a2ac-a749af315b8e/cover-child-trauma.jpg" },
       { property: "og:url", content: "https://sensesofvoid.app/tools/child-trauma" },
       { property: "og:site_name", content: "Senses of Void" },
     ],

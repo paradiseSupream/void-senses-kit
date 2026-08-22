@@ -35,6 +35,8 @@ export const Route = createFileRoute("/tools/dark-personality")({
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { property: "og:image", content: "https://sensesofvoid.app/__l5e/assets-v1/5372e174-cb46-4786-8ef3-281c52a92138/cover-dark-personality.jpg" },
+      { name: "twitter:image", content: "https://sensesofvoid.app/__l5e/assets-v1/5372e174-cb46-4786-8ef3-281c52a92138/cover-dark-personality.jpg" },
       { property: "og:url", content: "https://sensesofvoid.app/tools/dark-personality" },
       { property: "og:site_name", content: "Senses of Void" },
     ],

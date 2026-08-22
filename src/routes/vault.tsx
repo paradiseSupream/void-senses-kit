@@ -24,6 +24,8 @@ export const Route = createFileRoute("/vault")({
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { property: "og:image", content: "https://sensesofvoid.app/__l5e/assets-v1/3694b7f0-d5cc-4c5f-9a94-74e3fa5ea65c/cover-vault.jpg" },
+      { name: "twitter:image", content: "https://sensesofvoid.app/__l5e/assets-v1/3694b7f0-d5cc-4c5f-9a94-74e3fa5ea65c/cover-vault.jpg" },
       { property: "og:url", content: "https://sensesofvoid.app/vault" },
       { property: "og:site_name", content: "Senses of Void" },
     ],

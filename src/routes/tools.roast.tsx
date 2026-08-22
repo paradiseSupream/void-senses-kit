@@ -21,6 +21,8 @@ export const Route = createFileRoute("/tools/roast")({
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { property: "og:image", content: "https://sensesofvoid.app/__l5e/assets-v1/db71cc0a-0458-41bf-b6d3-b85d575aa039/cover-roast.jpg" },
+      { name: "twitter:image", content: "https://sensesofvoid.app/__l5e/assets-v1/db71cc0a-0458-41bf-b6d3-b85d575aa039/cover-roast.jpg" },
       { property: "og:url", content: "https://sensesofvoid.app/tools/roast" },
       { property: "og:site_name", content: "Senses of Void" },
     ],
