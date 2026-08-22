@@ -4,6 +4,7 @@ import {
   Link,
   createRootRouteWithContext,
   useRouter,
+  useRouterState,
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
@@ -147,13 +148,15 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const pathname = useRouterState({ select: (state) => state.location.pathname });
+  const isAdmin = pathname.startsWith("/admin");
 
   return (
     <QueryClientProvider client={queryClient}>
       <VipProvider>
         <SiteConfigProvider>
           <ActionGateProvider>
-            <div className="flex min-h-screen flex-col pb-16 sm:pb-0">
+            <div className="flex min-h-screen flex-col pb-32 sm:pb-0">
               <Header />
               <main className="flex-1">
                 {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
@@ -162,11 +165,11 @@ function RootComponent() {
               <Footer />
             </div>
             <MobileTabBar />
-            <StickyBottomAd />
-            <SocialBar />
+            {!isAdmin ? <StickyBottomAd /> : null}
+            {!isAdmin ? <SocialBar /> : null}
             <CookieBanner />
             <VipModal />
-            <ExitIntentOffer />
+            {!isAdmin ? <ExitIntentOffer /> : null}
             <Toaster theme="dark" position="top-center" richColors />
           </ActionGateProvider>
         </SiteConfigProvider>

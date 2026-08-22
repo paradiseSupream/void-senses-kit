@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { useActionGate } from "@/components/monetization/ActionGate";
 import { downloadCanvas, drawBrandedCard, drawStoryCard } from "@/lib/canvas-card";
 import { compareUrl } from "@/lib/compare-link";
+import { ShareRow } from "@/components/tools/ShareRow";
 
 export type SharePayload = {
   eyebrow: string;
@@ -126,6 +127,7 @@ export function ResultActions({
   };
 
   return (
+    <>
     <div className="mt-7 flex flex-wrap gap-2.5">
       <button
         type="button"
@@ -173,5 +175,12 @@ export function ResultActions({
         </button>
       ) : null}
     </div>
+    <ShareRow
+      className="mt-4 justify-center"
+      toolSlug={toolSlug}
+      url={challengeLink()}
+      text={`I scored ${payload.headline} on ${payload.toolName ?? payload.title}. Beat me:`}
+    />
+    </>
   );
 }

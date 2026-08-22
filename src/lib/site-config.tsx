@@ -182,9 +182,12 @@ function MonetagLoader() {
 
   const allowed = adsAllowed(consent, privacy.consent_required && privacy.block_until_consent);
 
+  const onAdminRoute = pathname.startsWith("/admin");
+
   useEffect(() => {
     if (consent === undefined) return; // not hydrated yet
     if (typeof document === "undefined") return;
+    if (onAdminRoute) return; // the operator panel stays ad-free
     if (!allowed && !isVip && ads.enabled) {
       track({ event_type: "script_blocked", slot: "consent", format: "consent" });
     }
@@ -266,6 +269,7 @@ function MonetagLoader() {
       window.removeEventListener("scroll", loadPop);
     };
   }, [
+    onAdminRoute,
     depth,
     tier,
     isVip,
