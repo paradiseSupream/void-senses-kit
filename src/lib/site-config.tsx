@@ -207,7 +207,7 @@ function MonetagLoader() {
             ads.monetag_push_zone || MONETAG.push.zone,
             MONETAG.push.src,
           );
-        }, 10_000)
+        }, 5_000)
       : () => undefined;
 
     // Adsterra Social Bar: persistent sticky bar; also held back until the
@@ -220,7 +220,7 @@ function MonetagLoader() {
             "social_bar",
             ads.adsterra_social_bar_src || ADSTERRA.social_bar,
           );
-        }, 6_000)
+        }, 4_000)
       : () => undefined;
 
     // Vignette interstitial: delayed slightly to keep first paint fast.
