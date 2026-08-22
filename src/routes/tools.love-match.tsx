@@ -1,24 +1,28 @@
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { Copy, HeartPulse } from "lucide-react";
-import { toast } from "sonner";
+import { HeartPulse } from "lucide-react";
 
 import { ToolShell } from "@/components/layout/ToolShell";
-import { useActionGate } from "@/components/monetization/ActionGate";
+import { QuizRunner } from "@/components/tools/QuizRunner";
+import { RadarChart } from "@/components/tools/RadarChart";
+import { ResultActions } from "@/components/tools/ResultActions";
+import { TraitBars } from "@/components/tools/TraitBars";
+import { LOVE_BANK, LOVE_PER_DIM, LOVE_SESSION_SIZE, loveVerdict } from "@/lib/banks/love";
+import { newSeed, pickBalanced, rngFrom, scoreDimensions, type Likert } from "@/lib/quiz-engine";
 
 export const Route = createFileRoute("/tools/love-match")({
   head: () => ({
     meta: [
-      { title: "Love & Vibe Matcher — Deterministic Compatibility Score" },
+      { title: "Love & Vibe Matcher — 15-Question Compatibility Read" },
       {
         name: "description",
         content:
-          "Enter two names and optional birthdates for a stable, repeatable vibe score with a witty synergy breakdown you can copy straight to stories.",
+          "Fifteen randomised questions score banter, trust, adventure, calm and spark between two people, ending in a verdict card built for stories.",
       },
       { property: "og:title", content: "Love & Vibe Matcher — Senses of Void" },
       {
         property: "og:description",
-        content: "A deterministic chemistry read: same names in, same score out. For fun only.",
+        content: "Five chemistry dimensions, a resonance score and a share card. For fun only.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -27,190 +31,133 @@ export const Route = createFileRoute("/tools/love-match")({
   component: LoveMatch,
 });
 
-/** Stable 32-bit string hash — identical inputs always yield identical output. */
-function hash(input: string): number {
-  let h = 2166136261;
-  for (let i = 0; i < input.length; i++) {
-    h ^= input.charCodeAt(i);
-    h = Math.imul(h, 16777619);
-  }
-  return Math.abs(h);
-}
-
-const TRAITS = ["Banter", "Trust", "Adventure", "Calm", "Spark"] as const;
-
-const LINES: Record<string, string[]> = {
-  high: [
-    "You two finish each other's chaos.",
-    "Suspiciously synced. Check your playlists.",
-    "The kind of pairing group chats gossip about.",
-  ],
-  mid: [
-    "Solid signal, occasional static.",
-    "Great on paper, better after coffee.",
-    "You balance each other — mostly on purpose.",
-  ],
-  low: [
-    "Different frequencies, same city.",
-    "Friction now, folklore later.",
-    "Opposites, and neither is backing down.",
-  ],
-};
-
 function LoveMatch() {
+  const [seed, setSeed] = useState(() => newSeed());
+  const [phase, setPhase] = useState<"intro" | "quiz" | "result">("intro");
   const [a, setA] = useState("");
   const [b, setB] = useState("");
-  const [da, setDa] = useState("");
-  const [db, setDb] = useState("");
+  const [answers, setAnswers] = useState<Record<string, number>>({});
+
+  const items: Likert[] = useMemo(
+    () => pickBalanced(LOVE_BANK, (i) => i.dim, LOVE_PER_DIM, rngFrom(seed)),
+    [seed],
+  );
+
+  const reshuffle = useCallback(() => {
+    setSeed(newSeed());
+    setAnswers({});
+    setPhase("quiz");
+  }, []);
+
+  const pair = `${a.trim() || "You"} + ${b.trim() || "Them"}`;
 
   const result = useMemo(() => {
-    const nameA = a.trim().toLowerCase();
-    const nameB = b.trim().toLowerCase();
-    if (!nameA || !nameB) return null;
-    const seed = hash([nameA, nameB].sort().join("|") + "::" + [da, db].sort().join("|"));
-    const score = 42 + (seed % 59);
-    const traits = TRAITS.map((t, i) => ({
-      name: t,
-      value: 35 + (hash(`${seed}-${t}-${i}`) % 66),
-    }));
-    const band = score >= 80 ? "high" : score >= 62 ? "mid" : "low";
-    const line = LINES[band]![seed % 3]!;
-    return { score, traits, line, band };
-  }, [a, b, da, db]);
-
-  const runGated = useActionGate();
-
-  const copy = async () => {
-    if (!result) return;
-    await runGated({ toolSlug: "love-match" });
-    const text = `${a.trim()} × ${b.trim()} = ${result.score}% vibe match ⚡\n${result.line}\n— sensesofvoid.app`;
-    try {
-      await navigator.clipboard.writeText(text);
-      toast.success("Vibe score copied — paste it into your story.");
-    } catch {
-      toast.error("Clipboard blocked — copy the text manually.");
-    }
-  };
+    const scores = scoreDimensions(items, answers);
+    const score = scores.length
+      ? Math.round(scores.reduce((acc, s) => acc + s.value, 0) / scores.length)
+      : 0;
+    const sorted = [...scores].sort((x, y) => y.value - x.value);
+    return {
+      scores,
+      score,
+      strongest: sorted[0]?.dim ?? "Trust",
+      weakest: sorted[sorted.length - 1]?.dim ?? "Calm",
+      verdict: loveVerdict(score),
+    };
+  }, [items, answers]);
 
   return (
     <ToolShell
       eyebrow="Tool 04 · Social"
       slug="love-match"
       title="Love & Vibe Matcher"
-      intro="A deterministic read: the same two names always return the same score, so you can share it and it stays true."
+      intro="Fifteen questions about how the two of you actually operate — banter, trust, adventure, calm and spark. Drawn fresh from a 45-item bank each time, so retaking gives a real second opinion."
     >
-      <div className="glass grid gap-4 rounded-xl p-5 sm:grid-cols-2">
-        <div>
-          <label htmlFor="name-a" className="label-mono mb-1.5 block">
-            First name
-          </label>
-          <input
-            id="name-a"
-            value={a}
-            onChange={(e) => setA(e.target.value)}
-            className="w-full rounded-lg border border-hairline bg-surface-2/70 px-3 py-2.5 text-sm focus:border-primary/50"
-          />
-          <label htmlFor="dob-a" className="label-mono mt-3 mb-1.5 block">
-            Birthdate (optional)
-          </label>
-          <input
-            id="dob-a"
-            type="date"
-            value={da}
-            onChange={(e) => setDa(e.target.value)}
-            className="w-full rounded-lg border border-hairline bg-surface-2/70 px-3 py-2.5 text-sm focus:border-primary/50"
-          />
+      {phase === "intro" ? (
+        <div className="glass reveal rounded-2xl p-6 sm:p-8">
+          <span className="label-mono">Who is this about?</span>
+          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+            <input
+              value={a}
+              onChange={(e) => setA(e.target.value)}
+              placeholder="Your name"
+              aria-label="Your name"
+              className="min-h-11 rounded-xl border border-hairline bg-surface-2/70 px-3 text-sm focus:border-primary/50"
+            />
+            <input
+              value={b}
+              onChange={(e) => setB(e.target.value)}
+              placeholder="Their name"
+              aria-label="Their name"
+              className="min-h-11 rounded-xl border border-hairline bg-surface-2/70 px-3 text-sm focus:border-primary/50"
+            />
+          </div>
+          <ul className="mt-5 space-y-2.5 text-sm text-muted-foreground">
+            <li>A resonance score across five relationship dimensions.</li>
+            <li>Your strongest bond and the one that needs maintenance.</li>
+            <li>A verdict card built to be screenshotted.</li>
+          </ul>
+          <button
+            type="button"
+            onClick={() => setPhase("quiz")}
+            className="mt-6 w-full rounded-xl bg-primary px-4 py-3.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
+          >
+            Begin · {LOVE_SESSION_SIZE} questions
+          </button>
         </div>
-        <div>
-          <label htmlFor="name-b" className="label-mono mb-1.5 block">
-            Second name
-          </label>
-          <input
-            id="name-b"
-            value={b}
-            onChange={(e) => setB(e.target.value)}
-            className="w-full rounded-lg border border-hairline bg-surface-2/70 px-3 py-2.5 text-sm focus:border-primary/50"
-          />
-          <label htmlFor="dob-b" className="label-mono mt-3 mb-1.5 block">
-            Birthdate (optional)
-          </label>
-          <input
-            id="dob-b"
-            type="date"
-            value={db}
-            onChange={(e) => setDb(e.target.value)}
-            className="w-full rounded-lg border border-hairline bg-surface-2/70 px-3 py-2.5 text-sm focus:border-primary/50"
-          />
-        </div>
-      </div>
+      ) : null}
 
-      {result ? (
-        <div className="glass mt-6 rounded-xl p-6">
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <div>
-              <span className="label-mono flex items-center gap-2">
-                <HeartPulse className="size-3.5 text-primary" aria-hidden="true" /> synergy score
-              </span>
-              <p className="mt-2 font-display text-5xl font-bold text-primary">{result.score}%</p>
-              <p className="mt-1 text-sm text-foreground">{result.line}</p>
-            </div>
-            <button
-              type="button"
-              onClick={copy}
-              className="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90"
-            >
-              <Copy className="size-4" aria-hidden="true" /> Copy Vibe Score
-            </button>
+      {phase === "quiz" ? (
+        <QuizRunner
+          items={items}
+          intro={`About ${pair}`}
+          onReshuffle={reshuffle}
+          onComplete={(all) => {
+            setAnswers(all);
+            setPhase("result");
+          }}
+        />
+      ) : null}
+
+      {phase === "result" ? (
+        <div className="glass reveal rounded-2xl p-6 sm:p-8">
+          <span className="label-mono flex items-center gap-2">
+            <HeartPulse className="size-3.5 text-secondary" aria-hidden="true" /> {pair}
+          </span>
+          <p className="mt-4 font-display text-6xl font-bold text-primary">{result.score}%</p>
+          <h2 className="mt-2 font-display text-2xl font-semibold">{result.verdict.title}</h2>
+          <p className="mt-2 text-sm text-muted-foreground">{result.verdict.line}</p>
+          <p className="mt-2 text-sm text-foreground/80">
+            Strongest together in <strong>{result.strongest}</strong>; the one to protect is{" "}
+            <strong>{result.weakest}</strong>.
+          </p>
+
+          <div className="mt-7 rounded-2xl border border-hairline bg-surface-2/30 p-4">
+            <RadarChart data={result.scores} />
           </div>
 
-          <svg
-            viewBox="0 0 400 80"
-            className="mt-6 h-20 w-full"
-            role="img"
-            aria-label={`Pulse wave visual for a ${result.score} percent match`}
-          >
-            <path
-              d={buildWave(result.score)}
-              fill="none"
-              stroke="var(--primary)"
-              strokeWidth="2"
-              strokeLinecap="round"
-              className="[stroke-dasharray:1200] [stroke-dashoffset:1200] animate-[dash_2.2s_ease-out_forwards]"
-            />
-            <style>{`@keyframes dash { to { stroke-dashoffset: 0 } }`}</style>
-          </svg>
+          <div className="mt-8">
+            <TraitBars data={result.scores} />
+          </div>
 
-          <ul className="mt-6 space-y-3">
-            {result.traits.map((t) => (
-              <li key={t.name}>
-                <div className="flex justify-between text-sm">
-                  <span className="text-foreground">{t.name}</span>
-                  <span className="font-mono text-muted-foreground">{t.value}</span>
-                </div>
-                <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-surface-2">
-                  <div
-                    className="h-full rounded-full bg-gradient-to-r from-primary to-secondary"
-                    style={{ width: `${t.value}%` }}
-                  />
-                </div>
-              </li>
-            ))}
-          </ul>
+          <ResultActions
+            toolSlug="love-match"
+            onRetake={reshuffle}
+            payload={{
+              eyebrow: "Love & Vibe Matcher",
+              title: pair,
+              headline: `${result.score}% resonance`,
+              lines: [
+                `${result.verdict.title} — ${result.verdict.line}`,
+                `Strongest: ${result.strongest} · protect: ${result.weakest}`,
+              ],
+              footer: "sensesofvoid.app · for fun, not fate",
+              fileName: "senses-of-void-vibe-match.png",
+              text: `${pair} scored ${result.score}% — ${result.verdict.title} on Senses of Void.`,
+            }}
+          />
         </div>
-      ) : (
-        <p className="mt-6 text-sm text-muted-foreground">Enter both names to see the reading.</p>
-      )}
+      ) : null}
     </ToolShell>
   );
-}
-
-function buildWave(score: number): string {
-  const amp = 8 + (score / 100) * 26;
-  let d = "M0 40";
-  for (let x = 0; x <= 400; x += 20) {
-    const beat = x % 80 === 0 ? amp * 1.6 : amp;
-    const y = 40 - Math.sin((x / 400) * Math.PI * 6) * beat;
-    d += ` L${x} ${y.toFixed(1)}`;
-  }
-  return d;
 }
