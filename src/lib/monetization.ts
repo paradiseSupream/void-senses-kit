@@ -117,10 +117,10 @@ export function trackExperiment(slot: string, arm: string) {
 type CapState = { hour: number; counts: Record<string, number>; session: Record<string, number> };
 
 const CAPS: Record<string, { perHour: number; perSession: number }> = {
-  default: { perHour: 24, perSession: 12 },
-  sticky: { perHour: 8, perSession: 4 },
-  gate: { perHour: 6, perSession: 4 },
-  result: { perHour: 12, perSession: 8 },
+  default: { perHour: 60, perSession: 40 },
+  sticky: { perHour: 20, perSession: 12 },
+  gate: { perHour: 30, perSession: 20 },
+  result: { perHour: 40, perSession: 28 },
 };
 
 function capKind(slot: string) {
@@ -211,8 +211,9 @@ export function shouldGate(): boolean {
   try {
     const seen = Number(window.sessionStorage.getItem("sov.gateCount") ?? "0");
     window.sessionStorage.setItem("sov.gateCount", String(seen + 1));
-    // First export of a session is friction-free; then gate every action.
-    return seen >= 1;
+    // Every free download passes through the sponsor gate — that is where the
+    // smartlink revenue comes from. VIP users never reach this call.
+    return true;
   } catch {
     return true;
   }

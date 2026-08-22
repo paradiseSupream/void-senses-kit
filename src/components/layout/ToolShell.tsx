@@ -4,6 +4,8 @@ import { ChevronLeft, Clock, Download, ListChecks, ShieldCheck } from "lucide-re
 
 import { TOOLS } from "@/lib/tools";
 import { NextTools } from "@/components/tools/NextTools";
+import { AdSlot } from "@/components/monetization/AdSlot";
+import { NativeAdCard } from "@/components/monetization/NativeAdCard";
 import { track } from "@/lib/monetization";
 import { trackFunnel } from "@/lib/funnel";
 
@@ -119,7 +121,11 @@ export function ToolShell({
       </header>
 
       <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6 sm:py-12">
+        {slug ? <AdSlot id={`result-${slug}-top`} toolSlug={slug} className="mb-8" /> : null}
+
         {children}
+
+        {slug ? <NativeAdCard index={2} toolSlug={slug} /> : null}
 
         {slug ? <NextTools slug={slug} /> : null}
 
