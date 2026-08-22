@@ -67,7 +67,7 @@ function DarkPersonality() {
       top,
       second,
       intensity,
-      archetype: DARK_ARCHETYPES[top] ?? DARK_ARCHETYPES.Strategy!,
+      archetype: DARK_ARCHETYPES[top] ?? DARK_ARCHETYPES["Strategy"]!,
     };
   }, [items, answers]);
 
