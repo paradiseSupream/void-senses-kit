@@ -84,6 +84,8 @@ export type Cohort = {
   completionRate: number;
   revenueCents: number;
   rpm: number;
+  /** Revenue per visitor in dollars — the number that must beat your CPC. */
+  rpv: number;
   vips: number;
   vipRate: number;
 };
@@ -110,6 +112,8 @@ export type MonetizationStats = {
     revenueCents: number;
   }>;
   days: number;
+  /** Site-wide revenue per visitor in dollars = your max profitable CPC. */
+  rpv: number;
   totals: SlotStat;
   bySlot: SlotStat[];
   byVariant: SlotStat[];
@@ -381,6 +385,7 @@ export function buildCohorts(list: Row[], pick: (row: Row) => string): Cohort[] 
         completionRate: 0,
         revenueCents: 0,
         rpm: 0,
+        rpv: 0,
         vips: 0,
         vipRate: 0,
       };
@@ -400,6 +405,7 @@ export function buildCohorts(list: Row[], pick: (row: Row) => string): Cohort[] 
       startRate: c.sessions > 0 ? (c.starts / c.sessions) * 100 : 0,
       completionRate: c.starts > 0 ? (c.completes / c.starts) * 100 : 0,
       rpm: c.sessions > 0 ? (c.revenueCents / 100 / c.sessions) * 1000 : 0,
+      rpv: c.sessions > 0 ? c.revenueCents / 100 / c.sessions : 0,
       vipRate: c.sessions > 0 ? (c.vips / c.sessions) * 100 : 0,
     }))
     .sort((a, b) => b.sessions - a.sessions);
@@ -573,8 +579,11 @@ export function aggregate(list: Row[], days: number): MonetizationStats {
   const gateShown = list.filter((r) => r.event_type === "gate_shown").length;
   const gateCompleted = list.filter((r) => r.event_type === "gate_completed").length;
 
+  const uniqueSessions = new Set(list.map((r) => r.session_id)).size;
+
   return {
     days,
+    rpv: uniqueSessions > 0 ? totals.revenueCents / 100 / uniqueSessions : 0,
     totals,
     funnel: buildFunnel(list),
     cohorts: {
