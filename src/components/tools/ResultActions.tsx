@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Copy, Download, RotateCcw, Share2 } from "lucide-react";
 import { toast } from "sonner";
 
