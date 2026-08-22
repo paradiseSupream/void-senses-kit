@@ -84,6 +84,39 @@ export function LockedReport({
     setBusy(false);
   };
 
+  /** Free, zero-cost unlock: the visitor pays with a share instead of a click. */
+  const shareUnlock = async () => {
+    if (!share || busy) return;
+    setBusy(true);
+    const url = compareUrl(share);
+    const text = `I got ${share.h} on ${share.n}. Think you can beat me?`;
+    let shared = false;
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: share.n, text, url });
+        shared = true;
+      } else {
+        await navigator.clipboard.writeText(`${text} ${url}`);
+        shared = true;
+        toast.success("Challenge link copied — send it to a friend.");
+      }
+    } catch {
+      try {
+        await navigator.clipboard.writeText(`${text} ${url}`);
+        shared = true;
+        toast.success("Challenge link copied — send it to a friend.");
+      } catch {
+        toast.error("Sharing blocked by your browser — try the free unlock instead.");
+      }
+    }
+    if (shared) {
+      track({ event_type: "conversion", slot: "result_lock_share", tool_slug: toolSlug });
+      unlockReport(toolSlug);
+    }
+    setBusy(false);
+  };
+
+
   return (
     <div className="relative overflow-hidden rounded-2xl border border-hairline">
       <div aria-hidden="true" className="pointer-events-none max-h-64 overflow-hidden blur-[6px] select-none">
