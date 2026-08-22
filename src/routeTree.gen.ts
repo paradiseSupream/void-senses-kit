@@ -25,6 +25,7 @@ import { Route as ToolsLoveMatchRouteImport } from './routes/tools.love-match'
 import { Route as ToolsPromptMakerRouteImport } from './routes/tools.prompt-maker'
 import { Route as ToolsRoastRouteImport } from './routes/tools.roast'
 import { Route as ApiPublicGeoRouteImport } from './routes/api/public/geo'
+import { Route as ApiPublicGscSyncRouteImport } from './routes/api/public/gsc-sync'
 import { Route as ApiPublicRoastRouteImport } from './routes/api/public/roast'
 import { Route as ApiPublicTrackRouteImport } from './routes/api/public/track'
 import { Route as ApiPublicWeeklyReportRouteImport } from './routes/api/public/weekly-report'
@@ -109,6 +110,11 @@ const ApiPublicGeoRoute = ApiPublicGeoRouteImport.update({
   path: '/api/public/geo',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicGscSyncRoute = ApiPublicGscSyncRouteImport.update({
+  id: '/api/public/gsc-sync',
+  path: '/api/public/gsc-sync',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicRoastRoute = ApiPublicRoastRouteImport.update({
   id: '/api/public/roast',
   path: '/api/public/roast',
@@ -142,6 +148,7 @@ export interface FileRoutesByFullPath {
   '/admin/': typeof AdminIndexRoute
   '/tools/': typeof ToolsIndexRoute
   '/api/public/geo': typeof ApiPublicGeoRoute
+  '/api/public/gsc-sync': typeof ApiPublicGscSyncRoute
   '/api/public/roast': typeof ApiPublicRoastRoute
   '/api/public/track': typeof ApiPublicTrackRoute
   '/api/public/weekly-report': typeof ApiPublicWeeklyReportRoute
@@ -163,6 +170,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminIndexRoute
   '/tools': typeof ToolsIndexRoute
   '/api/public/geo': typeof ApiPublicGeoRoute
+  '/api/public/gsc-sync': typeof ApiPublicGscSyncRoute
   '/api/public/roast': typeof ApiPublicRoastRoute
   '/api/public/track': typeof ApiPublicTrackRoute
   '/api/public/weekly-report': typeof ApiPublicWeeklyReportRoute
@@ -185,6 +193,7 @@ export interface FileRoutesById {
   '/admin/': typeof AdminIndexRoute
   '/tools/': typeof ToolsIndexRoute
   '/api/public/geo': typeof ApiPublicGeoRoute
+  '/api/public/gsc-sync': typeof ApiPublicGscSyncRoute
   '/api/public/roast': typeof ApiPublicRoastRoute
   '/api/public/track': typeof ApiPublicTrackRoute
   '/api/public/weekly-report': typeof ApiPublicWeeklyReportRoute
@@ -208,6 +217,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/tools/'
     | '/api/public/geo'
+    | '/api/public/gsc-sync'
     | '/api/public/roast'
     | '/api/public/track'
     | '/api/public/weekly-report'
@@ -229,6 +239,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/tools'
     | '/api/public/geo'
+    | '/api/public/gsc-sync'
     | '/api/public/roast'
     | '/api/public/track'
     | '/api/public/weekly-report'
@@ -250,6 +261,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/tools/'
     | '/api/public/geo'
+    | '/api/public/gsc-sync'
     | '/api/public/roast'
     | '/api/public/track'
     | '/api/public/weekly-report'
@@ -272,6 +284,7 @@ export interface RootRouteChildren {
   AdminIndexRoute: typeof AdminIndexRoute
   ToolsIndexRoute: typeof ToolsIndexRoute
   ApiPublicGeoRoute: typeof ApiPublicGeoRoute
+  ApiPublicGscSyncRoute: typeof ApiPublicGscSyncRoute
   ApiPublicRoastRoute: typeof ApiPublicRoastRoute
   ApiPublicTrackRoute: typeof ApiPublicTrackRoute
   ApiPublicWeeklyReportRoute: typeof ApiPublicWeeklyReportRoute
@@ -391,6 +404,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicGeoRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/gsc-sync': {
+      id: '/api/public/gsc-sync'
+      path: '/api/public/gsc-sync'
+      fullPath: '/api/public/gsc-sync'
+      preLoaderRoute: typeof ApiPublicGscSyncRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/roast': {
       id: '/api/public/roast'
       path: '/api/public/roast'
@@ -432,6 +452,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminIndexRoute: AdminIndexRoute,
   ToolsIndexRoute: ToolsIndexRoute,
   ApiPublicGeoRoute: ApiPublicGeoRoute,
+  ApiPublicGscSyncRoute: ApiPublicGscSyncRoute,
   ApiPublicRoastRoute: ApiPublicRoastRoute,
   ApiPublicTrackRoute: ApiPublicTrackRoute,
   ApiPublicWeeklyReportRoute: ApiPublicWeeklyReportRoute,
