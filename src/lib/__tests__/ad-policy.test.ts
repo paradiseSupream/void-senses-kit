@@ -128,27 +128,15 @@ describe("no page loads an unapproved ad format", () => {
 describe("geo tiering", () => {
   const all: AdFormat[] = ["inpage_push", "vignette", "popunder", "adsterra_social_bar"];
 
-  it("keeps the full stack in tier-1 markets", () => {
-    expect(tierAdjust(all, tierOf("US"))).toEqual(all);
-    expect(tierOf("DE")).toBe("tier1");
+  it("never blocks any format by geo", () => {
+    for (const c of ["US", "BR", "BD", "IN", "NG", ""]) {
+      expect(tierAdjust(all, tierOf(c))).toEqual(all);
+    }
   });
 
-  it("drops the vignette in tier-2 markets", () => {
-    expect(tierAdjust(all, tierOf("BR"))).not.toContain("vignette");
-    expect(tierAdjust(all, tierOf("BR"))).toContain("popunder");
-  });
-
-  it("keeps push, social bar and pop-under (but no vignette) in tier-3 markets", () => {
-    expect(tierAdjust(all, tierOf("BD"))).toEqual([
-      "inpage_push",
-      "popunder",
-      "adsterra_social_bar",
-    ]);
-  });
-
-
-  it("scales frequency caps down as CPM drops", () => {
-    expect(tierCapScale("tier1")).toBeGreaterThan(tierCapScale("tier2"));
-    expect(tierCapScale("tier2")).toBeGreaterThan(tierCapScale("tier3"));
+  it("uses uniform frequency caps worldwide", () => {
+    expect(tierCapScale("tier1")).toBe(1);
+    expect(tierCapScale("tier2")).toBe(1);
+    expect(tierCapScale("tier3")).toBe(1);
   });
 });
