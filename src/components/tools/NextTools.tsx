@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 
 import { AdSlot } from "@/components/monetization/AdSlot";
 import { adVariant, track } from "@/lib/monetization";
+import { trackFunnel } from "@/lib/funnel";
 import { relatedTools } from "@/lib/tools";
 
 /** Chains the session after a result: two accent-themed suggestions. */
@@ -14,6 +15,7 @@ export function NextTools({ slug, heading = "Try next" }: { slug: string; headin
   useEffect(() => {
     setVariant(adVariant());
     track({ event_type: "tool_complete", slot: `result-${slug}`, tool_slug: slug });
+    trackFunnel("result_view", slug);
   }, [slug]);
 
   if (next.length === 0) return null;
