@@ -59,6 +59,7 @@ export function ActionGateProvider({ children }: { children: ReactNode }) {
       if (!shouldGate() || !claimImpression("gate")) return Promise.resolve();
 
       const variant = adVariant();
+      void variant;
       const partner = partnerLink(SLOT, toolSlug ?? null);
       clickId.current = partner.clickId;
 
@@ -75,9 +76,9 @@ export function ActionGateProvider({ children }: { children: ReactNode }) {
         click_id: partner.clickId,
       });
 
-      // In the gate-heavy variant the partner smartlink opens alongside the
-      // download; in the result-heavy variant the gate stays ad-light.
-      if (openPartnerTab && variant === "gate_heavy") {
+      // Smartlink opens alongside every gated download for free users; the
+      // A/B arm is still recorded so RPM per variant stays comparable.
+      if (openPartnerTab) {
         window.open(partner.url, "_blank", "noopener,noreferrer");
         track({
           event_type: "click",
