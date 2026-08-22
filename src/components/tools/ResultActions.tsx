@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Copy, Download, RotateCcw, Share2 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -29,6 +30,19 @@ export function ResultActions({
   onRetake?: () => void;
 }) {
   const runGated = useActionGate();
+
+  // Record the finished tool so the home page "3-test run" shows progress.
+  useEffect(() => {
+    try {
+      const raw = window.localStorage.getItem("sov.completed");
+      const list: string[] = raw ? JSON.parse(raw) : [];
+      if (!list.includes(toolSlug)) {
+        window.localStorage.setItem("sov.completed", JSON.stringify([...list, toolSlug]));
+      }
+    } catch {
+      /* storage unavailable */
+    }
+  }, [toolSlug]);
 
   const shareUrl =
     typeof window === "undefined" ? "https://sensesofvoid.app" : window.location.href;
