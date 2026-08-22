@@ -11,11 +11,9 @@ import { relatedTools } from "@/lib/tools";
 export function NextTools({ slug, heading = "Try next" }: { slug: string; heading?: string }) {
   const next = relatedTools(slug);
   const navigate = useNavigate();
-  const [variant, setVariant] = useState<string | null>(null);
   const firedRef = useRef(false);
 
   useEffect(() => {
-    setVariant(adVariant());
     track({ event_type: "tool_complete", slot: `result-${slug}`, tool_slug: slug });
     trackFunnel("result_view", slug);
   }, [slug]);
