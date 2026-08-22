@@ -146,6 +146,39 @@ export type Database = {
         }
         Relationships: []
       }
+      email_leads: {
+        Row: {
+          country: string | null
+          created_at: string
+          email: string
+          id: string
+          session_id: string | null
+          source: string
+          tool_slug: string | null
+          utm_source: string | null
+        }
+        Insert: {
+          country?: string | null
+          created_at?: string
+          email: string
+          id?: string
+          session_id?: string | null
+          source?: string
+          tool_slug?: string | null
+          utm_source?: string | null
+        }
+        Update: {
+          country?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          session_id?: string | null
+          source?: string
+          tool_slug?: string | null
+          utm_source?: string | null
+        }
+        Relationships: []
+      }
       roast_requests: {
         Row: {
           id: string
