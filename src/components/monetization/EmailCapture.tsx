@@ -4,6 +4,7 @@ import { Mail, Check } from "lucide-react";
 
 import { subscribeLead } from "@/lib/leads.functions";
 import { attribution, sessionId, track } from "@/lib/monetization";
+import { useVip } from "@/lib/vip";
 
 const KEY = "sov.lead";
 
@@ -21,6 +22,7 @@ export function EmailCapture({
   source?: string;
   className?: string;
 }) {
+  const { isVip } = useVip();
   const submit = useServerFn(subscribeLead);
   const [email, setEmail] = useState("");
   const [state, setState] = useState<"idle" | "busy" | "done">("idle");
@@ -32,6 +34,8 @@ export function EmailCapture({
       /* storage unavailable */
     }
   }, []);
+
+  if (isVip) return null;
 
   if (state === "done") {
     return (
