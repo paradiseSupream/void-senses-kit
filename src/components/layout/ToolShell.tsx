@@ -4,6 +4,8 @@ import { ChevronLeft, Clock, Download, ListChecks, ShieldCheck } from "lucide-re
 
 import { TOOLS } from "@/lib/tools";
 import { NextTools } from "@/components/tools/NextTools";
+import { AdSlot } from "@/components/monetization/AdSlot";
+import { NativeAdCard } from "@/components/monetization/NativeAdCard";
 import { track } from "@/lib/monetization";
 import { trackFunnel } from "@/lib/funnel";
 
