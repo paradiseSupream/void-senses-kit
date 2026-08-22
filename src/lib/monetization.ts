@@ -83,6 +83,35 @@ export function adVariant(): AdVariant {
   }
 }
 
+/* ------------------------------------------------- copy experiment (bounce) */
+
+const COPY_KEY = "sov.copyVariant";
+
+/** Homepage hero copy arms — measured against bounce / test_start. */
+export const COPY_VARIANTS = ["clarity", "curiosity", "speed"] as const;
+export type CopyVariant = (typeof COPY_VARIANTS)[number];
+
+/** Sticky per-visitor hero copy bucket. */
+export function copyVariant(): CopyVariant {
+  if (typeof window === "undefined") return "clarity";
+  try {
+    const stored = window.localStorage.getItem(COPY_KEY);
+    if (stored && (COPY_VARIANTS as readonly string[]).includes(stored)) {
+      return stored as CopyVariant;
+    }
+    const picked = COPY_VARIANTS[Math.floor(Math.random() * COPY_VARIANTS.length)]!;
+    window.localStorage.setItem(COPY_KEY, picked);
+    return picked;
+  } catch {
+    return "clarity";
+  }
+}
+
+/** Records an experiment exposure or interaction (slot = `hero_view` etc.). */
+export function trackExperiment(slot: string, arm: string) {
+  track({ event_type: "experiment", slot, format: arm, zone: arm });
+}
+
 /* --------------------------------------------------------- frequency capping */
 
 type CapState = { hour: number; counts: Record<string, number>; session: Record<string, number> };

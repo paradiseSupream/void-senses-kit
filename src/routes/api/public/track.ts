@@ -14,6 +14,8 @@ const EVENT_TYPES = new Set([
   "script_blocked",
   "web_vital",
   "consent",
+  "funnel",
+  "experiment",
 ]);
 
 
