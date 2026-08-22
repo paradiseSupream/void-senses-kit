@@ -198,6 +198,8 @@ function IqTest() {
               ],
               footer: "sensesofvoid.app · entertainment estimate, not a standardized IQ assessment",
               fileName: "senses-of-void-cognitive-certificate.png",
+              toolName: "Quick IQ Test",
+              toolPath: "/tools/iq",
               text: `I scored ${result.estimate} (${result.percentile}th percentile) on the Senses of Void IQ test.`,
             }}
           />
