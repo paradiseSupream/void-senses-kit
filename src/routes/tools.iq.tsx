@@ -8,6 +8,7 @@ import { markQuizInteraction } from "@/lib/engagement";
 import { QuizVipNudge } from "@/components/monetization/QuizVipNudge";
 import { ResultActions } from "@/components/tools/ResultActions";
 import { TraitBars } from "@/components/tools/TraitBars";
+import { LockedReport } from "@/components/monetization/LockedReport";
 import { IQ_BANK, IQ_PER_CATEGORY, IQ_SESSION_SIZE } from "@/lib/banks/iq";
 import {
   newSeed,
@@ -215,8 +216,12 @@ function IqTest() {
             {name.trim() || "Anonymous Participant"} · strongest area: {result.strongest}
           </p>
 
+          <div className="mt-8">
+            <LockedReport toolSlug="iq" title="Category-by-category score breakdown">
           <div className="mt-8 text-left">
-            <TraitBars data={result.breakdown} />
+              <TraitBars data={result.breakdown} />
+            </div>
+            </LockedReport>
           </div>
 
           <ResultActions

@@ -19,6 +19,7 @@ import { MobileTabBar } from "@/components/layout/MobileTabBar";
 import { SocialBar } from "@/components/monetization/SocialBar";
 import { StickyBottomAd } from "@/components/monetization/StickyBottomAd";
 import { VipModal } from "@/components/monetization/VipModal";
+import { ExitIntentOffer } from "@/components/monetization/ExitIntentOffer";
 import { ActionGateProvider } from "@/components/monetization/ActionGate";
 import { VipProvider } from "@/lib/vip";
 import { SiteConfigProvider } from "@/lib/site-config";
@@ -165,6 +166,7 @@ function RootComponent() {
             <SocialBar />
             <CookieBanner />
             <VipModal />
+            <ExitIntentOffer />
             <Toaster theme="dark" position="top-center" richColors />
           </ActionGateProvider>
         </SiteConfigProvider>

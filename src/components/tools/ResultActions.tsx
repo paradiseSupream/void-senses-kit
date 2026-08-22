@@ -154,13 +154,6 @@ export function ResultActions({
         className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-hairline px-4 text-sm font-medium transition-colors hover:bg-surface-2"
       >
 
-        <Download className="size-4" aria-hidden="true" /> Download HD card
-      </button>
-      <button
-        type="button"
-        onClick={nativeShare}
-        className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-hairline px-4 text-sm font-medium transition-colors hover:bg-surface-2"
-      >
         <Share2 className="size-4" aria-hidden="true" /> Share
       </button>
       <button
