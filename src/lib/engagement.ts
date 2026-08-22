@@ -76,7 +76,10 @@ export function whenEngaged(cb: () => void, fallbackMs = 12_000): () => void {
     return () => undefined;
   }
   window.addEventListener(INTERACTION_EVENT, fire, { once: true });
-  const timer = window.setTimeout(fire, fallbackMs);
+  // Deadline is absolute (from page load), so React effect re-runs cannot keep
+  // restarting the countdown and starve the ad forever.
+  const elapsed = Math.max(0, performance.now() - mountedAt);
+  const timer = window.setTimeout(fire, Math.max(0, fallbackMs - elapsed));
   return () => {
     window.removeEventListener(INTERACTION_EVENT, fire);
     window.clearTimeout(timer);
