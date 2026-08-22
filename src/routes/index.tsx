@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 
 import {
@@ -27,6 +27,7 @@ import { SampleResult } from "@/components/home/SampleResult";
 import { StreakChallenge } from "@/components/home/StreakChallenge";
 import { HomeFaq } from "@/components/home/HomeFaq";
 import { useVip } from "@/lib/vip";
+import { copyVariant, trackExperiment, type CopyVariant } from "@/lib/monetization";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -108,8 +109,50 @@ const GOALS: Goal[] = [
   { id: "fun", label: "Just for fun", icon: Laugh, slugs: ["roast", "prompt-maker", "vault"] },
 ];
 
+/**
+ * Hero copy A/B test. Three arms compete on the fastest signal we have against
+ * bounce: the share of exposed sessions that reach `test_start` in the funnel.
+ */
+const HERO_COPY: Record<
+  CopyVariant,
+  { badge: string; title: string; accent: string; sub: string; cta: string; second: string }
+> = {
+  clarity: {
+    badge: "100% free · no signup · ad supported",
+    title: "Free IQ & psychology tests",
+    accent: "that actually show you something",
+    sub: "Answer for 2–5 minutes and get a radar map of your mind, written analysis and an HD card you can share — scored entirely in your browser, with fresh randomised questions every single time.",
+    cta: "Start the free IQ test",
+    second: "See all 7 tools",
+  },
+  curiosity: {
+    badge: "7 free tests · results in 3 minutes",
+    title: "What does your mind",
+    accent: "actually look like?",
+    sub: "One question at a time, a radar map of your traits at the end, and an HD card worth screenshotting. No signup, no email, nothing saved.",
+    cta: "Reveal my results — free",
+    second: "Browse all 7 tests",
+  },
+  speed: {
+    badge: "No signup · starts instantly",
+    title: "Take a real IQ test",
+    accent: "in under 3 minutes",
+    sub: "Timed, randomised questions scored on your device the second you finish — with a visual report and share card you can download straight away.",
+    cta: "Start now — 3 minutes",
+    second: "Or pick another test",
+  },
+};
+
 function Home() {
   const [query, setQuery] = useState("");
+  const [arm, setArm] = useState<CopyVariant>("clarity");
+  const copy = HERO_COPY[arm];
+
+  useEffect(() => {
+    const picked = copyVariant();
+    setArm(picked);
+    trackExperiment("hero_view", picked);
+  }, []);
   const [goal, setGoal] = useState("all");
   const { openVipModal, isVip } = useVip();
 
@@ -138,24 +181,22 @@ function Home() {
                 <span className="absolute inline-flex size-full animate-ping rounded-full bg-primary opacity-70" />
                 <span className="relative inline-flex size-1.5 rounded-full bg-primary" />
               </span>
-              100% free · no signup · ad supported
+              {copy.badge}
             </span>
 
             <h1
               className="reveal mt-5 font-display text-[2.3rem] leading-[1.03] font-bold tracking-tight text-balance sm:mt-7 sm:text-6xl lg:text-[4.1rem]"
               style={{ animationDelay: "60ms" }}
             >
-              Free IQ &amp; psychology tests
-              <span className="text-gradient mt-1 block">that actually show you something</span>
+              {copy.title}
+              <span className="text-gradient mt-1 block">{copy.accent}</span>
             </h1>
 
             <p
               className="reveal mx-auto mt-4 max-w-xl text-[0.97rem] leading-relaxed text-pretty text-muted-foreground sm:mt-6 sm:text-lg lg:mx-0"
               style={{ animationDelay: "120ms" }}
             >
-              Answer for 2–5 minutes and get a radar map of your mind, written analysis and an HD
-              card you can share — scored entirely in your browser, with fresh randomised questions
-              every single time.
+              {copy.sub}
             </p>
 
             <div
@@ -164,15 +205,17 @@ function Home() {
             >
               <Link
                 to="/tools/iq"
+                onClick={() => trackExperiment("hero_cta", arm)}
                 className="btn-glow inline-flex min-h-13 items-center justify-center gap-2 rounded-full px-7 text-base font-semibold"
               >
-                Start the free IQ test <ArrowRight className="size-4" aria-hidden="true" />
+                {copy.cta} <ArrowRight className="size-4" aria-hidden="true" />
               </Link>
               <a
                 href="#suite"
+                onClick={() => trackExperiment("hero_secondary", arm)}
                 className="inline-flex min-h-13 items-center justify-center gap-2 rounded-full border border-hairline bg-surface/60 px-7 text-base font-semibold backdrop-blur-xl transition-colors hover:bg-surface-2"
               >
-                See all 7 tools
+                {copy.second}
               </a>
             </div>
 
