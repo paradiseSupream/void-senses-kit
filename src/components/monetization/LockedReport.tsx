@@ -1,13 +1,17 @@
 import { useEffect, useState } from "react";
-import { Crown, Lock, Sparkles } from "lucide-react";
+import { Crown, Lock, Sparkles, Swords } from "lucide-react";
+import { toast } from "sonner";
 
 import { useVip } from "@/lib/vip";
 import { useSiteConfig } from "@/lib/site-config";
 import { useActionGate } from "@/components/monetization/ActionGate";
 import { AdSlot } from "@/components/monetization/AdSlot";
+import { EmailCapture } from "@/components/monetization/EmailCapture";
 import { isUnlocked, onUnlock, unlockReport } from "@/lib/unlock";
 import { partnerLink, track } from "@/lib/monetization";
 import { trackFunnel } from "@/lib/funnel";
+import { compareUrl, type ComparePayload } from "@/lib/compare-link";
+
 
 /**
  * Paywall-lite for the deep half of a result.
