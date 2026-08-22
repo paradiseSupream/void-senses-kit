@@ -46,6 +46,7 @@ function StatTable({ rows, label }: { rows: SlotStat[]; label: string }) {
             <th className="py-2 pr-3 font-normal">CTR</th>
             <th className="py-2 pr-3 font-normal">Conv.</th>
             <th className="py-2 pr-3 font-normal">Revenue</th>
+            <th className="py-2 pr-3 font-normal">eCPM</th>
             <th className="py-2 font-normal">RPM</th>
           </tr>
         </thead>
@@ -58,6 +59,7 @@ function StatTable({ rows, label }: { rows: SlotStat[]; label: string }) {
               <td className="py-2 pr-3">{pct(row.ctr)}</td>
               <td className="py-2 pr-3">{row.conversions}</td>
               <td className="py-2 pr-3">{money(row.revenueCents)}</td>
+              <td className="py-2 pr-3">${row.ecpm.toFixed(2)}</td>
               <td className="py-2">${row.rpm.toFixed(2)}</td>
             </tr>
           ))}
@@ -137,6 +139,109 @@ export function ReportsTab({ token }: { token: string }) {
 
       {stats ? (
         <>
+          <Panel title="Conversion funnel (visit → test → dwell → result → VIP)">
+            {stats.funnel[0]?.sessions ? (
+              <div className="space-y-2">
+                {stats.funnel.map((step) => (
+                  <div key={step.step}>
+                    <div className="flex items-baseline justify-between text-sm">
+                      <span className="font-mono text-xs">{step.step}</span>
+                      <span className="text-muted-foreground">
+                        {step.sessions} sessions · {pct(step.ofVisit)} of visits ·{" "}
+                        {pct(step.ofPrevious)} of previous
+                        {step.dropOff > 0 ? ` · -${step.dropOff}` : ""}
+                      </span>
+                    </div>
+                    <div className="mt-1 h-2 w-full overflow-hidden rounded-full bg-surface-2">
+                      <div
+                        className="h-full rounded-full bg-primary"
+                        style={{ width: `${Math.min(100, step.ofVisit)}%` }}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground">No funnel events recorded yet.</p>
+            )}
+          </Panel>
+
+          <Panel title="Per-tool revenue, eCPM and session conversion">
+            {stats.byTool.length === 0 ? (
+              <p className="text-sm text-muted-foreground">No tool activity yet.</p>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="label-mono text-left text-muted-foreground">
+                      <th className="py-2 pr-3 font-normal">Tool</th>
+                      <th className="py-2 pr-3 font-normal">Starts</th>
+                      <th className="py-2 pr-3 font-normal">Completes</th>
+                      <th className="py-2 pr-3 font-normal">Completion</th>
+                      <th className="py-2 pr-3 font-normal">Impr.</th>
+                      <th className="py-2 pr-3 font-normal">Revenue</th>
+                      <th className="py-2 pr-3 font-normal">eCPM</th>
+                      <th className="py-2 font-normal">RPM</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {stats.byTool.map((row) => (
+                      <tr key={row.key} className="border-t border-hairline/60">
+                        <td className="py-2 pr-3 font-mono text-xs">{row.key}</td>
+                        <td className="py-2 pr-3">{row.starts}</td>
+                        <td className="py-2 pr-3">{row.completes}</td>
+                        <td className="py-2 pr-3">{pct(row.completion)}</td>
+                        <td className="py-2 pr-3">{row.impressions}</td>
+                        <td className="py-2 pr-3">{money(row.revenueCents)}</td>
+                        <td className="py-2 pr-3">${row.ecpm.toFixed(2)}</td>
+                        <td className="py-2">${row.rpm.toFixed(2)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </Panel>
+
+          <Panel title="Copy A/B tests (arm → started a test)">
+            {stats.experiments.length === 0 ? (
+              <p className="text-sm text-muted-foreground">No experiment exposures yet.</p>
+            ) : (
+              <div className="space-y-4">
+                {stats.experiments.map((exp) => (
+                  <div key={exp.slot}>
+                    <span className="label-mono">{exp.slot}</span>
+                    <table className="mt-1 w-full text-sm">
+                      <thead>
+                        <tr className="label-mono text-left text-muted-foreground">
+                          <th className="py-1.5 pr-3 font-normal">Arm</th>
+                          <th className="py-1.5 pr-3 font-normal">Sessions</th>
+                          <th className="py-1.5 pr-3 font-normal">Started a test</th>
+                          <th className="py-1.5 font-normal">Rate</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {exp.arms.map((arm, i) => (
+                          <tr key={arm.arm} className="border-t border-hairline/60">
+                            <td className="py-1.5 pr-3 font-mono text-xs">
+                              {arm.arm}
+                              {i === 0 && arm.exposures > 0 ? (
+                                <span className="ml-2 text-primary">leader</span>
+                              ) : null}
+                            </td>
+                            <td className="py-1.5 pr-3">{arm.exposures}</td>
+                            <td className="py-1.5 pr-3">{arm.conversions}</td>
+                            <td className="py-1.5">{pct(arm.rate)}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ))}
+              </div>
+            )}
+          </Panel>
+
           <Panel title="Revenue by ad format">
             <Chart rows={stats.byFormat} />
             <div className="mt-3">
