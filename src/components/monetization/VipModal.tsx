@@ -9,7 +9,7 @@ import { attribution, sessionId } from "@/lib/monetization";
 import { useVip, type VipPlan } from "@/lib/vip";
 import { useSiteConfig } from "@/lib/site-config";
 import { trackFunnel } from "@/lib/funnel";
-import { OFFER_CENTS, useVipOffer } from "@/lib/vip-offer";
+import { MONTHLY_OFFER_CENTS, OFFER_CENTS, useVipOffer } from "@/lib/vip-offer";
 
 /** Monthly no-ads pass — a low-friction entry point next to lifetime VIP. */
 export const VIP_MONTHLY_CENTS = 499;
