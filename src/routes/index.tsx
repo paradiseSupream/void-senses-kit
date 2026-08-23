@@ -70,6 +70,8 @@ export const Route = createFileRoute("/")({
   component: Home,
 });
 
+const QUICK_PICKS = ["dark-personality", "love-match", "iq", "roast"] as const;
+
 const STATS = [
   { icon: Gauge, k: "< 1.5s", v: "first paint" },
   { icon: Fingerprint, k: "On-device", v: "test scoring" },
