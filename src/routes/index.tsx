@@ -394,7 +394,7 @@ function Home() {
           })}
         </div>
 
-        <div className="relative mt-4 w-full sm:max-w-sm">
+        <div className="relative mt-4 hidden w-full sm:block sm:max-w-sm">
           <label htmlFor="hub-filter" className="sr-only">
             Filter tools
           </label>
