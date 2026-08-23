@@ -480,7 +480,7 @@ function Home() {
             </Link>
             <button
               type="button"
-              onClick={openVipModal}
+              onClick={() => openVipModal()}
               className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full border border-hairline bg-surface/60 px-6 text-sm font-semibold backdrop-blur-xl transition-colors hover:bg-surface-2"
             >
               <Wallet className="size-4" aria-hidden="true" />

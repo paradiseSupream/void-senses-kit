@@ -38,7 +38,7 @@ export function Header() {
         {isVip ? (
           <button
             type="button"
-            onClick={openVipModal}
+            onClick={() => openVipModal()}
             className="ml-auto inline-flex shrink-0 items-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-3 py-1.5 text-xs font-semibold text-primary"
           >
             <Crown className="size-3.5" aria-hidden="true" />
