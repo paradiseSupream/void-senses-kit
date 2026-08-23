@@ -162,16 +162,94 @@ const HERO_COPY: Record<
   },
 };
 
+/**
+ * Paid-traffic message match. `/?t=<slug>` swaps the hero into a single-promise
+ * landing view for that exact test, so an ad click lands on the same words it
+ * was sold with — no separate landing route to maintain, and the whole suite
+ * stays one page below the fold.
+ */
+const FOCUS: Record<
+  string,
+  { title: string; accent: string; sub: string; cta: string; reasons: [string, string, string] }
+> = {
+  "dark-personality": {
+    title: "Which dark archetype",
+    accent: "is hiding in your shadow?",
+    sub: "Eighteen randomised statements weigh strategy, detachment, ambition, control, charm and defiance — then name the archetype that runs you.",
+    cta: "Reveal my archetype — free",
+    reasons: [
+      "Six shadow traits on a visual radar, not one vague label",
+      "A fresh randomised question set every attempt",
+      "HD share card ready to post the second you finish",
+    ],
+  },
+  "love-match": {
+    title: "How real is the chemistry",
+    accent: "between you two?",
+    sub: "Fifteen randomised questions score banter, trust, adventure, calm and spark, then hand you an honest verdict card built for stories.",
+    cta: "Check our vibe — free",
+    reasons: [
+      "Five chemistry dimensions broken down, not one flat percentage",
+      "About two minutes, works on any phone, no signup",
+      "Story-sized card for Instagram and TikTok",
+    ],
+  },
+  iq: {
+    title: "Take a real IQ test",
+    accent: "in under 3 minutes",
+    sub: "Timed, randomised reasoning questions scored on your device the second you finish, with a visual report you can download straight away.",
+    cta: "Start the IQ test — free",
+    reasons: [
+      "Scored instantly on your device, no waiting screen",
+      "Different question set every run, so retakes stay honest",
+      "Downloadable score report and share card",
+    ],
+  },
+  "child-trauma": {
+    title: "Which childhood patterns",
+    accent: "still run your reactions?",
+    sub: "Eighteen randomised statements build a radar of six emotional dimensions, with a written reflection for every band you land in.",
+    cta: "See my patterns — free",
+    reasons: [
+      "Six emotional axes mapped, plus written reflection per band",
+      "Answers never leave your browser — nothing is saved",
+      "Takes about three minutes",
+    ],
+  },
+};
+
+const DEFAULT_REASONS: [string, string, string] = [
+  "Scored on your device the moment you answer — no waiting, no account",
+  "Fresh randomised questions every run, so results stay honest",
+  "Visual radar report and an HD share card you can download free",
+];
+
 function Home() {
   const [query, setQuery] = useState("");
   const [arm, setArm] = useState<CopyVariant>("clarity");
-  const copy = HERO_COPY[arm];
+  const [focusSlug, setFocusSlug] = useState<string | null>(null);
 
   useEffect(() => {
     const picked = copyVariant();
     setArm(picked);
+    const slug = new URLSearchParams(window.location.search).get("t");
+    if (slug && FOCUS[slug]) {
+      setFocusSlug(slug);
+      trackExperiment("hero_view", `focus:${slug}`);
+      return;
+    }
     trackExperiment("hero_view", picked);
   }, []);
+
+  const focusTool = focusSlug ? (TOOLS.find((t) => t.slug === focusSlug) ?? null) : null;
+  const focusCopy = focusSlug ? FOCUS[focusSlug] : undefined;
+  const base = HERO_COPY[arm];
+  const copy = focusCopy
+    ? { ...base, title: focusCopy.title, accent: focusCopy.accent, sub: focusCopy.sub, cta: focusCopy.cta }
+    : base;
+  const reasons = focusCopy?.reasons ?? DEFAULT_REASONS;
+  const primaryPath = focusTool ? `${focusTool.path}?auto=1` : "/tools/iq";
+  const heroArm = focusSlug ? `focus:${focusSlug}` : arm;
   const [goal, setGoal] = useState("all");
   const { openVipModal, isVip } = useVip();
 
@@ -222,21 +300,33 @@ function Home() {
               className="reveal mt-7 flex flex-col gap-3 sm:mt-8 sm:flex-row sm:flex-wrap lg:justify-start"
               style={{ animationDelay: "180ms" }}
             >
-              <Link
-                to="/tools/iq"
-                onClick={() => trackExperiment("hero_cta", arm)}
-                className="btn-glow inline-flex min-h-13 items-center justify-center gap-2 rounded-full px-7 text-base font-semibold"
+              <a
+                href={primaryPath}
+                onClick={() => trackExperiment("hero_cta", heroArm)}
+                className="btn-glow inline-flex min-h-14 items-center justify-center gap-2 rounded-full px-7 text-base font-semibold"
               >
                 {copy.cta} <ArrowRight className="size-4" aria-hidden="true" />
-              </Link>
+              </a>
               <a
                 href="#suite"
-                onClick={() => trackExperiment("hero_secondary", arm)}
-                className="inline-flex min-h-13 items-center justify-center gap-2 rounded-full border border-hairline bg-surface/60 px-7 text-base font-semibold backdrop-blur-xl transition-colors hover:bg-surface-2"
+                onClick={() => trackExperiment("hero_secondary", heroArm)}
+                className="inline-flex min-h-14 items-center justify-center gap-2 rounded-full border border-hairline bg-surface/60 px-7 text-base font-semibold backdrop-blur-xl transition-colors hover:bg-surface-2"
               >
-                {copy.second}
+                {focusTool ? "See all 7 tests" : copy.second}
               </a>
             </div>
+
+            <ul
+              className="reveal mx-auto mt-6 grid max-w-xl gap-2 text-left sm:mt-7 lg:mx-0"
+              style={{ animationDelay: "200ms" }}
+            >
+              {reasons.map((reason) => (
+                <li key={reason} className="flex items-start gap-2.5 text-sm text-muted-foreground">
+                  <BadgeCheck className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden="true" />
+                  <span>{reason}</span>
+                </li>
+              ))}
+            </ul>
 
             <p
               className="reveal label-mono mt-4 flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 lg:justify-start"
