@@ -344,7 +344,7 @@ function Home() {
             </p>
           </div>
 
-          <div className="reveal" style={{ animationDelay: "260ms" }}>
+          <div className="reveal hidden lg:block" style={{ animationDelay: "260ms" }}>
             <SampleResult />
           </div>
         </div>
@@ -363,65 +363,8 @@ function Home() {
       </section>
 
 
-      {/* ---------------- Popular rail (mobile-first swipe) ---------------- */}
-      <section className="mx-auto max-w-7xl px-4 pt-8 sm:px-6 sm:pt-16">
-        <div className="flex items-end justify-between gap-4">
-          <div>
-            <span className="label-mono">Most taken this week</span>
-            <h2 className="mt-1.5 font-display text-xl font-bold tracking-tight sm:text-2xl">
-              Start with a crowd favourite
-            </h2>
-          </div>
-        </div>
-        <ul className="mt-5 -mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-2 sm:mx-0 sm:px-0">
-          {popular.map((tool) => {
-            const Icon = tool.icon;
-            return (
-              <li key={tool.slug} className="w-[15rem] shrink-0 snap-start">
-                <Link
-                  to={tool.path}
-                  style={{ ["--tool-accent" as string]: tool.accent }}
-                  className="panel lift group block h-full overflow-hidden"
-                >
-                  <div className="relative aspect-[16/10]">
-                    <img
-                      src={tool.cover}
-                      alt=""
-                      width={1024}
-                      height={576}
-                      loading="lazy"
-                      className="size-full object-cover"
-                    />
-                    <div
-                      aria-hidden="true"
-                      className="absolute inset-0 bg-gradient-to-t from-background to-transparent"
-                    />
-                    <span className="label-mono absolute top-2.5 left-2.5 rounded-full border border-primary/35 bg-background/80 px-2 py-0.5 text-primary backdrop-blur-md">
-                      Free
-                    </span>
-                  </div>
-                  <div className="p-4">
-                    <span className="flex items-center gap-2 font-display text-sm font-semibold">
-                      <Icon
-                        className="size-4 shrink-0"
-                        style={{ color: "var(--tool-accent)" }}
-                        aria-hidden="true"
-                      />
-                      <span className="truncate">{tool.name}</span>
-                    </span>
-                    <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-muted-foreground">
-                      {tool.promise}
-                    </p>
-                  </div>
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
-      </section>
-
       {/* ---------------- Tool suite + goal finder ---------------- */}
-      <section id="suite" className="mx-auto max-w-7xl scroll-mt-20 px-4 py-12 sm:px-6 sm:py-20">
+      <section id="suite" className="mx-auto max-w-7xl scroll-mt-20 px-4 py-8 sm:px-6 sm:py-20">
         <div className="max-w-2xl">
           <span className="label-mono">Find your test</span>
           <h2 className="mt-2 font-display text-2xl font-bold tracking-tight sm:text-4xl">
