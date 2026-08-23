@@ -349,9 +349,8 @@ function Home() {
                 const Icon = t.icon;
                 return (
                   <li key={slug}>
-                    <Link
-                      to={t.path}
-                      search={{ auto: "1" } as never}
+                    <a
+                      href={`${t.path}?auto=1`}
                       style={{ ["--tool-accent" as string]: t.accent }}
                       className="inline-flex min-h-11 items-center gap-2 rounded-full border border-hairline bg-surface/60 px-4 text-sm font-semibold backdrop-blur-xl transition-colors hover:bg-surface-2"
                     >
@@ -361,7 +360,7 @@ function Home() {
                         aria-hidden="true"
                       />
                       {t.name}
-                    </Link>
+                    </a>
                   </li>
                 );
               })}
