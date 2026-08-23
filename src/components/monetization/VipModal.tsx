@@ -105,7 +105,9 @@ export function VipModal() {
                 key: "monthly" as const,
                 label: "1 month, no ads",
                 amount: monthlyPrice,
-                note: "cancel anytime — nothing auto-renews",
+                note: offerActive
+                  ? `one-visit offer — normally $${(VIP_MONTHLY_CENTS / 100).toFixed(2)}`
+                  : "cancel anytime — nothing auto-renews",
               },
               {
                 key: "lifetime" as const,
