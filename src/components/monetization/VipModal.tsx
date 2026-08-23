@@ -9,7 +9,7 @@ import { attribution, sessionId } from "@/lib/monetization";
 import { useVip, type VipPlan } from "@/lib/vip";
 import { useSiteConfig } from "@/lib/site-config";
 import { trackFunnel } from "@/lib/funnel";
-import { OFFER_CENTS, useVipOffer } from "@/lib/vip-offer";
+import { MONTHLY_OFFER_CENTS, OFFER_CENTS, useVipOffer } from "@/lib/vip-offer";
 
 /** Monthly no-ads pass — a low-friction entry point next to lifetime VIP. */
 export const VIP_MONTHLY_CENTS = 499;
@@ -23,22 +23,26 @@ const PERKS = [
 ];
 
 export function VipModal() {
-  const { vipModalOpen, closeVipModal, setVip, isVip } = useVip();
+  const { vipModalOpen, closeVipModal, setVip, isVip, preferredPlan } = useVip();
   const saveLead = useServerFn(subscribeLead);
   const [email, setEmail] = useState("");
   const [emailSaved, setEmailSaved] = useState(false);
   const [tab, setTab] = useState<"card" | "crypto">("card");
-  const [plan, setPlan] = useState<VipPlan>("lifetime");
+  const [plan, setPlan] = useState<VipPlan>(preferredPlan);
   const { site } = useSiteConfig();
   const offerActive = useVipOffer();
   const lifetimeCents = offerActive ? OFFER_CENTS : site.vip_price_cents;
+  const monthlyCents = offerActive ? MONTHLY_OFFER_CENTS : VIP_MONTHLY_CENTS;
   const lifetimePrice = `$${(lifetimeCents / 100).toFixed(0)}`;
-  const monthlyPrice = `$${(VIP_MONTHLY_CENTS / 100).toFixed(2)}`;
+  const monthlyPrice = `$${(monthlyCents / 100).toFixed(2)}`;
   const price = plan === "lifetime" ? lifetimePrice : monthlyPrice;
 
   useEffect(() => {
-    if (vipModalOpen) trackFunnel("vip_gate_shown");
-  }, [vipModalOpen]);
+    if (vipModalOpen) {
+      setPlan(preferredPlan);
+      trackFunnel("vip_gate_shown");
+    }
+  }, [vipModalOpen, preferredPlan]);
 
   const persistEmail = async () => {
     if (!email.includes("@")) {
@@ -101,7 +105,9 @@ export function VipModal() {
                 key: "monthly" as const,
                 label: "1 month, no ads",
                 amount: monthlyPrice,
-                note: "cancel anytime — nothing auto-renews",
+                note: offerActive
+                  ? `one-visit offer — normally $${(VIP_MONTHLY_CENTS / 100).toFixed(2)}`
+                  : "cancel anytime — nothing auto-renews",
               },
               {
                 key: "lifetime" as const,

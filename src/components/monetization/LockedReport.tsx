@@ -132,7 +132,7 @@ export function LockedReport({
         <div className="mt-5 flex flex-col gap-2.5 sm:flex-row sm:justify-center">
           <button
             type="button"
-            onClick={openVipModal}
+            onClick={() => openVipModal()}
             className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-primary px-5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
           >
             <Crown className="size-4" aria-hidden="true" /> Unlock forever · {price}

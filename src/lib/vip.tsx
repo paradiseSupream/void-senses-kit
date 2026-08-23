@@ -14,7 +14,9 @@ type VipContextValue = {
   expiresAt: number | null;
   setVip: (value: boolean, plan?: VipPlan) => void;
   vipModalOpen: boolean;
-  openVipModal: () => void;
+  /** Plan the modal should preselect when it opens. */
+  preferredPlan: VipPlan;
+  openVipModal: (plan?: VipPlan) => void;
   closeVipModal: () => void;
 };
 
@@ -27,6 +29,7 @@ export function VipProvider({ children }: { children: ReactNode }) {
   const [plan, setPlan] = useState<VipPlan | null>(null);
   const [expiresAt, setExpiresAt] = useState<number | null>(null);
   const [vipModalOpen, setVipModalOpen] = useState(false);
+  const [preferredPlan, setPreferredPlan] = useState<VipPlan>("lifetime");
 
   useEffect(() => {
     try {
@@ -69,10 +72,14 @@ export function VipProvider({ children }: { children: ReactNode }) {
       expiresAt,
       setVip,
       vipModalOpen,
-      openVipModal: () => setVipModalOpen(true),
+      preferredPlan,
+      openVipModal: (next?: VipPlan) => {
+        if (next === "monthly" || next === "lifetime") setPreferredPlan(next);
+        setVipModalOpen(true);
+      },
       closeVipModal: () => setVipModalOpen(false),
     }),
-    [isVip, plan, expiresAt, setVip, vipModalOpen],
+    [isVip, plan, expiresAt, setVip, vipModalOpen, preferredPlan],
   );
 
   return <VipContext.Provider value={value}>{children}</VipContext.Provider>;

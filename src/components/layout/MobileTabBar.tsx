@@ -43,7 +43,7 @@ export function MobileTabBar() {
         <li>
           <button
             type="button"
-            onClick={openVipModal}
+            onClick={() => openVipModal()}
             className="flex min-h-[3.25rem] w-full flex-col items-center justify-center gap-1 text-[0.65rem] font-medium text-muted-foreground transition-colors"
           >
             <Crown className="size-5 text-primary" aria-hidden="true" />

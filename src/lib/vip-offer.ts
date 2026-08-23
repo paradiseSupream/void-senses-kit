@@ -13,6 +13,9 @@ const EVENT = "sov:vip-offer";
 /** Discounted lifetime price while the exit offer is active. */
 export const OFFER_CENTS = 900;
 
+/** Discounted monthly pass price while the exit offer is active. */
+export const MONTHLY_OFFER_CENTS = 299;
+
 export function hasVipOffer(): boolean {
   if (typeof window === "undefined") return false;
   try {
