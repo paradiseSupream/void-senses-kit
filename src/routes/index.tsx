@@ -342,13 +342,13 @@ function Home() {
             </p>
 
             {/* Quick picks keep the top-converting tools reachable without any scroll. */}
-            <ul className="reveal mt-4 -mx-4 flex snap-x gap-2 overflow-x-auto px-4 pb-1 lg:mx-0 lg:flex-wrap lg:px-0">
+            <ul className="reveal mt-4 flex flex-wrap justify-center gap-2 lg:justify-start">
               {QUICK_PICKS.map((slug) => {
                 const t = TOOLS.find((x) => x.slug === slug);
                 if (!t) return null;
                 const Icon = t.icon;
                 return (
-                  <li key={slug} className="shrink-0 snap-start">
+                  <li key={slug}>
                     <Link
                       to={t.path}
                       search={{ auto: "1" } as never}
