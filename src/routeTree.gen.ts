@@ -17,6 +17,7 @@ import { Route as TermsRouteImport } from './routes/terms'
 import { Route as VaultRouteImport } from './routes/vault'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AdminMonetizationRouteImport } from './routes/admin.monetization'
+import { Route as GoDarkPersonalityRouteImport } from './routes/go.dark-personality'
 import { Route as ToolsIndexRouteImport } from './routes/tools.index'
 import { Route as ToolsChildTraumaRouteImport } from './routes/tools.child-trauma'
 import { Route as ToolsDarkPersonalityRouteImport } from './routes/tools.dark-personality'
@@ -68,6 +69,11 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
 const AdminMonetizationRoute = AdminMonetizationRouteImport.update({
   id: '/admin/monetization',
   path: '/admin/monetization',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GoDarkPersonalityRoute = GoDarkPersonalityRouteImport.update({
+  id: '/go/dark-personality',
+  path: '/go/dark-personality',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ToolsIndexRoute = ToolsIndexRouteImport.update({
@@ -139,6 +145,7 @@ export interface FileRoutesByFullPath {
   '/terms': typeof TermsRoute
   '/vault': typeof VaultRoute
   '/admin/monetization': typeof AdminMonetizationRoute
+  '/go/dark-personality': typeof GoDarkPersonalityRoute
   '/tools/child-trauma': typeof ToolsChildTraumaRoute
   '/tools/dark-personality': typeof ToolsDarkPersonalityRoute
   '/tools/iq': typeof ToolsIqRoute
@@ -161,6 +168,7 @@ export interface FileRoutesByTo {
   '/terms': typeof TermsRoute
   '/vault': typeof VaultRoute
   '/admin/monetization': typeof AdminMonetizationRoute
+  '/go/dark-personality': typeof GoDarkPersonalityRoute
   '/tools/child-trauma': typeof ToolsChildTraumaRoute
   '/tools/dark-personality': typeof ToolsDarkPersonalityRoute
   '/tools/iq': typeof ToolsIqRoute
@@ -184,6 +192,7 @@ export interface FileRoutesById {
   '/terms': typeof TermsRoute
   '/vault': typeof VaultRoute
   '/admin/monetization': typeof AdminMonetizationRoute
+  '/go/dark-personality': typeof GoDarkPersonalityRoute
   '/tools/child-trauma': typeof ToolsChildTraumaRoute
   '/tools/dark-personality': typeof ToolsDarkPersonalityRoute
   '/tools/iq': typeof ToolsIqRoute
@@ -208,6 +217,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/vault'
     | '/admin/monetization'
+    | '/go/dark-personality'
     | '/tools/child-trauma'
     | '/tools/dark-personality'
     | '/tools/iq'
@@ -230,6 +240,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/vault'
     | '/admin/monetization'
+    | '/go/dark-personality'
     | '/tools/child-trauma'
     | '/tools/dark-personality'
     | '/tools/iq'
@@ -252,6 +263,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/vault'
     | '/admin/monetization'
+    | '/go/dark-personality'
     | '/tools/child-trauma'
     | '/tools/dark-personality'
     | '/tools/iq'
@@ -275,6 +287,7 @@ export interface RootRouteChildren {
   TermsRoute: typeof TermsRoute
   VaultRoute: typeof VaultRoute
   AdminMonetizationRoute: typeof AdminMonetizationRoute
+  GoDarkPersonalityRoute: typeof GoDarkPersonalityRoute
   ToolsChildTraumaRoute: typeof ToolsChildTraumaRoute
   ToolsDarkPersonalityRoute: typeof ToolsDarkPersonalityRoute
   ToolsIqRoute: typeof ToolsIqRoute
@@ -346,6 +359,13 @@ declare module '@tanstack/react-router' {
       path: '/admin/monetization'
       fullPath: '/admin/monetization'
       preLoaderRoute: typeof AdminMonetizationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/go/dark-personality': {
+      id: '/go/dark-personality'
+      path: '/go/dark-personality'
+      fullPath: '/go/dark-personality'
+      preLoaderRoute: typeof GoDarkPersonalityRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/tools/': {
@@ -443,6 +463,7 @@ const rootRouteChildren: RootRouteChildren = {
   TermsRoute: TermsRoute,
   VaultRoute: VaultRoute,
   AdminMonetizationRoute: AdminMonetizationRoute,
+  GoDarkPersonalityRoute: GoDarkPersonalityRoute,
   ToolsChildTraumaRoute: ToolsChildTraumaRoute,
   ToolsDarkPersonalityRoute: ToolsDarkPersonalityRoute,
   ToolsIqRoute: ToolsIqRoute,
