@@ -362,28 +362,6 @@ function Home() {
         </div>
       </section>
 
-      {/* ---------------- How it works ---------------- */}
-      <section className="border-b border-hairline bg-surface/20">
-        <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16">
-          <span className="label-mono">How it works</span>
-          <div className="mt-5 grid gap-3 sm:grid-cols-3 sm:gap-5">
-            {STEPS.map(({ icon: Icon, title, body }, i) => (
-              <div key={title} className="panel flex items-start gap-4 p-5">
-                <span className="accent-tile size-10 shrink-0">
-                  <Icon className="size-4.5" aria-hidden="true" />
-                </span>
-                <div className="min-w-0">
-                  <h3 className="font-display text-base font-semibold">
-                    <span className="label-mono mr-2">0{i + 1}</span>
-                    {title}
-                  </h3>
-                  <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{body}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* ---------------- Popular rail (mobile-first swipe) ---------------- */}
       <section className="mx-auto max-w-7xl px-4 pt-12 sm:px-6 sm:pt-16">
@@ -510,6 +488,31 @@ function Home() {
           ) : null}
         </div>
       </section>
+
+      {/* ---------------- How it works ---------------- */}
+      <section className="border-y border-hairline bg-surface/20">
+        <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16">
+          <span className="label-mono">How it works</span>
+          <div className="mt-5 grid gap-3 sm:grid-cols-3 sm:gap-5">
+            {STEPS.map(({ icon: Icon, title, body }, i) => (
+              <div key={title} className="panel flex items-start gap-4 p-5">
+                <span className="accent-tile size-10 shrink-0">
+                  <Icon className="size-4.5" aria-hidden="true" />
+                </span>
+                <div className="min-w-0">
+                  <h3 className="font-display text-base font-semibold">
+                    <span className="label-mono mr-2">0{i + 1}</span>
+                    {title}
+                  </h3>
+                  <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{body}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+
 
       {/* ---------------- 3-test run (dwell time) ---------------- */}
       <section className="border-y border-hairline bg-surface/20">
