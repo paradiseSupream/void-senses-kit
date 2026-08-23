@@ -258,10 +258,6 @@ function Home() {
     return searchTools(query).filter((t) => active.slugs.includes(t.slug));
   }, [query, goal]);
   const slots = useMemo(() => withNativeAds(results), [results]);
-  const popular = useMemo(
-    () => TOOLS.filter((t) => ["iq", "dark-personality", "roast", "love-match"].includes(t.slug)),
-    [],
-  );
 
   return (
     <div>
