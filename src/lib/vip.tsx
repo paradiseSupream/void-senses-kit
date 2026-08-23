@@ -14,7 +14,9 @@ type VipContextValue = {
   expiresAt: number | null;
   setVip: (value: boolean, plan?: VipPlan) => void;
   vipModalOpen: boolean;
-  openVipModal: () => void;
+  /** Plan the modal should preselect when it opens. */
+  preferredPlan: VipPlan;
+  openVipModal: (plan?: VipPlan) => void;
   closeVipModal: () => void;
 };
 
