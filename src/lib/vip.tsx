@@ -71,10 +71,14 @@ export function VipProvider({ children }: { children: ReactNode }) {
       expiresAt,
       setVip,
       vipModalOpen,
-      openVipModal: () => setVipModalOpen(true),
+      preferredPlan,
+      openVipModal: (next?: VipPlan) => {
+        if (next === "monthly" || next === "lifetime") setPreferredPlan(next);
+        setVipModalOpen(true);
+      },
       closeVipModal: () => setVipModalOpen(false),
     }),
-    [isVip, plan, expiresAt, setVip, vipModalOpen],
+    [isVip, plan, expiresAt, setVip, vipModalOpen, preferredPlan],
   );
 
   return <VipContext.Provider value={value}>{children}</VipContext.Provider>;
