@@ -23,22 +23,26 @@ const PERKS = [
 ];
 
 export function VipModal() {
-  const { vipModalOpen, closeVipModal, setVip, isVip } = useVip();
+  const { vipModalOpen, closeVipModal, setVip, isVip, preferredPlan } = useVip();
   const saveLead = useServerFn(subscribeLead);
   const [email, setEmail] = useState("");
   const [emailSaved, setEmailSaved] = useState(false);
   const [tab, setTab] = useState<"card" | "crypto">("card");
-  const [plan, setPlan] = useState<VipPlan>("lifetime");
+  const [plan, setPlan] = useState<VipPlan>(preferredPlan);
   const { site } = useSiteConfig();
   const offerActive = useVipOffer();
   const lifetimeCents = offerActive ? OFFER_CENTS : site.vip_price_cents;
+  const monthlyCents = offerActive ? MONTHLY_OFFER_CENTS : VIP_MONTHLY_CENTS;
   const lifetimePrice = `$${(lifetimeCents / 100).toFixed(0)}`;
-  const monthlyPrice = `$${(VIP_MONTHLY_CENTS / 100).toFixed(2)}`;
+  const monthlyPrice = `$${(monthlyCents / 100).toFixed(2)}`;
   const price = plan === "lifetime" ? lifetimePrice : monthlyPrice;
 
   useEffect(() => {
-    if (vipModalOpen) trackFunnel("vip_gate_shown");
-  }, [vipModalOpen]);
+    if (vipModalOpen) {
+      setPlan(preferredPlan);
+      trackFunnel("vip_gate_shown");
+    }
+  }, [vipModalOpen, preferredPlan]);
 
   const persistEmail = async () => {
     if (!email.includes("@")) {
