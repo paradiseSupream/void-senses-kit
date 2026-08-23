@@ -338,7 +338,34 @@ function Home() {
                 <ShieldCheck className="size-3.5 text-primary" aria-hidden="true" /> no account
               </span>
             </p>
+
+            {/* Quick picks keep the top-converting tools reachable without any scroll. */}
+            <ul className="reveal mt-4 -mx-4 flex snap-x gap-2 overflow-x-auto px-4 pb-1 lg:mx-0 lg:flex-wrap lg:px-0">
+              {QUICK_PICKS.map((slug) => {
+                const t = TOOLS.find((x) => x.slug === slug);
+                if (!t) return null;
+                const Icon = t.icon;
+                return (
+                  <li key={slug} className="shrink-0 snap-start">
+                    <Link
+                      to={t.path}
+                      search={{ auto: "1" } as never}
+                      style={{ ["--tool-accent" as string]: t.accent }}
+                      className="inline-flex min-h-11 items-center gap-2 rounded-full border border-hairline bg-surface/60 px-4 text-sm font-semibold backdrop-blur-xl transition-colors hover:bg-surface-2"
+                    >
+                      <Icon
+                        className="size-4"
+                        style={{ color: "var(--tool-accent)" }}
+                        aria-hidden="true"
+                      />
+                      {t.name}
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
           </div>
+
 
           <div className="reveal hidden lg:block" style={{ animationDelay: "260ms" }}>
             <SampleResult />
