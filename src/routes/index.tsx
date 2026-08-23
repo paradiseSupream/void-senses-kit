@@ -70,6 +70,8 @@ export const Route = createFileRoute("/")({
   component: Home,
 });
 
+const QUICK_PICKS = ["dark-personality", "love-match", "iq", "roast"] as const;
+
 const STATS = [
   { icon: Gauge, k: "< 1.5s", v: "first paint" },
   { icon: Fingerprint, k: "On-device", v: "test scoring" },
@@ -258,17 +260,13 @@ function Home() {
     return searchTools(query).filter((t) => active.slugs.includes(t.slug));
   }, [query, goal]);
   const slots = useMemo(() => withNativeAds(results), [results]);
-  const popular = useMemo(
-    () => TOOLS.filter((t) => ["iq", "dark-personality", "roast", "love-match"].includes(t.slug)),
-    [],
-  );
 
   return (
     <div>
       {/* ---------------- Hero ---------------- */}
       <section className="aurora grain relative overflow-hidden border-b border-hairline">
         <div className="void-grid absolute inset-0 -z-10" aria-hidden="true" />
-        <div className="mx-auto grid max-w-7xl gap-10 px-4 py-12 sm:px-6 sm:py-20 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:items-center lg:gap-14">
+        <div className="mx-auto grid max-w-7xl gap-10 px-4 py-8 sm:px-6 sm:py-20 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:items-center lg:gap-14">
           <div className="text-center lg:text-left">
             <span
               className="reveal label-mono inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3.5 py-1.5 text-primary backdrop-blur-xl"
@@ -342,17 +340,43 @@ function Home() {
                 <ShieldCheck className="size-3.5 text-primary" aria-hidden="true" /> no account
               </span>
             </p>
+
+            {/* Quick picks keep the top-converting tools reachable without any scroll. */}
+            <ul className="reveal mt-4 flex flex-wrap justify-center gap-2 lg:justify-start">
+              {QUICK_PICKS.map((slug) => {
+                const t = TOOLS.find((x) => x.slug === slug);
+                if (!t) return null;
+                const Icon = t.icon;
+                return (
+                  <li key={slug}>
+                    <a
+                      href={`${t.path}?auto=1`}
+                      style={{ ["--tool-accent" as string]: t.accent }}
+                      className="inline-flex min-h-11 items-center gap-2 rounded-full border border-hairline bg-surface/60 px-4 text-sm font-semibold backdrop-blur-xl transition-colors hover:bg-surface-2"
+                    >
+                      <Icon
+                        className="size-4"
+                        style={{ color: "var(--tool-accent)" }}
+                        aria-hidden="true"
+                      />
+                      {t.name}
+                    </a>
+                  </li>
+                );
+              })}
+            </ul>
           </div>
 
-          <div className="reveal" style={{ animationDelay: "260ms" }}>
+
+          <div className="reveal hidden lg:block" style={{ animationDelay: "260ms" }}>
             <SampleResult />
           </div>
         </div>
 
-        <div className="mx-auto max-w-7xl px-4 pb-10 sm:px-6 sm:pb-14">
+        <div className="mx-auto max-w-7xl px-4 pb-6 sm:px-6 sm:pb-14">
           <dl className="grid grid-cols-2 gap-2.5 sm:grid-cols-4 sm:gap-3">
             {STATS.map(({ icon: Icon, k, v }) => (
-              <div key={k} className="glass rounded-xl px-3 py-3.5 text-center sm:py-4">
+              <div key={k} className="glass rounded-xl px-3 py-2.5 text-center sm:py-4">
                 <Icon className="mx-auto size-4 text-primary" aria-hidden="true" />
                 <dt className="mt-2 font-display text-base font-semibold">{k}</dt>
                 <dd className="label-mono mt-0.5">{v}</dd>
@@ -362,94 +386,15 @@ function Home() {
         </div>
       </section>
 
-      {/* ---------------- How it works ---------------- */}
-      <section className="border-b border-hairline bg-surface/20">
-        <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16">
-          <span className="label-mono">How it works</span>
-          <div className="mt-5 grid gap-3 sm:grid-cols-3 sm:gap-5">
-            {STEPS.map(({ icon: Icon, title, body }, i) => (
-              <div key={title} className="panel flex items-start gap-4 p-5">
-                <span className="accent-tile size-10 shrink-0">
-                  <Icon className="size-4.5" aria-hidden="true" />
-                </span>
-                <div className="min-w-0">
-                  <h3 className="font-display text-base font-semibold">
-                    <span className="label-mono mr-2">0{i + 1}</span>
-                    {title}
-                  </h3>
-                  <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{body}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ---------------- Popular rail (mobile-first swipe) ---------------- */}
-      <section className="mx-auto max-w-7xl px-4 pt-12 sm:px-6 sm:pt-16">
-        <div className="flex items-end justify-between gap-4">
-          <div>
-            <span className="label-mono">Most taken this week</span>
-            <h2 className="mt-1.5 font-display text-xl font-bold tracking-tight sm:text-2xl">
-              Start with a crowd favourite
-            </h2>
-          </div>
-        </div>
-        <ul className="mt-5 -mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-2 sm:mx-0 sm:px-0">
-          {popular.map((tool) => {
-            const Icon = tool.icon;
-            return (
-              <li key={tool.slug} className="w-[15rem] shrink-0 snap-start">
-                <Link
-                  to={tool.path}
-                  style={{ ["--tool-accent" as string]: tool.accent }}
-                  className="panel lift group block h-full overflow-hidden"
-                >
-                  <div className="relative aspect-[16/10]">
-                    <img
-                      src={tool.cover}
-                      alt=""
-                      width={1024}
-                      height={576}
-                      loading="lazy"
-                      className="size-full object-cover"
-                    />
-                    <div
-                      aria-hidden="true"
-                      className="absolute inset-0 bg-gradient-to-t from-background to-transparent"
-                    />
-                    <span className="label-mono absolute top-2.5 left-2.5 rounded-full border border-primary/35 bg-background/80 px-2 py-0.5 text-primary backdrop-blur-md">
-                      Free
-                    </span>
-                  </div>
-                  <div className="p-4">
-                    <span className="flex items-center gap-2 font-display text-sm font-semibold">
-                      <Icon
-                        className="size-4 shrink-0"
-                        style={{ color: "var(--tool-accent)" }}
-                        aria-hidden="true"
-                      />
-                      <span className="truncate">{tool.name}</span>
-                    </span>
-                    <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-muted-foreground">
-                      {tool.promise}
-                    </p>
-                  </div>
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
-      </section>
 
       {/* ---------------- Tool suite + goal finder ---------------- */}
-      <section id="suite" className="mx-auto max-w-7xl scroll-mt-20 px-4 py-12 sm:px-6 sm:py-20">
+      <section id="suite" className="mx-auto max-w-7xl scroll-mt-20 px-4 py-8 sm:px-6 sm:py-20">
         <div className="max-w-2xl">
           <span className="label-mono">Find your test</span>
           <h2 className="mt-2 font-display text-2xl font-bold tracking-tight sm:text-4xl">
             What do you want to find out?
           </h2>
-          <p className="mt-2.5 text-sm leading-relaxed text-muted-foreground">
+          <p className="mt-2.5 hidden text-sm leading-relaxed text-muted-foreground sm:block">
             Tap a goal and we&apos;ll show the right tools. Every one is free, starts instantly and
             finishes in minutes.
           </p>
@@ -477,7 +422,7 @@ function Home() {
           })}
         </div>
 
-        <div className="relative mt-4 w-full sm:max-w-sm">
+        <div className="relative mt-4 hidden w-full sm:block sm:max-w-sm">
           <label htmlFor="hub-filter" className="sr-only">
             Filter tools
           </label>
@@ -495,7 +440,7 @@ function Home() {
           />
         </div>
 
-        <div className="mt-8 grid gap-4 sm:mt-10 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3">
+        <div className="mt-5 grid gap-4 sm:mt-10 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3">
           {slots.map((slot, i) =>
             "ad" in slot ? (
               <NativeAdCard key={`ad-${i}`} index={slot.ad} />
@@ -510,6 +455,31 @@ function Home() {
           ) : null}
         </div>
       </section>
+
+      {/* ---------------- How it works ---------------- */}
+      <section className="border-y border-hairline bg-surface/20">
+        <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16">
+          <span className="label-mono">How it works</span>
+          <div className="mt-5 grid gap-3 sm:grid-cols-3 sm:gap-5">
+            {STEPS.map(({ icon: Icon, title, body }, i) => (
+              <div key={title} className="panel flex items-start gap-4 p-5">
+                <span className="accent-tile size-10 shrink-0">
+                  <Icon className="size-4.5" aria-hidden="true" />
+                </span>
+                <div className="min-w-0">
+                  <h3 className="font-display text-base font-semibold">
+                    <span className="label-mono mr-2">0{i + 1}</span>
+                    {title}
+                  </h3>
+                  <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{body}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+
 
       {/* ---------------- 3-test run (dwell time) ---------------- */}
       <section className="border-y border-hairline bg-surface/20">
@@ -526,7 +496,7 @@ function Home() {
             Engineered like a product, not a quiz page
           </h2>
         </div>
-        <div className="mt-8 grid gap-4 sm:mt-10 sm:gap-5 md:grid-cols-3">
+        <div className="mt-5 grid gap-4 sm:mt-10 sm:gap-5 md:grid-cols-3">
           {PILLARS.map(({ icon: Icon, title, body }) => (
             <div key={title} className="panel p-6">
               <span className="accent-tile size-11">

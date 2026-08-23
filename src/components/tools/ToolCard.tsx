@@ -13,7 +13,7 @@ export function ToolCard({ tool, priority = false }: { tool: ToolMeta; priority?
       className="panel lift group relative flex flex-col overflow-hidden"
     >
       {/* Cover art gives every tool its own visual identity at a glance. */}
-      <div className="relative aspect-[16/9] w-full overflow-hidden">
+      <div className="relative aspect-[2/1] w-full sm:aspect-[16/9] overflow-hidden">
         <img
           src={tool.cover}
           alt={`${tool.name} cover art`}
@@ -35,20 +35,20 @@ export function ToolCard({ tool, priority = false }: { tool: ToolMeta; priority?
         </span>
       </div>
 
-      <div className="flex flex-1 flex-col p-5">
+      <div className="flex flex-1 flex-col p-4 sm:p-5">
         <h3 className="font-display text-lg font-semibold tracking-tight sm:text-xl">
           {tool.name}
         </h3>
         <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{tool.promise}</p>
 
         <p
-          className="mt-3 truncate rounded-lg border border-hairline bg-surface-2/40 px-3 py-2 font-mono text-xs text-foreground/70"
+          className="mt-3 hidden truncate rounded-lg sm:block border border-hairline bg-surface-2/40 px-3 py-2 font-mono text-xs text-foreground/70"
           title={tool.teaser}
         >
           {tool.teaser}
         </p>
 
-        <ul className="mt-4 flex flex-wrap gap-1.5">
+        <ul className="mt-4 hidden flex-wrap sm:flex gap-1.5">
           {tool.highlights.map((item) => (
             <li
               key={item}
@@ -60,7 +60,7 @@ export function ToolCard({ tool, priority = false }: { tool: ToolMeta; priority?
         </ul>
 
         <span
-          className="mt-5 inline-flex min-h-11 items-center justify-center gap-1.5 rounded-full border border-hairline bg-surface/60 px-4 text-sm font-semibold text-foreground transition-colors group-hover:bg-surface-2"
+          className="mt-4 inline-flex sm:mt-5 min-h-11 items-center justify-center gap-1.5 rounded-full border border-hairline bg-surface/60 px-4 text-sm font-semibold text-foreground transition-colors group-hover:bg-surface-2"
           style={{ borderColor: "color-mix(in oklab, var(--tool-accent) 35%, transparent)" }}
         >
           {tool.category === "Assets" ? "Open the vault" : "Start now"}
