@@ -345,10 +345,10 @@ function Home() {
           </div>
         </div>
 
-        <div className="mx-auto max-w-7xl px-4 pb-10 sm:px-6 sm:pb-14">
+        <div className="mx-auto max-w-7xl px-4 pb-6 sm:px-6 sm:pb-14">
           <dl className="grid grid-cols-2 gap-2.5 sm:grid-cols-4 sm:gap-3">
             {STATS.map(({ icon: Icon, k, v }) => (
-              <div key={k} className="glass rounded-xl px-3 py-3.5 text-center sm:py-4">
+              <div key={k} className="glass rounded-xl px-3 py-2.5 text-center sm:py-4">
                 <Icon className="mx-auto size-4 text-primary" aria-hidden="true" />
                 <dt className="mt-2 font-display text-base font-semibold">{k}</dt>
                 <dd className="label-mono mt-0.5">{v}</dd>
@@ -366,7 +366,7 @@ function Home() {
           <h2 className="mt-2 font-display text-2xl font-bold tracking-tight sm:text-4xl">
             What do you want to find out?
           </h2>
-          <p className="mt-2.5 text-sm leading-relaxed text-muted-foreground">
+          <p className="mt-2.5 hidden text-sm leading-relaxed text-muted-foreground sm:block">
             Tap a goal and we&apos;ll show the right tools. Every one is free, starts instantly and
             finishes in minutes.
           </p>
@@ -412,7 +412,7 @@ function Home() {
           />
         </div>
 
-        <div className="mt-8 grid gap-4 sm:mt-10 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3">
+        <div className="mt-5 grid gap-4 sm:mt-10 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3">
           {slots.map((slot, i) =>
             "ad" in slot ? (
               <NativeAdCard key={`ad-${i}`} index={slot.ad} />
@@ -468,7 +468,7 @@ function Home() {
             Engineered like a product, not a quiz page
           </h2>
         </div>
-        <div className="mt-8 grid gap-4 sm:mt-10 sm:gap-5 md:grid-cols-3">
+        <div className="mt-5 grid gap-4 sm:mt-10 sm:gap-5 md:grid-cols-3">
           {PILLARS.map(({ icon: Icon, title, body }) => (
             <div key={title} className="panel p-6">
               <span className="accent-tile size-11">
