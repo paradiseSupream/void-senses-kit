@@ -29,6 +29,7 @@ export function VipProvider({ children }: { children: ReactNode }) {
   const [plan, setPlan] = useState<VipPlan | null>(null);
   const [expiresAt, setExpiresAt] = useState<number | null>(null);
   const [vipModalOpen, setVipModalOpen] = useState(false);
+  const [preferredPlan, setPreferredPlan] = useState<VipPlan>("lifetime");
 
   useEffect(() => {
     try {
