@@ -1,5 +1,4 @@
 import { useEffect } from "react";
-import { Link } from "@tanstack/react-router";
 import { ArrowRight, Check, ShieldCheck, Sparkles, Timer } from "lucide-react";
 
 import { track } from "@/lib/monetization";
@@ -54,14 +53,13 @@ export function AdLanding({ tool, headline, sub, cta, reasons }: Props) {
           </p>
 
           <div className="mt-7 flex flex-col items-center gap-3 sm:mt-8 lg:items-start">
-            <Link
-              to={tool.path}
-              search={{ auto: "1" }}
+            <a
+              href={startTo}
               onClick={onStart}
               className="btn-glow inline-flex min-h-14 w-full items-center justify-center gap-2 rounded-full px-8 text-base font-semibold sm:w-auto"
             >
               {cta} <ArrowRight className="size-4" aria-hidden="true" />
-            </Link>
+            </a>
             <p className="label-mono flex items-center gap-2 text-xs text-muted-foreground">
               <ShieldCheck className="size-3.5" aria-hidden="true" />
               Free · nothing saved · no email required
@@ -127,22 +125,19 @@ export function AdLanding({ tool, headline, sub, cta, reasons }: Props) {
             Every attempt draws a fresh, randomised question set, so the result stays honest even
             if you come back tomorrow.
           </p>
-          <Link
-            to={tool.path}
-            search={{ auto: "1" }}
+          <a
+            href={startTo}
             onClick={onStart}
             className="btn-glow mt-7 inline-flex min-h-14 items-center justify-center gap-2 rounded-full px-8 text-base font-semibold"
           >
             {cta} <ArrowRight className="size-4" aria-hidden="true" />
-          </Link>
+          </a>
           <p className="label-mono mt-4 flex items-center justify-center gap-2 text-xs text-muted-foreground">
             <Timer className="size-3.5" aria-hidden="true" />
             {tool.duration} · results on this device only
           </p>
         </div>
       </section>
-
-      <p className="sr-only">{startTo}</p>
     </div>
   );
 }
