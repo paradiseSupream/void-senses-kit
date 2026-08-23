@@ -3,7 +3,7 @@ import { Crown, X } from "lucide-react";
 
 import { useVip } from "@/lib/vip";
 import { useSiteConfig } from "@/lib/site-config";
-import { grantVipOffer, OFFER_CENTS } from "@/lib/vip-offer";
+import { grantVipOffer, MONTHLY_OFFER_CENTS, OFFER_CENTS } from "@/lib/vip-offer";
 import { track } from "@/lib/monetization";
 import { trackFunnel } from "@/lib/funnel";
 
@@ -71,6 +71,7 @@ export function ExitIntentOffer() {
 
   const full = `$${(site.vip_price_cents / 100).toFixed(0)}`;
   const offer = `$${(OFFER_CENTS / 100).toFixed(0)}`;
+  const monthly = `$${(MONTHLY_OFFER_CENTS / 100).toFixed(2)}`;
 
   return (
     <div
@@ -104,11 +105,23 @@ export function ExitIntentOffer() {
             grantVipOffer();
             track({ event_type: "click", slot: "exit_intent" });
             setOpen(false);
-            openVipModal();
+            openVipModal("lifetime");
           }}
           className="mt-5 w-full rounded-xl bg-primary px-4 py-3.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
         >
           Claim {offer} lifetime VIP
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            grantVipOffer();
+            track({ event_type: "click", slot: "exit_intent_monthly" });
+            setOpen(false);
+            openVipModal("monthly");
+          }}
+          className="mt-2.5 w-full rounded-xl border border-primary/40 bg-primary/10 px-4 py-3 text-sm font-semibold text-primary transition-colors hover:bg-primary/20"
+        >
+          Or try 1 month ad-free — {monthly}
         </button>
         <button
           type="button"
