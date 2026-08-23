@@ -268,7 +268,7 @@ function Home() {
       {/* ---------------- Hero ---------------- */}
       <section className="aurora grain relative overflow-hidden border-b border-hairline">
         <div className="void-grid absolute inset-0 -z-10" aria-hidden="true" />
-        <div className="mx-auto grid max-w-7xl gap-10 px-4 py-12 sm:px-6 sm:py-20 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:items-center lg:gap-14">
+        <div className="mx-auto grid max-w-7xl gap-10 px-4 py-8 sm:px-6 sm:py-20 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:items-center lg:gap-14">
           <div className="text-center lg:text-left">
             <span
               className="reveal label-mono inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3.5 py-1.5 text-primary backdrop-blur-xl"
@@ -364,7 +364,7 @@ function Home() {
 
 
       {/* ---------------- Popular rail (mobile-first swipe) ---------------- */}
-      <section className="mx-auto max-w-7xl px-4 pt-12 sm:px-6 sm:pt-16">
+      <section className="mx-auto max-w-7xl px-4 pt-8 sm:px-6 sm:pt-16">
         <div className="flex items-end justify-between gap-4">
           <div>
             <span className="label-mono">Most taken this week</span>
