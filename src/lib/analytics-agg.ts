@@ -508,6 +508,26 @@ export function buildExperiments(list: Row[]) {
   }));
 }
 
+/**
+ * Session cohorts keyed by "creative x tool" so you can see which ad creative
+ * (utm_source) sends the traffic that actually converts to VIP on which tool.
+ * The dimension is resolved from the whole session, not just its first row,
+ * because the tool slug only appears once the visitor opens a test.
+ */
+export function buildCreativeTool(list: Row[]): Cohort[] {
+  const creative = new Map<string, string>();
+  const tool = new Map<string, string>();
+  for (const row of list) {
+    const sid = row.session_id || "unknown";
+    if (!creative.has(sid) && row.utm_source) creative.set(sid, row.utm_source);
+    if (!tool.has(sid) && row.tool_slug) tool.set(sid, row.tool_slug);
+  }
+  return buildCohorts(list, (r) => {
+    const sid = r.session_id || "unknown";
+    return `${creative.get(sid) ?? "direct"} \u00b7 ${tool.get(sid) ?? "site"}`;
+  });
+}
+
 export function aggregate(list: Row[], days: number): MonetizationStats {
   const totals = finalize(
     list.reduce((acc, row) => {
@@ -596,6 +616,8 @@ export function aggregate(list: Row[], days: number): MonetizationStats {
       source: buildCohorts(list, (r) => r.utm_source ?? "direct"),
     },
     byTool: buildToolRevenue(list),
+    creativeTool: buildCreativeTool(list),
+    placementCohorts: buildCohorts(list, (r) => r.variant || "default"),
     experiments: buildExperiments(list),
     bySlot: group(adRows, (r) => r.slot),
     byVariant: group(adRows, (r) => r.variant),
