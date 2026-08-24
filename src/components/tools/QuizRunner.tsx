@@ -2,7 +2,8 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { ChevronLeft, RefreshCw } from "lucide-react";
 
 import { QuizVipNudge } from "@/components/monetization/QuizVipNudge";
-import { markQuizInteraction } from "@/lib/engagement";
+import { AdSlot } from "@/components/monetization/AdSlot";
+import { markQuizInteraction, setQuizActive } from "@/lib/engagement";
 import { SCALE, type Likert } from "@/lib/quiz-engine";
 
 /**
@@ -28,6 +29,13 @@ export function QuizRunner({
     setAnswers({});
   }, [items]);
 
+  // While the quiz is open and unfinished, no pop-under / vignette / push may
+  // load — only the first-party banner below and the smartlink on the result.
+  useEffect(() => {
+    setQuizActive(true);
+    return () => setQuizActive(false);
+  }, []);
+
   const item = items[index];
   const progress = useMemo(() => (index / items.length) * 100, [index, items.length]);
 
@@ -37,7 +45,10 @@ export function QuizRunner({
       markQuizInteraction();
       const next = { ...answers, [item.id]: weight };
       setAnswers(next);
-      if (index === items.length - 1) onComplete(next);
+      if (index === items.length - 1) {
+        setQuizActive(false);
+        onComplete(next);
+      }
       else setIndex((i) => i + 1);
     },
     [answers, index, item, items.length, onComplete],
@@ -121,6 +132,10 @@ export function QuizRunner({
           })}
         </div>
       </div>
+
+      {/* Quiet banner only once the visitor is deep in the quiz (7th question
+          onward) — no interstitial, no pop-under, safe for paid social. */}
+      {index >= 6 ? <AdSlot id="quiz-inline" className="mt-4" /> : null}
 
       <QuizVipNudge step={index} total={items.length} />
     </div>

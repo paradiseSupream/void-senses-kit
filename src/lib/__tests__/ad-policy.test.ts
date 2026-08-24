@@ -11,6 +11,7 @@ import {
   type AdFormat,
   type PolicyInput,
 } from "@/lib/ad-policy";
+import { isCampaignEntry } from "@/lib/campaign-mode";
 import { DEFAULT_PUBLIC_CONFIG } from "@/lib/admin-types";
 
 const FULL: PolicyInput = {
@@ -56,6 +57,26 @@ describe("ad policy", () => {
     expect(plannedAdScripts(FULL, { isVip: true, consentAllowsAds: true })).toEqual([]);
     expect(plannedAdScripts({ ...FULL, enabled: false }, CONSENTED)).toEqual([]);
     expect(smartlinkSurfacesAllowed(FULL, { isVip: true, consentAllowsAds: true })).toBe(false);
+  });
+
+  it("CAMPAIGN SAFE: paid-social sessions load zero third-party scripts", () => {
+    expect(plannedAdScripts(FULL, { ...CONSENTED, campaignSafe: true })).toEqual([]);
+    expect(smartlinkSurfacesAllowed(FULL, { ...CONSENTED, campaignSafe: true })).toBe(true);
+  });
+
+  it("never interrupts an open quiz with a script format", () => {
+    expect(plannedAdScripts(FULL, { ...CONSENTED, quizActive: true })).toEqual([]);
+  });
+
+  it("detects campaign entries from click ids, utm and ad-landing links", () => {
+    expect(isCampaignEntry("?fbclid=abc")).toBe(true);
+    expect(isCampaignEntry("?utm_source=facebook")).toBe(true);
+    expect(isCampaignEntry("?utm_medium=cpc")).toBe(true);
+    expect(isCampaignEntry("?t=dark-personality")).toBe(true);
+    expect(isCampaignEntry("?auto=1")).toBe(true);
+    expect(isCampaignEntry("", "https://www.instagram.com/")).toBe(true);
+    expect(isCampaignEntry("?utm_source=newsletter", "https://google.com/")).toBe(false);
+    expect(isCampaignEntry("")).toBe(false);
   });
 
   it("respects per-format toggles", () => {

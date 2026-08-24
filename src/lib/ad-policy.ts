@@ -29,6 +29,14 @@ export type PolicyContext = {
   isVip: boolean;
   /** undefined = consent not resolved yet. */
   consentAllowsAds: boolean | undefined;
+  /**
+   * Paid-social / ad-landing session (auto-detected). Third-party formats stay
+   * off for the entire session so Meta review only ever sees first-party
+   * banners + smartlink anchors.
+   */
+  campaignSafe?: boolean | undefined;
+  /** The visitor is mid-quiz: never interrupt the flow with a script format. */
+  quizActive?: boolean | undefined;
 };
 
 /**
@@ -40,6 +48,8 @@ export function plannedAdScripts(ads: PolicyInput, ctx: PolicyContext): AdFormat
   if (ctx.consentAllowsAds !== true) return [];
   if (!ads.enabled) return [];
   if (ads.lean_mode) return [];
+  if (ctx.campaignSafe) return [];
+  if (ctx.quizActive) return [];
 
   const planned: AdFormat[] = [];
   if (ads.monetag_inpage_push) planned.push("inpage_push");
