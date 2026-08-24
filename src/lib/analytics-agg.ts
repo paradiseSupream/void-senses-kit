@@ -94,6 +94,10 @@ export type MonetizationStats = {
   cohorts: { geo: Cohort[]; device: Cohort[]; source: Cohort[] };
   funnel: FunnelStep[];
   byTool: ToolRevenue[];
+  /** Creative (utm_source) x tool matrix for ad A/B testing. */
+  creativeTool: Cohort[];
+  /** Ad placement variant cohorts with VIP conversion, not just ad revenue. */
+  placementCohorts: Cohort[];
   experiments: Array<{
     slot: string;
     arms: Array<{ arm: string; exposures: number; conversions: number; rate: number }>;
