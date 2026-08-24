@@ -25,7 +25,7 @@ export const Route = createFileRoute("/admin/compliance")({
       { name: "twitter:card", content: "summary" },
     ],
   }),
-  component: CompliancePage;
+  component: CompliancePage,
 });
 
 const TOKEN_KEY = "sov.adminToken";
