@@ -20,7 +20,8 @@ import { Ga4Loader } from "@/components/Ga4Loader";
 import { startWebVitals } from "@/lib/web-vitals";
 import { plannedAdScripts, tierAdjust, tierCapScale, type Tier } from "@/lib/ad-policy";
 import { startFunnel, stopFunnel } from "@/lib/funnel";
-import { bumpPageView, whenEngaged } from "@/lib/engagement";
+import { bumpPageView, whenEngaged, isQuizActive, QUIZ_PHASE_EVENT } from "@/lib/engagement";
+import { isCampaignSession, markCampaignSession } from "@/lib/campaign-mode";
 
 /**
  * Vignettes never fire on the landing view — an interstitial before the
@@ -154,6 +155,10 @@ function MonetagLoader() {
   const tier = useTier();
   const pathname = useRouterState({ select: (state) => state.location.pathname });
   const [depth, setDepth] = useState(0);
+  // Auto campaign-safe mode: paid-social / ad-landing sessions never get a
+  // third-party script (no manual toggle needed to stay FB-policy safe).
+  const [campaignSafe, setCampaignSafe] = useState(false);
+  const [quizPhase, setQuizPhase] = useState(false);
   const ads = config.ads;
   const privacy = ads.privacy ?? DEFAULT_PRIVACY;
   const caps = useMemo(
@@ -170,6 +175,18 @@ function MonetagLoader() {
   useEffect(() => {
     setDepth(bumpPageView());
   }, [pathname]);
+
+  useEffect(() => {
+    setCampaignSafe(markCampaignSession(window.location.search, document.referrer) || isCampaignSession());
+  }, [pathname]);
+
+  // Never fire an intrusive format while a quiz is open and unfinished.
+  useEffect(() => {
+    setQuizPhase(isQuizActive());
+    const onPhase = (event: Event) => setQuizPhase((event as CustomEvent<boolean>).detail === true);
+    window.addEventListener(QUIZ_PHASE_EVENT, onPhase);
+    return () => window.removeEventListener(QUIZ_PHASE_EVENT, onPhase);
+  }, []);
 
   useEffect(() => {
     if (ads.smartlink_url) setPartnerBase(ads.smartlink_url);
@@ -199,7 +216,7 @@ function MonetagLoader() {
     // Geo-tiered: Tier-1 gets the full Monetag + Adsterra stack, Tier-2 loses
     // the vignette, Tier-3 keeps only in-page push so cheap traffic is not
     // burned out for pennies.
-    const planned = tierAdjust(plannedAdScripts(ads, { isVip, consentAllowsAds: allowed }), tier);
+    const planned = tierAdjust(plannedAdScripts(ads, { isVip, consentAllowsAds: allowed, campaignSafe, quizActive: quizPhase }), tier);
     if (planned.length === 0) return;
 
     // In-page push: only for visitors who actually started a tool (or after a
@@ -275,6 +292,8 @@ function MonetagLoader() {
     };
   }, [
     onAdminRoute,
+    campaignSafe,
+    quizPhase,
     depth,
     tier,
     isVip,
