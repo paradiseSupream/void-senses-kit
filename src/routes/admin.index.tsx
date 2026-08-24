@@ -31,6 +31,7 @@ import {
 } from "@/lib/admin.functions";
 import type { AdsSettings, SiteSettings } from "@/lib/admin-types";
 import { DEFAULT_CAPS, DEFAULT_PRIVACY } from "@/lib/admin-types";
+import { AbTestsTab } from "@/components/admin/AbTestsTab";
 import { ReportsTab } from "@/components/admin/ReportsTab";
 import { SearchConsoleTab } from "@/components/admin/SearchConsoleTab";
 
@@ -57,7 +58,7 @@ const TOKEN_KEY = "sov.adminToken";
 const money = (cents: number) => `$${(cents / 100).toFixed(2)}`;
 const pct = (value: number) => `${value.toFixed(2)}%`;
 
-const TABS = ["Overview", "Reports", "Search", "Ads", "VIP", "Affiliates", "Site"] as const;
+const TABS = ["Overview", "Reports", "A/B tests", "Search", "Ads", "VIP", "Affiliates", "Site"] as const;
 type Tab = (typeof TABS)[number];
 
 function Field({
@@ -200,6 +201,12 @@ function AdminPanel() {
         </div>
         <div className="flex items-center gap-2">
           <Link
+            to="/admin/compliance"
+            className="rounded-lg border border-hairline px-3 py-2 text-xs font-medium text-muted-foreground hover:text-foreground"
+          >
+            FB compliance
+          </Link>
+          <Link
             to="/admin/monetization"
             className="rounded-lg border border-hairline px-3 py-2 text-xs font-medium text-muted-foreground hover:text-foreground"
           >
@@ -241,6 +248,7 @@ function AdminPanel() {
       <div className="mt-6">
         {tab === "Overview" ? <OverviewTab token={token} /> : null}
         {tab === "Reports" ? <ReportsTab token={token} /> : null}
+        {tab === "A/B tests" ? <AbTestsTab token={token} /> : null}
         {tab === "Search" ? <SearchConsoleTab token={token} /> : null}
         {tab === "Ads" || tab === "Site" ? <SettingsTab token={token} which={tab} /> : null}
         {tab === "VIP" ? <VipTab token={token} /> : null}
@@ -420,6 +428,20 @@ function SettingsTab({ token, which }: { token: string; which: "Ads" | "Site" })
             checked={ads.enabled}
             onChange={(v) => setAds({ ...ads, enabled: v })}
           />
+          <div className="rounded-lg border border-primary/30 bg-primary/5 p-3">
+            <Toggle
+              label="Lean Mode — FB/Meta safe (no pop-under, vignette or push script)"
+              checked={ads.lean_mode ?? false}
+              onChange={(v) => setAds({ ...ads, lean_mode: v })}
+            />
+            <p className="mt-1.5 text-xs text-muted-foreground">
+              Keep this ON while a Facebook campaign is running. Only the Free Vault and partner
+              smartlink anchors stay live.{" "}
+              <Link to="/admin/compliance" className="text-primary underline">
+                Run the compliance scan
+              </Link>
+            </p>
+          </div>
           <div className="grid gap-3 sm:grid-cols-2">
             <Field label="Monetag verification code">
               <input

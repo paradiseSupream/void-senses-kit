@@ -16,6 +16,7 @@ import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as VaultRouteImport } from './routes/vault'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as AdminComplianceRouteImport } from './routes/admin.compliance'
 import { Route as AdminMonetizationRouteImport } from './routes/admin.monetization'
 import { Route as ToolsIndexRouteImport } from './routes/tools.index'
 import { Route as ToolsChildTraumaRouteImport } from './routes/tools.child-trauma'
@@ -63,6 +64,11 @@ const VaultRoute = VaultRouteImport.update({
 const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/admin/',
   path: '/admin/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminComplianceRoute = AdminComplianceRouteImport.update({
+  id: '/admin/compliance',
+  path: '/admin/compliance',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminMonetizationRoute = AdminMonetizationRouteImport.update({
@@ -138,6 +144,7 @@ export interface FileRoutesByFullPath {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/vault': typeof VaultRoute
+  '/admin/compliance': typeof AdminComplianceRoute
   '/admin/monetization': typeof AdminMonetizationRoute
   '/tools/child-trauma': typeof ToolsChildTraumaRoute
   '/tools/dark-personality': typeof ToolsDarkPersonalityRoute
@@ -160,6 +167,7 @@ export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/vault': typeof VaultRoute
+  '/admin/compliance': typeof AdminComplianceRoute
   '/admin/monetization': typeof AdminMonetizationRoute
   '/tools/child-trauma': typeof ToolsChildTraumaRoute
   '/tools/dark-personality': typeof ToolsDarkPersonalityRoute
@@ -183,6 +191,7 @@ export interface FileRoutesById {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/vault': typeof VaultRoute
+  '/admin/compliance': typeof AdminComplianceRoute
   '/admin/monetization': typeof AdminMonetizationRoute
   '/tools/child-trauma': typeof ToolsChildTraumaRoute
   '/tools/dark-personality': typeof ToolsDarkPersonalityRoute
@@ -207,6 +216,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/terms'
     | '/vault'
+    | '/admin/compliance'
     | '/admin/monetization'
     | '/tools/child-trauma'
     | '/tools/dark-personality'
@@ -229,6 +239,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/terms'
     | '/vault'
+    | '/admin/compliance'
     | '/admin/monetization'
     | '/tools/child-trauma'
     | '/tools/dark-personality'
@@ -251,6 +262,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/terms'
     | '/vault'
+    | '/admin/compliance'
     | '/admin/monetization'
     | '/tools/child-trauma'
     | '/tools/dark-personality'
@@ -274,6 +286,7 @@ export interface RootRouteChildren {
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TermsRoute: typeof TermsRoute
   VaultRoute: typeof VaultRoute
+  AdminComplianceRoute: typeof AdminComplianceRoute
   AdminMonetizationRoute: typeof AdminMonetizationRoute
   ToolsChildTraumaRoute: typeof ToolsChildTraumaRoute
   ToolsDarkPersonalityRoute: typeof ToolsDarkPersonalityRoute
@@ -339,6 +352,13 @@ declare module '@tanstack/react-router' {
       path: '/admin'
       fullPath: '/admin/'
       preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/compliance': {
+      id: '/admin/compliance'
+      path: '/admin/compliance'
+      fullPath: '/admin/compliance'
+      preLoaderRoute: typeof AdminComplianceRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/monetization': {
@@ -442,6 +462,7 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TermsRoute: TermsRoute,
   VaultRoute: VaultRoute,
+  AdminComplianceRoute: AdminComplianceRoute,
   AdminMonetizationRoute: AdminMonetizationRoute,
   ToolsChildTraumaRoute: ToolsChildTraumaRoute,
   ToolsDarkPersonalityRoute: ToolsDarkPersonalityRoute,
