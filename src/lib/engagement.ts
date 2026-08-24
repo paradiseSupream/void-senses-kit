@@ -35,6 +35,23 @@ export function pageViews(): number {
   }
 }
 
+/* -------------------------------------------------------------- quiz phase */
+
+export const QUIZ_PHASE_EVENT = "sov:quizphase";
+let quizActive = false;
+
+/** True while a quiz is on screen and unfinished (no intrusive format then). */
+export function isQuizActive(): boolean {
+  return quizActive;
+}
+
+/** Called by the quiz runner on mount / completion. */
+export function setQuizActive(value: boolean): void {
+  if (typeof window === "undefined" || quizActive === value) return;
+  quizActive = value;
+  window.dispatchEvent(new CustomEvent(QUIZ_PHASE_EVENT, { detail: value }));
+}
+
 /* ------------------------------------------------------------ interaction */
 
 export function hasInteracted(): boolean {
