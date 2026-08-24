@@ -30,6 +30,18 @@ import { useVip } from "@/lib/vip";
 import { copyVariant, trackExperiment, type CopyVariant } from "@/lib/monetization";
 
 export const Route = createFileRoute("/")({
+  // Paid-traffic landing: `?t=<slug>` sends the visitor straight to the tool
+  // page with auto-start, instead of landing them on the home hero where they
+  // need an extra click. Redirects happen before render (SSR) so ad clicks
+  // never see the home page at all.
+  beforeLoad: ({ location }) => {
+    const t = (location.search as { t?: string }).t;
+    if (!t) return;
+    const tool = TOOLS.find((x) => x.slug === t);
+    if (tool) {
+      throw redirect({ to: tool.path, search: { auto: "1" } as never, replace: true });
+    }
+  },
   head: () => ({
     meta: [
       { title: "Free IQ & Psychology Tests With Instant Visual Results" },
