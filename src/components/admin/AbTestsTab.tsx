@@ -226,7 +226,7 @@ export function AbTestsTab({ token }: { token: string }) {
                     />
                     <Legend wrapperStyle={{ fontSize: 11 }} />
                     <Bar dataKey="vipRate" name="VIP %" fill="var(--color-primary)" radius={[4, 4, 0, 0]} />
-                    <Bar dataKey="completion" name="Completion %" fill="var(--color-accent)" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="completion" name="Completion %" fill="var(--color-muted-foreground)" radius={[4, 4, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
