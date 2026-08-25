@@ -10,7 +10,7 @@ import { rememberOrder } from "@/lib/vip-unlock";
 import { attribution, sessionId } from "@/lib/monetization";
 import { trackFunnel } from "@/lib/funnel";
 import { grantMatrix, useMatrix } from "@/lib/vip-unlock";
-import type { Dossier } from "@/lib/archetype";
+import type { Dossier } from "@/lib/archetype-core";
 
 /** Shared checkout kick-off for the $9 Shadow Matrix add-on. */
 function useMatrixCheckout() {

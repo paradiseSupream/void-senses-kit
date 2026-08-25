@@ -279,73 +279,8 @@ export const verifyEntitlement = createServerFn({ method: "POST" })
       email: string | null;
       licenseKey: string | null;
     }> => {
-      const empty = {
-        vip: false,
-        matrix: false,
-        plan: null,
-        expiresAt: null,
-        email: null,
-        licenseKey: null,
-      };
-      if (!data.orderId && !data.licenseKey) return empty;
-
-      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-      // Server-derived only: never seeded from client input.
-      let email: string | null = null;
-      let vip = false;
-      let matrix = false;
-      let plan: VipPlanName | null = null;
-      let expiresAt: string | null = null;
-      let licenseKey: string | null = null;
-
-      if (data.licenseKey) {
-        const { lookupVipByLicense } = await import("@/lib/vip-fulfil.server");
-        const access = await lookupVipByLicense(data.licenseKey);
-        if (access.active) {
-          vip = true;
-          plan = access.plan ?? "lifetime";
-          expiresAt = access.expiresAt;
-          email = access.email;
-          licenseKey = access.licenseKey;
-        }
-      }
-
-      if (data.orderId) {
-        const { data: row } = await supabaseAdmin
-          .from("vip_orders")
-          .select("status,plan,email,order_id,amount_cents")
-          .eq("order_id", data.orderId)
-          .maybeSingle();
-        if (row?.status === "paid") {
-          email = email ?? row.email ?? null;
-          if (row.order_id.startsWith("sovm_")) matrix = true;
-          else {
-            vip = true;
-            plan = plan ?? (row.plan as VipPlanName) ?? "lifetime";
-          }
-        }
-      }
-
-      if (email) {
-        const { lookupVip } = await import("@/lib/vip-fulfil.server");
-        const access = await lookupVip(email);
-        if (access.active) {
-          vip = true;
-          plan = access.plan ?? plan ?? "lifetime";
-          expiresAt = access.expiresAt;
-          licenseKey = licenseKey ?? access.licenseKey;
-        }
-        // Any paid Shadow Matrix order on this email restores the add-on too.
-        const { data: matrixOrders } = await supabaseAdmin
-          .from("vip_orders")
-          .select("order_id")
-          .eq("status", "paid")
-          .ilike("email", email)
-          .like("order_id", "sovm_%")
-          .limit(1);
-        if (matrixOrders && matrixOrders.length > 0) matrix = true;
-      }
-
-      return { vip, matrix, plan, expiresAt, email: email ?? null, licenseKey };
+      const { resolveEntitlement } = await import("@/lib/entitlement.server");
+      return resolveEntitlement(data);
     },
   );
+

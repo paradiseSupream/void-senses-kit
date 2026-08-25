@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import { ARCHETYPES, buildDossier, resolveArchetype, type AxisScore } from "@/lib/archetype";
+import { buildDossier } from "@/lib/archetype-premium.server";
+import {
+  PUBLIC_ARCHETYPES as ARCHETYPES,
+  resolveArchetype,
+  type AxisScore,
+} from "@/lib/archetype-core";
 import { DARK_BANK, DARK_DIMS, DARK_PER_DIM, DARK_SESSION_SIZE } from "@/lib/banks/dark";
 import { pickBalanced, rngFrom, scoreDimensions, SCALE_MAX } from "@/lib/quiz-engine";
 
