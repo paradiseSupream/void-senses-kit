@@ -141,17 +141,27 @@ export const vipOrderStatus = createServerFn({ method: "POST" })
     },
   );
 
-/** Restore VIP on a new device from the purchase email. */
+/**
+ * Restore VIP on a new device.
+ *
+ * A typed email is NOT proof of purchase (anybody could guess a buyer's
+ * address), so the license key issued on the success page is required and must
+ * belong to the email supplied. The email is then only used as a second factor.
+ */
 export const restoreVipAccess = createServerFn({ method: "POST" })
-  .inputValidator((input: { email: string }) => ({
+  .inputValidator((input: { email: string; licenseKey?: string | null }) => ({
     email: String(input?.email ?? "").trim().toLowerCase().slice(0, 200),
+    licenseKey: String(input?.licenseKey ?? "").trim().toLowerCase().slice(0, 80),
   }))
-  .handler(async ({ data }): Promise<VipAccessResult> => {
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(data.email)) {
-      return { active: false, plan: null, expiresAt: null, licenseKey: null };
-    }
-    const { lookupVip } = await import("@/lib/vip-fulfil.server");
-    return lookupVip(data.email);
+  .handler(async ({ data }): Promise<VipAccessResult & { email: string | null }> => {
+    const denied = { active: false, plan: null, expiresAt: null, licenseKey: null, email: null };
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(data.email)) return denied;
+    if (!data.licenseKey) return denied;
+
+    const { lookupVipByLicense } = await import("@/lib/vip-fulfil.server");
+    const access = await lookupVipByLicense(data.licenseKey);
+    if (!access.active || (access.email ?? "") !== data.email) return denied;
+    return access;
   });
 
 /**
