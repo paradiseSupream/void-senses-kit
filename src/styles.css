@@ -481,33 +481,72 @@
   overflow: hidden;
   background-image: linear-gradient(
     100deg,
-    var(--primary),
-    color-mix(in oklab, var(--primary) 70%, var(--chart-4))
+    color-mix(in oklab, var(--primary) 96%, black),
+    color-mix(in oklab, var(--primary) 74%, var(--light-cyan))
   );
   color: var(--primary-foreground);
   box-shadow:
-    0 12px 32px -12px color-mix(in oklab, var(--primary) 70%, transparent),
-    inset 0 1px 0 0 oklch(1 0 0 / 0.28);
+    0 10px 30px -14px color-mix(in oklab, var(--primary) 55%, transparent),
+    0 1px 0 0 oklch(1 0 0 / 0.1),
+    inset 0 1px 0 0 oklch(1 0 0 / 0.3);
   transition:
-    transform 0.25s cubic-bezier(0.22, 1, 0.36, 1),
-    box-shadow 0.25s ease;
+    transform var(--dur-micro) var(--ease-spring),
+    box-shadow var(--dur-ui) ease;
 
   &::after {
     content: "";
     position: absolute;
     inset: 0;
-    background: linear-gradient(100deg, transparent 20%, oklch(1 0 0 / 0.35) 50%, transparent 80%);
+    background: linear-gradient(100deg, transparent 24%, oklch(1 0 0 / 0.28) 50%, transparent 76%);
     transform: translateX(-120%);
-    animation: sheen 4.5s ease-in-out infinite;
+    animation: sheen 5.5s ease-in-out infinite;
   }
 
   &:hover {
-    transform: translateY(-1px);
+    transform: translateY(-2px);
     box-shadow:
-      0 18px 44px -12px color-mix(in oklab, var(--primary) 85%, transparent),
-      inset 0 1px 0 0 oklch(1 0 0 / 0.32);
+      0 18px 44px -16px color-mix(in oklab, var(--primary) 70%, transparent),
+      inset 0 1px 0 0 oklch(1 0 0 / 0.34);
+  }
+
+  &:active {
+    transform: scale(0.97);
   }
 }
+
+/* Secondary CTA: layered surface, hairline edge, restrained ambient light. */
+@utility btn-ghost {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--hairline);
+  background-image: linear-gradient(
+    165deg,
+    color-mix(in oklab, var(--void-2) 84%, transparent),
+    color-mix(in oklab, var(--void-1) 58%, transparent)
+  );
+  backdrop-filter: blur(18px) saturate(130%);
+  box-shadow:
+    0 16px 40px -26px oklch(0 0 0 / 0.9),
+    inset 0 1px 0 0 oklch(1 0 0 / 0.06);
+  transition:
+    transform var(--dur-micro) var(--ease-spring),
+    border-color var(--dur-ui) ease,
+    box-shadow var(--dur-ui) ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    border-color: color-mix(in oklab, var(--primary) 28%, transparent);
+    box-shadow:
+      0 22px 50px -28px oklch(0 0 0 / 0.95),
+      0 0 30px -20px color-mix(in oklab, var(--primary) 40%, transparent),
+      inset 0 1px 0 0 oklch(1 0 0 / 0.08);
+  }
+
+  &:active {
+    transform: scale(0.97);
+  }
+}
+
 
 @keyframes sheen {
   0%,
