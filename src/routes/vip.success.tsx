@@ -47,7 +47,6 @@ function VipSuccessPage() {
   const [state, setState] = useState<"waiting" | "done" | "failed">(
     status === "error" ? "failed" : "waiting",
   );
-  const [licenseKey, setLicenseKey] = useState<string | null>(null);
 
   useEffect(() => {
     if (!order || state === "failed") return;
@@ -63,7 +62,6 @@ function VipSuccessPage() {
           rememberOrder(order, result.email);
           rememberLicense(result.licenseKey);
           setVip(true, result.plan ?? "lifetime");
-          setLicenseKey(result.licenseKey);
           setState("done");
           trackFunnel("vip_purchase");
           toast.success("VIP is active — ads and export gates are off.");
@@ -91,14 +89,9 @@ function VipSuccessPage() {
           </span>
           <h1 className="mt-5 font-display text-2xl font-bold">VIP is active</h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            Ads, interstitials and export gates are off on this device. Save the license key below —
-            with your purchase email it restores VIP on any other device.
+            Ads, interstitials and export gates are off on this device. On any other device, open
+            the VIP panel and enter this purchase email — access returns instantly, no code to keep.
           </p>
-          {licenseKey ? (
-            <p className="mt-4 rounded-xl border border-hairline bg-surface-2 px-3 py-2 font-mono text-xs">
-              License: {licenseKey}
-            </p>
-          ) : null}
           <Link
             to="/tools/dark-personality"
             search={{ vip_order: order ?? "" }}
@@ -126,7 +119,7 @@ function VipSuccessPage() {
           <h1 className="font-display text-xl font-bold">We couldn&rsquo;t confirm the payment</h1>
           <p className="mt-2 text-sm text-muted-foreground">
             If you were charged, VIP activates automatically within a minute — reload this page, or
-            restore it with your purchase email from the VIP panel.
+            open the VIP panel and restore it with your purchase email.
           </p>
           <Link
             to="/"
