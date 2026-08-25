@@ -6,7 +6,7 @@ import { toast } from "sonner";
 
 import { vipOrderStatus } from "@/lib/vip.functions";
 import { useVip } from "@/lib/vip";
-import { rememberOrder } from "@/lib/vip-unlock";
+import { rememberLicense, rememberOrder } from "@/lib/vip-unlock";
 import { trackFunnel } from "@/lib/funnel";
 
 type Search = { order?: string; status?: string };
@@ -61,6 +61,7 @@ function VipSuccessPage() {
         if (cancelled) return;
         if (result.status === "paid") {
           rememberOrder(order, result.email);
+          rememberLicense(result.licenseKey);
           setVip(true, result.plan ?? "lifetime");
           setLicenseKey(result.licenseKey);
           setState("done");

@@ -7,7 +7,7 @@ import { useServerFn } from "@tanstack/react-start";
 
 import { subscribeLead } from "@/lib/leads.functions";
 import { restoreVipAccess, startVipCheckout } from "@/lib/vip.functions";
-import { rememberOrder } from "@/lib/vip-unlock";
+import { rememberLicense, rememberOrder } from "@/lib/vip-unlock";
 import { attribution, sessionId } from "@/lib/monetization";
 import { useVip, type VipPlan } from "@/lib/vip";
 import { useSiteConfig } from "@/lib/site-config";
