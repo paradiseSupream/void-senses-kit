@@ -108,8 +108,11 @@ function DarkPersonality() {
     setPhase("quiz");
   }, []);
 
-  const dossier = useMemo(() => buildDossier(scoreDimensions(items, answers)), [items, answers]);
-  const scores = dossier.axes.map((a) => ({ dim: a.dim, value: a.value }));
+  // Free tier: scores, bands and the archetype card only. Every premium
+  // paragraph comes from the entitlement-checked server function below.
+  const summary = useMemo(() => freeSummary(scoreDimensions(items, answers)), [items, answers]);
+  const scores = summary.axes.map((a) => ({ dim: a.dim, value: a.value }));
+  const premium = usePremiumDossier(scores, phase === "result");
 
   return (
     <ToolShell
@@ -164,19 +167,19 @@ function DarkPersonality() {
             <Ghost className="size-3.5 text-secondary" aria-hidden="true" /> shadow archetype
           </span>
           <h2 className="mt-3 font-display text-3xl leading-tight font-bold text-primary sm:text-4xl">
-            {dossier.archetype.name}
+            {summary.archetype.name}
           </h2>
           <p className="mt-1 font-mono text-xs tracking-wide text-muted-foreground uppercase">
-            {dossier.archetype.tagline}
+            {summary.archetype.tagline}
           </p>
-          <p className="mt-3 text-sm text-muted-foreground">{dossier.archetype.blurb}</p>
-          <p className="mt-2 text-sm text-foreground/80">{dossier.archetype.edge}</p>
+          <p className="mt-3 text-sm text-muted-foreground">{summary.archetype.blurb}</p>
+          <p className="mt-2 text-sm text-foreground/80">{summary.archetype.edge}</p>
 
           <div className="mt-7 rounded-2xl border border-hairline bg-surface-2/30 p-4">
             <RadarChart data={scores} labels={DARK_SHORT} />
             <p className="mt-2 text-center font-mono text-xs text-muted-foreground">
-              Shadow intensity {dossier.intensity}/100 · dominant {dossier.dominant}, backed by{" "}
-              {dossier.support}
+              Shadow intensity {summary.intensity}/100 · dominant {summary.dominant}, backed by{" "}
+              {summary.support}
             </p>
           </div>
 
@@ -184,18 +187,43 @@ function DarkPersonality() {
             <LockedReport
               toolSlug="dark-personality"
               title="Full six-axis dossier"
-              blurb="Interactive axis breakdown, blind spots, defence mechanisms, behavioural prediction matrix, 1,500+ word shadow analysis and the printable PDF dossier."
+              blurb="Interactive axis breakdown, blind spots, defence mechanisms, behavioural prediction matrix, 1,500+ word shadow analysis and the printable PDF summary."
               share={{
                 t: "dark-personality",
                 n: "Dark Personality Test",
-                h: dossier.archetype.name,
-                l: [`Shadow intensity ${dossier.intensity}/100`, `Dominant ${dossier.dominant}`],
+                h: summary.archetype.name,
+                l: [`Shadow intensity ${summary.intensity}/100`, `Dominant ${summary.dominant}`],
                 p: "/tools/dark-personality",
               }}
             >
               <div className="mt-8 space-y-8">
                 <TraitBars data={scores} notes={DARK_NOTES} />
-                <ShadowDossier dossier={dossier} />
+                {premium.dossier ? (
+                  <ShadowDossier
+                    dossier={premium.dossier}
+                    pdfToken={premium.pdfToken}
+                    onTokenExpired={premium.refresh}
+                  />
+                ) : premium.loading ? (
+                  <p className="flex items-center justify-center gap-2 py-6 text-sm text-muted-foreground">
+                    <Loader2 className="size-4 animate-spin" aria-hidden="true" /> Verifying your VIP
+                    access and generating the dossier…
+                  </p>
+                ) : (
+                  <div className="rounded-2xl border border-hairline bg-surface-2/40 p-5 text-center">
+                    <span className="mx-auto grid size-10 place-items-center rounded-xl border border-hairline bg-background/60">
+                      <Lock className="size-4 text-primary" aria-hidden="true" />
+                    </span>
+                    <h3 className="mt-3 font-display text-base font-semibold">
+                      VIP Shadow Dossier
+                    </h3>
+                    <p className="mx-auto mt-1 max-w-md text-sm text-muted-foreground">
+                      The 1,500+ word shadow analysis, blind spots, defence mechanisms, prediction
+                      matrix and the print-ready PDF are generated on our server for verified VIP
+                      members only.
+                    </p>
+                  </div>
+                )}
               </div>
             </LockedReport>
           </div>
@@ -206,16 +234,16 @@ function DarkPersonality() {
             payload={{
               eyebrow: "Dark Personality Test",
               title: "Shadow archetype",
-              headline: dossier.archetype.name,
+              headline: summary.archetype.name,
               lines: [
-                dossier.archetype.tagline,
-                `Shadow intensity ${dossier.intensity}/100 · dominant ${dossier.dominant}`,
+                summary.archetype.tagline,
+                `Shadow intensity ${summary.intensity}/100 · dominant ${summary.dominant}`,
               ],
               footer: "sensesofvoid.app · entertainment personality read",
               fileName: "senses-of-void-shadow-archetype.png",
               toolName: "Dark Personality Test",
               toolPath: "/tools/dark-personality",
-              text: `I'm ${dossier.archetype.name} — shadow intensity ${dossier.intensity}/100 on Senses of Void.`,
+              text: `I'm ${summary.archetype.name} — shadow intensity ${summary.intensity}/100 on Senses of Void.`,
             }}
           />
         </div>
