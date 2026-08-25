@@ -25,6 +25,7 @@ import { Route as ToolsIqRouteImport } from './routes/tools.iq'
 import { Route as ToolsLoveMatchRouteImport } from './routes/tools.love-match'
 import { Route as ToolsPromptMakerRouteImport } from './routes/tools.prompt-maker'
 import { Route as ToolsRoastRouteImport } from './routes/tools.roast'
+import { Route as VipCheckoutRouteImport } from './routes/vip.checkout'
 import { Route as ApiPublicGeoRouteImport } from './routes/api/public/geo'
 import { Route as ApiPublicGscSyncRouteImport } from './routes/api/public/gsc-sync'
 import { Route as ApiPublicRoastRouteImport } from './routes/api/public/roast'
@@ -112,6 +113,11 @@ const ToolsRoastRoute = ToolsRoastRouteImport.update({
   path: '/tools/roast',
   getParentRoute: () => rootRouteImport,
 } as any)
+const VipCheckoutRoute = VipCheckoutRouteImport.update({
+  id: '/vip/checkout',
+  path: '/vip/checkout',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicGeoRoute = ApiPublicGeoRouteImport.update({
   id: '/api/public/geo',
   path: '/api/public/geo',
@@ -158,6 +164,7 @@ export interface FileRoutesByFullPath {
   '/tools/love-match': typeof ToolsLoveMatchRoute
   '/tools/prompt-maker': typeof ToolsPromptMakerRoute
   '/tools/roast': typeof ToolsRoastRoute
+  '/vip/checkout': typeof VipCheckoutRoute
   '/admin/': typeof AdminIndexRoute
   '/tools/': typeof ToolsIndexRoute
   '/api/public/geo': typeof ApiPublicGeoRoute
@@ -182,6 +189,7 @@ export interface FileRoutesByTo {
   '/tools/love-match': typeof ToolsLoveMatchRoute
   '/tools/prompt-maker': typeof ToolsPromptMakerRoute
   '/tools/roast': typeof ToolsRoastRoute
+  '/vip/checkout': typeof VipCheckoutRoute
   '/admin': typeof AdminIndexRoute
   '/tools': typeof ToolsIndexRoute
   '/api/public/geo': typeof ApiPublicGeoRoute
@@ -207,6 +215,7 @@ export interface FileRoutesById {
   '/tools/love-match': typeof ToolsLoveMatchRoute
   '/tools/prompt-maker': typeof ToolsPromptMakerRoute
   '/tools/roast': typeof ToolsRoastRoute
+  '/vip/checkout': typeof VipCheckoutRoute
   '/admin/': typeof AdminIndexRoute
   '/tools/': typeof ToolsIndexRoute
   '/api/public/geo': typeof ApiPublicGeoRoute
@@ -233,6 +242,7 @@ export interface FileRouteTypes {
     | '/tools/love-match'
     | '/tools/prompt-maker'
     | '/tools/roast'
+    | '/vip/checkout'
     | '/admin/'
     | '/tools/'
     | '/api/public/geo'
@@ -257,6 +267,7 @@ export interface FileRouteTypes {
     | '/tools/love-match'
     | '/tools/prompt-maker'
     | '/tools/roast'
+    | '/vip/checkout'
     | '/admin'
     | '/tools'
     | '/api/public/geo'
@@ -281,6 +292,7 @@ export interface FileRouteTypes {
     | '/tools/love-match'
     | '/tools/prompt-maker'
     | '/tools/roast'
+    | '/vip/checkout'
     | '/admin/'
     | '/tools/'
     | '/api/public/geo'
@@ -306,6 +318,7 @@ export interface RootRouteChildren {
   ToolsLoveMatchRoute: typeof ToolsLoveMatchRoute
   ToolsPromptMakerRoute: typeof ToolsPromptMakerRoute
   ToolsRoastRoute: typeof ToolsRoastRoute
+  VipCheckoutRoute: typeof VipCheckoutRoute
   AdminIndexRoute: typeof AdminIndexRoute
   ToolsIndexRoute: typeof ToolsIndexRoute
   ApiPublicGeoRoute: typeof ApiPublicGeoRoute
@@ -430,6 +443,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ToolsRoastRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/vip/checkout': {
+      id: '/vip/checkout'
+      path: '/vip/checkout'
+      fullPath: '/vip/checkout'
+      preLoaderRoute: typeof VipCheckoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/geo': {
       id: '/api/public/geo'
       path: '/api/public/geo'
@@ -490,6 +510,7 @@ const rootRouteChildren: RootRouteChildren = {
   ToolsLoveMatchRoute: ToolsLoveMatchRoute,
   ToolsPromptMakerRoute: ToolsPromptMakerRoute,
   ToolsRoastRoute: ToolsRoastRoute,
+  VipCheckoutRoute: VipCheckoutRoute,
   AdminIndexRoute: AdminIndexRoute,
   ToolsIndexRoute: ToolsIndexRoute,
   ApiPublicGeoRoute: ApiPublicGeoRoute,
