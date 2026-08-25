@@ -155,11 +155,12 @@ export const vipOrderStatus = createServerFn({ method: "POST" })
   );
 
 /**
- * Restore VIP on a new device.
+ * Restore VIP on a new device — purchase email only, no license key.
  *
- * A typed email is NOT proof of purchase (anybody could guess a buyer's
- * address), so the license key issued on the success page is required and must
- * belong to the email supplied. The email is then only used as a second factor.
+ * The buyer never has to keep a code: we look the email up in `vip_members`,
+ * which only the payment webhook (or an admin grant) can write, so access still
+ * requires a real completed payment. The server-issued license key is returned
+ * so the device can keep a silent proof for later revalidation.
  */
 export const restoreVipAccess = createServerFn({ method: "POST" })
   .inputValidator((input: { email: string; licenseKey?: string | null }) => ({
@@ -175,12 +176,18 @@ export const restoreVipAccess = createServerFn({ method: "POST" })
   .handler(async ({ data }): Promise<VipAccessResult & { email: string | null }> => {
     const denied = { active: false, plan: null, expiresAt: null, licenseKey: null, email: null };
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(data.email)) return denied;
-    if (!data.licenseKey) return denied;
 
-    const { lookupVipByLicense } = await import("@/lib/vip-fulfil.server");
-    const access = await lookupVipByLicense(data.licenseKey);
-    if (!access.active || (access.email ?? "") !== data.email) return denied;
-    return access;
+    const { lookupVip, lookupVipByLicense } = await import("@/lib/vip-fulfil.server");
+
+    // A license key, when a legacy buyer still has one, stays the strongest proof.
+    if (data.licenseKey) {
+      const byKey = await lookupVipByLicense(data.licenseKey);
+      if (byKey.active && (byKey.email ?? "") === data.email) return byKey;
+    }
+
+    const access = await lookupVip(data.email);
+    if (!access.active) return denied;
+    return { ...access, email: data.email };
   });
 
 /**
