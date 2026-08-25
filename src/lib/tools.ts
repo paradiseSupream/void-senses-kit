@@ -87,7 +87,7 @@ export const TOOLS: ToolMeta[] = [
     name: "Dark Personality Test",
     tagline: "Meet the archetype in your shadow",
     description:
-      "Eighteen randomised statements weigh six shadow traits to reveal your dominant archetype and its edge.",
+      "Eighteen randomised statements score six psychometric axes to reveal one of eight dark archetypes and its edge.",
     category: "Psyche",
     keywords: ["dark", "personality", "machiavellian", "shadow", "archetype", "sliders"],
     duration: "~3 min",
