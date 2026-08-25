@@ -101,14 +101,15 @@ export function VipModal() {
         return;
       }
       closeVipModal();
+      const search = {
+        s: result.checkoutId,
+        p: result.planId,
+        ...(result.orderId ? { order: result.orderId } : {}),
+        ...(typeof result.amountCents === "number" ? { amount: String(result.amountCents) } : {}),
+      };
       await navigate({
         to: "/vip/checkout",
-        search: {
-          s: result.checkoutId,
-          p: result.planId,
-          order: result.orderId,
-          amount: String(result.amountCents ?? ""),
-        },
+        search,
       });
     } catch {
       toast.error("Could not open checkout — please try again.");
