@@ -25,11 +25,6 @@ export type VipAccessResult = {
   licenseKey: string | null;
 };
 
-const PRICES: Record<VipPlanName, { full: number; offer: number }> = {
-  lifetime: { full: 1900, offer: 900 },
-  monthly: { full: 499, offer: 299 },
-};
-
 /** Is card checkout live on this deployment? */
 export const vipGatewayStatus = createServerFn({ method: "GET" }).handler(
   async (): Promise<{ card: boolean }> => {
@@ -57,6 +52,10 @@ export const startVipCheckout = createServerFn({ method: "POST" })
     }),
   )
   .handler(async ({ data }): Promise<CheckoutStart> => {
+    const PRICES: Record<VipPlanName, { full: number; offer: number }> = {
+      lifetime: { full: 1900, offer: 900 },
+      monthly: { full: 499, offer: 299 },
+    };
     const { createWhopCheckout, isWhopPrice, whopConfigured } = await import("@/lib/whop.server");
     if (!whopConfigured()) {
       return { ok: false, reason: "Card checkout is not connected yet." };
