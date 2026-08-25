@@ -4,30 +4,55 @@ import { toast } from "sonner";
 
 import { RadarChart } from "@/components/tools/RadarChart";
 import { DARK_SHORT } from "@/lib/banks/dark";
-import type { Dossier } from "@/lib/archetype";
+import type { Dossier } from "@/lib/archetype-core";
 import { downloadDossierPdf } from "@/lib/dossier-pdf";
 import { MatrixModule } from "@/components/monetization/MatrixUpsellModal";
 
 /**
  * The unlocked VIP report: interactive six-axis radar, per-axis breakdown,
  * behavioural prediction matrix, deep analysis and the PDF export.
+ *
+ * Every string here arrives from the entitlement-checked server function, and
+ * the export button only forwards a short-lived signed token — the PDF itself is
+ * rendered server-side.
  */
-export function ShadowDossier({ dossier, name }: { dossier: Dossier; name?: string }) {
+export function ShadowDossier({
+  dossier,
+  name,
+  pdfToken,
+  onTokenExpired,
+}: {
+  dossier: Dossier;
+  name?: string;
+  pdfToken: string | null;
+  onTokenExpired?: () => void;
+}) {
   const [selected, setSelected] = useState<string | null>(dossier.axes[0]?.dim ?? null);
   const [busy, setBusy] = useState(false);
   const axis = dossier.axes.find((a) => a.dim === selected) ?? dossier.axes[0]!;
 
   const exportPdf = async () => {
     if (busy) return;
+    if (!pdfToken) {
+      toast.error("Report session expired — refreshing your access.");
+      onTokenExpired?.();
+      return;
+    }
     setBusy(true);
     try {
-      await downloadDossierPdf(dossier, name);
-    } catch {
-      toast.error("PDF export failed — try again.");
+      await downloadDossierPdf(pdfToken);
+    } catch (error) {
+      if (error instanceof Error && error.message === "locked") {
+        toast.error("Download link expired — refreshing your VIP access.");
+        onTokenExpired?.();
+      } else {
+        toast.error("PDF export failed — try again.");
+      }
     } finally {
       setBusy(false);
     }
   };
+
 
   return (
     <div className="space-y-7">
