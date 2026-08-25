@@ -49,13 +49,16 @@ describe("entitlement input surface", () => {
   });
 
 
-  it("cross-device restore requires the server-issued license key", () => {
+  it("cross-device restore only trusts server-written payment state", () => {
     const restore = vipFns.slice(vipFns.indexOf("export const restoreVipAccess"));
-    expect(restore).toContain("if (!data.licenseKey) return denied");
-    expect(restore).toContain("lookupVipByLicense");
-    // The license must belong to the email that was typed in.
-    expect(restore).toContain('(access.email ?? "") !== data.email');
+    // Email-only restore is allowed (no code to keep), but the answer always
+    // comes from vip_members, which only the payment webhook / admin can write.
+    expect(restore).toContain("lookupVip");
+    expect(restore).toContain("if (!access.active) return denied");
+    // A legacy license key still has to belong to the email that was typed in.
+    expect(restore).toContain('(byKey.email ?? "") === data.email');
   });
+
 
   it("license lookup is constant-shape and format-validated", () => {
     const fulfil = read("lib/vip-fulfil.server.ts");
