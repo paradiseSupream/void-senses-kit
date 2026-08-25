@@ -11,6 +11,12 @@ import { createFileRoute } from "@tanstack/react-router";
 export const Route = createFileRoute("/api/dossier-pdf")({
   server: {
     handlers: {
+      // Nothing is readable without a signed token in the request body.
+      GET: async () =>
+        new Response("Method not allowed", {
+          status: 405,
+          headers: { allow: "POST", "cache-control": "no-store, private, max-age=0" },
+        }),
       POST: async ({ request }) => {
         const deny = (status: number, message: string) =>
           new Response(message, {
