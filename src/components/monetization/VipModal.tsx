@@ -273,18 +273,23 @@ export function VipModal() {
         </div>
 
         {tab === "card" ? (
-          <button
-            type="button"
-            onClick={() => {
-              if (email.includes("@")) void persistEmail();
-              trackFunnel("vip_purchase");
-              toast.info("Checkout opens once payments are connected to this project.");
-            }}
-            className="mt-4 w-full rounded-lg bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
-          >
-            Continue to secure checkout — {price}
-          </button>
+          <>
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => void startCheckout()}
+              className="mt-4 flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-60"
+            >
+              {busy ? <Loader2 className="size-4 animate-spin" aria-hidden="true" /> : null}
+              Continue to secure checkout — {price}
+            </button>
+            <p className="mt-2 text-center text-xs text-muted-foreground">
+              Card, Apple&nbsp;Pay, Google&nbsp;Pay and local methods in 195 countries. Secured by
+              Whop — we never see your card details.
+            </p>
+          </>
         ) : (
+
           <div className="mt-4 rounded-lg border border-dashed border-border p-4">
             {site.vip_sol_address ? (
               <>
