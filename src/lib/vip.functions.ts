@@ -299,6 +299,7 @@ export const verifyEntitlement = createServerFn({ method: "POST" })
           vip = true;
           plan = access.plan ?? plan ?? "lifetime";
           expiresAt = access.expiresAt;
+          licenseKey = licenseKey ?? access.licenseKey;
         }
         // Any paid Shadow Matrix order on this email restores the add-on too.
         const { data: matrixOrders } = await supabaseAdmin
