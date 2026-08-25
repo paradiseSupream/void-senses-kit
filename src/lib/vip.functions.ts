@@ -153,3 +153,57 @@ export const restoreVipAccess = createServerFn({ method: "POST" })
     const { lookupVip } = await import("@/lib/vip-fulfil.server");
     return lookupVip(data.email);
   });
+
+/**
+ * $9 Shadow Matrix add-on checkout (one-time). The price is fixed server-side;
+ * the client can only ask for it, never name it.
+ */
+export const startMatrixCheckout = createServerFn({ method: "POST" })
+  .inputValidator(
+    (input: { email?: string | null; sessionId?: string | null; toolSlug?: string | null; utmSource?: string | null }) => ({
+      email: input?.email ? String(input.email).trim().toLowerCase().slice(0, 200) : null,
+      sessionId: input?.sessionId ? String(input.sessionId).slice(0, 80) : null,
+      toolSlug: input?.toolSlug ? String(input.toolSlug).slice(0, 60) : null,
+      utmSource: input?.utmSource ? String(input.utmSource).slice(0, 80) : null,
+    }),
+  )
+  .handler(async ({ data }): Promise<CheckoutStart> => {
+    const AMOUNT_CENTS = 900;
+    const { createWhopCheckout, whopConfigured } = await import("@/lib/whop.server");
+    if (!whopConfigured()) return { ok: false, reason: "Card checkout is not connected yet." };
+
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { getRequestHeader } = await import("@tanstack/react-start/server");
+    const country = getRequestHeader("cf-ipcountry") ?? null;
+    const orderId = `sovm_${crypto.randomUUID()}`;
+
+    let checkout;
+    try {
+      checkout = await createWhopCheckout({
+        amountCents: AMOUNT_CENTS,
+        orderId,
+        email: data.email,
+        sessionId: data.sessionId,
+        toolSlug: data.toolSlug,
+      });
+    } catch (error) {
+      console.error("[vip] matrix checkout failed", error);
+      return { ok: false, reason: "Could not open checkout — please try again." };
+    }
+
+    await supabaseAdmin.from("vip_orders").insert({
+      order_id: orderId,
+      email: data.email,
+      plan: "lifetime",
+      amount_cents: AMOUNT_CENTS,
+      status: "pending",
+      provider: "whop",
+      checkout_id: checkout.checkoutId,
+      whop_plan_id: checkout.planId,
+      session_id: data.sessionId,
+      utm_source: data.utmSource,
+      country,
+    });
+
+    return { ok: true, orderId, checkoutId: checkout.checkoutId, planId: checkout.planId, amountCents: AMOUNT_CENTS };
+  });
