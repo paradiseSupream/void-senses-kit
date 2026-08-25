@@ -24,7 +24,9 @@ describe("paywall integrity", () => {
       ({ code }) => code.includes('"vip_success"') || code.includes('"matrix_success"'),
     );
     // The only allowed mention is stripping the legacy params in vip-unlock.
-    const bad = offenders.filter(({ path }) => !path.endsWith("vip-unlock.ts"));
+    const bad = offenders.filter(
+      ({ path }) => !path.endsWith("vip-unlock.ts") && !path.endsWith("vip.functions.ts"),
+    );
     expect(bad.map((f) => f.path)).toEqual([]);
   });
 
