@@ -57,11 +57,24 @@ export async function createWhopCheckout(input: {
   if (!apiKey || !accountId) throw new Error("Whop is not configured yet.");
 
   const shape = WHOP_PRICES[input.amountCents];
+  const title = shape.plan === "monthly" ? "Senses of Void Monthly VIP" : "Senses of Void Lifetime VIP";
   const body: Record<string, unknown> = {
-    account_id: accountId,
+    company_id: accountId,
+    currency: "usd",
+    mode: "payment",
     plan: {
+      company_id: accountId,
+      currency: "usd",
       initial_price: input.amountCents / 100,
       plan_type: shape.type,
+      title,
+      product: {
+        external_identifier: "senses-of-void-vip",
+        title: "Senses of Void VIP",
+        headline: "Ad-free tools, full reports and high-resolution exports.",
+        description: "VIP access for Senses of Void tools.",
+        visibility: "hidden",
+      },
       ...(shape.type === "renewal" ? { renewal_price: input.amountCents / 100, billing_period: 30 } : {}),
     },
     metadata: {
