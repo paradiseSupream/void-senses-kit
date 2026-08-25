@@ -93,6 +93,10 @@ class PdfDoc {
     this.stream += `${BG.join(" ")} rg 0 0 ${PAGE_W} ${PAGE_H} re f\n`;
   }
 
+  gap(space: number) {
+    this.y += space;
+  }
+
   newPage() {
     if (this.stream) this.pages.push(this.stream);
     this.stream = "";
@@ -118,7 +122,7 @@ class PdfDoc {
     opts: { size?: number; bold?: boolean; color?: readonly number[]; gap?: number } = {},
   ) {
     const size = opts.size ?? 10;
-    for (const row of wrap(text, size, Boolean(opts.bold), PAGE_W - M * 2)) {
+    for (const row of wrap(text, size, Boolean(opts.bold), PAGE_W - M * 2 - 8)) {
       this.line(row, opts);
       this.y += 0.5;
     }
@@ -126,7 +130,8 @@ class PdfDoc {
   }
 
   heading(text: string, size = 13) {
-    this.need(size + 34);
+    this.need(size + 44);
+    this.y += 10;
     this.line(text.toUpperCase(), { size, bold: true, color: ACCENT });
     this.y += 2;
     this.stream += `0.153 0.153 0.165 RG 1 w ${M} ${(PAGE_H - this.y).toFixed(2)} m ${PAGE_W - M} ${(PAGE_H - this.y).toFixed(2)} l S\n`;
@@ -220,6 +225,7 @@ export function buildDossierPdf(dossier: Dossier, name?: string | null): Uint8Ar
     bold: true,
     color: MUTED,
   });
+  doc.gap(16);
   doc.paragraph(dossier.archetype.name, { size: 24, bold: true, gap: 2 });
   doc.paragraph(dossier.archetype.tagline, { size: 11, color: ACCENT, gap: 10 });
   doc.paragraph(
