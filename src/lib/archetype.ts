@@ -587,7 +587,9 @@ export function resolveArchetype(scores: AxisScore[]): {
 export function buildDossier(scores: AxisScore[]) {
   const resolved = resolveArchetype(scores);
   const axes = DARK_DIMS.map((dim) => {
-    const value = scores.find((s) => s.dim === dim)?.value ?? 0;
+    // Read the normalised vector, not the raw input, so the dossier, the radar
+    // and the archetype maths can never disagree.
+    const value = resolved.ordered.find((s) => s.dim === dim)?.value ?? 0;
     const detail = AXIS_DETAIL[dim];
     return {
       dim,
