@@ -395,9 +395,11 @@ function Home() {
         <div className="mx-auto max-w-7xl px-4 pb-6 sm:px-6 sm:pb-14">
           <dl className="grid grid-cols-2 gap-2.5 sm:grid-cols-4 sm:gap-3">
             {STATS.map(({ icon: Icon, k, v }) => (
-              <div key={k} className="glass rounded-xl px-3 py-2.5 text-center sm:py-4">
+              <div key={k} className="hud-tile px-3 py-3 text-center sm:py-4">
                 <Icon className="mx-auto size-4 text-primary" aria-hidden="true" />
-                <dt className="mt-2 font-display text-base font-semibold">{k}</dt>
+                <dt className="mt-2 font-display text-base font-semibold tracking-[-0.02em]">
+                  {k}
+                </dt>
                 <dd className="label-mono mt-0.5">{v}</dd>
               </div>
             ))}
@@ -410,9 +412,7 @@ function Home() {
       <section id="suite" className="mx-auto max-w-7xl scroll-mt-20 px-4 py-8 sm:px-6 sm:py-20">
         <div className="max-w-2xl">
           <span className="label-mono">Find your test</span>
-          <h2 className="mt-2 font-display text-2xl font-bold tracking-tight sm:text-4xl">
-            What do you want to find out?
-          </h2>
+          <h2 className="text-section mt-2.5">What do you want to find out?</h2>
           <p className="mt-2.5 hidden text-sm leading-relaxed text-muted-foreground sm:block">
             Tap a goal and we&apos;ll show the right tools. Every one is free, starts instantly and
             finishes in minutes.
@@ -428,10 +428,8 @@ function Home() {
                 type="button"
                 onClick={() => setGoal(id)}
                 aria-pressed={active}
-                className={`inline-flex min-h-11 items-center gap-2 rounded-full border px-4 text-sm font-semibold transition-colors ${
-                  active
-                    ? "border-primary/50 bg-primary/15 text-primary"
-                    : "border-hairline bg-surface/60 text-muted-foreground hover:bg-surface-2 hover:text-foreground"
+                className={`capsule inline-flex min-h-11 items-center gap-2 px-4 text-sm font-semibold ${
+                  active ? "capsule-active" : "text-muted-foreground hover:text-foreground"
                 }`}
               >
                 <Icon className="size-4" aria-hidden="true" />
@@ -440,6 +438,7 @@ function Home() {
             );
           })}
         </div>
+
 
         <div className="relative mt-4 hidden w-full sm:block sm:max-w-sm">
           <label htmlFor="hub-filter" className="sr-only">
