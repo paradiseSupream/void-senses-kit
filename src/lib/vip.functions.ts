@@ -312,6 +312,6 @@ export const verifyEntitlement = createServerFn({ method: "POST" })
         if (matrixOrders && matrixOrders.length > 0) matrix = true;
       }
 
-      return { vip, matrix, plan, expiresAt, email: email ?? null };
+      return { vip, matrix, plan, expiresAt, email: email ?? null, licenseKey };
     },
   );
