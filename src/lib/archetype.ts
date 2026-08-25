@@ -52,7 +52,13 @@ export const ARCHETYPES: Archetype[] = [
     blurb:
       "You do not ask for power, you arrange the conditions under which it is handed to you. People leave your conversations feeling they chose something you had already decided.",
     edge: "Your risk is winning so quietly that nobody, including you, can tell what you actually wanted.",
-    weights: { Machiavellianism: 1.35, Narcissism: 1, Cognition: 0.6, Detachment: 0.3, Psychopathy: 0.2 },
+    weights: {
+      Machiavellianism: 1.35,
+      Narcissism: 1,
+      Cognition: 0.6,
+      Detachment: 0.3,
+      Psychopathy: 0.2,
+    },
     pressure:
       "Under extreme pressure you get warmer, not colder. Charm becomes the instrument: you widen your circle of obligations until someone else's resources absorb the shock.",
     betrayal:
@@ -98,7 +104,13 @@ export const ARCHETYPES: Archetype[] = [
     blurb:
       "You are remembered as an atmosphere rather than a set of facts. People feel close to you and later cannot name a single thing you disclosed.",
     edge: "Your risk is mistaking distance for peace and calling an empty room freedom.",
-    weights: { Detachment: 1.4, Machiavellianism: 0.7, Cognition: 0.5, Psychopathy: 0.4, Narcissism: -0.2 },
+    weights: {
+      Detachment: 1.4,
+      Machiavellianism: 0.7,
+      Cognition: 0.5,
+      Psychopathy: 0.4,
+      Narcissism: -0.2,
+    },
     pressure:
       "Under pressure you go quiet and elegant. You keep functioning at a high level while withdrawing every emotional signal, so nobody realises you are in crisis until it is already resolved or already over.",
     betrayal:
@@ -190,7 +202,13 @@ export const ARCHETYPES: Archetype[] = [
     blurb:
       "You feel everything in the room and understand precisely what could be done with it. That is a rare and heavy combination: the accuracy of a manipulator with the conscience of someone who cannot un-feel the cost.",
     edge: "Your risk is exhaustion — you carry other people's states and audit your own motives at the same time.",
-    weights: { Shadow: 1.2, Machiavellianism: 0.9, Cognition: 0.8, Psychopathy: -0.9, Detachment: -0.2 },
+    weights: {
+      Shadow: 1.2,
+      Machiavellianism: 0.9,
+      Cognition: 0.8,
+      Psychopathy: -0.9,
+      Detachment: -0.2,
+    },
     pressure:
       "Under pressure you over-attune. You start managing everyone's emotional weather and lose track of your own position until the pressure is over and you crash.",
     betrayal:
@@ -443,7 +461,8 @@ export const AXIS_DETAIL: Record<
     },
     blindSpot:
       "The invisible ledger: debts you never state and therefore can never collect, only resent.",
-    defense: "Pre-emptive generosity and controlled disclosure — giving first so nothing can be demanded.",
+    defense:
+      "Pre-emptive generosity and controlled disclosure — giving first so nothing can be demanded.",
   },
   Narcissism: {
     label: "Narcissism",
@@ -454,8 +473,10 @@ export const AXIS_DETAIL: Record<
         "You want to be excellent without requiring an audience for it. Criticism lands but does not restructure you.",
       Low: "Status is genuinely not the currency you trade in, which frees you and occasionally leaves you under-claimed.",
     },
-    blindSpot: "Reading criticism of a plan as an attack on your worth, and filtering it out as disloyalty.",
-    defense: "Escalation and narrative repair — aiming higher when doubted, rewriting setbacks into chapters.",
+    blindSpot:
+      "Reading criticism of a plan as an attack on your worth, and filtering it out as disloyalty.",
+    defense:
+      "Escalation and narrative repair — aiming higher when doubted, rewriting setbacks into chapters.",
   },
   Psychopathy: {
     label: "Psychopathy",
@@ -477,33 +498,40 @@ export const AXIS_DETAIL: Record<
       Moderate: "You open selectively and close cleanly. Access is a decision, not a reflex.",
       Low: "You are legible. It costs you leverage and buys you the kind of intimacy the guarded rarely reach.",
     },
-    blindSpot: "Hearing a request for closeness as a demand for control, then exiting before anything is negotiated.",
-    defense: "Warmth as camouflage and pre-emptive exit — leaving with a plausible reason instead of admitting overwhelm.",
+    blindSpot:
+      "Hearing a request for closeness as a demand for control, then exiting before anything is negotiated.",
+    defense:
+      "Warmth as camouflage and pre-emptive exit — leaving with a plausible reason instead of admitting overwhelm.",
   },
   Cognition: {
     label: "Cognitive Dominance",
     meaning: "Control of the frame: definitions, sequence, contingency and the second plan.",
     bands: {
       High: "You win by owning the question. You are calm in crises because you already simulated the bad branch.",
-      Moderate: "You think ahead without needing to run the room. You can be led by a better argument.",
+      Moderate:
+        "You think ahead without needing to run the room. You can be led by a better argument.",
       Low: "You stay in the present tense, which keeps you responsive and leaves the frame to whoever sets it.",
     },
-    blindSpot: "Mistaking being correct for being persuasive, and treating emotional processing as inefficiency.",
-    defense: "Intellectualisation and contingency hoarding — converting hurt into a design problem, building a hidden plan B.",
+    blindSpot:
+      "Mistaking being correct for being persuasive, and treating emotional processing as inefficiency.",
+    defense:
+      "Intellectualisation and contingency hoarding — converting hurt into a design problem, building a hidden plan B.",
   },
   Shadow: {
     label: "Shadow Integration",
-    meaning: "Conscious access to your own dark instincts — a weapon you carry versus one that carries you.",
+    meaning:
+      "Conscious access to your own dark instincts — a weapon you carry versus one that carries you.",
     bands: {
       High: "You watch your own manipulation, ego and coldness as they happen and know their names. Hard to run a play on.",
-      Moderate: "You recognise the pattern afterwards, usually accurately, occasionally too late to change the move.",
+      Moderate:
+        "You recognise the pattern afterwards, usually accurately, occasionally too late to change the move.",
       Low: "Your darker instincts operate automatically and get explained after the fact — the highest-risk setting on the map.",
     },
     blindSpot: "Over-crediting awareness: naming a pattern feels like handling it, and it is not.",
-    defense: "Meta-analysis and pre-emptive confession — moving to observer position, disclosing the flaw before it can be used.",
+    defense:
+      "Meta-analysis and pre-emptive confession — moving to observer position, disclosing the flaw before it can be used.",
   },
 };
-
 
 /**
  * Score-driven paragraphs: written from the actual axis spread rather than the
@@ -559,7 +587,9 @@ export function resolveArchetype(scores: AxisScore[]): {
   const axes: AxisScore[] = DARK_DIMS.map((dim) => ({ dim, value: clamp(byDim.get(dim) ?? 0) }));
   // Ties broken by the canonical axis order so the ranking is deterministic.
   const ordered = [...axes].sort(
-    (a, b) => b.value - a.value || DARK_DIMS.indexOf(a.dim as DarkDim) - DARK_DIMS.indexOf(b.dim as DarkDim),
+    (a, b) =>
+      b.value - a.value ||
+      DARK_DIMS.indexOf(a.dim as DarkDim) - DARK_DIMS.indexOf(b.dim as DarkDim),
   );
   const intensity = Math.round(axes.reduce((a, b) => a + b.value, 0) / axes.length);
 
@@ -608,10 +638,18 @@ export function buildDossier(scores: AxisScore[]) {
 
   const words =
     resolved.archetype.analysis.join(" ").split(/\s+/).length +
-    axes.map((a) => `${a.meaning} ${a.reading} ${a.blindSpot} ${a.defense}`).join(" ").split(/\s+/).length +
+    axes
+      .map((a) => `${a.meaning} ${a.reading} ${a.blindSpot} ${a.defense}`)
+      .join(" ")
+      .split(/\s+/).length +
     resolved.archetype.mastery.join(" ").split(/\s+/).length +
     context.join(" ").split(/\s+/).length +
-    [resolved.archetype.pressure, resolved.archetype.betrayal, resolved.archetype.romance, resolved.runnerUp.blurb]
+    [
+      resolved.archetype.pressure,
+      resolved.archetype.betrayal,
+      resolved.archetype.romance,
+      resolved.runnerUp.blurb,
+    ]
       .join(" ")
       .split(/\s+/).length;
 

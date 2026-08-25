@@ -123,7 +123,6 @@ describe("no page loads an unapproved ad format", () => {
     expect(offenders).toEqual([]);
   });
 
-
   it("no route or component hardcodes a third-party ad host", () => {
     const offenders = files.filter((file) => {
       // Allowed: the zone registry, server defaults and the admin control panel.

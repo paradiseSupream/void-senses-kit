@@ -115,7 +115,13 @@ export const vipOrderStatus = createServerFn({ method: "POST" })
   .handler(
     async ({
       data,
-    }): Promise<{ status: "pending" | "paid" | "unknown"; plan: VipPlanName | null; email: string | null; licenseKey: string | null; expiresAt: string | null }> => {
+    }): Promise<{
+      status: "pending" | "paid" | "unknown";
+      plan: VipPlanName | null;
+      email: string | null;
+      licenseKey: string | null;
+      expiresAt: string | null;
+    }> => {
       const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
       const { data: row } = await supabaseAdmin
         .from("vip_orders")
@@ -123,10 +129,17 @@ export const vipOrderStatus = createServerFn({ method: "POST" })
         .eq("order_id", data.orderId)
         .maybeSingle();
 
-      if (!row) return { status: "unknown", plan: null, email: null, licenseKey: null, expiresAt: null };
+      if (!row)
+        return { status: "unknown", plan: null, email: null, licenseKey: null, expiresAt: null };
       const plan = (row.plan as VipPlanName) ?? "lifetime";
       if (row.status !== "paid") {
-        return { status: "pending", plan, email: row.email ?? null, licenseKey: null, expiresAt: null };
+        return {
+          status: "pending",
+          plan,
+          email: row.email ?? null,
+          licenseKey: null,
+          expiresAt: null,
+        };
       }
 
       const { lookupVip } = await import("@/lib/vip-fulfil.server");
@@ -150,8 +163,14 @@ export const vipOrderStatus = createServerFn({ method: "POST" })
  */
 export const restoreVipAccess = createServerFn({ method: "POST" })
   .inputValidator((input: { email: string; licenseKey?: string | null }) => ({
-    email: String(input?.email ?? "").trim().toLowerCase().slice(0, 200),
-    licenseKey: String(input?.licenseKey ?? "").trim().toLowerCase().slice(0, 80),
+    email: String(input?.email ?? "")
+      .trim()
+      .toLowerCase()
+      .slice(0, 200),
+    licenseKey: String(input?.licenseKey ?? "")
+      .trim()
+      .toLowerCase()
+      .slice(0, 80),
   }))
   .handler(async ({ data }): Promise<VipAccessResult & { email: string | null }> => {
     const denied = { active: false, plan: null, expiresAt: null, licenseKey: null, email: null };
@@ -170,7 +189,12 @@ export const restoreVipAccess = createServerFn({ method: "POST" })
  */
 export const startMatrixCheckout = createServerFn({ method: "POST" })
   .inputValidator(
-    (input: { email?: string | null; sessionId?: string | null; toolSlug?: string | null; utmSource?: string | null }) => ({
+    (input: {
+      email?: string | null;
+      sessionId?: string | null;
+      toolSlug?: string | null;
+      utmSource?: string | null;
+    }) => ({
       email: input?.email ? String(input.email).trim().toLowerCase().slice(0, 200) : null,
       sessionId: input?.sessionId ? String(input.sessionId).slice(0, 80) : null,
       toolSlug: input?.toolSlug ? String(input.toolSlug).slice(0, 60) : null,
@@ -215,7 +239,13 @@ export const startMatrixCheckout = createServerFn({ method: "POST" })
       country,
     });
 
-    return { ok: true, orderId, checkoutId: checkout.checkoutId, planId: checkout.planId, amountCents: AMOUNT_CENTS };
+    return {
+      ok: true,
+      orderId,
+      checkoutId: checkout.checkoutId,
+      planId: checkout.planId,
+      amountCents: AMOUNT_CENTS,
+    };
   });
 
 /**
@@ -230,10 +260,14 @@ export const startMatrixCheckout = createServerFn({ method: "POST" })
  * buyer email grants nothing.
  */
 export const verifyEntitlement = createServerFn({ method: "POST" })
-  .inputValidator((input: { orderId?: string | null; email?: string | null; licenseKey?: string | null }) => ({
-    orderId: input?.orderId ? String(input.orderId).slice(0, 80) : null,
-    licenseKey: input?.licenseKey ? String(input.licenseKey).trim().toLowerCase().slice(0, 80) : null,
-  }))
+  .inputValidator(
+    (input: { orderId?: string | null; email?: string | null; licenseKey?: string | null }) => ({
+      orderId: input?.orderId ? String(input.orderId).slice(0, 80) : null,
+      licenseKey: input?.licenseKey
+        ? String(input.licenseKey).trim().toLowerCase().slice(0, 80)
+        : null,
+    }),
+  )
   .handler(
     async ({
       data,

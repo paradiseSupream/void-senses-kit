@@ -39,7 +39,9 @@ export async function grantVip(grant: VipGrant): Promise<VipAccess> {
   if (existing) {
     // Monthly renewals stack on the remaining time; lifetime never expires.
     const base =
-      grant.plan === "monthly" && existing.expires_at && new Date(existing.expires_at).getTime() > Date.now()
+      grant.plan === "monthly" &&
+      existing.expires_at &&
+      new Date(existing.expires_at).getTime() > Date.now()
         ? new Date(existing.expires_at).getTime()
         : Date.now();
     const nextExpiry =

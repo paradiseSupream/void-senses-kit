@@ -85,7 +85,7 @@ describe("webhook is the only writer of paid state", () => {
   it("only paid/activated events grant, and terminal orders never re-open", () => {
     expect(hook).toContain('parsed.type === "payment.succeeded"');
     expect(hook).toContain('order.status === "refunded" || order.status === "cancelled"');
-    expect(hook).toContain('.update({ active: false })');
+    expect(hook).toContain(".update({ active: false })");
   });
 
   it("has replay protection and a timing-safe comparison", () => {
@@ -143,9 +143,10 @@ describe("secrets stay server-side", () => {
 
   it("no VITE_ variable exposes a payment or service secret", () => {
     // The GA4 measurement id is a publishable identifier, not a secret.
-    const bad = files.filter(({ code }) =>
-      /VITE_[A-Z_]*(WHOP|SERVICE_ROLE|SECRET)/.test(code) ||
-      /VITE_(?!LOVABLE_CONNECTOR_GOOGLE_ANALYTICS_)[A-Z_]*API_KEY/.test(code),
+    const bad = files.filter(
+      ({ code }) =>
+        /VITE_[A-Z_]*(WHOP|SERVICE_ROLE|SECRET)/.test(code) ||
+        /VITE_(?!LOVABLE_CONNECTOR_GOOGLE_ANALYTICS_)[A-Z_]*API_KEY/.test(code),
     );
     expect(bad.map((f) => f.path)).toEqual([]);
     const env = readFileSync(join(process.cwd(), ".env"), "utf8");
@@ -154,15 +155,16 @@ describe("secrets stay server-side", () => {
 
   it("the admin service-role client is only imported inside handlers", () => {
     const offenders = files.filter(
-      ({ path, code }) =>
-        /^import .*client\.server/m.test(code) && !path.includes(".server."),
+      ({ path, code }) => /^import .*client\.server/m.test(code) && !path.includes(".server."),
     );
     expect(offenders.map((f) => f.path)).toEqual([]);
   });
 });
 
 describe("tool isolation", () => {
-  const importers = files.filter(({ code }) => /from "@\/lib\/archetype"/.test(code)).map((f) => f.path);
+  const importers = files
+    .filter(({ code }) => /from "@\/lib\/archetype"/.test(code))
+    .map((f) => f.path);
 
   it("the 6-axis archetype engine is only used by the Dark Personality surface", () => {
     const allowed = [
@@ -181,7 +183,9 @@ describe("tool isolation", () => {
       .filter(({ code }) => /from "@\/lib\/banks\/dark"/.test(code))
       .map((f) => f.path);
     for (const path of bankUsers) {
-      expect(/dark-personality|archetype|dossier-pdf|ShadowDossier|MatrixUpsell/.test(path)).toBe(true);
+      expect(/dark-personality|archetype|dossier-pdf|ShadowDossier|MatrixUpsell/.test(path)).toBe(
+        true,
+      );
     }
   });
 

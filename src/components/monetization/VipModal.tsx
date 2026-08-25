@@ -14,7 +14,6 @@ import { useSiteConfig } from "@/lib/site-config";
 import { trackFunnel } from "@/lib/funnel";
 import { MONTHLY_OFFER_CENTS, OFFER_CENTS, useVipOffer } from "@/lib/vip-offer";
 
-
 /** Monthly no-ads pass — a low-friction entry point next to lifetime VIP. */
 export const VIP_MONTHLY_CENTS = 499;
 
@@ -156,7 +155,6 @@ export function VipModal() {
 
   if (!vipModalOpen) return null;
 
-
   return (
     <div
       className="fixed inset-0 z-50 grid place-items-center overflow-y-auto bg-background/85 p-4 backdrop-blur-sm"
@@ -186,26 +184,24 @@ export function VipModal() {
         </p>
 
         <div className="mt-5 grid gap-2 sm:grid-cols-2">
-          {(
-            [
-              {
-                key: "monthly" as const,
-                label: "1 month, no ads",
-                amount: monthlyPrice,
-                note: offerActive
-                  ? `one-visit offer — normally $${(VIP_MONTHLY_CENTS / 100).toFixed(2)}`
-                  : "cancel anytime — nothing auto-renews",
-              },
-              {
-                key: "lifetime" as const,
-                label: "Lifetime VIP",
-                amount: lifetimePrice,
-                note: offerActive
-                  ? `one-visit offer — normally $${(site.vip_price_cents / 100).toFixed(0)}`
-                  : "one payment, every future tool",
-              },
-            ]
-          ).map((option) => {
+          {[
+            {
+              key: "monthly" as const,
+              label: "1 month, no ads",
+              amount: monthlyPrice,
+              note: offerActive
+                ? `one-visit offer — normally $${(VIP_MONTHLY_CENTS / 100).toFixed(2)}`
+                : "cancel anytime — nothing auto-renews",
+            },
+            {
+              key: "lifetime" as const,
+              label: "Lifetime VIP",
+              amount: lifetimePrice,
+              note: offerActive
+                ? `one-visit offer — normally $${(site.vip_price_cents / 100).toFixed(0)}`
+                : "one payment, every future tool",
+            },
+          ].map((option) => {
             const active = plan === option.key;
             return (
               <button
@@ -303,7 +299,6 @@ export function VipModal() {
             </p>
           </>
         ) : (
-
           <div className="mt-4 rounded-lg border border-dashed border-border p-4">
             {site.vip_sol_address ? (
               <>
@@ -373,7 +368,6 @@ export function VipModal() {
             </p>
           </div>
         ) : null}
-
       </div>
     </div>
   );

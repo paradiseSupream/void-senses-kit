@@ -42,12 +42,8 @@ describe("dark personality item bank", () => {
 
   it("normalises the extremes to 0 and 100, honouring reverse-keyed items", () => {
     const items = pickBalanced(DARK_BANK, (i) => i.dim, DARK_PER_DIM, rngFrom(11));
-    const maxAnswers = Object.fromEntries(
-      items.map((i) => [i.id, i.reverse ? 0 : SCALE_MAX]),
-    );
-    const minAnswers = Object.fromEntries(
-      items.map((i) => [i.id, i.reverse ? SCALE_MAX : 0]),
-    );
+    const maxAnswers = Object.fromEntries(items.map((i) => [i.id, i.reverse ? 0 : SCALE_MAX]));
+    const minAnswers = Object.fromEntries(items.map((i) => [i.id, i.reverse ? SCALE_MAX : 0]));
     expect(scoreDimensions(items, maxAnswers).every((s) => s.value === 100)).toBe(true);
     expect(scoreDimensions(items, minAnswers).every((s) => s.value === 0)).toBe(true);
   });
@@ -82,7 +78,14 @@ describe("archetype resolution", () => {
   });
 
   it("is deterministic and stable for the same input", () => {
-    const p = vector({ Machiavellianism: 71, Narcissism: 64, Psychopathy: 39, Detachment: 52, Cognition: 80, Shadow: 45 });
+    const p = vector({
+      Machiavellianism: 71,
+      Narcissism: 64,
+      Psychopathy: 39,
+      Detachment: 52,
+      Cognition: 80,
+      Shadow: 45,
+    });
     const a = resolveArchetype(p);
     const b = resolveArchetype([...p].reverse());
     expect(b.archetype.key).toBe(a.archetype.key);
@@ -141,7 +144,14 @@ describe("archetype resolution", () => {
 describe("VIP dossier", () => {
   it("renders every axis, the deep analysis and the matrix module", () => {
     const dossier = buildDossier(
-      vector({ Machiavellianism: 82, Narcissism: 74, Psychopathy: 41, Detachment: 66, Cognition: 88, Shadow: 35 }),
+      vector({
+        Machiavellianism: 82,
+        Narcissism: 74,
+        Psychopathy: 41,
+        Detachment: 66,
+        Cognition: 88,
+        Shadow: 35,
+      }),
     );
     expect(dossier.axes.length).toBe(DARK_DIMS.length);
     for (const axis of dossier.axes) {
