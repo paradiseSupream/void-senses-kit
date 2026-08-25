@@ -672,3 +672,26 @@
   font-size: clamp(1.5rem, 3.6vw, 2.5rem);
 }
 
+
+/* Result radar: the scored shape draws itself once, then holds. */
+@utility radar-draw {
+  stroke-dasharray: 1400;
+  animation:
+    radar-stroke var(--dur-major) var(--ease-out) both,
+    radar-fill var(--dur-major) var(--ease-out) both;
+}
+
+@keyframes radar-stroke {
+  from {
+    stroke-dashoffset: 1400;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes radar-fill {
+  from {
+    fill-opacity: 0;
+  }
+}
