@@ -1,0 +1,101 @@
+import { useEffect } from "react";
+import { createFileRoute, Link } from "@tanstack/react-router";
+
+import { LogoMark } from "@/components/brand/LogoMark";
+
+type Search = { s?: string; p?: string; order?: string; amount?: string };
+
+/**
+ * Card checkout page — Whop's embedded checkout mounts here, so the buyer never
+ * leaves sensesofvoid.app. Prices and sessions are created server-side.
+ */
+export const Route = createFileRoute("/vip/checkout")({
+  validateSearch: (search: Record<string, unknown>): Search => ({
+    s: typeof search["s"] === "string" ? search["s"] : undefined,
+    p: typeof search["p"] === "string" ? search["p"] : undefined,
+    order: typeof search["order"] === "string" ? search["order"] : undefined,
+    amount: typeof search["amount"] === "string" ? search["amount"] : undefined,
+  }),
+  head: () => ({
+    meta: [
+      { title: "Secure VIP Checkout — Senses of Void" },
+      {
+        name: "description",
+        content:
+          "Complete your Senses of Void VIP purchase with card, Apple Pay, Google Pay or a local payment method — ad-free tools and unlimited exports.",
+      },
+      { property: "og:title", content: "Secure VIP Checkout — Senses of Void" },
+      {
+        property: "og:description",
+        content: "Ad-free tools, no export gate, high-resolution reports. Pay securely by card.",
+      },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "robots", content: "noindex" },
+    ],
+  }),
+  component: VipCheckoutPage,
+});
+
+function VipCheckoutPage() {
+  const { s, p, order, amount } = Route.useSearch();
+
+  useEffect(() => {
+    if (document.getElementById("whop-checkout-loader")) return;
+    const script = document.createElement("script");
+    script.id = "whop-checkout-loader";
+    script.src = "https://js.whop.com/static/checkout/loader.js";
+    script.async = true;
+    script.defer = true;
+    document.body.appendChild(script);
+  }, []);
+
+  const returnUrl =
+    typeof window !== "undefined"
+      ? `${window.location.origin}/vip/success?order=${encodeURIComponent(order ?? "")}`
+      : "";
+
+  const price = amount ? `$${(Number(amount) / 100).toFixed(2)}` : null;
+
+  return (
+    <main className="mx-auto w-full max-w-lg px-4 py-10">
+      <Link to="/" className="inline-flex items-center gap-2">
+        <LogoMark className="size-7" />
+        <span className="font-display text-sm font-semibold">Senses of Void</span>
+      </Link>
+
+      <h1 className="mt-6 font-display text-2xl font-bold">Secure checkout</h1>
+      <p className="mt-1 text-sm text-muted-foreground">
+        {price ? `${price} — ` : ""}card, Apple&nbsp;Pay, Google&nbsp;Pay and local methods in 195
+        countries. VIP unlocks the moment the payment clears.
+      </p>
+
+      {s && p ? (
+        <div className="glass mt-6 overflow-hidden rounded-2xl p-2">
+          <div
+            data-whop-checkout-plan-id={p}
+            data-whop-checkout-session={s}
+            data-whop-checkout-return-url={returnUrl}
+            data-whop-checkout-theme="dark"
+            className="min-h-[560px] w-full"
+          />
+        </div>
+      ) : (
+        <div className="glass mt-6 rounded-2xl p-6 text-sm text-muted-foreground">
+          This checkout link has expired. Open the VIP panel again to start a fresh secure checkout.
+        </div>
+      )}
+
+      <p className="mt-4 text-xs text-muted-foreground">
+        Payments are processed by Whop. We never see or store your card details.{" "}
+        <Link to="/terms" className="underline underline-offset-4">
+          Terms
+        </Link>{" "}
+        ·{" "}
+        <Link to="/privacy" className="underline underline-offset-4">
+          Privacy
+        </Link>
+      </p>
+    </main>
+  );
+}
