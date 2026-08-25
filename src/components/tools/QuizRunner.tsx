@@ -59,17 +59,21 @@ export function QuizRunner({
   return (
     <div>
       {/* Sticky progress rail so the finish line is always visible on mobile. */}
-      <div className="sticky top-14 z-20 -mx-4 mb-4 bg-background/85 px-4 py-2.5 backdrop-blur-xl sm:top-16">
-        <div className="flex items-center justify-between">
-          <span className="label-mono">
-            Question {index + 1} / {items.length}
+      <div className="sticky top-14 z-20 -mx-4 mb-5 border-b border-hairline bg-void-0/80 px-4 py-2.5 backdrop-blur-2xl sm:top-16">
+        <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
+          <span className="label-mono min-w-0 truncate">
+            <span className="font-mono text-sm text-foreground">
+              {String(index + 1).padStart(2, "0")}
+            </span>
+            <span className="mx-1 opacity-50">/</span>
+            {String(items.length).padStart(2, "0")}
           </span>
-          <div className="flex items-center gap-2">
+          <div className="flex shrink-0 items-center gap-2">
             {onReshuffle ? (
               <button
                 type="button"
                 onClick={onReshuffle}
-                className="label-mono inline-flex min-h-9 items-center gap-1 rounded-full border border-hairline px-2.5 transition-colors hover:text-primary"
+                className="capsule label-mono inline-flex min-h-9 items-center gap-1 px-2.5 hover:text-primary"
               >
                 <RefreshCw className="size-3" aria-hidden="true" /> New set
               </button>
@@ -78,32 +82,43 @@ export function QuizRunner({
               <button
                 type="button"
                 onClick={() => setIndex((i) => i - 1)}
-                className="label-mono inline-flex min-h-9 items-center gap-1 rounded-full border border-hairline px-2.5 transition-colors hover:text-primary"
+                className="capsule label-mono inline-flex min-h-9 items-center gap-1 px-2.5 hover:text-primary"
               >
                 <ChevronLeft className="size-3" aria-hidden="true" /> Back
               </button>
             ) : null}
           </div>
         </div>
-        <div className="mt-2 h-1 overflow-hidden rounded-full bg-surface-2">
-          <div
-            className="h-full rounded-full transition-[width] duration-300"
-            style={{
-              width: `${progress}%`,
-              background: "linear-gradient(90deg, var(--tool-accent, var(--primary)), var(--secondary))",
-            }}
-          />
+        {/* Segmented rail reads as measured progress, not a loading bar. */}
+        <div className="mt-2.5 flex gap-[3px]" aria-hidden="true">
+          {items.map((q, i) => (
+            <span
+              key={q.id}
+              className="h-1 flex-1 rounded-full transition-colors duration-[var(--dur-ui)]"
+              style={{
+                background:
+                  i < index
+                    ? "var(--tool-accent, var(--primary))"
+                    : i === index
+                      ? "color-mix(in oklab, var(--tool-accent, var(--primary)) 55%, transparent)"
+                      : "color-mix(in oklab, var(--foreground) 10%, transparent)",
+              }}
+            />
+          ))}
         </div>
+        <span className="sr-only" role="status">
+          Question {index + 1} of {items.length}
+        </span>
       </div>
 
-      <div key={item.id} className="glass reveal rounded-2xl p-5 sm:p-7">
+      <div key={item.id} className="panel spotlight reveal p-5 sm:p-8">
         {intro ? <span className="label-mono">{intro}</span> : null}
-        <h2 className="mt-2 font-display text-xl leading-snug font-semibold text-balance sm:text-2xl">
+        <h2 className="mt-2.5 font-display text-[1.35rem] leading-[1.25] font-semibold tracking-[-0.025em] text-balance sm:text-[1.75rem]">
           {item.text}
         </h2>
 
         <div className="mt-6 grid gap-2">
-          {SCALE.map((option) => {
+          {SCALE.map((option, i) => {
             const active = answers[item.id] === option.weight;
             return (
               <button
@@ -111,20 +126,24 @@ export function QuizRunner({
                 type="button"
                 onClick={() => choose(option.weight)}
                 aria-pressed={active}
-                className={`flex min-h-12 items-center justify-between rounded-xl border px-4 py-3 text-left text-sm transition-all ${
+                style={{ animationDelay: `${60 + i * 35}ms` }}
+                className={`reveal flex min-h-12 items-center justify-between rounded-xl border px-4 py-3 text-left text-sm transition-[background-color,border-color,transform] duration-[var(--dur-micro)] active:scale-[0.985] ${
                   active
-                    ? "border-primary/60 bg-primary/15 text-foreground"
-                    : "border-hairline bg-surface-2/50 text-foreground/85 hover:border-primary/40 hover:bg-primary/10"
+                    ? "border-primary/55 bg-primary/12 text-foreground"
+                    : "border-hairline bg-void-2/45 text-foreground/85 hover:border-primary/35 hover:bg-primary/8"
                 }`}
               >
                 {option.label}
                 <span
                   aria-hidden="true"
-                  className="size-2.5 rounded-full"
+                  className="size-2.5 shrink-0 rounded-full transition-transform duration-[var(--dur-micro)]"
                   style={{
                     background: active
                       ? "var(--tool-accent, var(--primary))"
-                      : "color-mix(in oklab, var(--foreground) 18%, transparent)",
+                      : "color-mix(in oklab, var(--foreground) 16%, transparent)",
+                    boxShadow: active
+                      ? "0 0 12px color-mix(in oklab, var(--tool-accent, var(--primary)) 60%, transparent)"
+                      : "none",
                   }}
                 />
               </button>
@@ -132,6 +151,7 @@ export function QuizRunner({
           })}
         </div>
       </div>
+
 
       {/* Quiet banner only once the visitor is deep in the quiz (7th question
           onward) — no interstitial, no pop-under, safe for paid social. */}

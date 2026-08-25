@@ -24,6 +24,7 @@ import { TOOLS, searchTools, type ToolMeta } from "@/lib/tools";
 import { ToolCard } from "@/components/tools/ToolCard";
 import { NativeAdCard, withNativeAds } from "@/components/monetization/NativeAdCard";
 import { SampleResult } from "@/components/home/SampleResult";
+import { AmbientCanvas } from "@/components/visuals/AmbientCanvas";
 import { StreakChallenge } from "@/components/home/StreakChallenge";
 import { HomeFaq } from "@/components/home/HomeFaq";
 import { useVip } from "@/lib/vip";
@@ -278,10 +279,15 @@ function Home() {
       {/* ---------------- Hero ---------------- */}
       <section className="aurora grain relative overflow-hidden border-b border-hairline">
         <div className="void-grid absolute inset-0 -z-10" aria-hidden="true" />
-        <div className="mx-auto grid max-w-7xl gap-10 px-4 py-8 sm:px-6 sm:py-20 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:items-center lg:gap-14">
+        <AmbientCanvas className="-z-10 opacity-70" />
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent"
+        />
+        <div className="mx-auto grid max-w-7xl gap-10 px-4 py-10 sm:px-6 sm:py-24 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:items-center lg:gap-16">
           <div className="text-center lg:text-left">
             <span
-              className="reveal label-mono inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3.5 py-1.5 text-primary backdrop-blur-xl"
+              className="reveal label-mono inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/8 px-3.5 py-1.5 text-primary backdrop-blur-xl"
               style={{ animationDelay: "0ms" }}
             >
               <span className="relative flex size-1.5">
@@ -292,12 +298,13 @@ function Home() {
             </span>
 
             <h1
-              className="reveal mt-5 font-display text-[2.3rem] leading-[1.03] font-bold tracking-tight text-balance sm:mt-7 sm:text-6xl lg:text-[4.1rem]"
+              className="reveal text-display mt-6 sm:mt-8"
               style={{ animationDelay: "60ms" }}
             >
               {copy.title}
-              <span className="text-gradient mt-1 block">{copy.accent}</span>
+              <span className="sheen-word mt-1.5 block">{copy.accent}</span>
             </h1>
+
 
             <p
               className="reveal mx-auto mt-4 max-w-xl text-[0.97rem] leading-relaxed text-pretty text-muted-foreground sm:mt-6 sm:text-lg lg:mx-0"
@@ -320,10 +327,11 @@ function Home() {
               <a
                 href="#suite"
                 onClick={() => trackExperiment("hero_secondary", heroArm)}
-                className="inline-flex min-h-14 items-center justify-center gap-2 rounded-full border border-hairline bg-surface/60 px-7 text-base font-semibold backdrop-blur-xl transition-colors hover:bg-surface-2"
+                className="btn-ghost inline-flex min-h-14 items-center justify-center gap-2 rounded-full px-7 text-base font-semibold"
               >
                 {focusTool ? "See all 7 tests" : copy.second}
               </a>
+
             </div>
 
             <ul
@@ -388,9 +396,11 @@ function Home() {
         <div className="mx-auto max-w-7xl px-4 pb-6 sm:px-6 sm:pb-14">
           <dl className="grid grid-cols-2 gap-2.5 sm:grid-cols-4 sm:gap-3">
             {STATS.map(({ icon: Icon, k, v }) => (
-              <div key={k} className="glass rounded-xl px-3 py-2.5 text-center sm:py-4">
+              <div key={k} className="hud-tile px-3 py-3 text-center sm:py-4">
                 <Icon className="mx-auto size-4 text-primary" aria-hidden="true" />
-                <dt className="mt-2 font-display text-base font-semibold">{k}</dt>
+                <dt className="mt-2 font-display text-base font-semibold tracking-[-0.02em]">
+                  {k}
+                </dt>
                 <dd className="label-mono mt-0.5">{v}</dd>
               </div>
             ))}
@@ -403,9 +413,7 @@ function Home() {
       <section id="suite" className="mx-auto max-w-7xl scroll-mt-20 px-4 py-8 sm:px-6 sm:py-20">
         <div className="max-w-2xl">
           <span className="label-mono">Find your test</span>
-          <h2 className="mt-2 font-display text-2xl font-bold tracking-tight sm:text-4xl">
-            What do you want to find out?
-          </h2>
+          <h2 className="text-section mt-2.5">What do you want to find out?</h2>
           <p className="mt-2.5 hidden text-sm leading-relaxed text-muted-foreground sm:block">
             Tap a goal and we&apos;ll show the right tools. Every one is free, starts instantly and
             finishes in minutes.
@@ -421,10 +429,8 @@ function Home() {
                 type="button"
                 onClick={() => setGoal(id)}
                 aria-pressed={active}
-                className={`inline-flex min-h-11 items-center gap-2 rounded-full border px-4 text-sm font-semibold transition-colors ${
-                  active
-                    ? "border-primary/50 bg-primary/15 text-primary"
-                    : "border-hairline bg-surface/60 text-muted-foreground hover:bg-surface-2 hover:text-foreground"
+                className={`capsule inline-flex min-h-11 items-center gap-2 px-4 text-sm font-semibold ${
+                  active ? "capsule-active" : "text-muted-foreground hover:text-foreground"
                 }`}
               >
                 <Icon className="size-4" aria-hidden="true" />
@@ -433,6 +439,7 @@ function Home() {
             );
           })}
         </div>
+
 
         <div className="relative mt-4 hidden w-full sm:block sm:max-w-sm">
           <label htmlFor="hub-filter" className="sr-only">
@@ -448,7 +455,7 @@ function Home() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Or search the suite…"
-            className="min-h-11 w-full rounded-full border border-hairline bg-surface/60 py-2.5 pr-4 pl-10 text-sm backdrop-blur-xl placeholder:text-muted-foreground focus:border-primary/50"
+            className="min-h-11 w-full rounded-full border border-hairline bg-void-2/50 py-2.5 pr-4 pl-10 text-sm backdrop-blur-xl transition-colors placeholder:text-muted-foreground focus:border-primary/45 focus:bg-void-2/70"
           />
         </div>
 
@@ -504,9 +511,7 @@ function Home() {
       <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-20">
         <div className="max-w-xl">
           <span className="label-mono">Why it feels different</span>
-          <h2 className="mt-2 font-display text-2xl font-bold tracking-tight sm:text-4xl">
-            Engineered like a product, not a quiz page
-          </h2>
+          <h2 className="text-section mt-2.5">Engineered like a product, not a quiz page</h2>
         </div>
         <div className="mt-5 grid gap-4 sm:mt-10 sm:gap-5 md:grid-cols-3">
           {PILLARS.map(({ icon: Icon, title, body }) => (
@@ -525,19 +530,15 @@ function Home() {
       <section className="border-y border-hairline bg-surface/20">
         <div className="mx-auto max-w-3xl px-4 py-12 sm:px-6 sm:py-20">
           <span className="label-mono">Questions people ask</span>
-          <h2 className="mt-2 mb-6 font-display text-2xl font-bold tracking-tight sm:text-4xl">
-            Free to use, honestly explained
-          </h2>
+          <h2 className="text-section mt-2.5 mb-6">Free to use, honestly explained</h2>
           <HomeFaq />
         </div>
       </section>
 
       {/* ---------------- Closing CTA ---------------- */}
       <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-20">
-        <div className="panel aurora grain relative overflow-hidden p-7 text-center sm:p-14">
-          <h2 className="font-display text-2xl font-bold tracking-tight text-balance sm:text-4xl">
-            Everything here is free. Forever.
-          </h2>
+        <div className="panel aurora grain spotlight relative overflow-hidden p-7 text-center sm:p-14">
+          <h2 className="text-section text-balance">Everything here is free. Forever.</h2>
           <p className="mx-auto mt-3.5 max-w-lg text-sm leading-relaxed text-muted-foreground">
             All {TOOLS.length} tools and the whole vault stay free — ads keep the lights on. If you
             prefer a clean screen, lifetime VIP removes every ad and export gate for one $19
@@ -553,7 +554,7 @@ function Home() {
             <button
               type="button"
               onClick={() => openVipModal()}
-              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full border border-hairline bg-surface/60 px-6 text-sm font-semibold backdrop-blur-xl transition-colors hover:bg-surface-2"
+              className="btn-ghost inline-flex min-h-12 items-center justify-center gap-2 rounded-full px-6 text-sm font-semibold"
             >
               <Wallet className="size-4" aria-hidden="true" />
               {isVip ? "VIP active" : "Remove ads for $19 (optional)"}

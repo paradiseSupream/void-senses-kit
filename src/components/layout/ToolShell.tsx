@@ -40,12 +40,12 @@ export function ToolShell({
               alt=""
               width={1024}
               height={576}
-              className="absolute inset-0 size-full object-cover opacity-45"
+              className="absolute inset-0 size-full scale-105 object-cover opacity-40"
               aria-hidden="true"
             />
             <div
               aria-hidden="true"
-              className="absolute inset-0 bg-gradient-to-b from-background/55 via-background/85 to-background"
+              className="absolute inset-0 bg-gradient-to-b from-void-0/50 via-void-0/85 to-void-0"
             />
           </>
         ) : (
@@ -70,7 +70,7 @@ export function ToolShell({
             ) : null}
             <div className="min-w-0">
               <span className="label-mono block">{eyebrow}</span>
-              <h1 className="mt-1 font-display text-[1.8rem] leading-[1.1] font-bold text-balance sm:text-[2.6rem]">
+              <h1 className="mt-1 font-display text-[1.8rem] leading-[1.08] font-bold tracking-[-0.032em] text-balance sm:text-[2.6rem]">
                 {title}
               </h1>
             </div>
@@ -89,7 +89,7 @@ export function ToolShell({
                   { icon: Clock, k: "Takes", v: tool.facts.time },
                   { icon: Download, k: "You get", v: tool.facts.output },
                 ].map(({ icon: FactIcon, k, v }) => (
-                  <div key={k} className="glass rounded-xl px-2.5 py-3 text-center sm:px-3">
+                  <div key={k} className="hud-tile px-2.5 py-3 text-center sm:px-3">
                     <FactIcon
                       className="mx-auto size-4"
                       style={{ color: "var(--tool-accent)" }}
@@ -107,7 +107,7 @@ export function ToolShell({
                 {tool.highlights.map((item) => (
                   <li
                     key={item}
-                    className="label-mono rounded-full border border-hairline bg-surface/60 px-3 py-1 text-foreground/75"
+                    className="capsule label-mono px-3 py-1 text-foreground/75"
                   >
                     {item}
                   </li>
@@ -123,7 +123,7 @@ export function ToolShell({
 
         {slug ? <NextTools slug={slug} /> : null}
 
-        <p className="mt-12 flex items-start gap-2 rounded-xl border border-hairline bg-surface/40 p-4 text-xs leading-relaxed text-muted-foreground">
+        <p className="mt-12 flex items-start gap-2 rounded-xl border border-hairline bg-void-1/50 p-4 text-xs leading-relaxed text-muted-foreground">
           <ShieldCheck className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden="true" />
           Everything is scored on your device — no answers are uploaded. For entertainment and
           self-reflection only, not clinical psychological or medical assessment.
