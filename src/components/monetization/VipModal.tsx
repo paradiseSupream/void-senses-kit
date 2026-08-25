@@ -32,7 +32,6 @@ export function VipModal() {
   const restoreVip = useServerFn(restoreVipAccess);
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
-  const [license, setLicense] = useState("");
   const [emailSaved, setEmailSaved] = useState(false);
   const [busy, setBusy] = useState(false);
   const [tab, setTab] = useState<"card" | "crypto">("card");
@@ -121,33 +120,28 @@ export function VipModal() {
   };
 
   /**
-   * Restores an existing purchase on this device. The email alone is not proof
-   * of payment, so the server also requires the license key from the success
-   * page / receipt.
+   * Restores an existing purchase on this device using just the purchase email.
+   * `vip_members` is only written by the verified payment webhook or an admin,
+   * so no code needs to be kept by the buyer.
    */
   const restore = async () => {
     if (!email.includes("@")) {
       toast.error("Enter the email you paid with.");
       return;
     }
-    const key = license.trim();
-    if (!key) {
-      toast.error("Enter your license key (shown on the payment success page).");
-      return;
-    }
     setBusy(true);
     try {
-      const access = await restoreVip({ data: { email, licenseKey: key } });
+      const access = await restoreVip({ data: { email } });
       if (access.active) {
-        rememberLicense(access.licenseKey ?? key);
+        rememberLicense(access.licenseKey ?? null);
         setVip(true, access.plan ?? "lifetime");
         toast.success("VIP restored on this device.");
         closeVipModal();
       } else {
-        toast.error("That email and license key do not match an active VIP.");
+        toast.error("No active VIP found for that email — check the address you paid with.");
       }
     } catch {
-      toast.error("Could not verify that license — try again.");
+      toast.error("Could not check that email — try again.");
     } finally {
       setBusy(false);
     }
@@ -349,24 +343,10 @@ export function VipModal() {
         </button>
 
         {!isVip ? (
-          <div className="mt-3">
-            <label htmlFor="vip-license" className="label-mono mb-1.5 block">
-              License key
-            </label>
-            <input
-              id="vip-license"
-              value={license}
-              onChange={(event) => setLicense(event.target.value)}
-              placeholder="from your payment success page"
-              autoComplete="off"
-              spellCheck={false}
-              className="w-full rounded-xl border border-hairline bg-surface-2 px-3 py-2.5 font-mono text-xs outline-none focus:border-primary/60"
-            />
-            <p className="mt-1.5 text-xs text-muted-foreground">
-              Email plus license key restores VIP on any device — the email on its own never grants
-              access.
-            </p>
-          </div>
+          <p className="mt-2 text-center text-xs text-muted-foreground">
+            Paid already? Enter the same email above and tap restore — access returns on any device,
+            no code needed.
+          </p>
         ) : null}
       </div>
     </div>
