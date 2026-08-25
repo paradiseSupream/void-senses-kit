@@ -24,6 +24,7 @@ import { TOOLS, searchTools, type ToolMeta } from "@/lib/tools";
 import { ToolCard } from "@/components/tools/ToolCard";
 import { NativeAdCard, withNativeAds } from "@/components/monetization/NativeAdCard";
 import { SampleResult } from "@/components/home/SampleResult";
+import { AmbientCanvas } from "@/components/visuals/AmbientCanvas";
 import { StreakChallenge } from "@/components/home/StreakChallenge";
 import { HomeFaq } from "@/components/home/HomeFaq";
 import { useVip } from "@/lib/vip";
@@ -454,7 +455,7 @@ function Home() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Or search the suite…"
-            className="min-h-11 w-full rounded-full border border-hairline bg-surface/60 py-2.5 pr-4 pl-10 text-sm backdrop-blur-xl placeholder:text-muted-foreground focus:border-primary/50"
+            className="min-h-11 w-full rounded-full border border-hairline bg-void-2/50 py-2.5 pr-4 pl-10 text-sm backdrop-blur-xl transition-colors placeholder:text-muted-foreground focus:border-primary/45 focus:bg-void-2/70"
           />
         </div>
 
@@ -510,9 +511,7 @@ function Home() {
       <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-20">
         <div className="max-w-xl">
           <span className="label-mono">Why it feels different</span>
-          <h2 className="mt-2 font-display text-2xl font-bold tracking-tight sm:text-4xl">
-            Engineered like a product, not a quiz page
-          </h2>
+          <h2 className="text-section mt-2.5">Engineered like a product, not a quiz page</h2>
         </div>
         <div className="mt-5 grid gap-4 sm:mt-10 sm:gap-5 md:grid-cols-3">
           {PILLARS.map(({ icon: Icon, title, body }) => (
@@ -531,19 +530,15 @@ function Home() {
       <section className="border-y border-hairline bg-surface/20">
         <div className="mx-auto max-w-3xl px-4 py-12 sm:px-6 sm:py-20">
           <span className="label-mono">Questions people ask</span>
-          <h2 className="mt-2 mb-6 font-display text-2xl font-bold tracking-tight sm:text-4xl">
-            Free to use, honestly explained
-          </h2>
+          <h2 className="text-section mt-2.5 mb-6">Free to use, honestly explained</h2>
           <HomeFaq />
         </div>
       </section>
 
       {/* ---------------- Closing CTA ---------------- */}
       <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-20">
-        <div className="panel aurora grain relative overflow-hidden p-7 text-center sm:p-14">
-          <h2 className="font-display text-2xl font-bold tracking-tight text-balance sm:text-4xl">
-            Everything here is free. Forever.
-          </h2>
+        <div className="panel aurora grain spotlight relative overflow-hidden p-7 text-center sm:p-14">
+          <h2 className="text-section text-balance">Everything here is free. Forever.</h2>
           <p className="mx-auto mt-3.5 max-w-lg text-sm leading-relaxed text-muted-foreground">
             All {TOOLS.length} tools and the whole vault stay free — ads keep the lights on. If you
             prefer a clean screen, lifetime VIP removes every ad and export gate for one $19
@@ -559,7 +554,7 @@ function Home() {
             <button
               type="button"
               onClick={() => openVipModal()}
-              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full border border-hairline bg-surface/60 px-6 text-sm font-semibold backdrop-blur-xl transition-colors hover:bg-surface-2"
+              className="btn-ghost inline-flex min-h-12 items-center justify-center gap-2 rounded-full px-6 text-sm font-semibold"
             >
               <Wallet className="size-4" aria-hidden="true" />
               {isVip ? "VIP active" : "Remove ads for $19 (optional)"}
