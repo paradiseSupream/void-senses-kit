@@ -326,10 +326,11 @@ function Home() {
               <a
                 href="#suite"
                 onClick={() => trackExperiment("hero_secondary", heroArm)}
-                className="inline-flex min-h-14 items-center justify-center gap-2 rounded-full border border-hairline bg-surface/60 px-7 text-base font-semibold backdrop-blur-xl transition-colors hover:bg-surface-2"
+                className="btn-ghost inline-flex min-h-14 items-center justify-center gap-2 rounded-full px-7 text-base font-semibold"
               >
                 {focusTool ? "See all 7 tests" : copy.second}
               </a>
+
             </div>
 
             <ul
