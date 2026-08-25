@@ -76,7 +76,72 @@ export function VipModal() {
     }
   };
 
+  /** Opens the Whop card checkout for the selected plan. */
+  const startCheckout = async () => {
+    if (busy) return;
+    if (!email.includes("@")) {
+      toast.error("Enter your email first — VIP access is tied to it.");
+      return;
+    }
+    setBusy(true);
+    try {
+      await persistEmail();
+      trackFunnel("vip_purchase");
+      const result = await beginCheckout({
+        data: {
+          plan,
+          offer: offerActive,
+          email,
+          sessionId: sessionId(),
+          utmSource: attribution().utm_source ?? null,
+        },
+      });
+      if (!result.ok || !result.checkoutId || !result.planId) {
+        toast.error(result.reason ?? "Checkout is unavailable right now.");
+        return;
+      }
+      closeVipModal();
+      await navigate({
+        to: "/vip/checkout",
+        search: {
+          s: result.checkoutId,
+          p: result.planId,
+          order: result.orderId,
+          amount: String(result.amountCents ?? ""),
+        },
+      });
+    } catch {
+      toast.error("Could not open checkout — please try again.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  /** Restores an existing purchase on this device from the buyer's email. */
+  const restore = async () => {
+    if (!email.includes("@")) {
+      toast.error("Enter the email you paid with.");
+      return;
+    }
+    setBusy(true);
+    try {
+      const access = await restoreVip({ data: { email } });
+      if (access.active) {
+        setVip(true, access.plan ?? "lifetime");
+        toast.success("VIP restored on this device.");
+        closeVipModal();
+      } else {
+        toast.error("No active VIP found for that email.");
+      }
+    } catch {
+      toast.error("Could not check that email — try again.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
   if (!vipModalOpen) return null;
+
 
   return (
     <div
