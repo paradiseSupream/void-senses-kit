@@ -605,19 +605,43 @@
   .lift:hover {
     transform: none;
   }
-}
 
+  /* No 3D, parallax or background drift when the user asked for calm. */
+  .tilt-3d {
+    transform: none !important;
+  }
+
+  .spotlight::after {
+    display: none;
+  }
+
+  .sheen-word {
+    background-image: none;
+    background-clip: border-box;
+    color: color-mix(in oklab, var(--primary) 85%, white);
+  }
+}
 
 /* Mobile-first refinements: lighter effects, safe areas, comfortable type. */
 @media (max-width: 640px) {
   .panel,
-  .glass {
+  .glass,
+  .dock {
     backdrop-filter: blur(14px) saturate(125%);
   }
 
   .aurora::before {
     filter: blur(22px);
     animation: none;
+  }
+
+  /* Touch devices get press feedback instead of pointer tilt/spotlight. */
+  .tilt-3d {
+    transform: none;
+  }
+
+  .spotlight::after {
+    display: none;
   }
 
   body {
@@ -629,3 +653,22 @@
     overflow-x: hidden;
   }
 }
+
+/* Fluid cinematic display scale used by hero + result headlines. */
+@utility text-display {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  line-height: 1.02;
+  font-size: clamp(2.15rem, 7.2vw, 4.5rem);
+  text-wrap: balance;
+}
+
+@utility text-section {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  line-height: 1.1;
+  font-size: clamp(1.5rem, 3.6vw, 2.5rem);
+}
+
