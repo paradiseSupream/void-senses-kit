@@ -52,7 +52,13 @@ export const ARCHETYPES: Archetype[] = [
     blurb:
       "You do not ask for power, you arrange the conditions under which it is handed to you. People leave your conversations feeling they chose something you had already decided.",
     edge: "Your risk is winning so quietly that nobody, including you, can tell what you actually wanted.",
-    weights: { Machiavellianism: 1.35, Narcissism: 1, Cognition: 0.6, Detachment: 0.3, Psychopathy: 0.2 },
+    weights: {
+      Machiavellianism: 1.35,
+      Narcissism: 1,
+      Cognition: 0.6,
+      Detachment: 0.3,
+      Psychopathy: 0.2,
+    },
     pressure:
       "Under extreme pressure you get warmer, not colder. Charm becomes the instrument: you widen your circle of obligations until someone else's resources absorb the shock.",
     betrayal:
@@ -98,7 +104,13 @@ export const ARCHETYPES: Archetype[] = [
     blurb:
       "You are remembered as an atmosphere rather than a set of facts. People feel close to you and later cannot name a single thing you disclosed.",
     edge: "Your risk is mistaking distance for peace and calling an empty room freedom.",
-    weights: { Detachment: 1.4, Machiavellianism: 0.7, Cognition: 0.5, Psychopathy: 0.4, Narcissism: -0.2 },
+    weights: {
+      Detachment: 1.4,
+      Machiavellianism: 0.7,
+      Cognition: 0.5,
+      Psychopathy: 0.4,
+      Narcissism: -0.2,
+    },
     pressure:
       "Under pressure you go quiet and elegant. You keep functioning at a high level while withdrawing every emotional signal, so nobody realises you are in crisis until it is already resolved or already over.",
     betrayal:
@@ -190,7 +202,13 @@ export const ARCHETYPES: Archetype[] = [
     blurb:
       "You feel everything in the room and understand precisely what could be done with it. That is a rare and heavy combination: the accuracy of a manipulator with the conscience of someone who cannot un-feel the cost.",
     edge: "Your risk is exhaustion — you carry other people's states and audit your own motives at the same time.",
-    weights: { Shadow: 1.2, Machiavellianism: 0.9, Cognition: 0.8, Psychopathy: -0.9, Detachment: -0.2 },
+    weights: {
+      Shadow: 1.2,
+      Machiavellianism: 0.9,
+      Cognition: 0.8,
+      Psychopathy: -0.9,
+      Detachment: -0.2,
+    },
     pressure:
       "Under pressure you over-attune. You start managing everyone's emotional weather and lose track of your own position until the pressure is over and you crash.",
     betrayal:
@@ -443,7 +461,8 @@ export const AXIS_DETAIL: Record<
     },
     blindSpot:
       "The invisible ledger: debts you never state and therefore can never collect, only resent.",
-    defense: "Pre-emptive generosity and controlled disclosure — giving first so nothing can be demanded.",
+    defense:
+      "Pre-emptive generosity and controlled disclosure — giving first so nothing can be demanded.",
   },
   Narcissism: {
     label: "Narcissism",
@@ -454,8 +473,10 @@ export const AXIS_DETAIL: Record<
         "You want to be excellent without requiring an audience for it. Criticism lands but does not restructure you.",
       Low: "Status is genuinely not the currency you trade in, which frees you and occasionally leaves you under-claimed.",
     },
-    blindSpot: "Reading criticism of a plan as an attack on your worth, and filtering it out as disloyalty.",
-    defense: "Escalation and narrative repair — aiming higher when doubted, rewriting setbacks into chapters.",
+    blindSpot:
+      "Reading criticism of a plan as an attack on your worth, and filtering it out as disloyalty.",
+    defense:
+      "Escalation and narrative repair — aiming higher when doubted, rewriting setbacks into chapters.",
   },
   Psychopathy: {
     label: "Psychopathy",
@@ -477,33 +498,40 @@ export const AXIS_DETAIL: Record<
       Moderate: "You open selectively and close cleanly. Access is a decision, not a reflex.",
       Low: "You are legible. It costs you leverage and buys you the kind of intimacy the guarded rarely reach.",
     },
-    blindSpot: "Hearing a request for closeness as a demand for control, then exiting before anything is negotiated.",
-    defense: "Warmth as camouflage and pre-emptive exit — leaving with a plausible reason instead of admitting overwhelm.",
+    blindSpot:
+      "Hearing a request for closeness as a demand for control, then exiting before anything is negotiated.",
+    defense:
+      "Warmth as camouflage and pre-emptive exit — leaving with a plausible reason instead of admitting overwhelm.",
   },
   Cognition: {
     label: "Cognitive Dominance",
     meaning: "Control of the frame: definitions, sequence, contingency and the second plan.",
     bands: {
       High: "You win by owning the question. You are calm in crises because you already simulated the bad branch.",
-      Moderate: "You think ahead without needing to run the room. You can be led by a better argument.",
+      Moderate:
+        "You think ahead without needing to run the room. You can be led by a better argument.",
       Low: "You stay in the present tense, which keeps you responsive and leaves the frame to whoever sets it.",
     },
-    blindSpot: "Mistaking being correct for being persuasive, and treating emotional processing as inefficiency.",
-    defense: "Intellectualisation and contingency hoarding — converting hurt into a design problem, building a hidden plan B.",
+    blindSpot:
+      "Mistaking being correct for being persuasive, and treating emotional processing as inefficiency.",
+    defense:
+      "Intellectualisation and contingency hoarding — converting hurt into a design problem, building a hidden plan B.",
   },
   Shadow: {
     label: "Shadow Integration",
-    meaning: "Conscious access to your own dark instincts — a weapon you carry versus one that carries you.",
+    meaning:
+      "Conscious access to your own dark instincts — a weapon you carry versus one that carries you.",
     bands: {
       High: "You watch your own manipulation, ego and coldness as they happen and know their names. Hard to run a play on.",
-      Moderate: "You recognise the pattern afterwards, usually accurately, occasionally too late to change the move.",
+      Moderate:
+        "You recognise the pattern afterwards, usually accurately, occasionally too late to change the move.",
       Low: "Your darker instincts operate automatically and get explained after the fact — the highest-risk setting on the map.",
     },
     blindSpot: "Over-crediting awareness: naming a pattern feels like handling it, and it is not.",
-    defense: "Meta-analysis and pre-emptive confession — moving to observer position, disclosing the flaw before it can be used.",
+    defense:
+      "Meta-analysis and pre-emptive confession — moving to observer position, disclosing the flaw before it can be used.",
   },
 };
-
 
 /**
  * Score-driven paragraphs: written from the actual axis spread rather than the
@@ -527,10 +555,24 @@ export function contextualParagraphs(
     `Long term, the trajectory of this profile depends on one trade. The strategies that produced your strengths were adaptive at some point — they solved a real problem, probably early, probably at a cost. They are still running now, in contexts that no longer require them. Maturity for your type is not becoming a different person; it is keeping the capability and retiring the automaticity. You should be able to run every move in ${archetype.name}'s repertoire on purpose, and be able to not run it when the situation does not call for it. That single degree of freedom is the difference between someone who is powerful and someone who is simply consistent.`,
     `The way you handle being seen accurately is diagnostic. Most people with your configuration have been described correctly at least once by someone who was not being kind about it, and the reaction to that moment tends to split into two habits: either you absorbed it and quietly used it, or you decided the person was hostile and filed them away. If you are honest about which one you did, you already know where your ceiling currently is. ${archetype.name} does not fail from lack of ability; it fails from an information problem it created itself, by making candour expensive for the people closest to it. The practical fix is unglamorous — pick one person, remove the penalty for telling you the truth, and then actually do not penalise them the first three times they use it.`,
     `Finally, consider the cost accounting. Every axis you score high on is buying you something real and charging you for it in a currency you may not be tracking: time, sleep, sincerity, or the number of relationships in which you can be unimpressive without panic. Write down what your top two axes have earned you in the last year and what they have cost, in those units, and the profile stops being a personality description and becomes a decision. That is the only use of a report like this. The archetype is not a verdict on who you are; it is an accurate description of the strategy you are currently running, and strategies are the one thing about a person that can be changed on purpose.`,
+    `One more thing worth holding onto: this profile describes a strategy, not a ceiling, and strategies are situational. The same configuration that makes you formidable in negotiation, crisis or ambiguity is the one that makes you difficult in intimacy, in stillness, and in any situation whose reward is not measurable. Most people with your scores never fail at the hard things — they fail at the easy ones, because the easy ones require dropping the apparatus. If you want a single practical instruction from this entire report, it is this: choose one context per week in which you deliberately operate at half capacity. No positioning, no reading the room, no contingency plan, no second layer. It will feel like incompetence for the first month and then it will feel like rest. That interval — the distance between those two feelings — is the exact measurement of how much of your personality is currently a defence and how much of it is a preference. Everything else in this dossier is description. That part is the work, and nobody can do it on your behalf or verify that you did it.`,
   ];
 }
 
-/** Normalise raw axis scores and pick the winning archetype by weighted affinity. */
+/** Clamp any raw axis value into the deterministic 0–100 report range. */
+function clamp(value: number): number {
+  if (!Number.isFinite(value)) return 0;
+  return Math.max(0, Math.min(100, Math.round(value)));
+}
+
+/**
+ * Normalise raw axis scores and pick the winning archetype by weighted affinity.
+ *
+ * Deterministic by construction: the axis vector is always the full six axes in
+ * canonical order, values are clamped to 0–100, and both the axis ranking and
+ * the archetype ranking break ties by declaration order — so the same answers
+ * always produce the same archetype, and every valid answer set produces one.
+ */
 export function resolveArchetype(scores: AxisScore[]): {
   archetype: Archetype;
   runnerUp: Archetype;
@@ -540,20 +582,27 @@ export function resolveArchetype(scores: AxisScore[]): {
   ordered: AxisScore[];
 } {
   const byDim = new Map(scores.map((s) => [s.dim, s.value]));
-  const ordered = [...scores].sort((a, b) => b.value - a.value);
-  const intensity = scores.length
-    ? Math.round(scores.reduce((a, b) => a + b.value, 0) / scores.length)
-    : 0;
+  // Always score all six axes: a missing axis reads as 0 rather than vanishing,
+  // so the affinity maths can never be computed over a short vector.
+  const axes: AxisScore[] = DARK_DIMS.map((dim) => ({ dim, value: clamp(byDim.get(dim) ?? 0) }));
+  // Ties broken by the canonical axis order so the ranking is deterministic.
+  const ordered = [...axes].sort(
+    (a, b) =>
+      b.value - a.value ||
+      DARK_DIMS.indexOf(a.dim as DarkDim) - DARK_DIMS.indexOf(b.dim as DarkDim),
+  );
+  const intensity = Math.round(axes.reduce((a, b) => a + b.value, 0) / axes.length);
 
-  const ranked = ARCHETYPES.map((archetype) => {
+  const ranked = ARCHETYPES.map((archetype, index) => {
     let total = 0;
     for (const dim of DARK_DIMS) {
       const weight = archetype.weights[dim] ?? 0;
-      const value = byDim.get(dim) ?? 0;
+      const value = axes.find((a) => a.dim === dim)!.value;
+      // A negative weight scores the *absence* of the axis, and is applied once.
       total += weight * (weight < 0 ? 100 - value : value);
     }
-    return { archetype, total };
-  }).sort((a, b) => b.total - a.total);
+    return { archetype, total, index };
+  }).sort((a, b) => b.total - a.total || a.index - b.index);
 
   return {
     archetype: ranked[0]!.archetype,
@@ -569,7 +618,9 @@ export function resolveArchetype(scores: AxisScore[]): {
 export function buildDossier(scores: AxisScore[]) {
   const resolved = resolveArchetype(scores);
   const axes = DARK_DIMS.map((dim) => {
-    const value = scores.find((s) => s.dim === dim)?.value ?? 0;
+    // Read the normalised vector, not the raw input, so the dossier, the radar
+    // and the archetype maths can never disagree.
+    const value = resolved.ordered.find((s) => s.dim === dim)?.value ?? 0;
     const detail = AXIS_DETAIL[dim];
     return {
       dim,
@@ -587,10 +638,18 @@ export function buildDossier(scores: AxisScore[]) {
 
   const words =
     resolved.archetype.analysis.join(" ").split(/\s+/).length +
-    axes.map((a) => `${a.meaning} ${a.reading} ${a.blindSpot} ${a.defense}`).join(" ").split(/\s+/).length +
+    axes
+      .map((a) => `${a.meaning} ${a.reading} ${a.blindSpot} ${a.defense}`)
+      .join(" ")
+      .split(/\s+/).length +
     resolved.archetype.mastery.join(" ").split(/\s+/).length +
     context.join(" ").split(/\s+/).length +
-    [resolved.archetype.pressure, resolved.archetype.betrayal, resolved.archetype.romance, resolved.runnerUp.blurb]
+    [
+      resolved.archetype.pressure,
+      resolved.archetype.betrayal,
+      resolved.archetype.romance,
+      resolved.runnerUp.blurb,
+    ]
       .join(" ")
       .split(/\s+/).length;
 

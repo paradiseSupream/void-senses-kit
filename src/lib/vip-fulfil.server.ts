@@ -39,7 +39,9 @@ export async function grantVip(grant: VipGrant): Promise<VipAccess> {
   if (existing) {
     // Monthly renewals stack on the remaining time; lifetime never expires.
     const base =
-      grant.plan === "monthly" && existing.expires_at && new Date(existing.expires_at).getTime() > Date.now()
+      grant.plan === "monthly" &&
+      existing.expires_at &&
+      new Date(existing.expires_at).getTime() > Date.now()
         ? new Date(existing.expires_at).getTime()
         : Date.now();
     const nextExpiry =
@@ -91,6 +93,37 @@ export async function grantVip(grant: VipGrant): Promise<VipAccess> {
     plan: (row?.plan as VipPlanName) ?? grant.plan,
     expiresAt: row?.expires_at ?? null,
     licenseKey: row?.license_key ?? null,
+  };
+}
+
+/**
+ * Cross-device restore proof: the license key is a server-generated secret that
+ * only the buyer ever sees, so it — not a typed email — is what authorises a
+ * restore. Returns the owning email so callers never trust a client-supplied one.
+ */
+export async function lookupVipByLicense(
+  licenseKey: string,
+): Promise<VipAccess & { email: string | null }> {
+  const key = licenseKey.trim().toLowerCase();
+  const miss = { active: false, plan: null, expiresAt: null, licenseKey: null, email: null };
+  if (!/^[0-9a-f]{16,64}$/.test(key)) return miss;
+
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { data: row } = await supabaseAdmin
+    .from("vip_members")
+    .select("email,plan,active,expires_at,license_key")
+    .eq("license_key", key)
+    .maybeSingle();
+
+  if (!row || !row.active) return miss;
+  const expired = Boolean(row.expires_at && new Date(row.expires_at).getTime() < Date.now());
+  if (expired) return miss;
+  return {
+    active: true,
+    plan: (row.plan as VipPlanName) ?? "lifetime",
+    expiresAt: row.expires_at ?? null,
+    licenseKey: row.license_key ?? null,
+    email: row.email ?? null,
   };
 }
 

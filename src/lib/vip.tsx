@@ -55,22 +55,22 @@ export function VipProvider({ children }: { children: ReactNode }) {
     let cancelled = false;
     const revalidate = async () => {
       let orderId: string | null = null;
-      let email: string | null = null;
+      let licenseKey: string | null = null;
       let cached = false;
       try {
         orderId = window.localStorage.getItem("sov.vip.order");
-        email = window.localStorage.getItem("sov.vip.email");
+        licenseKey = window.localStorage.getItem("sov.vip.license");
         cached = window.localStorage.getItem(VIP_KEY) === "1";
       } catch {
         return;
       }
       if (!cached) return;
-      if (!orderId && !email) {
+      if (!orderId && !licenseKey) {
         revoke();
         return;
       }
       try {
-        const result = await verify({ data: { orderId, email } });
+        const result = await verify({ data: { orderId, licenseKey } });
         if (cancelled) return;
         if (!result.vip) revoke();
       } catch {
@@ -87,6 +87,7 @@ export function VipProvider({ children }: { children: ReactNode }) {
         window.localStorage.removeItem(UNTIL_KEY);
         window.localStorage.removeItem("senses_vip_unlocked");
         window.localStorage.removeItem("senses_matrix_unlocked");
+        window.localStorage.removeItem("sov.vip.license");
       } catch {
         /* storage unavailable */
       }

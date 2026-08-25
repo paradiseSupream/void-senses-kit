@@ -115,7 +115,13 @@ export const vipOrderStatus = createServerFn({ method: "POST" })
   .handler(
     async ({
       data,
-    }): Promise<{ status: "pending" | "paid" | "unknown"; plan: VipPlanName | null; email: string | null; licenseKey: string | null; expiresAt: string | null }> => {
+    }): Promise<{
+      status: "pending" | "paid" | "unknown";
+      plan: VipPlanName | null;
+      email: string | null;
+      licenseKey: string | null;
+      expiresAt: string | null;
+    }> => {
       const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
       const { data: row } = await supabaseAdmin
         .from("vip_orders")
@@ -123,10 +129,17 @@ export const vipOrderStatus = createServerFn({ method: "POST" })
         .eq("order_id", data.orderId)
         .maybeSingle();
 
-      if (!row) return { status: "unknown", plan: null, email: null, licenseKey: null, expiresAt: null };
+      if (!row)
+        return { status: "unknown", plan: null, email: null, licenseKey: null, expiresAt: null };
       const plan = (row.plan as VipPlanName) ?? "lifetime";
       if (row.status !== "paid") {
-        return { status: "pending", plan, email: row.email ?? null, licenseKey: null, expiresAt: null };
+        return {
+          status: "pending",
+          plan,
+          email: row.email ?? null,
+          licenseKey: null,
+          expiresAt: null,
+        };
       }
 
       const { lookupVip } = await import("@/lib/vip-fulfil.server");
@@ -141,17 +154,33 @@ export const vipOrderStatus = createServerFn({ method: "POST" })
     },
   );
 
-/** Restore VIP on a new device from the purchase email. */
+/**
+ * Restore VIP on a new device.
+ *
+ * A typed email is NOT proof of purchase (anybody could guess a buyer's
+ * address), so the license key issued on the success page is required and must
+ * belong to the email supplied. The email is then only used as a second factor.
+ */
 export const restoreVipAccess = createServerFn({ method: "POST" })
-  .inputValidator((input: { email: string }) => ({
-    email: String(input?.email ?? "").trim().toLowerCase().slice(0, 200),
+  .inputValidator((input: { email: string; licenseKey?: string | null }) => ({
+    email: String(input?.email ?? "")
+      .trim()
+      .toLowerCase()
+      .slice(0, 200),
+    licenseKey: String(input?.licenseKey ?? "")
+      .trim()
+      .toLowerCase()
+      .slice(0, 80),
   }))
-  .handler(async ({ data }): Promise<VipAccessResult> => {
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(data.email)) {
-      return { active: false, plan: null, expiresAt: null, licenseKey: null };
-    }
-    const { lookupVip } = await import("@/lib/vip-fulfil.server");
-    return lookupVip(data.email);
+  .handler(async ({ data }): Promise<VipAccessResult & { email: string | null }> => {
+    const denied = { active: false, plan: null, expiresAt: null, licenseKey: null, email: null };
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(data.email)) return denied;
+    if (!data.licenseKey) return denied;
+
+    const { lookupVipByLicense } = await import("@/lib/vip-fulfil.server");
+    const access = await lookupVipByLicense(data.licenseKey);
+    if (!access.active || (access.email ?? "") !== data.email) return denied;
+    return access;
   });
 
 /**
@@ -160,7 +189,12 @@ export const restoreVipAccess = createServerFn({ method: "POST" })
  */
 export const startMatrixCheckout = createServerFn({ method: "POST" })
   .inputValidator(
-    (input: { email?: string | null; sessionId?: string | null; toolSlug?: string | null; utmSource?: string | null }) => ({
+    (input: {
+      email?: string | null;
+      sessionId?: string | null;
+      toolSlug?: string | null;
+      utmSource?: string | null;
+    }) => ({
       email: input?.email ? String(input.email).trim().toLowerCase().slice(0, 200) : null,
       sessionId: input?.sessionId ? String(input.sessionId).slice(0, 80) : null,
       toolSlug: input?.toolSlug ? String(input.toolSlug).slice(0, 60) : null,
@@ -205,22 +239,35 @@ export const startMatrixCheckout = createServerFn({ method: "POST" })
       country,
     });
 
-    return { ok: true, orderId, checkoutId: checkout.checkoutId, planId: checkout.planId, amountCents: AMOUNT_CENTS };
+    return {
+      ok: true,
+      orderId,
+      checkoutId: checkout.checkoutId,
+      planId: checkout.planId,
+      amountCents: AMOUNT_CENTS,
+    };
   });
 
 /**
  * Server-side entitlement check — the only thing allowed to grant VIP/Matrix.
  *
- * The client may only present an order id (issued by our own checkout) or the
- * purchase email. Both are resolved against `vip_orders` / `vip_members`, which
- * are written exclusively by the verified Whop webhook, so a spoofed URL
- * (`?vip_success=true`) or a hand-edited localStorage flag grants nothing.
+ * The client may only present proof it could not have invented: an order id
+ * issued by our own checkout, or the license key printed on the success page.
+ * A browser-typed email is NEVER a proof — the only email used for lookups is
+ * the one the server itself resolved from that proof. Both `vip_orders` and
+ * `vip_members` are written exclusively by the HMAC-verified Whop webhook, so a
+ * spoofed URL (`?vip_success=true`), an edited localStorage flag or a guessed
+ * buyer email grants nothing.
  */
 export const verifyEntitlement = createServerFn({ method: "POST" })
-  .inputValidator((input: { orderId?: string | null; email?: string | null }) => ({
-    orderId: input?.orderId ? String(input.orderId).slice(0, 80) : null,
-    email: input?.email ? String(input.email).trim().toLowerCase().slice(0, 200) : null,
-  }))
+  .inputValidator(
+    (input: { orderId?: string | null; email?: string | null; licenseKey?: string | null }) => ({
+      orderId: input?.orderId ? String(input.orderId).slice(0, 80) : null,
+      licenseKey: input?.licenseKey
+        ? String(input.licenseKey).trim().toLowerCase().slice(0, 80)
+        : null,
+    }),
+  )
   .handler(
     async ({
       data,
@@ -230,16 +277,38 @@ export const verifyEntitlement = createServerFn({ method: "POST" })
       plan: VipPlanName | null;
       expiresAt: string | null;
       email: string | null;
+      licenseKey: string | null;
     }> => {
-      const empty = { vip: false, matrix: false, plan: null, expiresAt: null, email: null };
-      if (!data.orderId && !data.email) return empty;
+      const empty = {
+        vip: false,
+        matrix: false,
+        plan: null,
+        expiresAt: null,
+        email: null,
+        licenseKey: null,
+      };
+      if (!data.orderId && !data.licenseKey) return empty;
 
       const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-      let email = data.email;
+      // Server-derived only: never seeded from client input.
+      let email: string | null = null;
       let vip = false;
       let matrix = false;
       let plan: VipPlanName | null = null;
       let expiresAt: string | null = null;
+      let licenseKey: string | null = null;
+
+      if (data.licenseKey) {
+        const { lookupVipByLicense } = await import("@/lib/vip-fulfil.server");
+        const access = await lookupVipByLicense(data.licenseKey);
+        if (access.active) {
+          vip = true;
+          plan = access.plan ?? "lifetime";
+          expiresAt = access.expiresAt;
+          email = access.email;
+          licenseKey = access.licenseKey;
+        }
+      }
 
       if (data.orderId) {
         const { data: row } = await supabaseAdmin
@@ -252,7 +321,7 @@ export const verifyEntitlement = createServerFn({ method: "POST" })
           if (row.order_id.startsWith("sovm_")) matrix = true;
           else {
             vip = true;
-            plan = (row.plan as VipPlanName) ?? "lifetime";
+            plan = plan ?? (row.plan as VipPlanName) ?? "lifetime";
           }
         }
       }
@@ -264,6 +333,7 @@ export const verifyEntitlement = createServerFn({ method: "POST" })
           vip = true;
           plan = access.plan ?? plan ?? "lifetime";
           expiresAt = access.expiresAt;
+          licenseKey = licenseKey ?? access.licenseKey;
         }
         // Any paid Shadow Matrix order on this email restores the add-on too.
         const { data: matrixOrders } = await supabaseAdmin
@@ -276,6 +346,6 @@ export const verifyEntitlement = createServerFn({ method: "POST" })
         if (matrixOrders && matrixOrders.length > 0) matrix = true;
       }
 
-      return { vip, matrix, plan, expiresAt, email: email ?? null };
+      return { vip, matrix, plan, expiresAt, email: email ?? null, licenseKey };
     },
   );

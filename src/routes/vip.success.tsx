@@ -6,7 +6,7 @@ import { toast } from "sonner";
 
 import { vipOrderStatus } from "@/lib/vip.functions";
 import { useVip } from "@/lib/vip";
-import { rememberOrder } from "@/lib/vip-unlock";
+import { rememberLicense, rememberOrder } from "@/lib/vip-unlock";
 import { trackFunnel } from "@/lib/funnel";
 
 type Search = { order?: string; status?: string };
@@ -61,6 +61,7 @@ function VipSuccessPage() {
         if (cancelled) return;
         if (result.status === "paid") {
           rememberOrder(order, result.email);
+          rememberLicense(result.licenseKey);
           setVip(true, result.plan ?? "lifetime");
           setLicenseKey(result.licenseKey);
           setState("done");
@@ -90,8 +91,8 @@ function VipSuccessPage() {
           </span>
           <h1 className="mt-5 font-display text-2xl font-bold">VIP is active</h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            Ads, interstitials and export gates are off on this device. Use the same email under
-            &ldquo;Restore VIP&rdquo; on any other device.
+            Ads, interstitials and export gates are off on this device. Save the license key below —
+            with your purchase email it restores VIP on any other device.
           </p>
           {licenseKey ? (
             <p className="mt-4 rounded-xl border border-hairline bg-surface-2 px-3 py-2 font-mono text-xs">

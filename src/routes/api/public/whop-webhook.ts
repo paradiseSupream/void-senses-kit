@@ -35,6 +35,14 @@ export const Route = createFileRoute("/api/public/whop-webhook")({
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
         if (endedEvent) {
+          // Close the order first so a replayed `payment.succeeded` cannot
+          // silently re-grant access after a refund/cancellation.
+          if (parsed.orderId) {
+            await supabaseAdmin
+              .from("vip_orders")
+              .update({ status: parsed.type === "payment.refunded" ? "refunded" : "cancelled" })
+              .eq("order_id", parsed.orderId);
+          }
           if (parsed.email) {
             await supabaseAdmin
               .from("vip_members")
@@ -54,6 +62,11 @@ export const Route = createFileRoute("/api/public/whop-webhook")({
                 .maybeSingle()
             ).data
           : null;
+
+        // Terminal states never transition back to paid.
+        if (order && (order.status === "refunded" || order.status === "cancelled")) {
+          return new Response("order closed", { status: 200 });
+        }
 
         const email = parsed.email ?? order?.email ?? null;
         const plan = (order?.plan as "lifetime" | "monthly") ?? parsed.plan;
