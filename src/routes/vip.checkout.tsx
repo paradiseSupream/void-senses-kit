@@ -58,7 +58,7 @@ function VipCheckoutPage() {
   const returnUrl =
     typeof window !== "undefined"
       ? m === "1"
-        ? `${window.location.origin}/tools/dark-personality?matrix_success=true`
+        ? `${window.location.origin}/tools/dark-personality?matrix_order=${encodeURIComponent(order ?? "")}`
         : `${window.location.origin}/vip/success?order=${encodeURIComponent(order ?? "")}`
       : "";
 

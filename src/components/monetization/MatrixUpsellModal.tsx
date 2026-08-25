@@ -6,6 +6,7 @@ import { Flame, Heart, Loader2, ShieldHalf, X, Zap } from "lucide-react";
 import { toast } from "sonner";
 
 import { startMatrixCheckout } from "@/lib/vip.functions";
+import { rememberOrder } from "@/lib/vip-unlock";
 import { attribution, sessionId } from "@/lib/monetization";
 import { trackFunnel } from "@/lib/funnel";
 import { grantMatrix, useMatrix } from "@/lib/vip-unlock";
@@ -33,6 +34,7 @@ function useMatrixCheckout() {
         toast.error(result.reason ?? "Could not open checkout — please try again.");
         return;
       }
+      if (result.orderId) rememberOrder(result.orderId);
       trackFunnel("vip_gate_shown", "dark-personality");
       await navigate({
         to: "/vip/checkout",

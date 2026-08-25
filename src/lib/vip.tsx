@@ -1,5 +1,8 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
+import { useServerFn } from "@tanstack/react-start";
+
+import { verifyEntitlement } from "@/lib/vip.functions";
 
 const VIP_KEY = "sov.vip";
 const PLAN_KEY = "sov.vip.plan";
@@ -44,6 +47,55 @@ export function VipProvider({ children }: { children: ReactNode }) {
       /* storage unavailable */
     }
   }, []);
+
+  // Local flags are only a cache: every load revalidates them server-side, so an
+  // edited localStorage value or a spoofed success URL cannot grant VIP.
+  const verify = useServerFn(verifyEntitlement);
+  useEffect(() => {
+    let cancelled = false;
+    const revalidate = async () => {
+      let orderId: string | null = null;
+      let email: string | null = null;
+      let cached = false;
+      try {
+        orderId = window.localStorage.getItem("sov.vip.order");
+        email = window.localStorage.getItem("sov.vip.email");
+        cached = window.localStorage.getItem(VIP_KEY) === "1";
+      } catch {
+        return;
+      }
+      if (!cached) return;
+      if (!orderId && !email) {
+        revoke();
+        return;
+      }
+      try {
+        const result = await verify({ data: { orderId, email } });
+        if (cancelled) return;
+        if (!result.vip) revoke();
+      } catch {
+        /* transient: keep the cached state until the next load */
+      }
+    };
+    const revoke = () => {
+      setIsVip(false);
+      setPlan(null);
+      setExpiresAt(null);
+      try {
+        window.localStorage.removeItem(VIP_KEY);
+        window.localStorage.removeItem(PLAN_KEY);
+        window.localStorage.removeItem(UNTIL_KEY);
+        window.localStorage.removeItem("senses_vip_unlocked");
+        window.localStorage.removeItem("senses_matrix_unlocked");
+      } catch {
+        /* storage unavailable */
+      }
+    };
+    void revalidate();
+    return () => {
+      cancelled = true;
+    };
+  }, [verify]);
 
   const setVip = useCallback((value: boolean, nextPlan: VipPlan = "lifetime") => {
     const until = value && nextPlan === "monthly" ? Date.now() + MONTH_MS : null;

@@ -6,6 +6,7 @@ import { toast } from "sonner";
 
 import { vipOrderStatus } from "@/lib/vip.functions";
 import { useVip } from "@/lib/vip";
+import { rememberOrder } from "@/lib/vip-unlock";
 import { trackFunnel } from "@/lib/funnel";
 
 type Search = { order?: string; status?: string };
@@ -59,6 +60,7 @@ function VipSuccessPage() {
         const result = await checkOrder({ data: { orderId: order } });
         if (cancelled) return;
         if (result.status === "paid") {
+          rememberOrder(order, result.email);
           setVip(true, result.plan ?? "lifetime");
           setLicenseKey(result.licenseKey);
           setState("done");
@@ -98,7 +100,7 @@ function VipSuccessPage() {
           ) : null}
           <Link
             to="/tools/dark-personality"
-            search={{ vip_success: "true" }}
+            search={{ vip_order: order ?? "" }}
             className="mt-6 inline-block rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground"
           >
             Open my VIP dossier
