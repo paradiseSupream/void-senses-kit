@@ -12,10 +12,12 @@ type Search = { order?: string; status?: string };
 
 /** Post-payment page: polls the order until the Whop webhook confirms it. */
 export const Route = createFileRoute("/vip/success")({
-  validateSearch: (search: Record<string, unknown>): Search => ({
-    order: typeof search["order"] === "string" ? search["order"] : undefined,
-    status: typeof search["status"] === "string" ? search["status"] : undefined,
-  }),
+  validateSearch: (search: Record<string, unknown>): Search => {
+    const parsed: Search = {};
+    if (typeof search["order"] === "string") parsed.order = search["order"];
+    if (typeof search["status"] === "string") parsed.status = search["status"];
+    return parsed;
+  },
   head: () => ({
     meta: [
       { title: "VIP Activated — Senses of Void" },

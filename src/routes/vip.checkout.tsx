@@ -10,12 +10,14 @@ type Search = { s?: string; p?: string; order?: string; amount?: string };
  * leaves sensesofvoid.app. Prices and sessions are created server-side.
  */
 export const Route = createFileRoute("/vip/checkout")({
-  validateSearch: (search: Record<string, unknown>): Search => ({
-    s: typeof search["s"] === "string" ? search["s"] : undefined,
-    p: typeof search["p"] === "string" ? search["p"] : undefined,
-    order: typeof search["order"] === "string" ? search["order"] : undefined,
-    amount: typeof search["amount"] === "string" ? search["amount"] : undefined,
-  }),
+  validateSearch: (search: Record<string, unknown>): Search => {
+    const parsed: Search = {};
+    if (typeof search["s"] === "string") parsed.s = search["s"];
+    if (typeof search["p"] === "string") parsed.p = search["p"];
+    if (typeof search["order"] === "string") parsed.order = search["order"];
+    if (typeof search["amount"] === "string") parsed.amount = search["amount"];
+    return parsed;
+  },
   head: () => ({
     meta: [
       { title: "Secure VIP Checkout — Senses of Void" },
