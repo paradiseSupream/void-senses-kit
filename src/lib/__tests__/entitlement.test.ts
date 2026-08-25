@@ -24,6 +24,7 @@ const files = walk(SRC)
 
 describe("entitlement input surface", () => {
   const vipFns = read("lib/vip.functions.ts");
+  const entitlement = read("lib/entitlement.server.ts");
 
   it("verifyEntitlement never accepts a browser-supplied email as proof", () => {
     const validator = vipFns.slice(
@@ -38,14 +39,15 @@ describe("entitlement input surface", () => {
   });
 
   it("only order ids and license keys can start a verification", () => {
-    expect(vipFns).toContain("if (!data.orderId && !data.licenseKey) return empty");
+    expect(entitlement).toContain("if (!orderId && !licenseKey) return { ...NO_ENTITLEMENT }");
   });
 
   it("only orders marked paid grant anything", () => {
-    expect(vipFns).toContain('row?.status === "paid"');
+    expect(entitlement).toContain('row?.status === "paid"');
     // Matrix restore is scoped to paid sovm_ orders only.
-    expect(vipFns).toContain('.eq("status", "paid")');
+    expect(entitlement).toContain('.eq("status", "paid")');
   });
+
 
   it("cross-device restore requires the server-issued license key", () => {
     const restore = vipFns.slice(vipFns.indexOf("export const restoreVipAccess"));
