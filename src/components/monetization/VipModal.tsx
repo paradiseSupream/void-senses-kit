@@ -1,15 +1,18 @@
 import { useEffect, useState } from "react";
-import { Bitcoin, Check, CreditCard, X } from "lucide-react";
+import { Bitcoin, Check, CreditCard, Loader2, X } from "lucide-react";
 import { toast } from "sonner";
 
+import { useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 
 import { subscribeLead } from "@/lib/leads.functions";
+import { restoreVipAccess, startVipCheckout } from "@/lib/vip.functions";
 import { attribution, sessionId } from "@/lib/monetization";
 import { useVip, type VipPlan } from "@/lib/vip";
 import { useSiteConfig } from "@/lib/site-config";
 import { trackFunnel } from "@/lib/funnel";
 import { MONTHLY_OFFER_CENTS, OFFER_CENTS, useVipOffer } from "@/lib/vip-offer";
+
 
 /** Monthly no-ads pass — a low-friction entry point next to lifetime VIP. */
 export const VIP_MONTHLY_CENTS = 499;
