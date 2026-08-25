@@ -21,6 +21,8 @@ export const MATRIX_FLAG = "senses_matrix_unlocked";
 export const ORDER_KEY = "sov.vip.order";
 export const MATRIX_ORDER_KEY = "sov.matrix.order";
 export const EMAIL_KEY = "sov.vip.email";
+/** Server-issued license key — the only cross-device proof of purchase. */
+export const LICENSE_KEY = "sov.vip.license";
 const MATRIX_EVENT = "sov:matrix";
 
 function readLocal(key: string): string | null {
@@ -47,6 +49,11 @@ export function rememberOrder(orderId: string, email?: string | null) {
   if (!orderId) return;
   writeLocal(orderId.startsWith("sovm_") ? MATRIX_ORDER_KEY : ORDER_KEY, orderId);
   if (email) writeLocal(EMAIL_KEY, email.trim().toLowerCase());
+}
+
+/** Stores the license key issued by the server after a verified payment. */
+export function rememberLicense(licenseKey: string | null) {
+  writeLocal(LICENSE_KEY, licenseKey ? licenseKey.trim().toLowerCase() : null);
 }
 
 export function hasMatrix(): boolean {
@@ -114,11 +121,11 @@ export function useVipSuccessUnlock(): { showUpsell: boolean; dismissUpsell: () 
 
       const orderId = returnedVipOrder ?? readLocal(ORDER_KEY);
       const matrixOrder = returnedMatrixOrder ?? readLocal(MATRIX_ORDER_KEY);
-      const email = readLocal(EMAIL_KEY);
+      const licenseKey = readLocal(LICENSE_KEY);
       const hadCachedVip = readLocal(VIP_FLAG) === "true";
       const hadCachedMatrix = hasMatrix();
 
-      if (!orderId && !matrixOrder && !email) {
+      if (!orderId && !matrixOrder && !licenseKey) {
         // No proof at all — clear any hand-edited cache flags.
         if (hadCachedVip) writeLocal(VIP_FLAG, null);
         if (hadCachedMatrix) revokeMatrix();
@@ -128,9 +135,9 @@ export function useVipSuccessUnlock(): { showUpsell: boolean; dismissUpsell: () 
 
       let result: Awaited<ReturnType<typeof verify>> | null = null;
       try {
-        result = await verify({ data: { orderId: orderId ?? matrixOrder, email } });
+        result = await verify({ data: { orderId: orderId ?? matrixOrder, licenseKey } });
         if (matrixOrder && orderId && !result.matrix) {
-          const second = await verify({ data: { orderId: matrixOrder, email } });
+          const second = await verify({ data: { orderId: matrixOrder, licenseKey } });
           result = { ...result, matrix: second.matrix, vip: result.vip || second.vip };
         }
       } catch {
@@ -141,9 +148,11 @@ export function useVipSuccessUnlock(): { showUpsell: boolean; dismissUpsell: () 
       if (result.vip) {
         writeLocal(VIP_FLAG, "true");
         if (result.email) writeLocal(EMAIL_KEY, result.email);
+        if (result.licenseKey) writeLocal(LICENSE_KEY, result.licenseKey);
         setVip(true, result.plan ?? "lifetime");
       } else {
         writeLocal(VIP_FLAG, null);
+        writeLocal(LICENSE_KEY, null);
         setVip(false);
       }
 
