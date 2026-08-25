@@ -142,8 +142,10 @@ describe("secrets stay server-side", () => {
   });
 
   it("no VITE_ variable exposes a payment or service secret", () => {
+    // The GA4 measurement id is a publishable identifier, not a secret.
     const bad = files.filter(({ code }) =>
-      /VITE_[A-Z_]*(WHOP|SERVICE_ROLE|SECRET|API_KEY)/.test(code),
+      /VITE_[A-Z_]*(WHOP|SERVICE_ROLE|SECRET)/.test(code) ||
+      /VITE_(?!LOVABLE_CONNECTOR_GOOGLE_ANALYTICS_)[A-Z_]*API_KEY/.test(code),
     );
     expect(bad.map((f) => f.path)).toEqual([]);
     const env = readFileSync(join(process.cwd(), ".env"), "utf8");
