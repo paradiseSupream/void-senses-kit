@@ -530,7 +530,20 @@ export function contextualParagraphs(
   ];
 }
 
-/** Normalise raw axis scores and pick the winning archetype by weighted affinity. */
+/** Clamp any raw axis value into the deterministic 0–100 report range. */
+function clamp(value: number): number {
+  if (!Number.isFinite(value)) return 0;
+  return Math.max(0, Math.min(100, Math.round(value)));
+}
+
+/**
+ * Normalise raw axis scores and pick the winning archetype by weighted affinity.
+ *
+ * Deterministic by construction: the axis vector is always the full six axes in
+ * canonical order, values are clamped to 0–100, and both the axis ranking and
+ * the archetype ranking break ties by declaration order — so the same answers
+ * always produce the same archetype, and every valid answer set produces one.
+ */
 export function resolveArchetype(scores: AxisScore[]): {
   archetype: Archetype;
   runnerUp: Archetype;
@@ -540,20 +553,25 @@ export function resolveArchetype(scores: AxisScore[]): {
   ordered: AxisScore[];
 } {
   const byDim = new Map(scores.map((s) => [s.dim, s.value]));
-  const ordered = [...scores].sort((a, b) => b.value - a.value);
-  const intensity = scores.length
-    ? Math.round(scores.reduce((a, b) => a + b.value, 0) / scores.length)
-    : 0;
+  // Always score all six axes: a missing axis reads as 0 rather than vanishing,
+  // so the affinity maths can never be computed over a short vector.
+  const axes: AxisScore[] = DARK_DIMS.map((dim) => ({ dim, value: clamp(byDim.get(dim) ?? 0) }));
+  // Ties broken by the canonical axis order so the ranking is deterministic.
+  const ordered = [...axes].sort(
+    (a, b) => b.value - a.value || DARK_DIMS.indexOf(a.dim as DarkDim) - DARK_DIMS.indexOf(b.dim as DarkDim),
+  );
+  const intensity = Math.round(axes.reduce((a, b) => a + b.value, 0) / axes.length);
 
-  const ranked = ARCHETYPES.map((archetype) => {
+  const ranked = ARCHETYPES.map((archetype, index) => {
     let total = 0;
     for (const dim of DARK_DIMS) {
       const weight = archetype.weights[dim] ?? 0;
-      const value = byDim.get(dim) ?? 0;
+      const value = axes.find((a) => a.dim === dim)!.value;
+      // A negative weight scores the *absence* of the axis, and is applied once.
       total += weight * (weight < 0 ? 100 - value : value);
     }
-    return { archetype, total };
-  }).sort((a, b) => b.total - a.total);
+    return { archetype, total, index };
+  }).sort((a, b) => b.total - a.total || a.index - b.index);
 
   return {
     archetype: ranked[0]!.archetype,
