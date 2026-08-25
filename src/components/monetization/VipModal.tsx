@@ -325,15 +325,20 @@ export function VipModal() {
 
         <button
           type="button"
+          disabled={busy}
           onClick={() => {
-            if (!isVip && email.includes("@")) void persistEmail();
-            setVip(!isVip, plan);
-            toast.success(isVip ? "VIP preview disabled." : "VIP preview enabled on this device.");
+            if (isVip) {
+              setVip(false, plan);
+              toast.success("VIP turned off on this device.");
+              return;
+            }
+            void restore();
           }}
-          className="mt-4 w-full text-center text-xs text-muted-foreground underline underline-offset-4 hover:text-foreground"
+          className="mt-4 w-full text-center text-xs text-muted-foreground underline underline-offset-4 hover:text-foreground disabled:opacity-60"
         >
-          {isVip ? "Turn off VIP preview" : "Already purchased? Restore VIP on this device"}
+          {isVip ? "Turn off VIP on this device" : "Already purchased? Restore VIP with your email"}
         </button>
+
       </div>
     </div>
   );
