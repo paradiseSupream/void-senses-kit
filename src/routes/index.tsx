@@ -278,10 +278,15 @@ function Home() {
       {/* ---------------- Hero ---------------- */}
       <section className="aurora grain relative overflow-hidden border-b border-hairline">
         <div className="void-grid absolute inset-0 -z-10" aria-hidden="true" />
-        <div className="mx-auto grid max-w-7xl gap-10 px-4 py-8 sm:px-6 sm:py-20 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:items-center lg:gap-14">
+        <AmbientCanvas className="-z-10 opacity-70" />
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent"
+        />
+        <div className="mx-auto grid max-w-7xl gap-10 px-4 py-10 sm:px-6 sm:py-24 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:items-center lg:gap-16">
           <div className="text-center lg:text-left">
             <span
-              className="reveal label-mono inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3.5 py-1.5 text-primary backdrop-blur-xl"
+              className="reveal label-mono inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/8 px-3.5 py-1.5 text-primary backdrop-blur-xl"
               style={{ animationDelay: "0ms" }}
             >
               <span className="relative flex size-1.5">
@@ -292,12 +297,13 @@ function Home() {
             </span>
 
             <h1
-              className="reveal mt-5 font-display text-[2.3rem] leading-[1.03] font-bold tracking-tight text-balance sm:mt-7 sm:text-6xl lg:text-[4.1rem]"
+              className="reveal text-display mt-6 sm:mt-8"
               style={{ animationDelay: "60ms" }}
             >
               {copy.title}
-              <span className="text-gradient mt-1 block">{copy.accent}</span>
+              <span className="sheen-word mt-1.5 block">{copy.accent}</span>
             </h1>
+
 
             <p
               className="reveal mx-auto mt-4 max-w-xl text-[0.97rem] leading-relaxed text-pretty text-muted-foreground sm:mt-6 sm:text-lg lg:mx-0"
