@@ -187,7 +187,7 @@ function DarkPersonality() {
             <LockedReport
               toolSlug="dark-personality"
               title="Full six-axis dossier"
-              blurb="Interactive axis breakdown, blind spots, defence mechanisms, behavioural prediction matrix, 1,500+ word shadow analysis and the printable PDF summary."
+              blurb="Interactive axis breakdown, blind spots, defence mechanisms, behavioural prediction matrix, 1,500+ word shadow analysis and the printable PDF dossier."
               share={{
                 t: "dark-personality",
                 n: "Dark Personality Test",
