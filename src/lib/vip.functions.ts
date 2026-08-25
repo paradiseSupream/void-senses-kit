@@ -207,3 +207,75 @@ export const startMatrixCheckout = createServerFn({ method: "POST" })
 
     return { ok: true, orderId, checkoutId: checkout.checkoutId, planId: checkout.planId, amountCents: AMOUNT_CENTS };
   });
+
+/**
+ * Server-side entitlement check — the only thing allowed to grant VIP/Matrix.
+ *
+ * The client may only present an order id (issued by our own checkout) or the
+ * purchase email. Both are resolved against `vip_orders` / `vip_members`, which
+ * are written exclusively by the verified Whop webhook, so a spoofed URL
+ * (`?vip_success=true`) or a hand-edited localStorage flag grants nothing.
+ */
+export const verifyEntitlement = createServerFn({ method: "POST" })
+  .inputValidator((input: { orderId?: string | null; email?: string | null }) => ({
+    orderId: input?.orderId ? String(input.orderId).slice(0, 80) : null,
+    email: input?.email ? String(input.email).trim().toLowerCase().slice(0, 200) : null,
+  }))
+  .handler(
+    async ({
+      data,
+    }): Promise<{
+      vip: boolean;
+      matrix: boolean;
+      plan: VipPlanName | null;
+      expiresAt: string | null;
+      email: string | null;
+    }> => {
+      const empty = { vip: false, matrix: false, plan: null, expiresAt: null, email: null };
+      if (!data.orderId && !data.email) return empty;
+
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      let email = data.email;
+      let vip = false;
+      let matrix = false;
+      let plan: VipPlanName | null = null;
+      let expiresAt: string | null = null;
+
+      if (data.orderId) {
+        const { data: row } = await supabaseAdmin
+          .from("vip_orders")
+          .select("status,plan,email,order_id,amount_cents")
+          .eq("order_id", data.orderId)
+          .maybeSingle();
+        if (row?.status === "paid") {
+          email = email ?? row.email ?? null;
+          if (row.order_id.startsWith("sovm_")) matrix = true;
+          else {
+            vip = true;
+            plan = (row.plan as VipPlanName) ?? "lifetime";
+          }
+        }
+      }
+
+      if (email) {
+        const { lookupVip } = await import("@/lib/vip-fulfil.server");
+        const access = await lookupVip(email);
+        if (access.active) {
+          vip = true;
+          plan = access.plan ?? plan ?? "lifetime";
+          expiresAt = access.expiresAt;
+        }
+        // Any paid Shadow Matrix order on this email restores the add-on too.
+        const { data: matrixOrders } = await supabaseAdmin
+          .from("vip_orders")
+          .select("order_id")
+          .eq("status", "paid")
+          .ilike("email", email)
+          .like("order_id", "sovm_%")
+          .limit(1);
+        if (matrixOrders && matrixOrders.length > 0) matrix = true;
+      }
+
+      return { vip, matrix, plan, expiresAt, email: email ?? null };
+    },
+  );
