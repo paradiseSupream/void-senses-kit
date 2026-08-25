@@ -1,15 +1,18 @@
 import { useEffect, useState } from "react";
-import { Bitcoin, Check, CreditCard, X } from "lucide-react";
+import { Bitcoin, Check, CreditCard, Loader2, X } from "lucide-react";
 import { toast } from "sonner";
 
+import { useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 
 import { subscribeLead } from "@/lib/leads.functions";
+import { restoreVipAccess, startVipCheckout } from "@/lib/vip.functions";
 import { attribution, sessionId } from "@/lib/monetization";
 import { useVip, type VipPlan } from "@/lib/vip";
 import { useSiteConfig } from "@/lib/site-config";
 import { trackFunnel } from "@/lib/funnel";
 import { MONTHLY_OFFER_CENTS, OFFER_CENTS, useVipOffer } from "@/lib/vip-offer";
+
 
 /** Monthly no-ads pass — a low-friction entry point next to lifetime VIP. */
 export const VIP_MONTHLY_CENTS = 499;
@@ -25,12 +28,17 @@ const PERKS = [
 export function VipModal() {
   const { vipModalOpen, closeVipModal, setVip, isVip, preferredPlan } = useVip();
   const saveLead = useServerFn(subscribeLead);
+  const beginCheckout = useServerFn(startVipCheckout);
+  const restoreVip = useServerFn(restoreVipAccess);
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [emailSaved, setEmailSaved] = useState(false);
+  const [busy, setBusy] = useState(false);
   const [tab, setTab] = useState<"card" | "crypto">("card");
   const [plan, setPlan] = useState<VipPlan>(preferredPlan);
   const { site } = useSiteConfig();
   const offerActive = useVipOffer();
+
   const lifetimeCents = offerActive ? OFFER_CENTS : site.vip_price_cents;
   const monthlyCents = offerActive ? MONTHLY_OFFER_CENTS : VIP_MONTHLY_CENTS;
   const lifetimePrice = `$${(lifetimeCents / 100).toFixed(0)}`;
@@ -68,7 +76,72 @@ export function VipModal() {
     }
   };
 
+  /** Opens the Whop card checkout for the selected plan. */
+  const startCheckout = async () => {
+    if (busy) return;
+    if (!email.includes("@")) {
+      toast.error("Enter your email first — VIP access is tied to it.");
+      return;
+    }
+    setBusy(true);
+    try {
+      await persistEmail();
+      trackFunnel("vip_purchase");
+      const result = await beginCheckout({
+        data: {
+          plan,
+          offer: offerActive,
+          email,
+          sessionId: sessionId(),
+          utmSource: attribution().utm_source ?? null,
+        },
+      });
+      if (!result.ok || !result.checkoutId || !result.planId) {
+        toast.error(result.reason ?? "Checkout is unavailable right now.");
+        return;
+      }
+      closeVipModal();
+      await navigate({
+        to: "/vip/checkout",
+        search: {
+          s: result.checkoutId,
+          p: result.planId,
+          order: result.orderId,
+          amount: String(result.amountCents ?? ""),
+        },
+      });
+    } catch {
+      toast.error("Could not open checkout — please try again.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  /** Restores an existing purchase on this device from the buyer's email. */
+  const restore = async () => {
+    if (!email.includes("@")) {
+      toast.error("Enter the email you paid with.");
+      return;
+    }
+    setBusy(true);
+    try {
+      const access = await restoreVip({ data: { email } });
+      if (access.active) {
+        setVip(true, access.plan ?? "lifetime");
+        toast.success("VIP restored on this device.");
+        closeVipModal();
+      } else {
+        toast.error("No active VIP found for that email.");
+      }
+    } catch {
+      toast.error("Could not check that email — try again.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
   if (!vipModalOpen) return null;
+
 
   return (
     <div
@@ -200,18 +273,23 @@ export function VipModal() {
         </div>
 
         {tab === "card" ? (
-          <button
-            type="button"
-            onClick={() => {
-              if (email.includes("@")) void persistEmail();
-              trackFunnel("vip_purchase");
-              toast.info("Checkout opens once payments are connected to this project.");
-            }}
-            className="mt-4 w-full rounded-lg bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
-          >
-            Continue to secure checkout — {price}
-          </button>
+          <>
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => void startCheckout()}
+              className="mt-4 flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-60"
+            >
+              {busy ? <Loader2 className="size-4 animate-spin" aria-hidden="true" /> : null}
+              Continue to secure checkout — {price}
+            </button>
+            <p className="mt-2 text-center text-xs text-muted-foreground">
+              Card, Apple&nbsp;Pay, Google&nbsp;Pay and local methods in 195 countries. Secured by
+              Whop — we never see your card details.
+            </p>
+          </>
         ) : (
+
           <div className="mt-4 rounded-lg border border-dashed border-border p-4">
             {site.vip_sol_address ? (
               <>
@@ -247,15 +325,20 @@ export function VipModal() {
 
         <button
           type="button"
+          disabled={busy}
           onClick={() => {
-            if (!isVip && email.includes("@")) void persistEmail();
-            setVip(!isVip, plan);
-            toast.success(isVip ? "VIP preview disabled." : "VIP preview enabled on this device.");
+            if (isVip) {
+              setVip(false, plan);
+              toast.success("VIP turned off on this device.");
+              return;
+            }
+            void restore();
           }}
-          className="mt-4 w-full text-center text-xs text-muted-foreground underline underline-offset-4 hover:text-foreground"
+          className="mt-4 w-full text-center text-xs text-muted-foreground underline underline-offset-4 hover:text-foreground disabled:opacity-60"
         >
-          {isVip ? "Turn off VIP preview" : "Already purchased? Restore VIP on this device"}
+          {isVip ? "Turn off VIP on this device" : "Already purchased? Restore VIP with your email"}
         </button>
+
       </div>
     </div>
   );
