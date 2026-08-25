@@ -5,7 +5,7 @@
  * maths, the archetype affinity weights and the public archetype copy (name,
  * tagline, teaser blurb, edge). Every premium paragraph — deep analysis, axis
  * readings, blind spots, defence mechanisms, mastery guide, relationship matrix
- * — lives in `archetype-premium.server.ts` and is never shipped to the browser.
+ *  — lives in the server-only premium module and is never shipped to the browser.
  */
 
 import { bandOf, type Band } from "@/lib/quiz-engine";
