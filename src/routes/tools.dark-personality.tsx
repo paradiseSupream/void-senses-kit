@@ -22,12 +22,12 @@ import {
 import { buildDossier } from "@/lib/archetype";
 import { newSeed, pickBalanced, rngFrom, scoreDimensions, type Likert } from "@/lib/quiz-engine";
 
-type Search = { auto?: string; vip_success?: string; matrix_success?: string };
+type Search = { auto?: string; vip_order?: string; matrix_order?: string };
 
 export const Route = createFileRoute("/tools/dark-personality")({
   validateSearch: (search: Record<string, unknown>): Search => {
     const parsed: Search = {};
-    for (const key of ["auto", "vip_success", "matrix_success"] as const) {
+    for (const key of ["auto", "vip_order", "matrix_order"] as const) {
       if (typeof search[key] === "string") parsed[key] = search[key] as string;
     }
     return parsed;
@@ -91,7 +91,7 @@ function DarkPersonality() {
   useAutoStart(() => setPhase("quiz"));
   const [answers, setAnswers] = useState<Record<string, number>>({});
 
-  // ?vip_success=true / ?matrix_success=true → persist the unlock, clean the URL
+  // ?vip_order= / ?matrix_order= → server-verified unlock, then clean the URL
   // and queue the one-time post-purchase upsell.
   const { showUpsell, dismissUpsell } = useVipSuccessUnlock();
 
