@@ -1,37 +1,67 @@
 /**
- * Return-from-checkout unlock + local persistence.
+ * Return-from-checkout unlock + local persistence — server verified.
  *
- * Whop sends the buyer back to the app with `?vip_success=true` (or
- * `?matrix_success=true` for the $9 Shadow Matrix add-on). We flip the local
- * flags, clean the URL without a reload, and keep the unlock across sessions.
- * The server webhook remains the source of truth for cross-device restore.
+ * Nothing in the URL or in localStorage grants access on its own. After
+ * checkout we carry our own order id (`?vip_order=` / `?matrix_order=`) and ask
+ * the server to confirm it was actually paid (the Whop webhook is the only
+ * writer of that state). Local flags exist purely as a cache and are revalidated
+ * against the server on every load, so a spoofed `?vip_success=true` or an
+ * edited localStorage value unlocks nothing.
  */
 
 import { useCallback, useEffect, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 
 import { useVip } from "@/lib/vip";
+import { verifyEntitlement } from "@/lib/vip.functions";
 
 export const VIP_FLAG = "senses_vip_unlocked";
 export const MATRIX_FLAG = "senses_matrix_unlocked";
+/** Proofs kept so a real buyer can be revalidated on the next visit. */
+export const ORDER_KEY = "sov.vip.order";
+export const MATRIX_ORDER_KEY = "sov.matrix.order";
+export const EMAIL_KEY = "sov.vip.email";
 const MATRIX_EVENT = "sov:matrix";
 
-export function hasMatrix(): boolean {
-  if (typeof window === "undefined") return false;
+function readLocal(key: string): string | null {
+  if (typeof window === "undefined") return null;
   try {
-    return window.localStorage.getItem(MATRIX_FLAG) === "true";
+    return window.localStorage.getItem(key);
   } catch {
-    return false;
+    return null;
   }
 }
 
-export function grantMatrix() {
+function writeLocal(key: string, value: string | null) {
   if (typeof window === "undefined") return;
   try {
-    window.localStorage.setItem(MATRIX_FLAG, "true");
+    if (value === null) window.localStorage.removeItem(key);
+    else window.localStorage.setItem(key, value);
   } catch {
     /* storage unavailable */
   }
-  window.dispatchEvent(new Event(MATRIX_EVENT));
+}
+
+/** Remembers the proof for an order the visitor just started paying for. */
+export function rememberOrder(orderId: string, email?: string | null) {
+  if (!orderId) return;
+  writeLocal(orderId.startsWith("sovm_") ? MATRIX_ORDER_KEY : ORDER_KEY, orderId);
+  if (email) writeLocal(EMAIL_KEY, email.trim().toLowerCase());
+}
+
+export function hasMatrix(): boolean {
+  return readLocal(MATRIX_FLAG) === "true";
+}
+
+/** Cache-only writer: never called without a server-confirmed payment. */
+export function grantMatrix() {
+  writeLocal(MATRIX_FLAG, "true");
+  if (typeof window !== "undefined") window.dispatchEvent(new Event(MATRIX_EVENT));
+}
+
+function revokeMatrix() {
+  writeLocal(MATRIX_FLAG, null);
+  if (typeof window !== "undefined") window.dispatchEvent(new Event(MATRIX_EVENT));
 }
 
 export function useMatrix(): boolean {
@@ -62,52 +92,73 @@ function stripParams(keys: string[]) {
 }
 
 /**
- * Reads `?vip_success=true` / `?matrix_success=true`, persists the unlock and
- * reports whether the post-purchase upsell should be shown.
+ * Verifies the return-from-checkout order (or a stored proof) with the server,
+ * then persists the unlock. Reports whether the post-purchase upsell should show.
  */
 export function useVipSuccessUnlock(): { showUpsell: boolean; dismissUpsell: () => void } {
-  const { setVip, isVip } = useVip();
+  const { setVip } = useVip();
+  const verify = useServerFn(verifyEntitlement);
   const [showUpsell, setShowUpsell] = useState(false);
 
   useEffect(() => {
-    let vipJustUnlocked = false;
-    try {
+    let cancelled = false;
+
+    const run = async () => {
       const params = new URLSearchParams(window.location.search);
-      const vipSuccess = params.get("vip_success") === "true";
-      const matrixSuccess = params.get("matrix_success") === "true";
-      const plan = params.get("plan") === "monthly" ? "monthly" : "lifetime";
+      const returnedVipOrder = params.get("vip_order");
+      const returnedMatrixOrder = params.get("matrix_order");
+      if (returnedVipOrder) rememberOrder(returnedVipOrder);
+      if (returnedMatrixOrder) rememberOrder(returnedMatrixOrder);
+      // Legacy/spoofable params are dropped without ever granting anything.
+      stripParams(["vip_success", "matrix_success", "plan", "vip_order", "matrix_order"]);
 
-      if (vipSuccess) {
-        window.localStorage.setItem(VIP_FLAG, "true");
-        setVip(true, plan);
-        vipJustUnlocked = true;
-      }
-      if (matrixSuccess) {
-        window.localStorage.setItem(VIP_FLAG, "true");
-        setVip(true, "lifetime");
-        grantMatrix();
-      }
-      if (vipSuccess || matrixSuccess) stripParams(["vip_success", "matrix_success", "plan"]);
+      const orderId = returnedVipOrder ?? readLocal(ORDER_KEY);
+      const matrixOrder = returnedMatrixOrder ?? readLocal(MATRIX_ORDER_KEY);
+      const email = readLocal(EMAIL_KEY);
+      const hadCachedVip = readLocal(VIP_FLAG) === "true";
+      const hadCachedMatrix = hasMatrix();
 
-      // Legacy / cross-tab flag: an earlier purchase on this device.
-      if (!vipSuccess && !matrixSuccess && window.localStorage.getItem(VIP_FLAG) === "true") {
-        setVip(true, "lifetime");
+      if (!orderId && !matrixOrder && !email) {
+        // No proof at all — clear any hand-edited cache flags.
+        if (hadCachedVip) writeLocal(VIP_FLAG, null);
+        if (hadCachedMatrix) revokeMatrix();
+        if (hadCachedVip) setVip(false);
+        return;
       }
-    } catch {
-      /* storage unavailable */
-    }
-    if (vipJustUnlocked && !hasMatrix()) setShowUpsell(true);
-  }, [setVip]);
 
-  // Keep the mirrored flag truthful for VIPs restored through email.
-  useEffect(() => {
-    if (!isVip) return;
-    try {
-      window.localStorage.setItem(VIP_FLAG, "true");
-    } catch {
-      /* storage unavailable */
-    }
-  }, [isVip]);
+      let result: Awaited<ReturnType<typeof verify>> | null = null;
+      try {
+        result = await verify({ data: { orderId: orderId ?? matrixOrder, email } });
+        if (matrixOrder && orderId && !result.matrix) {
+          const second = await verify({ data: { orderId: matrixOrder, email } });
+          result = { ...result, matrix: second.matrix, vip: result.vip || second.vip };
+        }
+      } catch {
+        return; // Offline / transient: keep the cached state, never escalate it.
+      }
+      if (cancelled || !result) return;
+
+      if (result.vip) {
+        writeLocal(VIP_FLAG, "true");
+        if (result.email) writeLocal(EMAIL_KEY, result.email);
+        setVip(true, result.plan ?? "lifetime");
+      } else {
+        writeLocal(VIP_FLAG, null);
+        setVip(false);
+      }
+
+      if (result.matrix) grantMatrix();
+      else if (hadCachedMatrix) revokeMatrix();
+
+      const justUnlocked = Boolean(returnedVipOrder) && result.vip;
+      if (justUnlocked && !result.matrix) setShowUpsell(true);
+    };
+
+    void run();
+    return () => {
+      cancelled = true;
+    };
+  }, [setVip, verify]);
 
   const dismissUpsell = useCallback(() => setShowUpsell(false), []);
   return { showUpsell, dismissUpsell };
