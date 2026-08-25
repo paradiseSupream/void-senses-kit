@@ -236,10 +236,12 @@ export type Database = {
           amount_cents: number
           created_at: string
           email: string
+          expires_at: string | null
           id: string
           license_key: string
           payment_ref: string | null
           plan: string
+          provider: string
           source: string
           wallet: string | null
         }
@@ -248,10 +250,12 @@ export type Database = {
           amount_cents?: number
           created_at?: string
           email: string
+          expires_at?: string | null
           id?: string
           license_key?: string
           payment_ref?: string | null
           plan?: string
+          provider?: string
           source?: string
           wallet?: string | null
         }
@@ -260,12 +264,68 @@ export type Database = {
           amount_cents?: number
           created_at?: string
           email?: string
+          expires_at?: string | null
           id?: string
           license_key?: string
           payment_ref?: string | null
           plan?: string
+          provider?: string
           source?: string
           wallet?: string | null
+        }
+        Relationships: []
+      }
+      vip_orders: {
+        Row: {
+          amount_cents: number
+          checkout_id: string | null
+          country: string | null
+          created_at: string
+          email: string | null
+          id: string
+          order_id: string
+          paid_at: string | null
+          payment_id: string | null
+          plan: string
+          provider: string
+          session_id: string | null
+          status: string
+          utm_source: string | null
+          whop_plan_id: string | null
+        }
+        Insert: {
+          amount_cents?: number
+          checkout_id?: string | null
+          country?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          order_id: string
+          paid_at?: string | null
+          payment_id?: string | null
+          plan?: string
+          provider?: string
+          session_id?: string | null
+          status?: string
+          utm_source?: string | null
+          whop_plan_id?: string | null
+        }
+        Update: {
+          amount_cents?: number
+          checkout_id?: string | null
+          country?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          order_id?: string
+          paid_at?: string | null
+          payment_id?: string | null
+          plan?: string
+          provider?: string
+          session_id?: string | null
+          status?: string
+          utm_source?: string | null
+          whop_plan_id?: string | null
         }
         Relationships: []
       }

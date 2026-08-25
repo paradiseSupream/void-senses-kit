@@ -30,6 +30,7 @@ import { Route as ApiPublicGscSyncRouteImport } from './routes/api/public/gsc-sy
 import { Route as ApiPublicRoastRouteImport } from './routes/api/public/roast'
 import { Route as ApiPublicTrackRouteImport } from './routes/api/public/track'
 import { Route as ApiPublicWeeklyReportRouteImport } from './routes/api/public/weekly-report'
+import { Route as ApiPublicWhopWebhookRouteImport } from './routes/api/public/whop-webhook'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -136,6 +137,11 @@ const ApiPublicWeeklyReportRoute = ApiPublicWeeklyReportRouteImport.update({
   path: '/api/public/weekly-report',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicWhopWebhookRoute = ApiPublicWhopWebhookRouteImport.update({
+  id: '/api/public/whop-webhook',
+  path: '/api/public/whop-webhook',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -159,6 +165,7 @@ export interface FileRoutesByFullPath {
   '/api/public/roast': typeof ApiPublicRoastRoute
   '/api/public/track': typeof ApiPublicTrackRoute
   '/api/public/weekly-report': typeof ApiPublicWeeklyReportRoute
+  '/api/public/whop-webhook': typeof ApiPublicWhopWebhookRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -182,6 +189,7 @@ export interface FileRoutesByTo {
   '/api/public/roast': typeof ApiPublicRoastRoute
   '/api/public/track': typeof ApiPublicTrackRoute
   '/api/public/weekly-report': typeof ApiPublicWeeklyReportRoute
+  '/api/public/whop-webhook': typeof ApiPublicWhopWebhookRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -206,6 +214,7 @@ export interface FileRoutesById {
   '/api/public/roast': typeof ApiPublicRoastRoute
   '/api/public/track': typeof ApiPublicTrackRoute
   '/api/public/weekly-report': typeof ApiPublicWeeklyReportRoute
+  '/api/public/whop-webhook': typeof ApiPublicWhopWebhookRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -231,6 +240,7 @@ export interface FileRouteTypes {
     | '/api/public/roast'
     | '/api/public/track'
     | '/api/public/weekly-report'
+    | '/api/public/whop-webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -254,6 +264,7 @@ export interface FileRouteTypes {
     | '/api/public/roast'
     | '/api/public/track'
     | '/api/public/weekly-report'
+    | '/api/public/whop-webhook'
   id:
     | '__root__'
     | '/'
@@ -277,6 +288,7 @@ export interface FileRouteTypes {
     | '/api/public/roast'
     | '/api/public/track'
     | '/api/public/weekly-report'
+    | '/api/public/whop-webhook'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -301,6 +313,7 @@ export interface RootRouteChildren {
   ApiPublicRoastRoute: typeof ApiPublicRoastRoute
   ApiPublicTrackRoute: typeof ApiPublicTrackRoute
   ApiPublicWeeklyReportRoute: typeof ApiPublicWeeklyReportRoute
+  ApiPublicWhopWebhookRoute: typeof ApiPublicWhopWebhookRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -452,6 +465,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicWeeklyReportRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/whop-webhook': {
+      id: '/api/public/whop-webhook'
+      path: '/api/public/whop-webhook'
+      fullPath: '/api/public/whop-webhook'
+      preLoaderRoute: typeof ApiPublicWhopWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -477,6 +497,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicRoastRoute: ApiPublicRoastRoute,
   ApiPublicTrackRoute: ApiPublicTrackRoute,
   ApiPublicWeeklyReportRoute: ApiPublicWeeklyReportRoute,
+  ApiPublicWhopWebhookRoute: ApiPublicWhopWebhookRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

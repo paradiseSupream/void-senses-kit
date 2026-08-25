@@ -1,0 +1,173 @@
+/**
+ * Whop payment gateway (server only).
+ *
+ * Whop is the card / international checkout for VIP. Every plan the app sells
+ * ($19 lifetime, $9 exit-offer lifetime, $4.99 monthly, $2.99 downsell monthly)
+ * is created as an inline Whop plan on a fresh checkout configuration, so no
+ * plan IDs have to be maintained by hand and the price is always decided on the
+ * server — a tampered client can never buy VIP cheaper than the real offer.
+ */
+
+import { createHmac, timingSafeEqual } from "crypto";
+
+const API_BASE = "https://api.whop.com/api/v1";
+
+/** Prices the server accepts, mapped to their Whop plan shape. */
+export const WHOP_PRICES = {
+  1900: { plan: "lifetime", type: "one_time" },
+  900: { plan: "lifetime", type: "one_time" },
+  499: { plan: "monthly", type: "renewal" },
+  299: { plan: "monthly", type: "renewal" },
+} as const;
+
+export type WhopPriceCents = keyof typeof WHOP_PRICES;
+
+export function isWhopPrice(cents: number): cents is WhopPriceCents {
+  return Object.prototype.hasOwnProperty.call(WHOP_PRICES, String(cents));
+}
+
+export function whopEnv() {
+  return {
+    apiKey: process.env["WHOP_API_KEY"] ?? "",
+    accountId: process.env["WHOP_ACCOUNT_ID"] ?? "",
+    webhookSecret: process.env["WHOP_WEBHOOK_SECRET"] ?? "",
+  };
+}
+
+/** True when card checkout can actually be created. */
+export function whopConfigured(): boolean {
+  const env = whopEnv();
+  return Boolean(env.apiKey && env.accountId);
+}
+
+export type WhopCheckout = { checkoutId: string; planId: string };
+
+/**
+ * Creates a checkout configuration (a one-shot checkout session) for one order.
+ * The returned ids feed Whop's embedded checkout on our own /vip/checkout page.
+ */
+export async function createWhopCheckout(input: {
+  amountCents: WhopPriceCents;
+  orderId: string;
+  email: string | null;
+  sessionId: string | null;
+  toolSlug: string | null;
+}): Promise<WhopCheckout> {
+  const { apiKey, accountId } = whopEnv();
+  if (!apiKey || !accountId) throw new Error("Whop is not configured yet.");
+
+  const shape = WHOP_PRICES[input.amountCents];
+  const body: Record<string, unknown> = {
+    account_id: accountId,
+    plan: {
+      initial_price: input.amountCents / 100,
+      plan_type: shape.type,
+      ...(shape.type === "renewal" ? { renewal_price: input.amountCents / 100, billing_period: 30 } : {}),
+    },
+    metadata: {
+      order_id: input.orderId,
+      plan: shape.plan,
+      email: input.email ?? "",
+      session_id: input.sessionId ?? "",
+      tool_slug: input.toolSlug ?? "",
+    },
+  };
+
+  const res = await fetch(`${API_BASE}/checkout_configurations`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body),
+  });
+
+  const text = await res.text();
+  if (!res.ok) {
+    throw new Error(`Whop checkout failed (${res.status}): ${text.slice(0, 300)}`);
+  }
+  const json = JSON.parse(text) as { id?: string; plan?: { id?: string } };
+  if (!json.id || !json.plan?.id) throw new Error("Whop returned an unexpected checkout payload.");
+  return { checkoutId: json.id, planId: json.plan.id };
+}
+
+function safeEqual(a: string, b: string): boolean {
+  const left = Buffer.from(a);
+  const right = Buffer.from(b);
+  if (left.length !== right.length) return false;
+  return timingSafeEqual(left, right);
+}
+
+/** Candidate HMAC keys — Whop hands out a `ws_`/`whsec_` prefixed secret. */
+function signingKeys(secret: string): Buffer[] {
+  const bare = secret.replace(/^(ws_|whsec_)/, "");
+  const keys = [Buffer.from(secret), Buffer.from(bare)];
+  try {
+    keys.push(Buffer.from(bare, "base64"));
+  } catch {
+    /* not base64 */
+  }
+  return keys;
+}
+
+/**
+ * Verifies a Standard Webhooks signature: HMAC-SHA256 over
+ * `{webhook-id}.{webhook-timestamp}.{raw body}`, base64, `v1,<sig>` header,
+ * with a 5-minute replay window.
+ */
+export function verifyWhopWebhook(rawBody: string, headers: Headers): boolean {
+  const { webhookSecret } = whopEnv();
+  if (!webhookSecret) return false;
+
+  const id = headers.get("webhook-id");
+  const timestamp = headers.get("webhook-timestamp");
+  const signature = headers.get("webhook-signature");
+  if (!id || !timestamp || !signature) return false;
+
+  const ts = Number(timestamp);
+  if (!Number.isFinite(ts) || Math.abs(Date.now() / 1000 - ts) > 300) return false;
+
+  const signed = `${id}.${timestamp}.${rawBody}`;
+  const provided = signature
+    .split(" ")
+    .map((part) => part.trim())
+    .filter(Boolean)
+    .map((part) => (part.startsWith("v1,") ? part.slice(3) : part));
+
+  for (const key of signingKeys(webhookSecret)) {
+    const digest = createHmac("sha256", key).update(signed).digest("base64");
+    if (provided.some((candidate) => safeEqual(candidate, digest))) return true;
+  }
+  return false;
+}
+
+export type WhopEvent = {
+  type?: string;
+  data?: {
+    id?: string;
+    status?: string;
+    user_email?: string;
+    email?: string;
+    metadata?: Record<string, string | undefined>;
+    member?: { id?: string; email?: string };
+    user?: { email?: string };
+  };
+};
+
+/** Pulls the fields we need out of any payment/membership event shape. */
+export function readWhopEvent(event: WhopEvent) {
+  const data = event.data ?? {};
+  const metadata = data.metadata ?? {};
+  const email =
+    (metadata["email"] || data.user_email || data.email || data.member?.email || data.user?.email || "")
+      .toString()
+      .trim()
+      .toLowerCase() || null;
+  return {
+    type: event.type ?? "",
+    orderId: metadata["order_id"] ?? null,
+    plan: metadata["plan"] === "monthly" ? ("monthly" as const) : ("lifetime" as const),
+    email,
+    paymentId: data.id ?? null,
+  };
+}
