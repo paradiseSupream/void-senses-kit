@@ -69,7 +69,16 @@ export function RadarChart({
         );
       })}
 
-      <polygon points={shape} fill={accent} fillOpacity={0.22} stroke={accent} strokeWidth={2} />
+      <polygon
+        points={shape}
+        fill={accent}
+        fillOpacity={0.2}
+        stroke={accent}
+        strokeWidth={2}
+        strokeLinejoin="round"
+        className="radar-draw"
+        style={{ filter: "drop-shadow(0 0 10px color-mix(in oklab, var(--primary) 45%, transparent))" }}
+      />
       {data.map((d, i) => {
         const [x, y] = point(i, Math.max(0.06, d.value / 100));
         const active = selected === d.dim;
