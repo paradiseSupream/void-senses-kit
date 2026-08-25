@@ -18,6 +18,7 @@ import { Route as VaultRouteImport } from './routes/vault'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AdminComplianceRouteImport } from './routes/admin.compliance'
 import { Route as AdminMonetizationRouteImport } from './routes/admin.monetization'
+import { Route as ApiDossierPdfRouteImport } from './routes/api/dossier-pdf'
 import { Route as ToolsIndexRouteImport } from './routes/tools.index'
 import { Route as ToolsChildTraumaRouteImport } from './routes/tools.child-trauma'
 import { Route as ToolsDarkPersonalityRouteImport } from './routes/tools.dark-personality'
@@ -77,6 +78,11 @@ const AdminComplianceRoute = AdminComplianceRouteImport.update({
 const AdminMonetizationRoute = AdminMonetizationRouteImport.update({
   id: '/admin/monetization',
   path: '/admin/monetization',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiDossierPdfRoute = ApiDossierPdfRouteImport.update({
+  id: '/api/dossier-pdf',
+  path: '/api/dossier-pdf',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ToolsIndexRoute = ToolsIndexRouteImport.update({
@@ -164,6 +170,7 @@ export interface FileRoutesByFullPath {
   '/vault': typeof VaultRoute
   '/admin/compliance': typeof AdminComplianceRoute
   '/admin/monetization': typeof AdminMonetizationRoute
+  '/api/dossier-pdf': typeof ApiDossierPdfRoute
   '/tools/child-trauma': typeof ToolsChildTraumaRoute
   '/tools/dark-personality': typeof ToolsDarkPersonalityRoute
   '/tools/iq': typeof ToolsIqRoute
@@ -190,6 +197,7 @@ export interface FileRoutesByTo {
   '/vault': typeof VaultRoute
   '/admin/compliance': typeof AdminComplianceRoute
   '/admin/monetization': typeof AdminMonetizationRoute
+  '/api/dossier-pdf': typeof ApiDossierPdfRoute
   '/tools/child-trauma': typeof ToolsChildTraumaRoute
   '/tools/dark-personality': typeof ToolsDarkPersonalityRoute
   '/tools/iq': typeof ToolsIqRoute
@@ -217,6 +225,7 @@ export interface FileRoutesById {
   '/vault': typeof VaultRoute
   '/admin/compliance': typeof AdminComplianceRoute
   '/admin/monetization': typeof AdminMonetizationRoute
+  '/api/dossier-pdf': typeof ApiDossierPdfRoute
   '/tools/child-trauma': typeof ToolsChildTraumaRoute
   '/tools/dark-personality': typeof ToolsDarkPersonalityRoute
   '/tools/iq': typeof ToolsIqRoute
@@ -245,6 +254,7 @@ export interface FileRouteTypes {
     | '/vault'
     | '/admin/compliance'
     | '/admin/monetization'
+    | '/api/dossier-pdf'
     | '/tools/child-trauma'
     | '/tools/dark-personality'
     | '/tools/iq'
@@ -271,6 +281,7 @@ export interface FileRouteTypes {
     | '/vault'
     | '/admin/compliance'
     | '/admin/monetization'
+    | '/api/dossier-pdf'
     | '/tools/child-trauma'
     | '/tools/dark-personality'
     | '/tools/iq'
@@ -297,6 +308,7 @@ export interface FileRouteTypes {
     | '/vault'
     | '/admin/compliance'
     | '/admin/monetization'
+    | '/api/dossier-pdf'
     | '/tools/child-trauma'
     | '/tools/dark-personality'
     | '/tools/iq'
@@ -324,6 +336,7 @@ export interface RootRouteChildren {
   VaultRoute: typeof VaultRoute
   AdminComplianceRoute: typeof AdminComplianceRoute
   AdminMonetizationRoute: typeof AdminMonetizationRoute
+  ApiDossierPdfRoute: typeof ApiDossierPdfRoute
   ToolsChildTraumaRoute: typeof ToolsChildTraumaRoute
   ToolsDarkPersonalityRoute: typeof ToolsDarkPersonalityRoute
   ToolsIqRoute: typeof ToolsIqRoute
@@ -405,6 +418,13 @@ declare module '@tanstack/react-router' {
       path: '/admin/monetization'
       fullPath: '/admin/monetization'
       preLoaderRoute: typeof AdminMonetizationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/dossier-pdf': {
+      id: '/api/dossier-pdf'
+      path: '/api/dossier-pdf'
+      fullPath: '/api/dossier-pdf'
+      preLoaderRoute: typeof ApiDossierPdfRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/tools/': {
@@ -524,6 +544,7 @@ const rootRouteChildren: RootRouteChildren = {
   VaultRoute: VaultRoute,
   AdminComplianceRoute: AdminComplianceRoute,
   AdminMonetizationRoute: AdminMonetizationRoute,
+  ApiDossierPdfRoute: ApiDossierPdfRoute,
   ToolsChildTraumaRoute: ToolsChildTraumaRoute,
   ToolsDarkPersonalityRoute: ToolsDarkPersonalityRoute,
   ToolsIqRoute: ToolsIqRoute,
