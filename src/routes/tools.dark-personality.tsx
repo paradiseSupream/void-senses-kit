@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { Ghost } from "lucide-react";
+import { Ghost, Loader2, Lock } from "lucide-react";
 
 import { ToolShell } from "@/components/layout/ToolShell";
 import { useAutoStart } from "@/lib/autostart";
@@ -19,10 +19,12 @@ import {
   DARK_SESSION_SIZE,
   DARK_SHORT,
 } from "@/lib/banks/dark";
-import { buildDossier } from "@/lib/archetype";
+import { freeSummary } from "@/lib/archetype-core";
+import { usePremiumDossier } from "@/lib/premium-dossier";
 import { newSeed, pickBalanced, rngFrom, scoreDimensions, type Likert } from "@/lib/quiz-engine";
 
 type Search = { auto?: string; vip_order?: string; matrix_order?: string };
+
 
 export const Route = createFileRoute("/tools/dark-personality")({
   validateSearch: (search: Record<string, unknown>): Search => {
