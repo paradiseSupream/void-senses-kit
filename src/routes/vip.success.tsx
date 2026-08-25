@@ -97,10 +97,17 @@ function VipSuccessPage() {
             </p>
           ) : null}
           <Link
-            to="/tools"
+            to="/tools/dark-personality"
+            search={{ vip_success: "true" }}
             className="mt-6 inline-block rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground"
           >
-            Open the tools
+            Open my VIP dossier
+          </Link>
+          <Link
+            to="/tools"
+            className="mt-3 block text-sm font-medium text-muted-foreground underline underline-offset-4"
+          >
+            Browse all tools
           </Link>
         </>
       ) : state === "waiting" ? (

@@ -9,29 +9,42 @@ import { RadarChart } from "@/components/tools/RadarChart";
 import { ResultActions } from "@/components/tools/ResultActions";
 import { TraitBars } from "@/components/tools/TraitBars";
 import { LockedReport } from "@/components/monetization/LockedReport";
+import { ShadowDossier } from "@/components/tools/ShadowDossier";
+import { MatrixUpsellModal } from "@/components/monetization/MatrixUpsellModal";
+import { useVipSuccessUnlock } from "@/lib/vip-unlock";
 import {
-  DARK_ARCHETYPES,
   DARK_BANK,
   DARK_NOTES,
   DARK_PER_DIM,
   DARK_SESSION_SIZE,
+  DARK_SHORT,
 } from "@/lib/banks/dark";
+import { buildDossier } from "@/lib/archetype";
 import { newSeed, pickBalanced, rngFrom, scoreDimensions, type Likert } from "@/lib/quiz-engine";
 
+type Search = { auto?: string; vip_success?: string; matrix_success?: string };
+
 export const Route = createFileRoute("/tools/dark-personality")({
+  validateSearch: (search: Record<string, unknown>): Search => {
+    const parsed: Search = {};
+    for (const key of ["auto", "vip_success", "matrix_success"] as const) {
+      if (typeof search[key] === "string") parsed[key] = search[key] as string;
+    }
+    return parsed;
+  },
   head: () => ({
     meta: [
-      { title: "Dark Personality Test — 18 Items, Six Shadow Traits" },
+      { title: "Dark Personality Test — 6-Axis Shadow Archetype Profile" },
       {
         name: "description",
         content:
-          "Eighteen randomised statements weigh strategy, detachment, ambition, control, charm and defiance to reveal your dominant shadow archetype.",
+          "Eighteen randomised items score Machiavellianism, narcissism, psychopathy, detachment, cognitive dominance and shadow integration, then name one of eight dark archetypes.",
       },
       { property: "og:title", content: "Dark Personality Test — Senses of Void" },
       {
         property: "og:description",
         content:
-          "Mastermind, Phantom, Architect, Ghost, Siren or Outlaw? A different question set every attempt.",
+          "Sovereign Manipulator, Velvet Ghost, Dark Empath or Stoic Predator? Six psychometric axes, a different question set every attempt.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -78,6 +91,10 @@ function DarkPersonality() {
   useAutoStart(() => setPhase("quiz"));
   const [answers, setAnswers] = useState<Record<string, number>>({});
 
+  // ?vip_success=true / ?matrix_success=true → persist the unlock, clean the URL
+  // and queue the one-time post-purchase upsell.
+  const { showUpsell, dismissUpsell } = useVipSuccessUnlock();
+
   const items: Likert[] = useMemo(
     () => pickBalanced(DARK_BANK, (i) => i.dim, DARK_PER_DIM, rngFrom(seed)),
     [seed],
@@ -89,37 +106,28 @@ function DarkPersonality() {
     setPhase("quiz");
   }, []);
 
-  const result = useMemo(() => {
-    const scores = scoreDimensions(items, answers);
-    const sorted = [...scores].sort((a, b) => b.value - a.value);
-    const top = sorted[0]?.dim ?? "Strategy";
-    const second = sorted[1]?.dim ?? "Control";
-    const intensity = scores.length
-      ? Math.round(scores.reduce((a, b) => a + b.value, 0) / scores.length)
-      : 0;
-    return {
-      scores,
-      top,
-      second,
-      intensity,
-      archetype: DARK_ARCHETYPES[top] ?? DARK_ARCHETYPES["Strategy"]!,
-    };
-  }, [items, answers]);
+  const dossier = useMemo(() => buildDossier(scoreDimensions(items, answers)), [items, answers]);
+  const scores = dossier.axes.map((a) => ({ dim: a.dim, value: a.value }));
 
   return (
     <ToolShell
       eyebrow="Tool 03 · Psyche"
       slug="dark-personality"
       title="Dark Personality Test"
-      intro="Eighteen statements pulled fresh from a 48-item bank, scoring six shadow traits. No two attempts share the same set, so the archetype you get is earned, not memorised."
+      intro="Eighteen statements pulled fresh from a 48-item bank, scored across six psychometric axes. No two attempts share the same set, so the archetype you get is earned, not memorised."
     >
       {phase === "intro" ? (
         <div className="glass reveal rounded-2xl p-6 sm:p-8">
           <span className="label-mono">What you'll get</span>
           <ul className="mt-4 space-y-2.5 text-sm text-muted-foreground">
-            <li>Six trait scores: strategy, detachment, ambition, control, charm, defiance.</li>
-            <li>One of six archetypes, plus the edge that comes with it.</li>
-            <li>A radar visual and a downloadable share card.</li>
+            <li>
+              Six axis scores: Machiavellianism, narcissism, psychopathy, emotional detachment,
+              cognitive dominance and shadow integration.
+            </li>
+            <li>One of eight core archetypes, plus the edge and the risk it carries.</li>
+            <li>
+              An interactive radar, a printable VIP dossier and a downloadable share card.
+            </li>
           </ul>
           <p className="mt-5 rounded-xl border border-hairline bg-surface-2/40 p-3.5 text-sm italic">
             “I read the room for leverage before I speak.”
@@ -148,38 +156,45 @@ function DarkPersonality() {
 
       {phase === "result" ? (
         <div className="glass reveal rounded-2xl p-6 sm:p-8">
+          {showUpsell ? <MatrixUpsellModal onDismiss={dismissUpsell} /> : null}
+
           <span className="label-mono flex items-center gap-2">
             <Ghost className="size-3.5 text-secondary" aria-hidden="true" /> shadow archetype
           </span>
           <h2 className="mt-3 font-display text-3xl leading-tight font-bold text-primary sm:text-4xl">
-            {result.archetype.name}
+            {dossier.archetype.name}
           </h2>
-          <p className="mt-2 text-sm text-muted-foreground">{result.archetype.blurb}</p>
-          <p className="mt-2 text-sm text-foreground/80">{result.archetype.edge}</p>
+          <p className="mt-1 font-mono text-xs tracking-wide text-muted-foreground uppercase">
+            {dossier.archetype.tagline}
+          </p>
+          <p className="mt-3 text-sm text-muted-foreground">{dossier.archetype.blurb}</p>
+          <p className="mt-2 text-sm text-foreground/80">{dossier.archetype.edge}</p>
 
           <div className="mt-7 rounded-2xl border border-hairline bg-surface-2/30 p-4">
-            <RadarChart data={result.scores} />
+            <RadarChart data={scores} labels={DARK_SHORT} />
             <p className="mt-2 text-center font-mono text-xs text-muted-foreground">
-              Shadow intensity {result.intensity}/100 · dominant {result.top}, backed by{" "}
-              {result.second}
+              Shadow intensity {dossier.intensity}/100 · dominant {dossier.dominant}, backed by{" "}
+              {dossier.support}
             </p>
           </div>
 
           <div className="mt-8">
             <LockedReport
               toolSlug="dark-personality"
-              title="Trait-by-trait shadow breakdown"
+              title="Full six-axis dossier"
+              blurb="Interactive axis breakdown, blind spots, defence mechanisms, behavioural prediction matrix, 1,500+ word shadow analysis and the printable PDF dossier."
               share={{
                 t: "dark-personality",
                 n: "Dark Personality Test",
-                h: result.archetype.name,
-                l: [`Shadow intensity ${result.intensity}/100`, `Dominant ${result.top}`],
+                h: dossier.archetype.name,
+                l: [`Shadow intensity ${dossier.intensity}/100`, `Dominant ${dossier.dominant}`],
                 p: "/tools/dark-personality",
               }}
             >
-          <div className="mt-8">
-              <TraitBars data={result.scores} notes={DARK_NOTES} />
-            </div>
+              <div className="mt-8 space-y-8">
+                <TraitBars data={scores} notes={DARK_NOTES} />
+                <ShadowDossier dossier={dossier} />
+              </div>
             </LockedReport>
           </div>
 
@@ -189,16 +204,16 @@ function DarkPersonality() {
             payload={{
               eyebrow: "Dark Personality Test",
               title: "Shadow archetype",
-              headline: result.archetype.name,
+              headline: dossier.archetype.name,
               lines: [
-                result.archetype.blurb,
-                `Shadow intensity ${result.intensity}/100 · dominant ${result.top}`,
+                dossier.archetype.tagline,
+                `Shadow intensity ${dossier.intensity}/100 · dominant ${dossier.dominant}`,
               ],
               footer: "sensesofvoid.app · entertainment personality read",
               fileName: "senses-of-void-shadow-archetype.png",
               toolName: "Dark Personality Test",
               toolPath: "/tools/dark-personality",
-              text: `I'm ${result.archetype.name} — shadow intensity ${result.intensity}/100 on Senses of Void.`,
+              text: `I'm ${dossier.archetype.name} — shadow intensity ${dossier.intensity}/100 on Senses of Void.`,
             }}
           />
         </div>

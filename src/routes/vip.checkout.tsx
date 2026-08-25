@@ -3,7 +3,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 
 import { LogoMark } from "@/components/brand/LogoMark";
 
-type Search = { s?: string; p?: string; order?: string; amount?: string };
+type Search = { s?: string; p?: string; order?: string; amount?: string; m?: string };
 
 /**
  * Card checkout page — Whop's embedded checkout mounts here, so the buyer never
@@ -16,6 +16,7 @@ export const Route = createFileRoute("/vip/checkout")({
     if (typeof search["p"] === "string") parsed.p = search["p"];
     if (typeof search["order"] === "string") parsed.order = search["order"];
     if (typeof search["amount"] === "string") parsed.amount = search["amount"];
+    if (typeof search["m"] === "string") parsed.m = search["m"];
     return parsed;
   },
   head: () => ({
@@ -40,7 +41,7 @@ export const Route = createFileRoute("/vip/checkout")({
 });
 
 function VipCheckoutPage() {
-  const { s, p, order, amount } = Route.useSearch();
+  const { s, p, order, amount, m } = Route.useSearch();
 
   useEffect(() => {
     if (document.getElementById("whop-checkout-loader")) return;
@@ -52,9 +53,13 @@ function VipCheckoutPage() {
     document.body.appendChild(script);
   }, []);
 
+  // The $9 Shadow Matrix add-on returns straight into the dossier; VIP plans go
+  // through /vip/success so the webhook can be polled and a license shown.
   const returnUrl =
     typeof window !== "undefined"
-      ? `${window.location.origin}/vip/success?order=${encodeURIComponent(order ?? "")}`
+      ? m === "1"
+        ? `${window.location.origin}/tools/dark-personality?matrix_success=true`
+        : `${window.location.origin}/vip/success?order=${encodeURIComponent(order ?? "")}`
       : "";
 
   const price = amount ? `$${(Number(amount) / 100).toFixed(2)}` : null;
