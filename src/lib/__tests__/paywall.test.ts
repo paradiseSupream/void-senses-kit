@@ -16,7 +16,9 @@ function walk(dir: string): string[] {
   });
 }
 
-const files = walk(SRC).map((path) => ({ path, code: readFileSync(path, "utf8") }));
+const files = walk(SRC)
+  .filter((path) => !path.includes("__tests__"))
+  .map((path) => ({ path, code: readFileSync(path, "utf8") }));
 
 describe("paywall integrity", () => {
   it("never trusts a success flag from the URL", () => {
