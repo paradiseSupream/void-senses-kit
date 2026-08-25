@@ -13,7 +13,7 @@ export type SitemapEntry = {
 };
 
 /** Routes intentionally kept out of the sitemap (private, API, utility). */
-export const EXCLUDED_ROUTE_PREFIXES = ["/admin", "/api", "/compare"] as const;
+export const EXCLUDED_ROUTE_PREFIXES = ["/admin", "/api", "/compare", "/vip"] as const;
 
 export const SITEMAP_ENTRIES: SitemapEntry[] = [
   { path: "/", changefreq: "daily", priority: "1.0" },

@@ -111,11 +111,13 @@ describe("no page loads an unapproved ad format", () => {
   const files = walk(SRC).filter((f) => !f.includes("__tests__"));
 
   it("only site-config.tsx creates <script> elements for ads", () => {
-    // ga4.ts is analytics (consent-gated), not an ad format — allowed.
+    // ga4.ts is analytics (consent-gated) and vip.checkout.tsx loads the Whop
+    // payment widget — neither is an ad format, so both are allowed.
     const offenders = files.filter(
       (file) =>
         file !== SCRIPT_INJECTOR &&
         !file.endsWith("/ga4.ts") &&
+        !file.endsWith(join("routes", "vip.checkout.tsx")) &&
         /createElement\(\s*["']script["']\s*\)/.test(readFileSync(file, "utf8")),
     );
     expect(offenders).toEqual([]);
