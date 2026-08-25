@@ -28,12 +28,17 @@ const PERKS = [
 export function VipModal() {
   const { vipModalOpen, closeVipModal, setVip, isVip, preferredPlan } = useVip();
   const saveLead = useServerFn(subscribeLead);
+  const beginCheckout = useServerFn(startVipCheckout);
+  const restoreVip = useServerFn(restoreVipAccess);
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [emailSaved, setEmailSaved] = useState(false);
+  const [busy, setBusy] = useState(false);
   const [tab, setTab] = useState<"card" | "crypto">("card");
   const [plan, setPlan] = useState<VipPlan>(preferredPlan);
   const { site } = useSiteConfig();
   const offerActive = useVipOffer();
+
   const lifetimeCents = offerActive ? OFFER_CENTS : site.vip_price_cents;
   const monthlyCents = offerActive ? MONTHLY_OFFER_CENTS : VIP_MONTHLY_CENTS;
   const lifetimePrice = `$${(lifetimeCents / 100).toFixed(0)}`;
