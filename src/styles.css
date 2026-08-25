@@ -171,14 +171,14 @@
 @utility glass {
   background-image: linear-gradient(
     160deg,
-    color-mix(in oklab, var(--surface-2) 78%, transparent),
-    color-mix(in oklab, var(--surface) 62%, transparent)
+    color-mix(in oklab, var(--void-2) 82%, transparent),
+    color-mix(in oklab, var(--void-1) 66%, transparent)
   );
-  backdrop-filter: blur(28px) saturate(140%);
+  backdrop-filter: blur(22px) saturate(130%);
   border: 1px solid var(--hairline);
   box-shadow:
-    0 24px 60px -24px oklch(0 0 0 / 0.75),
-    inset 0 1px 0 0 oklch(1 0 0 / 0.06);
+    0 32px 80px -40px oklch(0 0 0 / 0.85),
+    inset 0 1px 0 0 oklch(1 0 0 / 0.05);
 }
 
 /* Premium card: gradient hairline edge + inner sheen + accent halo on hover. */
@@ -186,18 +186,25 @@
   position: relative;
   isolation: isolate;
   border-radius: var(--radius-2xl);
-  background-image: linear-gradient(
-    160deg,
-    color-mix(in oklab, var(--surface-2) 80%, transparent),
-    color-mix(in oklab, var(--surface) 55%, transparent)
-  );
-  backdrop-filter: blur(28px) saturate(140%);
+  background-image:
+    radial-gradient(
+      120% 90% at 50% -20%,
+      color-mix(in oklab, var(--tool-accent, var(--primary)) 7%, transparent),
+      transparent 60%
+    ),
+    linear-gradient(
+      160deg,
+      color-mix(in oklab, var(--void-2) 88%, transparent),
+      color-mix(in oklab, var(--void-1) 62%, transparent)
+    );
+  backdrop-filter: blur(22px) saturate(130%);
   box-shadow:
-    0 24px 60px -28px oklch(0 0 0 / 0.8),
-    inset 0 1px 0 0 oklch(1 0 0 / 0.06);
+    0 36px 90px -48px oklch(0 0 0 / 0.9),
+    0 2px 6px -2px oklch(0 0 0 / 0.6),
+    inset 0 1px 0 0 oklch(1 0 0 / 0.05);
   transition:
-    transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
-    box-shadow 0.35s ease;
+    transform var(--dur-ui) var(--ease-out),
+    box-shadow var(--dur-ui) ease;
 
   &::before {
     content: "";
@@ -208,9 +215,9 @@
     padding: 1px;
     background: linear-gradient(
       150deg,
-      oklch(1 0 0 / 0.14),
-      oklch(1 0 0 / 0.02) 42%,
-      color-mix(in oklab, var(--tool-accent, var(--primary)) 30%, transparent)
+      oklch(1 0 0 / 0.16),
+      oklch(1 0 0 / 0.015) 38%,
+      color-mix(in oklab, var(--tool-accent, var(--primary)) 24%, transparent)
     );
     -webkit-mask:
       linear-gradient(#000 0 0) content-box,
@@ -225,17 +232,164 @@
 
 @utility lift {
   transition:
-    transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
-    box-shadow 0.35s ease;
+    transform var(--dur-ui) var(--ease-out),
+    box-shadow var(--dur-ui) ease;
 
   &:hover {
-    transform: translateY(-4px);
+    transform: translateY(-3px);
     box-shadow:
-      0 40px 80px -32px oklch(0 0 0 / 0.85),
-      0 0 0 1px color-mix(in oklab, var(--tool-accent, var(--primary)) 28%, transparent),
-      0 0 60px -18px color-mix(in oklab, var(--tool-accent, var(--primary)) 45%, transparent);
+      0 48px 100px -50px oklch(0 0 0 / 0.9),
+      0 0 0 1px color-mix(in oklab, var(--tool-accent, var(--primary)) 22%, transparent),
+      0 0 48px -24px color-mix(in oklab, var(--tool-accent, var(--primary)) 32%, transparent);
+  }
+
+  &:active {
+    transform: scale(0.985);
   }
 }
+
+/* Cursor-tracked spotlight. Set --mx/--my (percent) from a pointer handler. */
+@utility spotlight {
+  position: relative;
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    border-radius: inherit;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity var(--dur-ui) ease;
+    background: radial-gradient(
+      42% 42% at var(--mx, 50%) var(--my, 0%),
+      color-mix(in oklab, var(--tool-accent, var(--primary)) 16%, transparent),
+      transparent 70%
+    );
+  }
+
+  &:hover::after {
+    opacity: 1;
+  }
+}
+
+/* Perspective container for pointer-reactive tilt (desktop only). */
+@utility tilt-3d {
+  transform: perspective(1100px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+  transform-style: preserve-3d;
+  transition: transform var(--dur-ui) var(--ease-out);
+  will-change: transform;
+}
+
+/* HUD-style analytical tile for technical stats. */
+@utility hud-tile {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--hairline);
+  background-image: linear-gradient(
+    165deg,
+    color-mix(in oklab, var(--void-2) 90%, transparent),
+    color-mix(in oklab, var(--void-0) 80%, transparent)
+  );
+  box-shadow: inset 0 1px 0 0 oklch(1 0 0 / 0.045);
+
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      color-mix(in oklab, var(--primary) 45%, transparent),
+      transparent
+    );
+  }
+}
+
+/* Interactive filter capsule. */
+@utility capsule {
+  position: relative;
+  border-radius: 999px;
+  border: 1px solid var(--hairline);
+  background-image: linear-gradient(
+    165deg,
+    color-mix(in oklab, var(--void-2) 78%, transparent),
+    color-mix(in oklab, var(--void-1) 55%, transparent)
+  );
+  color: var(--muted-foreground);
+  transition:
+    transform var(--dur-micro) var(--ease-spring),
+    color var(--dur-micro) ease,
+    border-color var(--dur-micro) ease,
+    background-color var(--dur-micro) ease;
+
+  &:hover {
+    color: var(--foreground);
+    border-color: color-mix(in oklab, var(--primary) 30%, transparent);
+  }
+
+  &:active {
+    transform: scale(0.97);
+  }
+}
+
+@utility capsule-active {
+  color: var(--primary);
+  border-color: color-mix(in oklab, var(--primary) 45%, transparent);
+  background-image: linear-gradient(
+    165deg,
+    color-mix(in oklab, var(--primary) 16%, transparent),
+    color-mix(in oklab, var(--primary) 6%, transparent)
+  );
+  box-shadow:
+    0 0 0 1px color-mix(in oklab, var(--primary) 18%, transparent),
+    0 8px 26px -16px color-mix(in oklab, var(--primary) 55%, transparent),
+    inset 0 1px 0 0 oklch(1 0 0 / 0.08);
+}
+
+/* Floating dock (header + mobile island). */
+@utility dock {
+  border: 1px solid var(--hairline);
+  background-color: color-mix(in oklab, var(--void-0) 72%, transparent);
+  backdrop-filter: blur(26px) saturate(140%);
+  box-shadow:
+    0 24px 60px -30px oklch(0 0 0 / 0.9),
+    inset 0 1px 0 0 oklch(1 0 0 / 0.06);
+}
+
+/* Shimmer sweep over selected display words. */
+@utility sheen-word {
+  background-image: linear-gradient(
+    100deg,
+    color-mix(in oklab, var(--primary) 92%, white) 0%,
+    color-mix(in oklab, var(--light-cyan) 88%, white) 28%,
+    oklch(1 0 0 / 0.95) 44%,
+    color-mix(in oklab, var(--light-violet) 86%, white) 62%,
+    color-mix(in oklab, var(--primary) 90%, white) 100%
+  );
+  background-size: 220% 100%;
+  background-clip: text;
+  color: transparent;
+  animation: sheen-sweep 7s ease-in-out infinite;
+}
+
+@keyframes sheen-sweep {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+/* Staged cinematic reveal for result screens. */
+@utility stage {
+  animation: reveal-up var(--dur-major) var(--ease-out) both;
+}
+
 
 /* Soft aurora field used behind hero and tool headers. */
 @utility aurora {
