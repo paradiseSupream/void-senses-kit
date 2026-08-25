@@ -93,7 +93,7 @@ export const TOOLS: ToolMeta[] = [
     duration: "~3 min",
     icon: VenetianMask,
     accent: "var(--chart-5)",
-    highlights: ["6 shadow traits", "6 archetypes", "Share card"],
+    highlights: ["6 psychometric axes", "8 archetypes", "VIP dossier"],
     cover: coverDark.url,
     promise: "Answer eighteen and meet the archetype hiding in your shadow.",
     facts: { steps: "18 randomised questions", time: "about 3 minutes", output: "Archetype share card" },
