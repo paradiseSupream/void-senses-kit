@@ -102,23 +102,104 @@ export const adminOverview = createServerFn({ method: "POST" })
     };
   });
 
+export type AdminSettings = {
+  ads: AdsSettings;
+  site: SiteSettings;
+  tracking: TrackingSettings;
+};
+
 export const adminGetSettings = createServerFn({ method: "POST" })
   .inputValidator((input: { token: string }) => ({ token: String(input?.token ?? "") }))
-  .handler(async ({ data }): Promise<{ ads: AdsSettings; site: SiteSettings }> => {
+  .handler(async ({ data }): Promise<AdminSettings> => {
     const { requireAdmin, readSettings } = await import("@/lib/admin-core.server");
     await requireAdmin(data.token);
     return readSettings();
   });
 
 export const adminSaveSettings = createServerFn({ method: "POST" })
-  .inputValidator((input: { token: string; ads?: AdsSettings; site?: SiteSettings }) => input)
-  .handler(async ({ data }): Promise<{ ads: AdsSettings; site: SiteSettings }> => {
+  .inputValidator(
+    (input: {
+      token: string;
+      ads?: AdsSettings;
+      site?: SiteSettings;
+      tracking?: TrackingSettings;
+    }) => input,
+  )
+  .handler(async ({ data }): Promise<AdminSettings> => {
     const { requireAdmin, readSettings, writeSetting } = await import("@/lib/admin-core.server");
     await requireAdmin(String(data?.token ?? ""));
     if (data.ads) await writeSetting("ads", data.ads);
     if (data.site) await writeSetting("site", data.site);
+    if (data.tracking) await writeSetting("tracking", data.tracking);
     return readSettings();
   });
+
+/** Live check that each configured pixel / server-side token actually works. */
+export const adminTestTracking = createServerFn({ method: "POST" })
+  .inputValidator((input: { token: string }) => ({ token: String(input?.token ?? "") }))
+  .handler(
+    async ({
+      data,
+    }): Promise<Array<{ channel: string; ok: boolean; detail: string }>> => {
+      const { requireAdmin, readSettings } = await import("@/lib/admin-core.server");
+      await requireAdmin(data.token);
+      const { tracking } = await readSettings();
+      const results: Array<{ channel: string; ok: boolean; detail: string }> = [];
+
+      results.push({
+        channel: "Meta pixel",
+        ok: Boolean(tracking.meta_pixel_id),
+        detail: tracking.meta_pixel_id ? "Pixel id set" : "Pixel id missing",
+      });
+      if (tracking.meta_pixel_id && tracking.meta_capi_token) {
+        try {
+          const res = await fetch(
+            `https://graph.facebook.com/v20.0/${tracking.meta_pixel_id}?fields=id,name&access_token=${encodeURIComponent(tracking.meta_capi_token)}`,
+          );
+          const body = (await res.json()) as { error?: { message?: string } };
+          results.push({
+            channel: "Meta Conversions API",
+            ok: res.ok,
+            detail: res.ok ? "Token valid" : (body.error?.message ?? `HTTP ${res.status}`),
+          });
+        } catch (error) {
+          results.push({
+            channel: "Meta Conversions API",
+            ok: false,
+            detail: (error as Error).message,
+          });
+        }
+      } else {
+        results.push({
+          channel: "Meta Conversions API",
+          ok: false,
+          detail: "Access token missing",
+        });
+      }
+
+      results.push({
+        channel: "TikTok pixel",
+        ok: Boolean(tracking.tiktok_pixel_id),
+        detail: tracking.tiktok_pixel_id ? "Pixel id set" : "Pixel id missing",
+      });
+      results.push({
+        channel: "TikTok Events API",
+        ok: Boolean(tracking.tiktok_events_token),
+        detail: tracking.tiktok_events_token ? "Access token set" : "Access token missing",
+      });
+      results.push({
+        channel: "Google Ads",
+        ok: Boolean(tracking.google_ads_id),
+        detail: tracking.google_ads_id ? "Conversion id set" : "Conversion id missing",
+      });
+      results.push({
+        channel: "GA4",
+        ok: Boolean(tracking.ga4_id),
+        detail: tracking.ga4_id ? "Measurement id set" : "Measurement id missing",
+      });
+      return results;
+    },
+  );
 
 export const adminListVips = createServerFn({ method: "POST" })
   .inputValidator((input: { token: string }) => ({ token: String(input?.token ?? "") }))
