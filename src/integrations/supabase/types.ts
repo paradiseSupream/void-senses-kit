@@ -224,6 +224,42 @@ export type Database = {
         }
         Relationships: []
       }
+      tracking_events: {
+        Row: {
+          channel: string
+          created_at: string
+          detail: string | null
+          event: string
+          event_id: string | null
+          id: number
+          ok: boolean
+          source: string
+          status: number | null
+        }
+        Insert: {
+          channel: string
+          created_at?: string
+          detail?: string | null
+          event: string
+          event_id?: string | null
+          id?: number
+          ok?: boolean
+          source?: string
+          status?: number | null
+        }
+        Update: {
+          channel?: string
+          created_at?: string
+          detail?: string | null
+          event?: string
+          event_id?: string | null
+          id?: number
+          ok?: boolean
+          source?: string
+          status?: number | null
+        }
+        Relationships: []
+      }
       vault_assets: {
         Row: {
           category: string

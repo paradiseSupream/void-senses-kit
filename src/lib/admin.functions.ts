@@ -1075,5 +1075,125 @@ export const adminReplayEvent = createServerFn({ method: "POST" })
       }
     }
 
+    const { logTrackingEvents } = await import("@/lib/tracking-log.server");
+    await logTrackingEvents(
+      out.map((row) => ({
+        channel: row.channel.startsWith("Meta") ? ("meta" as const) : ("tiktok" as const),
+        source: "sandbox" as const,
+        event: data.event,
+        ok: row.ok,
+        detail: row.detail,
+        eventId: row.eventId,
+      })),
+    );
+
     return out;
+  });
+
+/** Real-time tracking delivery health for the admin monitor. */
+export type TrackingMonitor = {
+  windowHours: number;
+  totals: Array<{ channel: string; sent: number; failed: number; successRate: number }>;
+  series: Array<{ bucket: string; meta: number; tiktok: number; ga4: number; google_ads: number }>;
+  latest: Array<{
+    at: string;
+    channel: string;
+    source: string;
+    event: string;
+    ok: boolean;
+    status: number | null;
+    detail: string | null;
+    eventId: string | null;
+  }>;
+  failures: Array<{ at: string; channel: string; event: string; status: number | null; detail: string | null }>;
+};
+
+export const adminTrackingMonitor = createServerFn({ method: "POST" })
+  .inputValidator((input: { token: string; hours?: number }) => ({
+    token: String(input?.token ?? ""),
+    hours: [1, 6, 24, 72].includes(Number(input?.hours)) ? Number(input?.hours) : 24,
+  }))
+  .handler(async ({ data }): Promise<TrackingMonitor> => {
+    const { requireAdmin, admin } = await import("@/lib/admin-core.server");
+    await requireAdmin(data.token);
+    const since = new Date(Date.now() - data.hours * 3600_000).toISOString();
+
+    const { data: rows, error } = await admin()
+      .from("tracking_events")
+      .select("created_at, channel, source, event, ok, status, detail, event_id")
+      .gte("created_at", since)
+      .order("created_at", { ascending: false })
+      .limit(5000);
+    if (error) throw new Error(error.message);
+
+    type Row = {
+      created_at: string;
+      channel: string;
+      source: string;
+      event: string;
+      ok: boolean;
+      status: number | null;
+      detail: string | null;
+      event_id: string | null;
+    };
+    const list = (rows ?? []) as Row[];
+
+    const channels = ["meta", "tiktok", "ga4", "google_ads"] as const;
+    const totals = channels.map((channel) => {
+      const scoped = list.filter((row) => row.channel === channel);
+      const failed = scoped.filter((row) => !row.ok).length;
+      return {
+        channel,
+        sent: scoped.length,
+        failed,
+        successRate: scoped.length > 0 ? ((scoped.length - failed) / scoped.length) * 100 : 0,
+      };
+    });
+
+    // Bucket by hour (or by 10 minutes for the 1-hour window).
+    const bucketMs = data.hours <= 1 ? 10 * 60_000 : 3600_000;
+    const buckets = new Map<
+      number,
+      { meta: number; tiktok: number; ga4: number; google_ads: number }
+    >();
+    const start = Math.floor((Date.now() - data.hours * 3600_000) / bucketMs) * bucketMs;
+    for (let t = start; t <= Date.now(); t += bucketMs) {
+      buckets.set(t, { meta: 0, tiktok: 0, ga4: 0, google_ads: 0 });
+    }
+    for (const row of list) {
+      const key = Math.floor(new Date(row.created_at).getTime() / bucketMs) * bucketMs;
+      const slot = buckets.get(key);
+      if (!slot) continue;
+      if (row.channel in slot) slot[row.channel as keyof typeof slot] += 1;
+    }
+
+    const series = [...buckets.entries()]
+      .sort((a, b) => a[0] - b[0])
+      .map(([time, counts]) => ({ bucket: new Date(time).toISOString(), ...counts }));
+
+    return {
+      windowHours: data.hours,
+      totals,
+      series,
+      latest: list.slice(0, 40).map((row) => ({
+        at: row.created_at,
+        channel: row.channel,
+        source: row.source,
+        event: row.event,
+        ok: row.ok,
+        status: row.status,
+        detail: row.detail,
+        eventId: row.event_id,
+      })),
+      failures: list
+        .filter((row) => !row.ok)
+        .slice(0, 25)
+        .map((row) => ({
+          at: row.created_at,
+          channel: row.channel,
+          event: row.event,
+          status: row.status,
+          detail: row.detail,
+        })),
+    };
   });

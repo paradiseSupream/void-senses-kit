@@ -219,7 +219,36 @@ export function pixelTrack(event: PixelEvent, payload: PixelPayload = {}) {
     });
   }
 
+  void reportPixelFires(event, eventId);
   void sendServerEvent(event, { ...payload, eventId, currency });
+}
+
+/**
+ * Tells our server which browser pixels actually fired, so the admin monitor
+ * can chart browser coverage next to server-side deliveries.
+ */
+export function reportPixelFires(event: string, eventId: string) {
+  const entries = [
+    { channel: "meta", event, ok: typeof window.fbq === "function" && metaEnabled() },
+    { channel: "tiktok", event, ok: Boolean(window.ttq?.["track"]) && tiktokEnabled() },
+    { channel: "google_ads", event, ok: typeof window.gtag === "function" && googleAdsEnabled() },
+  ].filter((entry) => entry.ok || entry.channel === "meta");
+
+  const body = JSON.stringify({ event_id: eventId, entries });
+  try {
+    if (navigator.sendBeacon) {
+      navigator.sendBeacon("/api/public/pixel-log", new Blob([body], { type: "application/json" }));
+      return;
+    }
+  } catch {
+    /* fall through to fetch */
+  }
+  void fetch("/api/public/pixel-log", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body,
+    keepalive: true,
+  }).catch(() => undefined);
 }
 
 /** Posts the same conversion to our server so it can reach Meta/TikTok CAPI. */

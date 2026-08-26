@@ -31,6 +31,7 @@ import { Route as VipSuccessRouteImport } from './routes/vip.success'
 import { Route as ApiPublicCapiRouteImport } from './routes/api/public/capi'
 import { Route as ApiPublicGeoRouteImport } from './routes/api/public/geo'
 import { Route as ApiPublicGscSyncRouteImport } from './routes/api/public/gsc-sync'
+import { Route as ApiPublicPixelLogRouteImport } from './routes/api/public/pixel-log'
 import { Route as ApiPublicRoastRouteImport } from './routes/api/public/roast'
 import { Route as ApiPublicTrackRouteImport } from './routes/api/public/track'
 import { Route as ApiPublicWeeklyReportRouteImport } from './routes/api/public/weekly-report'
@@ -146,6 +147,11 @@ const ApiPublicGscSyncRoute = ApiPublicGscSyncRouteImport.update({
   path: '/api/public/gsc-sync',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicPixelLogRoute = ApiPublicPixelLogRouteImport.update({
+  id: '/api/public/pixel-log',
+  path: '/api/public/pixel-log',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicRoastRoute = ApiPublicRoastRouteImport.update({
   id: '/api/public/roast',
   path: '/api/public/roast',
@@ -190,6 +196,7 @@ export interface FileRoutesByFullPath {
   '/api/public/capi': typeof ApiPublicCapiRoute
   '/api/public/geo': typeof ApiPublicGeoRoute
   '/api/public/gsc-sync': typeof ApiPublicGscSyncRoute
+  '/api/public/pixel-log': typeof ApiPublicPixelLogRoute
   '/api/public/roast': typeof ApiPublicRoastRoute
   '/api/public/track': typeof ApiPublicTrackRoute
   '/api/public/weekly-report': typeof ApiPublicWeeklyReportRoute
@@ -218,6 +225,7 @@ export interface FileRoutesByTo {
   '/api/public/capi': typeof ApiPublicCapiRoute
   '/api/public/geo': typeof ApiPublicGeoRoute
   '/api/public/gsc-sync': typeof ApiPublicGscSyncRoute
+  '/api/public/pixel-log': typeof ApiPublicPixelLogRoute
   '/api/public/roast': typeof ApiPublicRoastRoute
   '/api/public/track': typeof ApiPublicTrackRoute
   '/api/public/weekly-report': typeof ApiPublicWeeklyReportRoute
@@ -247,6 +255,7 @@ export interface FileRoutesById {
   '/api/public/capi': typeof ApiPublicCapiRoute
   '/api/public/geo': typeof ApiPublicGeoRoute
   '/api/public/gsc-sync': typeof ApiPublicGscSyncRoute
+  '/api/public/pixel-log': typeof ApiPublicPixelLogRoute
   '/api/public/roast': typeof ApiPublicRoastRoute
   '/api/public/track': typeof ApiPublicTrackRoute
   '/api/public/weekly-report': typeof ApiPublicWeeklyReportRoute
@@ -277,6 +286,7 @@ export interface FileRouteTypes {
     | '/api/public/capi'
     | '/api/public/geo'
     | '/api/public/gsc-sync'
+    | '/api/public/pixel-log'
     | '/api/public/roast'
     | '/api/public/track'
     | '/api/public/weekly-report'
@@ -305,6 +315,7 @@ export interface FileRouteTypes {
     | '/api/public/capi'
     | '/api/public/geo'
     | '/api/public/gsc-sync'
+    | '/api/public/pixel-log'
     | '/api/public/roast'
     | '/api/public/track'
     | '/api/public/weekly-report'
@@ -333,6 +344,7 @@ export interface FileRouteTypes {
     | '/api/public/capi'
     | '/api/public/geo'
     | '/api/public/gsc-sync'
+    | '/api/public/pixel-log'
     | '/api/public/roast'
     | '/api/public/track'
     | '/api/public/weekly-report'
@@ -362,6 +374,7 @@ export interface RootRouteChildren {
   ApiPublicCapiRoute: typeof ApiPublicCapiRoute
   ApiPublicGeoRoute: typeof ApiPublicGeoRoute
   ApiPublicGscSyncRoute: typeof ApiPublicGscSyncRoute
+  ApiPublicPixelLogRoute: typeof ApiPublicPixelLogRoute
   ApiPublicRoastRoute: typeof ApiPublicRoastRoute
   ApiPublicTrackRoute: typeof ApiPublicTrackRoute
   ApiPublicWeeklyReportRoute: typeof ApiPublicWeeklyReportRoute
@@ -524,6 +537,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicGscSyncRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/pixel-log': {
+      id: '/api/public/pixel-log'
+      path: '/api/public/pixel-log'
+      fullPath: '/api/public/pixel-log'
+      preLoaderRoute: typeof ApiPublicPixelLogRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/roast': {
       id: '/api/public/roast'
       path: '/api/public/roast'
@@ -578,6 +598,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicCapiRoute: ApiPublicCapiRoute,
   ApiPublicGeoRoute: ApiPublicGeoRoute,
   ApiPublicGscSyncRoute: ApiPublicGscSyncRoute,
+  ApiPublicPixelLogRoute: ApiPublicPixelLogRoute,
   ApiPublicRoastRoute: ApiPublicRoastRoute,
   ApiPublicTrackRoute: ApiPublicTrackRoute,
   ApiPublicWeeklyReportRoute: ApiPublicWeeklyReportRoute,

@@ -36,6 +36,7 @@ import { ReportsTab } from "@/components/admin/ReportsTab";
 import { SearchConsoleTab } from "@/components/admin/SearchConsoleTab";
 import { AudienceTab } from "@/components/admin/AudienceTab";
 import { TrackingTab } from "@/components/admin/TrackingTab";
+import { TrackingMonitorTab } from "@/components/admin/TrackingMonitorTab";
 
 export const Route = createFileRoute("/admin/")({
   head: () => ({
@@ -65,6 +66,7 @@ const TABS = [
   "Audience",
   "Reports",
   "Tracking",
+  "Monitor",
   "A/B tests",
   "Search",
   "Ads",
@@ -263,6 +265,7 @@ function AdminPanel() {
         {tab === "Audience" ? <AudienceTab token={token} /> : null}
         {tab === "Reports" ? <ReportsTab token={token} /> : null}
         {tab === "Tracking" ? <TrackingTab token={token} /> : null}
+        {tab === "Monitor" ? <TrackingMonitorTab token={token} /> : null}
         {tab === "A/B tests" ? <AbTestsTab token={token} /> : null}
         {tab === "Search" ? <SearchConsoleTab token={token} /> : null}
         {tab === "Ads" || tab === "Site" ? <SettingsTab token={token} which={tab} /> : null}
