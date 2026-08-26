@@ -33,7 +33,8 @@ export type AdEvent = {
     | "web_vital"
     | "consent"
     | "funnel"
-    | "experiment";
+    | "experiment"
+    | "heartbeat";
   slot: string;
   tool_slug?: string | null;
   revenue_cents?: number;

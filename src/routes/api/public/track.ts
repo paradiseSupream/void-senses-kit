@@ -16,6 +16,7 @@ const EVENT_TYPES = new Set([
   "consent",
   "funnel",
   "experiment",
+  "heartbeat",
 ]);
 
 
