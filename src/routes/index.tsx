@@ -385,7 +385,7 @@ function Home() {
 
       {/* ---------------- Bento 2: the payoff ---------------- */}
       <section className="border-b border-hairline bg-surface/15">
-        <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16">
+        <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-16">
           <Reveal>
             <span className="label-mono">The payoff</span>
             <h2 className="text-section mt-2">
@@ -393,26 +393,31 @@ function Home() {
             </h2>
           </Reveal>
 
-          <BentoGrid className="mt-6 sm:mt-8">
-            <BentoTile span="lg:col-span-4">
+          <BentoGrid className="mt-5 sm:mt-8">
+            <BentoTile span="col-span-2 lg:col-span-4">
               <Reveal className="h-full">
                 <SampleResult />
               </Reveal>
             </BentoTile>
             {PAYOFF.map(({ icon: Icon, title, body }, i) => (
-              <BentoTile key={title} span="lg:col-span-2">
+              <BentoTile key={title} span="col-span-1 lg:col-span-2">
                 <Reveal delay={80 + i * 70} className="h-full">
-                  <div className="bento flex h-full flex-col p-6">
-                    <span className="accent-tile size-11">
+                  <div className="bento flex h-full flex-col p-4 sm:p-6">
+                    <span className="accent-tile size-10 sm:size-11">
                       <Icon className="size-5" aria-hidden="true" />
                     </span>
-                    <h3 className="mt-5 font-display text-2xl">{title}</h3>
-                    <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{body}</p>
+                    <h3 className="mt-3.5 font-display text-lg leading-tight text-balance sm:mt-5 sm:text-2xl">
+                      {title}
+                    </h3>
+                    <p className="mt-1.5 text-[0.8rem] leading-snug text-muted-foreground sm:mt-2 sm:text-sm sm:leading-relaxed">
+                      {body}
+                    </p>
                   </div>
                 </Reveal>
               </BentoTile>
             ))}
           </BentoGrid>
+
         </div>
       </section>
 
