@@ -63,9 +63,68 @@ export type PublicAdsConfig = Pick<
   | "privacy"
 >;
 
+/**
+ * Advertising / analytics tracking configuration, editable from the admin
+ * panel. Pixel ids are public by design; the CAPI tokens are secrets and are
+ * never returned to the browser.
+ */
+export type TrackingSettings = {
+  enabled: boolean;
+  meta_pixel_id: string;
+  meta_capi_token: string;
+  meta_test_event_code: string;
+  tiktok_pixel_id: string;
+  tiktok_events_token: string;
+  google_ads_id: string;
+  google_ads_conversion_label: string;
+  ga4_id: string;
+  /** Send conversions server-side (Conversions API / Events API). */
+  server_side: boolean;
+  /** Fire pixels only after the visitor accepts advertising consent. */
+  require_consent: boolean;
+};
+
+export type PublicTrackingConfig = Pick<
+  TrackingSettings,
+  | "enabled"
+  | "meta_pixel_id"
+  | "tiktok_pixel_id"
+  | "google_ads_id"
+  | "google_ads_conversion_label"
+  | "ga4_id"
+  | "server_side"
+  | "require_consent"
+>;
+
+export const DEFAULT_TRACKING: TrackingSettings = {
+  enabled: true,
+  meta_pixel_id: "",
+  meta_capi_token: "",
+  meta_test_event_code: "",
+  tiktok_pixel_id: "",
+  tiktok_events_token: "",
+  google_ads_id: "",
+  google_ads_conversion_label: "",
+  ga4_id: "",
+  server_side: true,
+  require_consent: true,
+};
+
+export const DEFAULT_PUBLIC_TRACKING: PublicTrackingConfig = {
+  enabled: true,
+  meta_pixel_id: "",
+  tiktok_pixel_id: "",
+  google_ads_id: "",
+  google_ads_conversion_label: "",
+  ga4_id: "",
+  server_side: true,
+  require_consent: true,
+};
+
 export type PublicConfig = {
   ads: PublicAdsConfig;
   site: Pick<SiteSettings, "announcement" | "vip_price_cents" | "vip_sol_address">;
+  tracking: PublicTrackingConfig;
 };
 
 /** Live Monetag zones for sensesofvoid.app. */
