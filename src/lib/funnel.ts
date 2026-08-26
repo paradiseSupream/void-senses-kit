@@ -9,6 +9,14 @@
 
 import { track } from "@/lib/monetization";
 import { gaEvent } from "@/lib/ga4";
+import { pixelTrack, type PixelEvent } from "@/lib/pixels";
+
+/** Which funnel steps are worth reporting to the ad networks as conversions. */
+const PIXEL_STEPS: Partial<Record<string, PixelEvent>> = {
+  test_start: "ViewContent",
+  result_view: "Lead",
+  vip_gate_shown: "AddToCart",
+};
 
 export const FUNNEL_STEPS = [
   "visit",
