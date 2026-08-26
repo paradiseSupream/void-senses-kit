@@ -259,7 +259,7 @@ function Home() {
           aria-hidden="true"
           className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent"
         />
-        <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-20">
+        <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-20">
           <div className="mx-auto max-w-4xl text-center">
             <span
               className="reveal label-mono inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/8 px-3.5 py-1.5 text-primary backdrop-blur-xl"
@@ -272,47 +272,53 @@ function Home() {
               {copy.badge}
             </span>
 
-            <h1 className="reveal text-display mt-6 sm:mt-8" style={{ animationDelay: "60ms" }}>
+            <h1 className="reveal text-display mt-4 sm:mt-8" style={{ animationDelay: "60ms" }}>
               {copy.title}
               <span className="sheen-word serif-accent mt-1 block">{copy.accent}</span>
             </h1>
 
             <p
-              className="reveal mx-auto mt-5 max-w-xl text-[0.97rem] leading-relaxed text-pretty text-muted-foreground sm:text-lg"
+              className="reveal mx-auto mt-3.5 line-clamp-3 max-w-xl text-[0.92rem] leading-relaxed text-pretty text-muted-foreground sm:mt-5 sm:line-clamp-none sm:text-lg"
               style={{ animationDelay: "120ms" }}
             >
               {copy.sub}
             </p>
 
             <div
-              className="reveal mt-7 flex flex-col justify-center gap-3 sm:flex-row sm:flex-wrap"
+              className="reveal mt-5 flex flex-col justify-center gap-2.5 sm:mt-7 sm:flex-row sm:flex-wrap sm:gap-3"
               style={{ animationDelay: "180ms" }}
             >
               <a
                 href={primaryPath}
                 onClick={() => trackExperiment("hero_cta", heroArm)}
-                className="btn-glow inline-flex min-h-13 items-center justify-center gap-2 rounded-full px-7 text-base font-semibold"
+                className="btn-glow inline-flex min-h-13 w-full items-center justify-center gap-2 rounded-full px-7 text-base font-semibold sm:w-auto"
               >
                 {copy.cta} <ArrowRight className="size-4" aria-hidden="true" />
               </a>
               <a
                 href="#suite"
                 onClick={() => trackExperiment("hero_secondary", heroArm)}
-                className="btn-ghost inline-flex min-h-13 items-center justify-center gap-2 rounded-full px-7 text-base font-semibold"
+                className="btn-ghost inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-full px-7 text-sm font-semibold sm:min-h-13 sm:w-auto sm:text-base"
               >
                 {focusTool ? "See all 7 tests" : copy.second}
               </a>
             </div>
 
             <p
-              className="reveal label-mono mt-6 flex flex-wrap items-center justify-center gap-x-5 gap-y-1.5"
+              className="reveal label-mono mt-4 flex items-center justify-center gap-x-2 gap-y-1.5 sm:mt-6 sm:gap-x-5"
               style={{ animationDelay: "220ms" }}
             >
               <span className="inline-flex items-center gap-1.5">
-                <BadgeCheck className="size-3.5 text-primary" aria-hidden="true" /> free forever
+                <BadgeCheck className="size-3.5 text-primary" aria-hidden="true" /> free
+              </span>
+              <span aria-hidden="true" className="text-muted-foreground/40">
+                ·
               </span>
               <span className="inline-flex items-center gap-1.5">
-                <Timer className="size-3.5 text-primary" aria-hidden="true" /> result in 3 min
+                <Timer className="size-3.5 text-primary" aria-hidden="true" /> 3 min
+              </span>
+              <span aria-hidden="true" className="text-muted-foreground/40">
+                ·
               </span>
               <span className="inline-flex items-center gap-1.5">
                 <ShieldCheck className="size-3.5 text-primary" aria-hidden="true" /> no account
@@ -321,22 +327,22 @@ function Home() {
           </div>
 
           {/* ---------------- Bento 1: live entry · signature · reasons ---------------- */}
-          <BentoGrid className="mt-9 sm:mt-14">
-            <BentoTile span="lg:col-span-2 lg:row-span-2">
+          <BentoGrid className="mt-6 sm:mt-14">
+            <BentoTile span="col-span-2 lg:col-span-2 lg:row-span-2">
               <Reveal className="h-full">
                 <LiveEntry arm={heroArm} />
               </Reveal>
             </BentoTile>
 
-            <BentoTile span="lg:col-span-4">
+            <BentoTile span="col-span-2 lg:col-span-4">
               <Reveal delay={80} className="h-full">
                 <SignatureCard />
               </Reveal>
             </BentoTile>
 
-            <BentoTile span="lg:col-span-4">
+            <BentoTile span="col-span-2 lg:col-span-4">
               <Reveal delay={140}>
-                <ul className="bento edge-hairline grid gap-3 p-5 sm:grid-cols-3 sm:p-6">
+                <ul className="bento edge-hairline grid gap-2.5 p-4 sm:grid-cols-3 sm:gap-3 sm:p-6">
                   {reasons.map((reason) => (
                     <li key={reason} className="flex items-start gap-2.5 text-sm text-muted-foreground">
                       <BadgeCheck className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden="true" />
@@ -347,6 +353,7 @@ function Home() {
               </Reveal>
             </BentoTile>
           </BentoGrid>
+
 
           {/* Quick picks keep the top-converting tools one tap away. */}
           <ul className="mt-4 flex flex-wrap justify-center gap-2 sm:mt-5">
