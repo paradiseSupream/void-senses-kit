@@ -250,9 +250,12 @@ export function ResultActions({
     <ShareRow
       className="mt-4 justify-center"
       toolSlug={toolSlug}
-      url={challengeLink()}
+      campaign={toolSlug}
+      content="result_share_row"
+      url={challengeLink("share_row", "result_share_row")}
       text={`I scored ${payload.headline} on ${payload.toolName ?? payload.title}. Beat me:`}
     />
+
     </>
   );
 }
