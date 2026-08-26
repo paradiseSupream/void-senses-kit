@@ -28,6 +28,7 @@ import { Route as ToolsPromptMakerRouteImport } from './routes/tools.prompt-make
 import { Route as ToolsRoastRouteImport } from './routes/tools.roast'
 import { Route as VipCheckoutRouteImport } from './routes/vip.checkout'
 import { Route as VipSuccessRouteImport } from './routes/vip.success'
+import { Route as ApiPublicCapiRouteImport } from './routes/api/public/capi'
 import { Route as ApiPublicGeoRouteImport } from './routes/api/public/geo'
 import { Route as ApiPublicGscSyncRouteImport } from './routes/api/public/gsc-sync'
 import { Route as ApiPublicRoastRouteImport } from './routes/api/public/roast'
@@ -130,6 +131,11 @@ const VipSuccessRoute = VipSuccessRouteImport.update({
   path: '/vip/success',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicCapiRoute = ApiPublicCapiRouteImport.update({
+  id: '/api/public/capi',
+  path: '/api/public/capi',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicGeoRoute = ApiPublicGeoRouteImport.update({
   id: '/api/public/geo',
   path: '/api/public/geo',
@@ -181,6 +187,7 @@ export interface FileRoutesByFullPath {
   '/vip/success': typeof VipSuccessRoute
   '/admin/': typeof AdminIndexRoute
   '/tools/': typeof ToolsIndexRoute
+  '/api/public/capi': typeof ApiPublicCapiRoute
   '/api/public/geo': typeof ApiPublicGeoRoute
   '/api/public/gsc-sync': typeof ApiPublicGscSyncRoute
   '/api/public/roast': typeof ApiPublicRoastRoute
@@ -208,6 +215,7 @@ export interface FileRoutesByTo {
   '/vip/success': typeof VipSuccessRoute
   '/admin': typeof AdminIndexRoute
   '/tools': typeof ToolsIndexRoute
+  '/api/public/capi': typeof ApiPublicCapiRoute
   '/api/public/geo': typeof ApiPublicGeoRoute
   '/api/public/gsc-sync': typeof ApiPublicGscSyncRoute
   '/api/public/roast': typeof ApiPublicRoastRoute
@@ -236,6 +244,7 @@ export interface FileRoutesById {
   '/vip/success': typeof VipSuccessRoute
   '/admin/': typeof AdminIndexRoute
   '/tools/': typeof ToolsIndexRoute
+  '/api/public/capi': typeof ApiPublicCapiRoute
   '/api/public/geo': typeof ApiPublicGeoRoute
   '/api/public/gsc-sync': typeof ApiPublicGscSyncRoute
   '/api/public/roast': typeof ApiPublicRoastRoute
@@ -265,6 +274,7 @@ export interface FileRouteTypes {
     | '/vip/success'
     | '/admin/'
     | '/tools/'
+    | '/api/public/capi'
     | '/api/public/geo'
     | '/api/public/gsc-sync'
     | '/api/public/roast'
@@ -292,6 +302,7 @@ export interface FileRouteTypes {
     | '/vip/success'
     | '/admin'
     | '/tools'
+    | '/api/public/capi'
     | '/api/public/geo'
     | '/api/public/gsc-sync'
     | '/api/public/roast'
@@ -319,6 +330,7 @@ export interface FileRouteTypes {
     | '/vip/success'
     | '/admin/'
     | '/tools/'
+    | '/api/public/capi'
     | '/api/public/geo'
     | '/api/public/gsc-sync'
     | '/api/public/roast'
@@ -347,6 +359,7 @@ export interface RootRouteChildren {
   VipSuccessRoute: typeof VipSuccessRoute
   AdminIndexRoute: typeof AdminIndexRoute
   ToolsIndexRoute: typeof ToolsIndexRoute
+  ApiPublicCapiRoute: typeof ApiPublicCapiRoute
   ApiPublicGeoRoute: typeof ApiPublicGeoRoute
   ApiPublicGscSyncRoute: typeof ApiPublicGscSyncRoute
   ApiPublicRoastRoute: typeof ApiPublicRoastRoute
@@ -490,6 +503,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof VipSuccessRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/capi': {
+      id: '/api/public/capi'
+      path: '/api/public/capi'
+      fullPath: '/api/public/capi'
+      preLoaderRoute: typeof ApiPublicCapiRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/geo': {
       id: '/api/public/geo'
       path: '/api/public/geo'
@@ -555,6 +575,7 @@ const rootRouteChildren: RootRouteChildren = {
   VipSuccessRoute: VipSuccessRoute,
   AdminIndexRoute: AdminIndexRoute,
   ToolsIndexRoute: ToolsIndexRoute,
+  ApiPublicCapiRoute: ApiPublicCapiRoute,
   ApiPublicGeoRoute: ApiPublicGeoRoute,
   ApiPublicGscSyncRoute: ApiPublicGscSyncRoute,
   ApiPublicRoastRoute: ApiPublicRoastRoute,

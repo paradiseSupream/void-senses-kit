@@ -8,6 +8,7 @@ import { vipOrderStatus } from "@/lib/vip.functions";
 import { useVip } from "@/lib/vip";
 import { rememberLicense, rememberOrder } from "@/lib/vip-unlock";
 import { trackFunnel } from "@/lib/funnel";
+import { pixelTrack } from "@/lib/pixels";
 
 type Search = { order?: string; status?: string };
 
@@ -64,6 +65,12 @@ function VipSuccessPage() {
           setVip(true, result.plan ?? "lifetime");
           setState("done");
           trackFunnel("vip_purchase");
+          pixelTrack("Purchase", {
+            value: result.plan === "monthly" ? 2.99 : 19,
+            currency: "USD",
+            contentName: `vip_${result.plan ?? "lifetime"}`,
+            ...(result.email ? { email: result.email } : {}),
+          });
           toast.success("VIP is active — ads and export gates are off.");
           return;
         }
