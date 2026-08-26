@@ -10,9 +10,10 @@ import { ResultActions } from "@/components/tools/ResultActions";
 import { TraitBars } from "@/components/tools/TraitBars";
 import { LockedReport } from "@/components/monetization/LockedReport";
 import { IQ_BANK, IQ_PER_CATEGORY, IQ_SESSION_SIZE } from "@/lib/banks/iq";
+import { iqEstimate } from "@/lib/psychometrics";
+import { QualityBadge } from "@/components/tools/QualityBadge";
 import {
   newSeed,
-  percentileOf,
   pickIqItems,
   rngFrom,
   shuffleOptions,
@@ -86,6 +87,11 @@ function IqTest() {
   const [hits, setHits] = useState<Record<string, boolean>>({});
   const [left, setLeft] = useState(LIMIT);
   const lockRef = useRef(false);
+  // Per-item solve time + which items actually got an answer (vs timed out) —
+  // both feed the difficulty-weighted estimate and its confidence grade.
+  const [timings, setTimings] = useState<Record<string, number>>({});
+  const [answeredIds, setAnsweredIds] = useState<string[]>([]);
+  const shownAtRef = useRef(Date.now());
 
   const items: Prepared[] = useMemo(() => {
     const rand = rngFrom(seed);
@@ -99,7 +105,10 @@ function IqTest() {
     setSeed(newSeed());
     setIndex(0);
     setHits({});
+    setTimings({});
+    setAnsweredIds([]);
     setLeft(LIMIT);
+    shownAtRef.current = Date.now();
     setPhase("quiz");
   }, []);
 
@@ -111,12 +120,16 @@ function IqTest() {
       const item = items[index]!;
       const correct = choice !== null && choice === item.correctIndex;
       setHits((h) => ({ ...h, [item.id]: correct }));
+      const elapsed = Math.min(Date.now() - shownAtRef.current, LIMIT * 1000);
+      setTimings((t) => ({ ...t, [item.id]: elapsed }));
+      if (choice !== null) setAnsweredIds((ids) => (ids.includes(item.id) ? ids : [...ids, item.id]));
       window.setTimeout(() => {
         lockRef.current = false;
         if (index === items.length - 1) setPhase("result");
         else {
           setIndex((i) => i + 1);
           setLeft(LIMIT);
+          shownAtRef.current = Date.now();
         }
       }, 140);
     },
@@ -140,10 +153,7 @@ function IqTest() {
   }, [phase, index, advance]);
 
   const result = useMemo(() => {
-    const correct = items.filter((i) => hits[i.id]).length;
-    const ratio = correct / items.length;
-    const estimate = Math.round(78 + ratio * 62);
-    const percentile = percentileOf(ratio);
+    const est = iqEstimate(items, hits, { timingsMs: timings, answeredIds });
     const byCat = new Map<string, { hit: number; total: number }>();
     for (const item of items) {
       const entry = byCat.get(item.cat) ?? { hit: 0, total: 0 };
@@ -156,8 +166,21 @@ function IqTest() {
       value: Math.round((v.hit / v.total) * 100),
     }));
     const strongest = [...breakdown].sort((a, b) => b.value - a.value)[0]?.dim ?? "Logic";
-    return { correct, estimate, percentile, breakdown, strongest };
-  }, [hits, items]);
+    return {
+      correct: est.correct,
+      estimate: est.iq,
+      percentile: est.percentile,
+      low: est.low,
+      high: est.high,
+      sem: est.sem,
+      weighted: est.weighted,
+      tiers: est.tiers,
+      quality: est.quality,
+      answered: est.answered,
+      breakdown,
+      strongest,
+    };
+  }, [hits, items, timings, answeredIds]);
 
   if (phase === "intro") {
     return (
@@ -212,11 +235,32 @@ function IqTest() {
           <span className="label-mono">Verified performance estimate</span>
           <p className="mt-4 font-display text-6xl font-bold text-primary">{result.estimate}</p>
           <p className="mt-2 text-sm text-muted-foreground">
-            {result.correct} of {items.length} correct · approx. {result.percentile}th percentile
+            95% band {result.low}–{result.high} (±{result.sem}) · approx. {result.percentile}th
+            percentile
+          </p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {result.correct} of {items.length} correct · difficulty-weighted accuracy{" "}
+            {result.weighted}%
+          </p>
+          <p className="mt-2 font-mono text-[0.7rem] tracking-wide text-muted-foreground uppercase">
+            {result.tiers
+              .filter((t) => t.value !== null)
+              .map((t) => `T${t.tier} ${t.value}%`)
+              .join(" · ")}
           </p>
           <p className="mt-1 font-mono text-xs text-muted-foreground">
             {name.trim() || "Anonymous Participant"} · strongest area: {result.strongest}
           </p>
+
+          <QualityBadge
+            className="mt-6 text-left"
+            score={result.quality.score}
+            label={result.quality.label}
+            flags={result.quality.flags}
+            notes={result.quality.notes}
+            answered={result.answered}
+            total={items.length}
+          />
 
           <div className="mt-8">
             <LockedReport
