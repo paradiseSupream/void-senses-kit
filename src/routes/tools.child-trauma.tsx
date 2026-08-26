@@ -252,6 +252,10 @@ function ChildTrauma() {
               fileName: "senses-of-void-childhood-map.png",
               toolName: "Child Trauma Test",
               toolPath: "/tools/child-trauma",
+              accentSeed: result.archetype.name,
+              badge: `${result.overall}/100`,
+              subject: result.archetype.name,
+              metrics: result.scores.slice(0, 4).map((s) => ({ label: s.dim, value: s.value })),
               text: `I got ${result.archetype.name} (${result.overall}/100) on the Senses of Void childhood map.`,
             }}
           />

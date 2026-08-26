@@ -244,6 +244,10 @@ function LoveMatch() {
               fileName: "senses-of-void-vibe-match.png",
               toolName: "Love & Vibe Matcher",
               toolPath: "/tools/love-match",
+              accentSeed: result.verdict.title,
+              badge: result.verdict.title,
+              subject: pair,
+              metrics: result.scores.slice(0, 4).map((s) => ({ label: s.dim, value: s.value })),
               text: `${pair} scored ${result.score}% — ${result.verdict.title} on Senses of Void.`,
             }}
           />

@@ -346,6 +346,14 @@ function IqTest() {
               fileName: "senses-of-void-cognitive-certificate.png",
               toolName: "Quick IQ Test",
               toolPath: "/tools/iq",
+              accentSeed: `iq-${result.estimate}`,
+              badge: `${result.percentile}th pct`,
+              subject: name.trim() || undefined,
+              metrics: [
+                { label: "Score", value: Math.max(0, Math.min(100, (result.estimate - 60) / 0.9)) },
+                { label: "Percentile", value: result.percentile },
+                { label: "Solved", value: Math.round((result.correct / Math.max(1, items.length)) * 100) },
+              ],
               text: `I scored ${result.estimate} (${result.percentile}th percentile) on the Senses of Void IQ test.`,
             }}
           />
