@@ -1,3 +1,5 @@
+export type CardMetric = { label: string; value: number };
+
 type CardOptions = {
   width?: number;
   height?: number;
@@ -6,6 +8,14 @@ type CardOptions = {
   headline: string;
   lines: string[];
   footer?: string;
+  /** Per-result accent colour — personalises archetype / vibe cards. */
+  accent?: string;
+  /** Small pill in the top-right: rarity, band or verdict. */
+  badge?: string;
+  /** Name / pair label rendered beside the eyebrow. */
+  subject?: string;
+  /** Up to 4 axis bars (0–100) rendered above the footer. */
+  metrics?: CardMetric[];
 };
 
 const OBSIDIAN = "#09090b";
@@ -13,6 +23,63 @@ const SLATE = "#18181b";
 const LINE = "#27272a";
 const EMERALD = "#10b981";
 const VIOLET = "#7c3aed";
+
+/**
+ * Deterministic accent colour for a result seed (archetype name, verdict,
+ * score band) so every share card looks specific to that person's outcome.
+ */
+export function accentFor(seed: string): string {
+  let hash = 0;
+  for (let i = 0; i < seed.length; i += 1) hash = (hash * 31 + seed.charCodeAt(i)) % 360;
+  return `hsl(${hash} 78% 58%)`;
+}
+
+function drawBadge(ctx: CanvasRenderingContext2D, text: string, right: number, top: number, accent: string) {
+  ctx.font = "600 16px 'JetBrains Mono', monospace";
+  const width = ctx.measureText(text.toUpperCase()).width + 28;
+  const x = right - width;
+  ctx.fillStyle = accent;
+  ctx.globalAlpha = 0.16;
+  roundRect(ctx, x, top, width, 34, 17);
+  ctx.fill();
+  ctx.globalAlpha = 1;
+  ctx.strokeStyle = accent;
+  ctx.lineWidth = 1.2;
+  roundRect(ctx, x, top, width, 34, 17);
+  ctx.stroke();
+  ctx.fillStyle = accent;
+  ctx.fillText(text.toUpperCase(), x + 14, top + 23);
+}
+
+function drawMetrics(
+  ctx: CanvasRenderingContext2D,
+  metrics: CardMetric[],
+  x: number,
+  y: number,
+  width: number,
+  accent: string,
+) {
+  const items = metrics.slice(0, 4);
+  const gap = 14;
+  const colWidth = (width - gap * (items.length - 1)) / Math.max(1, items.length);
+  items.forEach((metric, index) => {
+    const cx = x + index * (colWidth + gap);
+    ctx.fillStyle = "#a1a1aa";
+    ctx.font = "500 13px 'JetBrains Mono', monospace";
+    ctx.fillText(metric.label.toUpperCase().slice(0, 14), cx, y);
+    ctx.fillStyle = "#27272a";
+    roundRect(ctx, cx, y + 10, colWidth, 8, 4);
+    ctx.fill();
+    ctx.fillStyle = accent;
+    const pct = Math.max(0, Math.min(100, metric.value)) / 100;
+    roundRect(ctx, cx, y + 10, Math.max(8, colWidth * pct), 8, 4);
+    ctx.fill();
+    ctx.fillStyle = "#fafafa";
+    ctx.font = "600 15px 'Space Grotesk', sans-serif";
+    ctx.fillText(String(Math.round(metric.value)), cx, y + 40);
+  });
+}
+
 
 /** Draws a branded 2x-resolution share card and returns the canvas. */
 export function drawBrandedCard(options: CardOptions): HTMLCanvasElement {
