@@ -543,12 +543,21 @@ type EventRow = {
  * they bought VIP.
  */
 export const adminAudience = createServerFn({ method: "POST" })
-  .inputValidator((input: { token: string; days?: number; country?: string; onlyVip?: boolean }) => ({
-    token: String(input?.token ?? ""),
-    days: Math.max(1, Math.min(90, Number(input?.days ?? 7))),
-    country: String(input?.country ?? "").trim().toUpperCase().slice(0, 2) || undefined,
-    onlyVip: Boolean(input?.onlyVip),
-  }))
+  .inputValidator(
+    (input: {
+      token: string;
+      days?: number;
+      country?: string;
+      onlyVip?: boolean;
+      full?: boolean;
+    }) => ({
+      token: String(input?.token ?? ""),
+      days: Math.max(1, Math.min(90, Number(input?.days ?? 7))),
+      country: String(input?.country ?? "").trim().toUpperCase().slice(0, 2) || undefined,
+      onlyVip: Boolean(input?.onlyVip),
+      full: input?.full === true,
+    }),
+  )
   .handler(async ({ data }): Promise<AudienceReport> => {
     const { requireAdmin, admin } = await import("@/lib/admin-core.server");
     await requireAdmin(data.token);
