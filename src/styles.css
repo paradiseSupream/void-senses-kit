@@ -743,6 +743,63 @@
   }
 }
 
+/* Horizontal snap rail — chips and preview cards swipe on phones,
+   fall back to a normal wrapped flex row from `sm` up. */
+@utility snap-rail {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  padding-inline: 1rem;
+  margin-inline: -1rem;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  & > * {
+    flex: none;
+    scroll-snap-align: start;
+  }
+}
+
+/* Keeps the last section clear of the floating mobile tab bar. */
+@utility pb-tabbar {
+  padding-bottom: calc(7.5rem + env(safe-area-inset-bottom));
+}
+
+@media (min-width: 640px) {
+  .snap-rail {
+    margin-inline: 0;
+    overflow-x: visible;
+  }
+
+  .snap-rail > * {
+    flex: 0 0 auto;
+  }
+}
+
+/* Phones: tighter bento padding and a display scale that fits two lines. */
+@media (max-width: 640px) {
+  .text-display {
+    font-size: clamp(2.15rem, 9.4vw, 2.9rem);
+    line-height: 1.02;
+  }
+
+  .text-section {
+    font-size: clamp(1.6rem, 6.6vw, 2rem);
+  }
+
+  .bento {
+    border-radius: var(--radius-xl);
+    box-shadow:
+      0 18px 44px -34px oklch(0 0 0 / 0.9),
+      inset 0 1px 0 0 oklch(1 0 0 / 0.04);
+  }
+}
+
+
 /* Scroll-reveal target. `.is-in` is toggled by the Reveal component. */
 @utility reveal-seq {
   opacity: 0;

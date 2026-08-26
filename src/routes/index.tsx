@@ -259,7 +259,7 @@ function Home() {
           aria-hidden="true"
           className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent"
         />
-        <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-20">
+        <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-20">
           <div className="mx-auto max-w-4xl text-center">
             <span
               className="reveal label-mono inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/8 px-3.5 py-1.5 text-primary backdrop-blur-xl"
@@ -272,47 +272,53 @@ function Home() {
               {copy.badge}
             </span>
 
-            <h1 className="reveal text-display mt-6 sm:mt-8" style={{ animationDelay: "60ms" }}>
+            <h1 className="reveal text-display mt-4 sm:mt-8" style={{ animationDelay: "60ms" }}>
               {copy.title}
               <span className="sheen-word serif-accent mt-1 block">{copy.accent}</span>
             </h1>
 
             <p
-              className="reveal mx-auto mt-5 max-w-xl text-[0.97rem] leading-relaxed text-pretty text-muted-foreground sm:text-lg"
+              className="reveal mx-auto mt-3.5 line-clamp-3 max-w-xl text-[0.92rem] leading-relaxed text-pretty text-muted-foreground sm:mt-5 sm:line-clamp-none sm:text-lg"
               style={{ animationDelay: "120ms" }}
             >
               {copy.sub}
             </p>
 
             <div
-              className="reveal mt-7 flex flex-col justify-center gap-3 sm:flex-row sm:flex-wrap"
+              className="reveal mt-5 flex flex-col justify-center gap-2.5 sm:mt-7 sm:flex-row sm:flex-wrap sm:gap-3"
               style={{ animationDelay: "180ms" }}
             >
               <a
                 href={primaryPath}
                 onClick={() => trackExperiment("hero_cta", heroArm)}
-                className="btn-glow inline-flex min-h-13 items-center justify-center gap-2 rounded-full px-7 text-base font-semibold"
+                className="btn-glow inline-flex min-h-13 w-full items-center justify-center gap-2 rounded-full px-7 text-base font-semibold sm:w-auto"
               >
                 {copy.cta} <ArrowRight className="size-4" aria-hidden="true" />
               </a>
               <a
                 href="#suite"
                 onClick={() => trackExperiment("hero_secondary", heroArm)}
-                className="btn-ghost inline-flex min-h-13 items-center justify-center gap-2 rounded-full px-7 text-base font-semibold"
+                className="btn-ghost inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-full px-7 text-sm font-semibold sm:min-h-13 sm:w-auto sm:text-base"
               >
                 {focusTool ? "See all 7 tests" : copy.second}
               </a>
             </div>
 
             <p
-              className="reveal label-mono mt-6 flex flex-wrap items-center justify-center gap-x-5 gap-y-1.5"
+              className="reveal label-mono mt-4 flex items-center justify-center gap-x-2 gap-y-1.5 sm:mt-6 sm:gap-x-5"
               style={{ animationDelay: "220ms" }}
             >
               <span className="inline-flex items-center gap-1.5">
-                <BadgeCheck className="size-3.5 text-primary" aria-hidden="true" /> free forever
+                <BadgeCheck className="size-3.5 text-primary" aria-hidden="true" /> free
+              </span>
+              <span aria-hidden="true" className="text-muted-foreground/40">
+                ·
               </span>
               <span className="inline-flex items-center gap-1.5">
-                <Timer className="size-3.5 text-primary" aria-hidden="true" /> result in 3 min
+                <Timer className="size-3.5 text-primary" aria-hidden="true" /> 3 min
+              </span>
+              <span aria-hidden="true" className="text-muted-foreground/40">
+                ·
               </span>
               <span className="inline-flex items-center gap-1.5">
                 <ShieldCheck className="size-3.5 text-primary" aria-hidden="true" /> no account
@@ -321,22 +327,22 @@ function Home() {
           </div>
 
           {/* ---------------- Bento 1: live entry · signature · reasons ---------------- */}
-          <BentoGrid className="mt-9 sm:mt-14">
-            <BentoTile span="lg:col-span-2 lg:row-span-2">
+          <BentoGrid className="mt-6 sm:mt-14">
+            <BentoTile span="col-span-2 lg:col-span-2 lg:row-span-2">
               <Reveal className="h-full">
                 <LiveEntry arm={heroArm} />
               </Reveal>
             </BentoTile>
 
-            <BentoTile span="lg:col-span-4">
+            <BentoTile span="col-span-2 lg:col-span-4">
               <Reveal delay={80} className="h-full">
                 <SignatureCard />
               </Reveal>
             </BentoTile>
 
-            <BentoTile span="lg:col-span-4">
+            <BentoTile span="col-span-2 lg:col-span-4">
               <Reveal delay={140}>
-                <ul className="bento edge-hairline grid gap-3 p-5 sm:grid-cols-3 sm:p-6">
+                <ul className="bento edge-hairline grid gap-2.5 p-4 sm:grid-cols-3 sm:gap-3 sm:p-6">
                   {reasons.map((reason) => (
                     <li key={reason} className="flex items-start gap-2.5 text-sm text-muted-foreground">
                       <BadgeCheck className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden="true" />
@@ -348,18 +354,19 @@ function Home() {
             </BentoTile>
           </BentoGrid>
 
+
           {/* Quick picks keep the top-converting tools one tap away. */}
-          <ul className="mt-4 flex flex-wrap justify-center gap-2 sm:mt-5">
+          <ul className="snap-rail mt-4 sm:mt-5 sm:flex-wrap sm:justify-center sm:overflow-visible sm:px-0">
             {QUICK_PICKS.map((slug) => {
               const t = TOOLS.find((x) => x.slug === slug);
               if (!t) return null;
               const Icon = t.icon;
               return (
-                <li key={slug}>
+                <li key={slug} className="snap-start">
                   <a
                     href={`${t.path}?auto=1`}
                     style={{ ["--tool-accent" as string]: t.accent }}
-                    className="capsule inline-flex min-h-11 items-center gap-2 px-4 text-sm font-semibold hover:text-foreground"
+                    className="capsule inline-flex min-h-11 items-center gap-2 px-4 text-sm font-semibold whitespace-nowrap hover:text-foreground"
                   >
                     <Icon
                       className="size-4"
@@ -372,12 +379,13 @@ function Home() {
               );
             })}
           </ul>
+
         </div>
       </section>
 
       {/* ---------------- Bento 2: the payoff ---------------- */}
       <section className="border-b border-hairline bg-surface/15">
-        <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16">
+        <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-16">
           <Reveal>
             <span className="label-mono">The payoff</span>
             <h2 className="text-section mt-2">
@@ -385,31 +393,36 @@ function Home() {
             </h2>
           </Reveal>
 
-          <BentoGrid className="mt-6 sm:mt-8">
-            <BentoTile span="lg:col-span-4">
+          <BentoGrid className="mt-5 sm:mt-8">
+            <BentoTile span="col-span-2 lg:col-span-4">
               <Reveal className="h-full">
                 <SampleResult />
               </Reveal>
             </BentoTile>
             {PAYOFF.map(({ icon: Icon, title, body }, i) => (
-              <BentoTile key={title} span="lg:col-span-2">
+              <BentoTile key={title} span="col-span-1 lg:col-span-2">
                 <Reveal delay={80 + i * 70} className="h-full">
-                  <div className="bento flex h-full flex-col p-6">
-                    <span className="accent-tile size-11">
+                  <div className="bento flex h-full flex-col p-4 sm:p-6">
+                    <span className="accent-tile size-10 sm:size-11">
                       <Icon className="size-5" aria-hidden="true" />
                     </span>
-                    <h3 className="mt-5 font-display text-2xl">{title}</h3>
-                    <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{body}</p>
+                    <h3 className="mt-3.5 font-display text-lg leading-tight text-balance sm:mt-5 sm:text-2xl">
+                      {title}
+                    </h3>
+                    <p className="mt-1.5 text-[0.8rem] leading-snug text-muted-foreground sm:mt-2 sm:text-sm sm:leading-relaxed">
+                      {body}
+                    </p>
                   </div>
                 </Reveal>
               </BentoTile>
             ))}
           </BentoGrid>
+
         </div>
       </section>
 
       {/* ---------------- Rest of the suite ---------------- */}
-      <section id="suite" className="mx-auto max-w-7xl scroll-mt-20 px-4 py-12 sm:px-6 sm:py-16">
+      <section id="suite" className="mx-auto max-w-7xl scroll-mt-20 px-4 py-10 sm:px-6 sm:py-16">
         <Reveal>
           <span className="label-mono">The rest of the suite</span>
           <h2 className="text-section mt-2">
@@ -417,7 +430,7 @@ function Home() {
           </h2>
         </Reveal>
 
-        <div className="mt-6 flex flex-wrap gap-2">
+        <div className="snap-rail mt-5 sm:mt-6 sm:flex-wrap sm:overflow-visible sm:px-0">
           {GOALS.map(({ id, label, icon: Icon }) => {
             const active = goal === id;
             return (
@@ -426,7 +439,7 @@ function Home() {
                 type="button"
                 onClick={() => setGoal(id)}
                 aria-pressed={active}
-                className={`capsule inline-flex min-h-11 items-center gap-2 px-4 text-sm font-semibold ${
+                className={`capsule inline-flex min-h-11 shrink-0 snap-start items-center gap-2 px-4 text-sm font-semibold whitespace-nowrap ${
                   active ? "capsule-active" : "text-muted-foreground hover:text-foreground"
                 }`}
               >
@@ -455,10 +468,12 @@ function Home() {
           />
         </div>
 
-        <div className="mt-5 grid gap-3 sm:mt-8 sm:grid-cols-2 sm:gap-4">
+        <div className="mt-5 grid grid-cols-2 gap-3 sm:mt-8 sm:gap-4">
           {slots.map((slot, i) =>
             "ad" in slot ? (
-              <NativeAdCard key={`ad-${i}`} index={slot.ad} />
+              <div key={`ad-${i}`} className="col-span-2 grid">
+                <NativeAdCard index={slot.ad} />
+              </div>
             ) : (
               <ToolRow key={slot.item.slug} tool={slot.item} />
             ),
@@ -471,9 +486,10 @@ function Home() {
         </div>
       </section>
 
+
       {/* ---------------- Proof band + 3-test run ---------------- */}
       <section className="border-y border-hairline bg-surface/15">
-        <div className="mx-auto max-w-7xl space-y-4 px-4 py-12 sm:space-y-4 sm:px-6 sm:py-16">
+        <div className="mx-auto max-w-7xl space-y-3 px-4 py-10 sm:space-y-4 sm:px-6 sm:py-16">
           <Reveal>
             <ProofBand />
           </Reveal>
@@ -484,10 +500,10 @@ function Home() {
       </section>
 
       {/* ---------------- FAQ ---------------- */}
-      <section className="mx-auto max-w-3xl px-4 py-12 sm:px-6 sm:py-16">
+      <section className="mx-auto max-w-3xl px-4 py-10 sm:px-6 sm:py-16">
         <Reveal>
           <span className="label-mono">Questions people ask</span>
-          <h2 className="text-section mt-2 mb-6">
+          <h2 className="text-section mt-2 mb-5 sm:mb-6">
             Free to use, <span className="serif-accent">honestly explained</span>
           </h2>
         </Reveal>
@@ -497,8 +513,9 @@ function Home() {
       </section>
 
       {/* ---------------- Closing CTA ---------------- */}
-      <section className="mx-auto max-w-7xl px-4 pb-12 sm:px-6 sm:pb-20">
-        <div className="bento aurora grain relative overflow-hidden p-7 text-center sm:p-16">
+      <section className="pb-tabbar mx-auto max-w-7xl px-4 sm:px-6 sm:pb-20">
+        <div className="bento aurora grain relative overflow-hidden p-6 text-center sm:p-16">
+
           <h2 className="text-section text-balance">
             Everything here is free. <span className="serif-accent">Forever.</span>
           </h2>
