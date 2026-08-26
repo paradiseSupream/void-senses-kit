@@ -253,7 +253,37 @@ export function AudienceTab({ token }: { token: string }) {
         >
           <RefreshCw className="size-4" aria-hidden="true" /> Refresh
         </button>
+
+        <div className="ml-auto flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            disabled={!report}
+            onClick={exportSummary}
+            className="inline-flex items-center gap-1.5 rounded-lg border border-hairline bg-surface-2 px-3 py-2 text-sm disabled:opacity-50"
+          >
+            <Download className="size-4" aria-hidden="true" /> Summary CSV
+          </button>
+          <button
+            type="button"
+            disabled={exportSessions.isPending}
+            onClick={() => exportSessions.mutate()}
+            className="inline-flex items-center gap-1.5 rounded-lg border border-hairline bg-surface-2 px-3 py-2 text-sm disabled:opacity-50"
+          >
+            <Download className="size-4" aria-hidden="true" />
+            {exportSessions.isPending ? "Exporting…" : "Sessions CSV"}
+          </button>
+          <button
+            type="button"
+            disabled={exportEvents.isPending}
+            onClick={() => exportEvents.mutate()}
+            className="inline-flex items-center gap-1.5 rounded-lg border border-hairline bg-surface-2 px-3 py-2 text-sm disabled:opacity-50"
+          >
+            <Download className="size-4" aria-hidden="true" />
+            {exportEvents.isPending ? "Exporting…" : "Raw events CSV"}
+          </button>
+        </div>
       </div>
+
 
       {totals ? (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
