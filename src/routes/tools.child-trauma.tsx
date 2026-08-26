@@ -180,6 +180,17 @@ function ChildTrauma() {
           </h2>
           <p className="mt-2 text-sm text-muted-foreground">{result.archetype.punch}</p>
 
+          <QualityBadge
+            className="mt-6"
+            score={quality.score}
+            label={quality.label}
+            flags={quality.flags}
+            notes={quality.notes}
+            errorBand={quality.errorBand}
+            answered={quality.answered}
+            total={quality.total}
+          />
+
           <div className="mt-7 rounded-2xl border border-hairline bg-surface-2/30 p-4">
             <RadarChart data={result.scores} />
             <p className="mt-2 text-center font-mono text-xs text-muted-foreground">
