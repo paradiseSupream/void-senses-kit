@@ -188,7 +188,7 @@ export function claimImpression(slot: string): boolean {
  * push loads.
  */
 export function claimFormat(
-  format: "popunder" | "vignette" | "inpage_push",
+  format: "popunder" | "vignette" | "inpage_push" | "adsterra_social_bar",
   cap: { perHour: number; perSession: number },
 ): boolean {
   if (typeof window === "undefined") return false;

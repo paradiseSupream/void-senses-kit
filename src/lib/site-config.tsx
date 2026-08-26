@@ -127,7 +127,7 @@ const claimedThisPage = new Set<string>();
 const injected = new Set<string>();
 
 /** Claim a cap slot once per page load, and only if not already injected. */
-function shouldLoad(id: string, format: "popunder" | "vignette" | "inpage_push", cap: { perHour: number; perSession: number }) {
+function shouldLoad(id: string, format: "popunder" | "vignette" | "inpage_push" | "adsterra_social_bar", cap: { perHour: number; perSession: number }) {
   if (typeof document === "undefined") return false;
   if (claimedThisPage.has(format) || claimedThisPage.has(id)) return false;
   claimedThisPage.add(id);
@@ -251,6 +251,7 @@ function MonetagLoader() {
     // so it never competes with the first impression of the page.
     const cancelBar = planned.includes("adsterra_social_bar")
       ? whenEngaged(() => {
+          if (!shouldLoad("adsterra-social-bar", "adsterra_social_bar", { perHour: 1, perSession: 1 })) return;
           loadZone(
             "adsterra-social-bar",
             "adsterra_social_bar",
