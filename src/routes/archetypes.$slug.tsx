@@ -304,6 +304,48 @@ function ArchetypeDetail() {
           </div>
         </section>
 
+        <section className="mt-10">
+          <h2 className="text-xl font-semibold tracking-tight">Tests that map this profile</h2>
+          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+            {TOOLS.filter((tool) =>
+              ["dark-personality", "child-trauma", "love-match", "iq"].includes(tool.slug),
+            ).map((tool) => (
+              <Link
+                key={tool.slug}
+                to={tool.path}
+                onClick={() =>
+                  track({
+                    event_type: "click",
+                    slot: "arch_tool_link",
+                    zone: slug,
+                    format: tool.slug,
+                  })
+                }
+                className="flex items-start gap-3 rounded-2xl border border-hairline bg-surface-2/60 p-4 transition-colors hover:border-primary/40"
+              >
+                <tool.icon className="mt-0.5 size-5 text-primary" aria-hidden="true" />
+                <span>
+                  <span className="block text-sm font-semibold">{tool.name}</span>
+                  <span className="mt-1 block text-xs text-muted-foreground">{tool.tagline}</span>
+                  <span className="mt-1 block font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+                    {tool.duration}
+                  </span>
+                </span>
+              </Link>
+            ))}
+          </div>
+          <ShareRow
+            className="mt-5"
+            toolSlug="dark-personality"
+            campaign={slug}
+            content="archetype_page"
+            url={`${BASE}${page.path}`}
+            text={`${page.archetype.name} — ${page.archetype.tagline}`}
+          />
+        </section>
+
+
+
         <p className="mt-10 text-xs leading-relaxed text-muted-foreground">
           Senses of Void tests are psychometric-inspired tools for self-reflection and
           entertainment. They are not diagnostic instruments and do not replace assessment by a
