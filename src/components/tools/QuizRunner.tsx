@@ -22,7 +22,7 @@ export function QuizRunner({
   onReshuffle?: () => void;
   intro?: string;
   /** Answers already given elsewhere (e.g. question one on the home hero). */
-  initialAnswers?: Record<string, number>;
+  initialAnswers?: Record<string, number> | undefined;
 }) {
   const [index, setIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, number>>({});

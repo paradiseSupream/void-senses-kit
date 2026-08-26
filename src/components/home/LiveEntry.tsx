@@ -15,18 +15,20 @@ import { trackExperiment } from "@/lib/monetization";
  * This is composition only: the item texts come straight from the shipped bank
  * and the answer is handed to the untouched runner/scoring engine.
  */
-const OPENERS = [
+type Opener = { id: string; text: string };
+
+const OPENERS: Opener[] = [
   { id: "mc1", text: "I read the room for leverage before I speak." },
   { id: "sh1", text: "I know exactly which part of me is dangerous." },
   { id: "dt1", text: "I keep parts of myself deliberately unreadable." },
   { id: "cg1", text: "I win arguments by reframing the question." },
-] as const;
+];
 
 const SLUG = "dark-personality";
 
 export function LiveEntry({ arm }: { arm: string }) {
   const navigate = useNavigate();
-  const [opener, setOpener] = useState(OPENERS[0]!);
+  const [opener, setOpener] = useState<Opener>(OPENERS[0]!);
   const [picked, setPicked] = useState<number | null>(null);
 
   // Rotate the opener after hydration so repeat visitors get a fresh prompt
