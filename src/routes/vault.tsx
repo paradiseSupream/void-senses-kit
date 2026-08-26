@@ -76,7 +76,9 @@ function Vault() {
   const slots = useMemo(() => withNativeAds(filtered), [filtered]);
 
   const download = async (asset: VaultAsset) => {
-    await runGated({ toolSlug: "vault" });
+    // Vault downloads always pass the sponsor smartlink step for free users —
+    // it is the highest-RPM surface on the site. VIPs skip it inside runGated.
+    await runGated({ toolSlug: "vault", force: true });
     window.open(asset.drive_link, "_blank", "noopener,noreferrer");
   };
 

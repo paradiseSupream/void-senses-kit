@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { ChevronLeft, RefreshCw } from "lucide-react";
 
 import { QuizVipNudge } from "@/components/monetization/QuizVipNudge";
+import { MidQuizOffer } from "@/components/monetization/MidQuizOffer";
 import { AdSlot } from "@/components/monetization/AdSlot";
 import { markQuizInteraction, setQuizActive } from "@/lib/engagement";
 import { SCALE, type Likert } from "@/lib/quiz-engine";
@@ -174,6 +175,8 @@ export function QuizRunner({
       {index >= 6 ? <AdSlot id="quiz-inline" className="mt-4" /> : null}
 
       <QuizVipNudge step={index} total={items.length} />
+      {/* One-time mid-test downsell with countdown + rewarded "see ads" path. */}
+      <MidQuizOffer step={index} total={items.length} />
     </div>
   );
 }
