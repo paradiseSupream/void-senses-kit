@@ -1,11 +1,12 @@
 import { useEffect } from "react";
-import { Copy, Download, RotateCcw, Share2, Smartphone, Swords } from "lucide-react";
+import { Copy, Download, ImageDown, RotateCcw, Share2, Smartphone, Swords } from "lucide-react";
 import { toast } from "sonner";
 
 import { useActionGate } from "@/components/monetization/ActionGate";
-import { downloadCanvas, drawBrandedCard, drawStoryCard } from "@/lib/canvas-card";
+import { downloadCanvas, drawBrandedCard, drawStoryCard, shareCanvasImage } from "@/lib/canvas-card";
 import { compareUrl } from "@/lib/compare-link";
 import { ShareRow } from "@/components/tools/ShareRow";
+import { track } from "@/lib/monetization";
 
 export type SharePayload = {
   eyebrow: string;
@@ -80,6 +81,32 @@ export function ResultActions({
     toast.success("Vertical story card downloaded — 1080×1920, ready for TikTok.");
   };
 
+  /**
+   * Viral loop primitive: shares the rendered card *image* through the native
+   * sheet so the result is visible in the feed. Ungated on purpose — every
+   * share is free acquisition. Falls back to a download when the browser has
+   * no file-share support.
+   */
+  const shareImage = async () => {
+    const canvas = drawBrandedCard({
+      eyebrow: payload.eyebrow,
+      title: payload.title,
+      headline: payload.headline,
+      lines: payload.lines,
+      ...(payload.footer ? { footer: payload.footer } : {}),
+    });
+    const text = `${payload.text}\n${challengeLink()}`;
+    track({ event_type: "conversion", slot: "share_image", tool_slug: toolSlug });
+    const shared = await shareCanvasImage(canvas, {
+      filename: payload.fileName,
+      title: payload.title,
+      text,
+    });
+    if (shared) return;
+    downloadCanvas(canvas, payload.fileName);
+    toast.success("Card saved — post it and tag the link.");
+  };
+
   const challengeLink = () =>
     compareUrl({
       t: toolSlug,
@@ -135,6 +162,13 @@ export function ResultActions({
         className="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-full bg-primary px-5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 sm:flex-none"
       >
         <Download className="size-4" aria-hidden="true" /> Download HD card
+      </button>
+      <button
+        type="button"
+        onClick={shareImage}
+        className="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-5 text-sm font-semibold text-primary transition-colors hover:bg-primary/15 sm:flex-none"
+      >
+        <ImageDown className="size-4" aria-hidden="true" /> Share image
       </button>
       <button
         type="button"
