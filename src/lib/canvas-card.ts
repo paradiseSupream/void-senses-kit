@@ -282,13 +282,15 @@ export function drawStoryCard(options: CardOptions): HTMLCanvasElement {
   roundRect(ctx, pad - 32, 300, w - (pad - 32) * 2, 1140, 48);
   ctx.stroke();
 
+  const accent = options.accent ?? EMERALD;
+
   // logo mark, centred
   ctx.strokeStyle = VIOLET;
   ctx.lineWidth = 4;
   ctx.beginPath();
   ctx.arc(w / 2, 170, 38, 0, Math.PI * 2);
   ctx.stroke();
-  ctx.fillStyle = EMERALD;
+  ctx.fillStyle = accent;
   ctx.beginPath();
   ctx.arc(w / 2, 170, 14, 0, Math.PI * 2);
   ctx.fill();
@@ -300,7 +302,10 @@ export function drawStoryCard(options: CardOptions): HTMLCanvasElement {
 
   ctx.fillStyle = "#a1a1aa";
   ctx.font = "500 26px 'JetBrains Mono', monospace";
-  ctx.fillText(options.eyebrow.toUpperCase(), w / 2, 400);
+  const eyebrow = options.subject
+    ? `${options.eyebrow} · ${options.subject}`
+    : options.eyebrow;
+  ctx.fillText(eyebrow.toUpperCase(), w / 2, 400);
 
   ctx.fillStyle = "#fafafa";
   ctx.font = "700 62px 'Space Grotesk', sans-serif";
@@ -308,8 +313,9 @@ export function drawStoryCard(options: CardOptions): HTMLCanvasElement {
     ctx.fillText(line, w / 2, 490 + i * 74);
   });
 
-  ctx.fillStyle = EMERALD;
-  ctx.font = "700 150px 'Space Grotesk', sans-serif";
+  ctx.fillStyle = accent;
+  const headlineFont = options.headline.length > 12 ? 84 : 150;
+  ctx.font = `700 ${headlineFont}px 'Space Grotesk', sans-serif`;
   ctx.fillText(options.headline, w / 2, 720);
 
   ctx.fillStyle = "#d4d4d8";
@@ -322,6 +328,19 @@ export function drawStoryCard(options: CardOptions): HTMLCanvasElement {
     });
     y += segments.length * 48 + 18;
   });
+
+  if (options.badge) {
+    ctx.textAlign = "left";
+    drawBadge(ctx, options.badge, w / 2 + 170, 1080, accent);
+    ctx.textAlign = "center";
+  }
+
+  if (options.metrics?.length) {
+    ctx.textAlign = "left";
+    drawMetrics(ctx, options.metrics, pad, 1180, w - pad * 2, accent);
+    ctx.textAlign = "center";
+  }
+
 
   ctx.fillStyle = VIOLET;
   ctx.font = "600 38px 'Space Grotesk', sans-serif";
