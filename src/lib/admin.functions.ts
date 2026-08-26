@@ -882,3 +882,198 @@ export const adminExportEvents = createServerFn({ method: "POST" })
       rows: list.length,
     };
   });
+
+/** One channel's outcome from the event replay sandbox. */
+export type ReplayResult = {
+  channel: string;
+  ok: boolean;
+  detail: string;
+  eventId: string;
+  request: string;
+  response: string;
+};
+
+/**
+ * Event replay sandbox: sends a real, clearly-marked test conversion to the
+ * configured Meta / TikTok server-side endpoints so an admin can confirm the
+ * id + token pair works and inspect the exact provider response.
+ */
+export const adminReplayEvent = createServerFn({ method: "POST" })
+  .inputValidator(
+    (input: {
+      token: string;
+      channel?: string;
+      event?: string;
+      value?: number;
+      email?: string;
+      testCode?: string;
+    }) => ({
+      token: String(input?.token ?? ""),
+      channel: ["meta", "tiktok", "both"].includes(String(input?.channel))
+        ? (String(input?.channel) as "meta" | "tiktok" | "both")
+        : ("both" as const),
+      event: ["PageView", "ViewContent", "Lead", "AddToCart", "Purchase"].includes(
+        String(input?.event),
+      )
+        ? String(input?.event)
+        : "Purchase",
+      value: Math.max(0, Math.min(10_000, Number(input?.value ?? 19))),
+      email: String(input?.email ?? "").trim().toLowerCase().slice(0, 120),
+      testCode: String(input?.testCode ?? "").trim().slice(0, 40),
+    }),
+  )
+  .handler(async ({ data }): Promise<ReplayResult[]> => {
+    const { requireAdmin, readSettings } = await import("@/lib/admin-core.server");
+    await requireAdmin(data.token);
+    const { tracking } = await readSettings();
+
+    const sha256 = async (value: string) => {
+      const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(value));
+      return [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, "0")).join("");
+    };
+
+    const eventId = `admin-replay-${Date.now()}`;
+    const now = Math.floor(Date.now() / 1000);
+    const emailHash = data.email ? await sha256(data.email) : null;
+    const out: ReplayResult[] = [];
+
+    // TikTok names a couple of events differently.
+    const tiktokEvent =
+      data.event === "Purchase"
+        ? "CompletePayment"
+        : data.event === "Lead"
+          ? "SubmitForm"
+          : data.event === "PageView"
+            ? "Pageview"
+            : data.event;
+
+    if (data.channel !== "tiktok") {
+      if (!tracking.meta_pixel_id || !tracking.meta_capi_token) {
+        out.push({
+          channel: "Meta Conversions API",
+          ok: false,
+          detail: "Pixel id or access token missing",
+          eventId,
+          request: "",
+          response: "",
+        });
+      } else {
+        const testCode = data.testCode || tracking.meta_test_event_code;
+        const payload = {
+          data: [
+            {
+              event_name: data.event,
+              event_time: now,
+              event_id: eventId,
+              action_source: "website",
+              event_source_url: "https://sensesofvoid.app/",
+              user_data: emailHash ? { em: [emailHash] } : { client_user_agent: "admin-sandbox" },
+              custom_data:
+                data.event === "Purchase" || data.event === "AddToCart"
+                  ? { currency: "USD", value: data.value }
+                  : {},
+            },
+          ],
+          ...(testCode ? { test_event_code: testCode } : {}),
+        };
+        try {
+          const res = await fetch(
+            `https://graph.facebook.com/v20.0/${tracking.meta_pixel_id}/events?access_token=${encodeURIComponent(tracking.meta_capi_token)}`,
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(payload),
+            },
+          );
+          const body = (await res.json()) as {
+            events_received?: number;
+            error?: { message?: string };
+          };
+          out.push({
+            channel: "Meta Conversions API",
+            ok: res.ok && (body.events_received ?? 0) > 0,
+            detail: res.ok
+              ? `Accepted ${body.events_received ?? 0} event(s)${testCode ? ` — check Test Events (${testCode})` : ""}`
+              : (body.error?.message ?? `HTTP ${res.status}`),
+            eventId,
+            request: JSON.stringify(payload, null, 2),
+            response: JSON.stringify(body, null, 2),
+          });
+        } catch (error) {
+          out.push({
+            channel: "Meta Conversions API",
+            ok: false,
+            detail: (error as Error).message,
+            eventId,
+            request: JSON.stringify(payload, null, 2),
+            response: "",
+          });
+        }
+      }
+    }
+
+    if (data.channel !== "meta") {
+      if (!tracking.tiktok_pixel_id || !tracking.tiktok_events_token) {
+        out.push({
+          channel: "TikTok Events API",
+          ok: false,
+          detail: "Pixel id or access token missing",
+          eventId,
+          request: "",
+          response: "",
+        });
+      } else {
+        const payload = {
+          event_source: "web",
+          event_source_id: tracking.tiktok_pixel_id,
+          test_event_code: data.testCode || undefined,
+          data: [
+            {
+              event: tiktokEvent,
+              event_time: now,
+              event_id: eventId,
+              user: emailHash ? { email: emailHash } : {},
+              page: { url: "https://sensesofvoid.app/" },
+              properties:
+                tiktokEvent === "CompletePayment"
+                  ? { currency: "USD", value: data.value }
+                  : {},
+            },
+          ],
+        };
+        try {
+          const res = await fetch("https://business-api.tiktok.com/open_api/v1.3/event/track/", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Access-Token": tracking.tiktok_events_token,
+            },
+            body: JSON.stringify(payload),
+          });
+          const body = (await res.json()) as { code?: number; message?: string };
+          out.push({
+            channel: "TikTok Events API",
+            ok: body.code === 0,
+            detail:
+              body.code === 0
+                ? `"${tiktokEvent}" accepted by TikTok`
+                : (body.message ?? `HTTP ${res.status}`),
+            eventId,
+            request: JSON.stringify(payload, null, 2),
+            response: JSON.stringify(body, null, 2),
+          });
+        } catch (error) {
+          out.push({
+            channel: "TikTok Events API",
+            ok: false,
+            detail: (error as Error).message,
+            eventId,
+            request: JSON.stringify(payload, null, 2),
+            response: "",
+          });
+        }
+      }
+    }
+
+    return out;
+  });
