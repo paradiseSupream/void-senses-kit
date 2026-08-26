@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ChevronLeft, RefreshCw } from "lucide-react";
 
 import { QuizVipNudge } from "@/components/monetization/QuizVipNudge";
@@ -19,7 +19,7 @@ export function QuizRunner({
   initialAnswers,
 }: {
   items: Likert[];
-  onComplete: (answers: Record<string, number>) => void;
+  onComplete: (answers: Record<string, number>, meta?: { timingsMs: Record<string, number> }) => void;
   onReshuffle?: () => void;
   intro?: string;
   /** Answers already given elsewhere (e.g. question one on the home hero). */
@@ -27,6 +27,10 @@ export function QuizRunner({
 }) {
   const [index, setIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, number>>({});
+  // Per-item response time, used only to grade measurement confidence
+  // (speeding detection) — never sent anywhere.
+  const timingsRef = useRef<Record<string, number>>({});
+  const shownAtRef = useRef<number>(Date.now());
 
   useEffect(() => {
     // Keep only carried answers that belong to this drawn set, then resume on
@@ -39,6 +43,8 @@ export function QuizRunner({
     const first = items.findIndex((item) => seeded[item.id] === undefined);
     setAnswers(seeded);
     setIndex(first === -1 ? 0 : first);
+    timingsRef.current = {};
+    shownAtRef.current = Date.now();
     // `initialAnswers` is a one-shot handoff; the drawn set is the real trigger.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [items]);
@@ -57,6 +63,9 @@ export function QuizRunner({
     (weight: number) => {
       if (!item) return;
       markQuizInteraction();
+      const elapsed = Date.now() - shownAtRef.current;
+      timingsRef.current[item.id] = Math.min(elapsed, 120_000);
+      shownAtRef.current = Date.now();
       const next = { ...answers, [item.id]: weight };
       setAnswers(next);
       // Skip anything already answered (a carried home-page answer), so the
@@ -64,7 +73,7 @@ export function QuizRunner({
       const remaining = items.findIndex((q) => next[q.id] === undefined);
       if (remaining === -1) {
         setQuizActive(false);
-        onComplete(next);
+        onComplete(next, { timingsMs: { ...timingsRef.current } });
       } else setIndex(remaining);
     },
     [answers, item, items, onComplete],
