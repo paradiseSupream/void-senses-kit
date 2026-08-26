@@ -127,6 +127,8 @@ export function drawBrandedCard(options: CardOptions): HTMLCanvasElement {
   roundRect(ctx, pad / 2, pad / 2, w - pad, h - pad, 28);
   ctx.stroke();
 
+  const accent = options.accent ?? EMERALD;
+
   // logo mark
   const cx = pad + 8;
   const cy = pad + 14;
@@ -135,7 +137,7 @@ export function drawBrandedCard(options: CardOptions): HTMLCanvasElement {
   ctx.beginPath();
   ctx.arc(cx, cy, 16, 0, Math.PI * 2);
   ctx.stroke();
-  ctx.fillStyle = EMERALD;
+  ctx.fillStyle = accent;
   ctx.beginPath();
   ctx.arc(cx, cy, 6, 0, Math.PI * 2);
   ctx.fill();
@@ -144,15 +146,20 @@ export function drawBrandedCard(options: CardOptions): HTMLCanvasElement {
   ctx.font = "600 22px 'Space Grotesk', sans-serif";
   ctx.fillText("Senses of Void", cx + 30, cy + 8);
 
+  if (options.badge) drawBadge(ctx, options.badge, w - pad, pad - 4, accent);
+
   ctx.fillStyle = "#a1a1aa";
   ctx.font = "500 14px 'JetBrains Mono', monospace";
-  ctx.fillText(options.eyebrow.toUpperCase(), pad, pad + 78);
+  const eyebrow = options.subject
+    ? `${options.eyebrow} · ${options.subject}`
+    : options.eyebrow;
+  ctx.fillText(eyebrow.toUpperCase(), pad, pad + 78);
 
   ctx.fillStyle = "#fafafa";
   ctx.font = "700 46px 'Space Grotesk', sans-serif";
   ctx.fillText(options.title, pad, pad + 136);
 
-  ctx.fillStyle = EMERALD;
+  ctx.fillStyle = accent;
   ctx.font = "700 76px 'Space Grotesk', sans-serif";
   ctx.fillText(options.headline, pad, pad + 226);
 
@@ -166,12 +173,17 @@ export function drawBrandedCard(options: CardOptions): HTMLCanvasElement {
     y += 32 * Math.max(1, wrapText(ctx, line, pad, y, w - pad * 2, 32).length) + 8;
   });
 
+  if (options.metrics?.length) {
+    drawMetrics(ctx, options.metrics, pad, h - pad - 96, w - pad * 2, accent);
+  }
+
   ctx.fillStyle = "#71717a";
   ctx.font = "400 16px 'JetBrains Mono', monospace";
   ctx.fillText(options.footer ?? "sensesofvoid.app · entertainment & self-reflection only", pad, h - pad);
 
   return canvas;
 }
+
 
 export function downloadCanvas(canvas: HTMLCanvasElement, filename: string) {
   const url = canvas.toDataURL("image/png");
