@@ -78,7 +78,7 @@ export function ResultActions({
     title: payload.title,
     headline: payload.headline,
     lines: payload.lines,
-    accent: accentFor(payload.accentSeed ?? payload.headline || payload.title),
+    accent: accentFor(payload.accentSeed ?? (payload.headline || payload.title)),
     ...(payload.footer ? { footer: payload.footer } : {}),
     ...(payload.badge ? { badge: payload.badge } : {}),
     ...(payload.subject ? { subject: payload.subject } : {}),

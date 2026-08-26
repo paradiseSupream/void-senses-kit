@@ -347,8 +347,8 @@ function IqTest() {
               toolName: "Quick IQ Test",
               toolPath: "/tools/iq",
               accentSeed: `iq-${result.estimate}`,
+              ...(name.trim() ? { subject: name.trim() } : {}),
               badge: `${result.percentile}th pct`,
-              subject: name.trim() || undefined,
               metrics: [
                 { label: "Score", value: Math.max(0, Math.min(100, (result.estimate - 60) / 0.9)) },
                 { label: "Percentile", value: result.percentile },
