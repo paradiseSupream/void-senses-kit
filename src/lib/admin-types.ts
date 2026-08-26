@@ -182,4 +182,5 @@ export const DEFAULT_PUBLIC_CONFIG: PublicConfig = {
     vip_price_cents: 1900,
     vip_sol_address: "8y9Bo4hHAead7VnkbMEMBUgwxSUMBZzPDKodE1PFs9vP",
   },
+  tracking: DEFAULT_PUBLIC_TRACKING,
 };
