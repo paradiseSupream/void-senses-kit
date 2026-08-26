@@ -3,10 +3,18 @@ import { Copy, Download, ImageDown, RotateCcw, Share2, Smartphone, Swords } from
 import { toast } from "sonner";
 
 import { useActionGate } from "@/components/monetization/ActionGate";
-import { downloadCanvas, drawBrandedCard, drawStoryCard, shareCanvasImage } from "@/lib/canvas-card";
+import {
+  accentFor,
+  downloadCanvas,
+  drawBrandedCard,
+  drawStoryCard,
+  shareCanvasImage,
+  type CardMetric,
+} from "@/lib/canvas-card";
 import { compareUrl } from "@/lib/compare-link";
 import { ShareRow } from "@/components/tools/ShareRow";
 import { track } from "@/lib/monetization";
+import { trackShare, withUtm } from "@/lib/share-link";
 
 export type SharePayload = {
   eyebrow: string;
@@ -21,7 +29,16 @@ export type SharePayload = {
   toolName?: string;
   /** Route back to the tool, e.g. "/tools/iq". */
   toolPath?: string;
+  /** Personalisation seed — archetype / verdict name drives the card accent. */
+  accentSeed?: string;
+  /** Rarity, band or verdict pill on the card. */
+  badge?: string;
+  /** Participant name or pair label. */
+  subject?: string;
+  /** Up to 4 axis bars (0–100) rendered on the card. */
+  metrics?: CardMetric[];
 };
+
 
 
 /**
