@@ -12,6 +12,8 @@ const CAP_KEY = "sov.adCaps";
 const ATTR_KEY = "sov.attr";
 const MOBILE_TOTAL_KEY = "mobile:total";
 const MOBILE_SESSION_LIMIT = 3;
+const MOBILE_FORMAT_TOTAL_KEY = "mobile:format-total";
+const MOBILE_FORMAT_SESSION_LIMIT = 1;
 
 export type AdVariant = "result_heavy" | "gate_heavy";
 export const AD_VARIANTS: AdVariant[] = ["result_heavy", "gate_heavy"];
@@ -194,11 +196,15 @@ export function claimFormat(
   const state = readCaps();
   const hourCount = state.counts[key] ?? 0;
   const sessionCount = state.session[key] ?? 0;
+  const isMobile = window.matchMedia("(max-width: 767px)").matches;
+  const mobileFormatTotal = state.session[MOBILE_FORMAT_TOTAL_KEY] ?? 0;
+  if (isMobile && mobileFormatTotal >= MOBILE_FORMAT_SESSION_LIMIT) return false;
   if (hourCount >= Math.max(0, cap.perHour) || sessionCount >= Math.max(0, cap.perSession)) {
     return false;
   }
   state.counts[key] = hourCount + 1;
   state.session[key] = sessionCount + 1;
+  if (isMobile) state.session[MOBILE_FORMAT_TOTAL_KEY] = mobileFormatTotal + 1;
   writeCaps(state);
   return true;
 }

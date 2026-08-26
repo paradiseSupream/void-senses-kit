@@ -22,6 +22,8 @@ import { plannedAdScripts, tierAdjust, tierCapScale, type Tier } from "@/lib/ad-
 import { startFunnel, stopFunnel } from "@/lib/funnel";
 import { bumpPageView, whenEngaged, isQuizActive, QUIZ_PHASE_EVENT } from "@/lib/engagement";
 import { isCampaignSession, markCampaignSession } from "@/lib/campaign-mode";
+import { scheduleAdWork } from "@/lib/ad-safety";
+import { AdErrorBoundary } from "@/components/monetization/AdErrorBoundary";
 
 /**
  * Vignettes never fire on the landing view — an interstitial before the
@@ -55,7 +57,9 @@ export function SiteConfigProvider({ children }: { children: ReactNode }) {
 
   return (
     <SiteConfigContext.Provider value={value}>
-      <MonetagLoader />
+      <AdErrorBoundary>
+        <MonetagLoader />
+      </AdErrorBoundary>
       <Ga4Loader />
       {children}
     </SiteConfigContext.Provider>
@@ -78,35 +82,45 @@ export function useAdSlotEnabled(kind: keyof PublicConfig["ads"]["slots"]): bool
  */
 function loadZone(id: string, format: string, zone: string, src: string) {
   if (!zone || injected.has(id)) return;
-  injected.add(id);
-  const started = performance.now();
-  const script = document.createElement("script");
-  script.id = id;
-  script.dataset["zone"] = zone;
-  script.dataset["cfasync"] = "false";
-  script.setAttribute("data-cfasync", "false");
-  script.src = src;
-  script.async = true;
-  script.addEventListener("load", () => {
-    track({
-      event_type: "script_load",
-      slot: format,
-      format,
-      zone,
-      duration_ms: Math.round(performance.now() - started),
-    });
-  });
-  script.addEventListener("error", () => {
-    track({
-      event_type: "script_error",
-      slot: format,
-      format,
-      zone,
-      duration_ms: Math.round(performance.now() - started),
-    });
-    console.warn(`[ads] ${format} script failed to load (zone ${zone})`);
-  });
-  document.body.appendChild(script);
+  scheduleAdWork(() => {
+    if (injected.has(id)) return;
+    injected.add(id);
+    const started = performance.now();
+    try {
+      const script = document.createElement("script");
+      script.id = id;
+      script.dataset["zone"] = zone;
+      script.dataset["cfasync"] = "false";
+      script.setAttribute("data-cfasync", "false");
+      script.src = src;
+      script.async = true;
+      script.addEventListener("load", () => {
+        track({
+          event_type: "script_load",
+          slot: format,
+          format,
+          zone,
+          duration_ms: Math.round(performance.now() - started),
+        });
+      });
+      script.addEventListener("error", () => {
+        script.remove();
+        track({
+          event_type: "script_error",
+          slot: format,
+          format,
+          zone,
+          duration_ms: Math.round(performance.now() - started),
+        });
+        console.warn(`[ads] ${format} script failed to load (zone ${zone})`);
+      });
+      document.body.appendChild(script);
+    } catch (error) {
+      injected.delete(id);
+      track({ event_type: "script_error", slot: format, format, zone });
+      console.warn(`[ads] ${format} script was isolated`, error);
+    }
+  }, 3_000);
 }
 
 const claimedThisPage = new Set<string>();

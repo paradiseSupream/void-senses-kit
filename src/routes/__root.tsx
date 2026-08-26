@@ -22,6 +22,7 @@ import { StickyBottomAd } from "@/components/monetization/StickyBottomAd";
 import { DesktopStickyAd } from "@/components/monetization/DesktopStickyAd";
 import { VipModal } from "@/components/monetization/VipModal";
 import { ExitIntentOffer } from "@/components/monetization/ExitIntentOffer";
+import { AdErrorBoundary } from "@/components/monetization/AdErrorBoundary";
 import { ActionGateProvider } from "@/components/monetization/ActionGate";
 import { VipProvider } from "@/lib/vip";
 import { SiteConfigProvider } from "@/lib/site-config";
@@ -166,9 +167,13 @@ function RootComponent() {
               <Footer />
             </div>
             <MobileTabBar />
-            {!isAdmin ? <StickyBottomAd /> : null}
-            {!isAdmin ? <DesktopStickyAd /> : null}
-            {!isAdmin ? <SocialBar /> : null}
+            {!isAdmin ? (
+              <AdErrorBoundary>
+                <StickyBottomAd />
+                <DesktopStickyAd />
+                <SocialBar />
+              </AdErrorBoundary>
+            ) : null}
             <CookieBanner />
             <VipModal />
             {!isAdmin ? <ExitIntentOffer /> : null}
