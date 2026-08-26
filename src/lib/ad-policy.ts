@@ -37,6 +37,8 @@ export type PolicyContext = {
   campaignSafe?: boolean | undefined;
   /** The visitor is mid-quiz: never interrupt the flow with a script format. */
   quizActive?: boolean | undefined;
+  /** Mobile webviews are too fragile for vendor scripts; first-party surfaces remain available. */
+  isMobile?: boolean | undefined;
 };
 
 /**
@@ -50,6 +52,7 @@ export function plannedAdScripts(ads: PolicyInput, ctx: PolicyContext): AdFormat
   if (ads.lean_mode) return [];
   if (ctx.campaignSafe) return [];
   if (ctx.quizActive) return [];
+  if (ctx.isMobile) return [];
 
   const planned: AdFormat[] = [];
   if (ads.monetag_inpage_push) planned.push("inpage_push");
