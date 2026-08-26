@@ -383,7 +383,10 @@ export function TrackingTab({ token }: { token: string }) {
         <Results checks={checks.google ?? []} />
       </div>
 
+      <EventReplaySandbox token={token} />
+
       <div className="panel p-5 text-sm text-muted-foreground">
+
         <h3 className="font-display text-base font-semibold text-foreground">
           Which events are sent
         </h3>
