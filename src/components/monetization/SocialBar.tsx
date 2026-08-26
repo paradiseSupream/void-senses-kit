@@ -4,6 +4,7 @@ import { X, Sparkles } from "lucide-react";
 import { useVip } from "@/lib/vip";
 import { useSiteConfig } from "@/lib/site-config";
 import { claimImpression, partnerLink, track } from "@/lib/monetization";
+import { scheduleAdWork } from "@/lib/ad-safety";
 
 const KEY = "sov.socialbar.dismissed";
 const SLOT = "social-bar";
@@ -24,14 +25,16 @@ export function SocialBar() {
     }
     if (dismissed) return;
     const t = window.setTimeout(() => {
-      if (!claimImpression(SLOT)) return;
-      const partner = partnerLink(SLOT, null);
-      setLink(partner);
-      track({
-        event_type: "impression",
-        slot: SLOT,
-        format: "social_bar",
-        click_id: partner.clickId,
+      scheduleAdWork(() => {
+        if (!claimImpression(SLOT)) return;
+        const partner = partnerLink(SLOT, null);
+        setLink(partner);
+        track({
+          event_type: "impression",
+          slot: SLOT,
+          format: "social_bar",
+          click_id: partner.clickId,
+        });
       });
     }, 1200);
     return () => window.clearTimeout(t);
