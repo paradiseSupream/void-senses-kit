@@ -547,8 +547,6 @@ export const adminAudience = createServerFn({ method: "POST" })
       return [...buckets.entries()].map(([k, arr]) => make(k, arr));
     };
 
-    const byCountry = group("" as never as never, () => null as never) as never;
-    void byCountry;
 
     const countries = group(
       (s) => s.country ?? "??",
