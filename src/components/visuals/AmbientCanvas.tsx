@@ -84,7 +84,7 @@ export function AmbientCanvas({ className = "" }: { className?: string }) {
     <canvas
       ref={ref}
       aria-hidden="true"
-      className={`pointer-events-none absolute inset-0 size-full ${className}`}
+      className={`ambient-canvas pointer-events-none absolute inset-0 size-full ${className}`}
     />
   );
 }
