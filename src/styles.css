@@ -621,6 +621,11 @@
     background-clip: border-box;
     color: color-mix(in oklab, var(--primary) 85%, white);
   }
+
+  .reveal-seq {
+    opacity: 1 !important;
+    transform: none !important;
+  }
 }
 
 /* Mobile-first refinements: lighter effects, safe areas, comfortable type. */
