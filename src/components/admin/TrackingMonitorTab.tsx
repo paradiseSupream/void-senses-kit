@@ -143,9 +143,9 @@ export function TrackingMonitorTab({ token }: { token: string }) {
                   key={key}
                   type="monotone"
                   dataKey={key}
-                  name={CHANNEL_LABEL[key]}
-                  stroke={CHANNEL_COLOR[key]}
-                  fill={CHANNEL_COLOR[key]}
+                  name={CHANNEL_LABEL[key] ?? key}
+                  stroke={CHANNEL_COLOR[key] ?? "#888"}
+                  fill={CHANNEL_COLOR[key] ?? "#888"}
                   fillOpacity={0.15}
                   strokeWidth={2}
                 />
