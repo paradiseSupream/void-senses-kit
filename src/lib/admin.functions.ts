@@ -740,6 +740,6 @@ export const adminAudience = createServerFn({ method: "POST" })
         createdAt: String(row["created_at"] ?? ""),
         active: row["active"] !== false,
       })),
-      sessions: sessions.slice(0, 300),
+      sessions: sessions.slice(0, data.full ? 20000 : 300),
     };
   });
