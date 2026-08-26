@@ -4,9 +4,15 @@ import { bandOf } from "@/lib/quiz-engine";
 export function TraitBars({
   data,
   notes,
+  percentiles,
+  liveNorms,
 }: {
   data: { dim: string; value: number }[];
   notes?: Record<string, string>;
+  /** Percentile per dimension, when a normative comparison is available. */
+  percentiles?: Record<string, number>;
+  /** True once the percentiles come from this site's own score pool. */
+  liveNorms?: boolean;
 }) {
   const sorted = [...data].sort((a, b) => b.value - a.value);
 
@@ -18,6 +24,9 @@ export function TraitBars({
             <span className="text-sm font-medium">{item.dim}</span>
             <span className="label-mono shrink-0">
               {bandOf(item.value)} · {item.value}
+              {typeof percentiles?.[item.dim] === "number"
+                ? ` · ${percentiles[item.dim]}th pct`
+                : ""}
             </span>
           </div>
           <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-surface-2">
@@ -35,6 +44,13 @@ export function TraitBars({
           ) : null}
         </li>
       ))}
+      {percentiles ? (
+        <li className="pt-1 font-mono text-[11px] text-muted-foreground">
+          {liveNorms
+            ? "Percentiles compared against this site's own anonymous score pool."
+            : "Percentiles compared against a standard reference curve until the live pool is large enough."}
+        </li>
+      ) : null}
     </ul>
   );
 }
