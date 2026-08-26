@@ -6,6 +6,7 @@ import { ToolShell } from "@/components/layout/ToolShell";
 import { useAutoStart } from "@/lib/autostart";
 import { takeCarriedAnswer } from "@/lib/entry-carry";
 import { QuizRunner } from "@/components/tools/QuizRunner";
+import { QualityBadge } from "@/components/tools/QualityBadge";
 import { RadarChart } from "@/components/tools/RadarChart";
 import { ResultActions } from "@/components/tools/ResultActions";
 import { TraitBars } from "@/components/tools/TraitBars";
@@ -23,6 +24,7 @@ import {
 import { freeSummary } from "@/lib/archetype-core";
 import { usePremiumDossier } from "@/lib/premium-dossier";
 import { newSeed, pickBalanced, rngFrom, scoreDimensions, type Likert } from "@/lib/quiz-engine";
+import { responseQuality } from "@/lib/psychometrics";
 
 type Search = { auto?: string; vip_order?: string; matrix_order?: string };
 
@@ -41,7 +43,7 @@ export const Route = createFileRoute("/tools/dark-personality")({
       {
         name: "description",
         content:
-          "Eighteen randomised items score Machiavellianism, narcissism, psychopathy, detachment, cognitive dominance and shadow integration, then name one of eight dark archetypes.",
+          "Twenty-four randomised items score Machiavellianism, narcissism, psychopathy, detachment, cognitive dominance and shadow integration, then name one of eight dark archetypes.",
       },
       { property: "og:title", content: "Dark Personality Test — Senses of Void" },
       {
@@ -106,6 +108,7 @@ function DarkPersonality() {
   // Chained sessions: /tools/x?auto=1 skips the intro and starts immediately.
   useAutoStart(() => setPhase("quiz"));
   const [answers, setAnswers] = useState<Record<string, number>>({});
+  const [timings, setTimings] = useState<Record<string, number>>({});
 
   // ?vip_order= / ?matrix_order= → server-verified unlock, then clean the URL
   // and queue the one-time post-purchase upsell.
@@ -116,9 +119,17 @@ function DarkPersonality() {
     [seed],
   );
 
+  // Measurement confidence for this exact session: completeness, response
+  // style, within-axis agreement and answer speed.
+  const quality = useMemo(
+    () => responseQuality(items, answers, timings),
+    [items, answers, timings],
+  );
+
   const reshuffle = useCallback(() => {
     setSeed(newSeed());
     setAnswers({});
+    setTimings({});
     setPhase("quiz");
   }, []);
 
@@ -133,7 +144,7 @@ function DarkPersonality() {
       eyebrow="Tool 03 · Psyche"
       slug="dark-personality"
       title="Dark Personality Test"
-      intro="Eighteen statements pulled fresh from a 48-item bank, scored across six psychometric axes. No two attempts share the same set, so the archetype you get is earned, not memorised."
+      intro="Twenty-four statements pulled fresh from a 48-item bank, scored across six psychometric axes. No two attempts share the same set, so the archetype you get is earned, not memorised."
     >
       {phase === "intro" ? (
         <div className="glass reveal rounded-2xl p-6 sm:p-8">
@@ -167,8 +178,9 @@ function DarkPersonality() {
           intro="How accurate is this about you?"
           onReshuffle={reshuffle}
           initialAnswers={carried ? { [carried.id]: carried.weight } : undefined}
-          onComplete={(all) => {
+          onComplete={(all, meta) => {
             setAnswers(all);
+            setTimings(meta?.timingsMs ?? {});
             setPhase("result");
           }}
         />
@@ -189,6 +201,17 @@ function DarkPersonality() {
           </p>
           <p className="mt-3 text-sm text-muted-foreground">{summary.archetype.blurb}</p>
           <p className="mt-2 text-sm text-foreground/80">{summary.archetype.edge}</p>
+
+          <QualityBadge
+            className="mt-6"
+            score={quality.score}
+            label={quality.label}
+            flags={quality.flags}
+            notes={quality.notes}
+            errorBand={quality.errorBand}
+            answered={quality.answered}
+            total={quality.total}
+          />
 
           <div className="mt-7 rounded-2xl border border-hairline bg-surface-2/30 p-4">
             <RadarChart data={scores} labels={DARK_SHORT} />

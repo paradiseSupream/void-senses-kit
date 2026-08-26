@@ -64,7 +64,7 @@ export const LOVE_BANK: Likert[] = [
   { id: "s9", dim: "Spark", text: "Being chosen by them would still feel like a win." },
 ];
 
-export const LOVE_PER_DIM = 3;
+export const LOVE_PER_DIM = 4;
 export const LOVE_SESSION_SIZE = LOVE_PER_DIM * LOVE_DIMS.length;
 
 export const LOVE_VERDICTS: { min: number; title: string; line: string }[] = [

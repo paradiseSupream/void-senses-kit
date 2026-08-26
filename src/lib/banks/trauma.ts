@@ -78,7 +78,7 @@ export const TRAUMA_BANK: Likert[] = [
   { id: "rg8", dim: "Regulation", text: "I still tense up when a room goes suddenly quiet.", reverse: true },
 ];
 
-export const TRAUMA_PER_DIM = 3;
+export const TRAUMA_PER_DIM = 4;
 export const TRAUMA_SESSION_SIZE = TRAUMA_PER_DIM * TRAUMA_DIMS.length;
 
 /** Written interpretation for each dimension at each band. */

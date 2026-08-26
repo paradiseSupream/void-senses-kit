@@ -5,12 +5,14 @@ import { HeartPulse } from "lucide-react";
 import { ToolShell } from "@/components/layout/ToolShell";
 import { useAutoStart } from "@/lib/autostart";
 import { QuizRunner } from "@/components/tools/QuizRunner";
+import { QualityBadge } from "@/components/tools/QualityBadge";
 import { RadarChart } from "@/components/tools/RadarChart";
 import { ResultActions } from "@/components/tools/ResultActions";
 import { TraitBars } from "@/components/tools/TraitBars";
 import { LockedReport } from "@/components/monetization/LockedReport";
 import { LOVE_BANK, LOVE_PER_DIM, LOVE_SESSION_SIZE, loveVerdict } from "@/lib/banks/love";
 import { newSeed, pickBalanced, rngFrom, scoreDimensions, type Likert } from "@/lib/quiz-engine";
+import { responseQuality } from "@/lib/psychometrics";
 
 export const Route = createFileRoute("/tools/love-match")({
   head: () => ({
@@ -19,7 +21,7 @@ export const Route = createFileRoute("/tools/love-match")({
       {
         name: "description",
         content:
-          "Fifteen randomised questions score banter, trust, adventure, calm and spark between two people, ending in a verdict card built for stories.",
+          "Twenty randomised questions score banter, trust, adventure, calm and spark between two people, ending in a verdict card built for stories.",
       },
       { property: "og:title", content: "Love & Vibe Matcher — Senses of Void" },
       {
@@ -72,15 +74,24 @@ function LoveMatch() {
   const [a, setA] = useState("");
   const [b, setB] = useState("");
   const [answers, setAnswers] = useState<Record<string, number>>({});
+  const [timings, setTimings] = useState<Record<string, number>>({});
 
   const items: Likert[] = useMemo(
     () => pickBalanced(LOVE_BANK, (i) => i.dim, LOVE_PER_DIM, rngFrom(seed)),
     [seed],
   );
 
+  // Measurement confidence for this exact session: completeness, response
+  // style, within-axis agreement and answer speed.
+  const quality = useMemo(
+    () => responseQuality(items, answers, timings),
+    [items, answers, timings],
+  );
+
   const reshuffle = useCallback(() => {
     setSeed(newSeed());
     setAnswers({});
+    setTimings({});
     setPhase("quiz");
   }, []);
 
@@ -106,7 +117,7 @@ function LoveMatch() {
       eyebrow="Tool 04 · Social"
       slug="love-match"
       title="Love & Vibe Matcher"
-      intro="Fifteen questions about how the two of you actually operate — banter, trust, adventure, calm and spark. Drawn fresh from a 45-item bank each time, so retaking gives a real second opinion."
+      intro="Twenty questions about how the two of you actually operate — banter, trust, adventure, calm and spark. Drawn fresh from a 45-item bank each time, so retaking gives a real second opinion."
     >
       {phase === "intro" ? (
         <div className="glass reveal rounded-2xl p-6 sm:p-8">
@@ -147,8 +158,9 @@ function LoveMatch() {
           items={items}
           intro={`About ${pair}`}
           onReshuffle={reshuffle}
-          onComplete={(all) => {
+          onComplete={(all, meta) => {
             setAnswers(all);
+            setTimings(meta?.timingsMs ?? {});
             setPhase("result");
           }}
         />
@@ -166,6 +178,17 @@ function LoveMatch() {
             Strongest together in <strong>{result.strongest}</strong>; the one to protect is{" "}
             <strong>{result.weakest}</strong>.
           </p>
+
+          <QualityBadge
+            className="mt-6"
+            score={quality.score}
+            label={quality.label}
+            flags={quality.flags}
+            notes={quality.notes}
+            errorBand={quality.errorBand}
+            answered={quality.answered}
+            total={quality.total}
+          />
 
           <div className="mt-7 rounded-2xl border border-hairline bg-surface-2/30 p-4">
             <RadarChart data={result.scores} />
