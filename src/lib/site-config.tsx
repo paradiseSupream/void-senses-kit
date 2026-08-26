@@ -173,6 +173,7 @@ function MonetagLoader() {
   // third-party script (no manual toggle needed to stay FB-policy safe).
   const [campaignSafe, setCampaignSafe] = useState(false);
   const [quizPhase, setQuizPhase] = useState(false);
+  const [isMobile, setIsMobile] = useState(true);
   const ads = config.ads;
   const privacy = ads.privacy ?? DEFAULT_PRIVACY;
   const caps = useMemo(
@@ -203,6 +204,14 @@ function MonetagLoader() {
   }, []);
 
   useEffect(() => {
+    const query = window.matchMedia("(max-width: 767px)");
+    const syncDevice = () => setIsMobile(query.matches);
+    syncDevice();
+    query.addEventListener("change", syncDevice);
+    return () => query.removeEventListener("change", syncDevice);
+  }, []);
+
+  useEffect(() => {
     if (ads.smartlink_url) setPartnerBase(ads.smartlink_url);
   }, [ads.smartlink_url]);
 
@@ -230,7 +239,16 @@ function MonetagLoader() {
     // Geo-tiered: Tier-1 gets the full Monetag + Adsterra stack, Tier-2 loses
     // the vignette, Tier-3 keeps only in-page push so cheap traffic is not
     // burned out for pennies.
-    const planned = tierAdjust(plannedAdScripts(ads, { isVip, consentAllowsAds: allowed, campaignSafe, quizActive: quizPhase }), tier);
+    const planned = tierAdjust(
+      plannedAdScripts(ads, {
+        isVip,
+        consentAllowsAds: allowed,
+        campaignSafe,
+        quizActive: quizPhase,
+        isMobile,
+      }),
+      tier,
+    );
     if (planned.length === 0) return;
 
     // In-page push: only for visitors who actually started a tool (or after a
@@ -309,6 +327,7 @@ function MonetagLoader() {
     onAdminRoute,
     campaignSafe,
     quizPhase,
+    isMobile,
     depth,
     tier,
     isVip,

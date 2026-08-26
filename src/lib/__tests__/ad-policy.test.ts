@@ -68,6 +68,11 @@ describe("ad policy", () => {
     expect(plannedAdScripts(FULL, { ...CONSENTED, quizActive: true })).toEqual([]);
   });
 
+  it("never injects third-party scripts on mobile webviews", () => {
+    expect(plannedAdScripts(FULL, { ...CONSENTED, isMobile: true })).toEqual([]);
+    expect(smartlinkSurfacesAllowed(FULL, { ...CONSENTED, isMobile: true })).toBe(true);
+  });
+
   it("detects campaign entries from click ids, utm and ad-landing links", () => {
     expect(isCampaignEntry("?fbclid=abc")).toBe(true);
     expect(isCampaignEntry("?utm_source=facebook")).toBe(true);
