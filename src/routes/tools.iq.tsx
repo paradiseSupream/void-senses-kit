@@ -235,7 +235,7 @@ function IqTest() {
           <span className="label-mono">Verified performance estimate</span>
           <p className="mt-4 font-display text-6xl font-bold text-primary">{result.estimate}</p>
           <p className="mt-2 text-sm text-muted-foreground">
-            95% band {result.low}–{result.high} (±{result.sem}) · approx. {result.percentile}th
+            68% band {result.low}–{result.high} (±{result.sem}) · approx. {result.percentile}th
             percentile
           </p>
           <p className="mt-1 text-sm text-muted-foreground">
