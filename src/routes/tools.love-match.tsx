@@ -19,7 +19,7 @@ export const Route = createFileRoute("/tools/love-match")({
       {
         name: "description",
         content:
-          "Fifteen randomised questions score banter, trust, adventure, calm and spark between two people, ending in a verdict card built for stories.",
+          "Twenty randomised questions score banter, trust, adventure, calm and spark between two people, ending in a verdict card built for stories.",
       },
       { property: "og:title", content: "Love & Vibe Matcher — Senses of Void" },
       {
@@ -106,7 +106,7 @@ function LoveMatch() {
       eyebrow="Tool 04 · Social"
       slug="love-match"
       title="Love & Vibe Matcher"
-      intro="Fifteen questions about how the two of you actually operate — banter, trust, adventure, calm and spark. Drawn fresh from a 45-item bank each time, so retaking gives a real second opinion."
+      intro="Twenty questions about how the two of you actually operate — banter, trust, adventure, calm and spark. Drawn fresh from a 45-item bank each time, so retaking gives a real second opinion."
     >
       {phase === "intro" ? (
         <div className="glass reveal rounded-2xl p-6 sm:p-8">

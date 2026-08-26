@@ -26,13 +26,13 @@ export const Route = createFileRoute("/tools/iq")({
       {
         name: "description",
         content:
-          "Twenty timed items drawn from a 64-question bank across number, logic, verbal, pattern and spatial reasoning, ending in a downloadable certificate with your percentile.",
+          "Twenty-five timed items drawn from a 67-question bank across number, logic, verbal, pattern and spatial reasoning, ending in a downloadable certificate with your percentile.",
       },
       { property: "og:title", content: "Quick IQ Test — Senses of Void" },
       {
         property: "og:description",
         content:
-          "A different set of twenty timed puzzles every attempt, with a category breakdown and an HD certificate.",
+          "A different set of twenty-five timed puzzles every attempt, with a category breakdown and an HD certificate.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -165,7 +165,7 @@ function IqTest() {
         eyebrow="Tool 02 · Cognition"
         slug="iq"
         title="Quick IQ Test"
-        intro="Twenty items drawn from a 64-question bank across five reasoning categories, twenty seconds each. Options are reshuffled too, so a screenshot helps nobody."
+        intro="Twenty-five items drawn from a 67-question bank across five reasoning categories, twenty seconds each. Options are reshuffled too, so a screenshot helps nobody."
       >
         <div className="glass reveal rounded-2xl p-6 sm:p-8">
           <span className="label-mono">What you'll get</span>
@@ -206,7 +206,7 @@ function IqTest() {
         eyebrow="Tool 02 · Cognition"
         slug="iq"
         title="Cognitive performance certificate"
-        intro="An estimate from speed and accuracy across twenty timed items in five categories."
+        intro="A difficulty-weighted estimate from twenty-five timed items across five reasoning categories, reported with its margin of error."
       >
         <div className="glass reveal rounded-2xl p-6 text-center sm:p-8">
           <span className="label-mono">Verified performance estimate</span>

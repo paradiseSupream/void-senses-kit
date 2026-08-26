@@ -41,7 +41,7 @@ export const Route = createFileRoute("/tools/dark-personality")({
       {
         name: "description",
         content:
-          "Eighteen randomised items score Machiavellianism, narcissism, psychopathy, detachment, cognitive dominance and shadow integration, then name one of eight dark archetypes.",
+          "Twenty-four randomised items score Machiavellianism, narcissism, psychopathy, detachment, cognitive dominance and shadow integration, then name one of eight dark archetypes.",
       },
       { property: "og:title", content: "Dark Personality Test — Senses of Void" },
       {
@@ -133,7 +133,7 @@ function DarkPersonality() {
       eyebrow="Tool 03 · Psyche"
       slug="dark-personality"
       title="Dark Personality Test"
-      intro="Eighteen statements pulled fresh from a 48-item bank, scored across six psychometric axes. No two attempts share the same set, so the archetype you get is earned, not memorised."
+      intro="Twenty-four statements pulled fresh from a 48-item bank, scored across six psychometric axes. No two attempts share the same set, so the archetype you get is earned, not memorised."
     >
       {phase === "intro" ? (
         <div className="glass reveal rounded-2xl p-6 sm:p-8">

@@ -32,7 +32,7 @@ export const Route = createFileRoute("/tools/child-trauma")({
       {
         name: "description",
         content:
-          "Eighteen randomised statements map six childhood dimensions — safety, trust, voice, attachment, self-worth and regulation — into a radar report you can download.",
+          "Twenty-four randomised statements map six childhood dimensions — safety, trust, voice, attachment, self-worth and regulation — into a radar report you can download.",
       },
       { property: "og:title", content: "Child Trauma Test — Senses of Void" },
       {
@@ -120,7 +120,7 @@ function ChildTrauma() {
       eyebrow="Tool 01 · Psyche"
       slug="child-trauma"
       title="Child Trauma Test"
-      intro="Eighteen statements about growing up, drawn fresh from a 48-item bank every attempt. Answer on instinct — the score maps how dependable six emotional dimensions felt, not how damaged you are."
+      intro="Twenty-four statements about growing up, drawn fresh from a 48-item bank every attempt. Answer on instinct — the score maps how dependable six emotional dimensions felt, not how damaged you are."
     >
       {phase === "intro" ? (
         <div className="glass reveal rounded-2xl p-6 sm:p-8">
