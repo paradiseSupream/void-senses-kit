@@ -194,6 +194,19 @@ export function AudienceTab({ token }: { token: string }) {
       ),
       "",
       toCsv(
+        ["audit_field", "covered", "total", "coverage_pct", "missing", "missing_rate_pct", "status"],
+        report.audit.fields.map((f) => [
+          f.field,
+          f.covered,
+          f.total,
+          f.coveragePct.toFixed(2),
+          f.missing,
+          f.missingRatePct.toFixed(2),
+          f.status,
+        ]),
+      ),
+      "",
+      toCsv(
         ["buyer_email", "plan", "source", "amount_cents", "created_at", "active"],
         report.buyers.map((b) => [
           b.email,
