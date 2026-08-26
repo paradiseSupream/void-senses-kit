@@ -1075,6 +1075,18 @@ export const adminReplayEvent = createServerFn({ method: "POST" })
       }
     }
 
+    const { logTrackingEvents } = await import("@/lib/tracking-log.server");
+    await logTrackingEvents(
+      out.map((row) => ({
+        channel: row.channel.startsWith("Meta") ? ("meta" as const) : ("tiktok" as const),
+        source: "sandbox" as const,
+        event: data.event,
+        ok: row.ok,
+        detail: row.detail,
+        eventId: row.eventId,
+      })),
+    );
+
     return out;
   });
 
