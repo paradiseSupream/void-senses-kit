@@ -106,7 +106,25 @@ export const DEFAULT_SITE: SiteSettings = {
   stripe_enabled: false,
 };
 
-export async function readSettings(): Promise<{ ads: AdsSettings; site: SiteSettings }> {
+/** Environment fallbacks so ids configured as secrets keep working. */
+function trackingEnvDefaults(): TrackingSettings {
+  const env = (name: string) => (process.env[name] ?? "").trim();
+  return {
+    ...DEFAULT_TRACKING,
+    meta_pixel_id: env("META_PIXEL_ID") || env("VITE_META_PIXEL_ID"),
+    meta_capi_token: env("META_CAPI_ACCESS_TOKEN"),
+    tiktok_pixel_id: env("TIKTOK_PIXEL_ID") || env("VITE_TIKTOK_PIXEL_ID"),
+    tiktok_events_token: env("TIKTOK_EVENTS_ACCESS_TOKEN"),
+    google_ads_id: env("VITE_GOOGLE_ADS_ID"),
+    ga4_id: env("VITE_GA4_ID"),
+  };
+}
+
+export async function readSettings(): Promise<{
+  ads: AdsSettings;
+  site: SiteSettings;
+  tracking: TrackingSettings;
+}> {
   const db = admin();
   const { data } = await db.from("app_settings").select("key,value");
   const map = new Map((data ?? []).map((row) => [row.key as string, row.value as object]));
