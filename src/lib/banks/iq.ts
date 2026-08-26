@@ -83,5 +83,5 @@ export const IQ_BANK: IqItem[] = [
   { id: "s13", cat: "Spatial", tier: 3, prompt: "A square rotated 45° in the plane looks like a:", options: ["Rectangle", "Diamond", "Trapezoid", "Circle"], answer: 1 },
 ];
 
-export const IQ_PER_CATEGORY = 4;
+export const IQ_PER_CATEGORY = 5;
 export const IQ_SESSION_SIZE = IQ_PER_CATEGORY * 5;

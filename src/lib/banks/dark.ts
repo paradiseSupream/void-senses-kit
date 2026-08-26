@@ -85,7 +85,7 @@ export const DARK_BANK: Likert[] = [
   { id: "sh8", dim: "Shadow", text: "I observe my own emotions as if from slightly outside them." },
 ];
 
-export const DARK_PER_DIM = 3;
+export const DARK_PER_DIM = 4;
 export const DARK_SESSION_SIZE = DARK_PER_DIM * DARK_DIMS.length;
 
 /** Short labels used on the radar so six axes fit on a phone. */
