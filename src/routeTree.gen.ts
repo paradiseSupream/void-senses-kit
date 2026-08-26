@@ -20,6 +20,7 @@ import { Route as AdminComplianceRouteImport } from './routes/admin.compliance'
 import { Route as AdminMonetizationRouteImport } from './routes/admin.monetization'
 import { Route as ApiDossierPdfRouteImport } from './routes/api/dossier-pdf'
 import { Route as ArchetypesIndexRouteImport } from './routes/archetypes.index'
+import { Route as ArchetypesSlugRouteImport } from './routes/archetypes.$slug'
 import { Route as ToolsIndexRouteImport } from './routes/tools.index'
 import { Route as ToolsChildTraumaRouteImport } from './routes/tools.child-trauma'
 import { Route as ToolsDarkPersonalityRouteImport } from './routes/tools.dark-personality'
@@ -91,6 +92,11 @@ const ApiDossierPdfRoute = ApiDossierPdfRouteImport.update({
 const ArchetypesIndexRoute = ArchetypesIndexRouteImport.update({
   id: '/archetypes/',
   path: '/archetypes/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ArchetypesSlugRoute = ArchetypesSlugRouteImport.update({
+  id: '/archetypes/$slug',
+  path: '/archetypes/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ToolsIndexRoute = ToolsIndexRouteImport.update({
@@ -189,6 +195,7 @@ export interface FileRoutesByFullPath {
   '/admin/compliance': typeof AdminComplianceRoute
   '/admin/monetization': typeof AdminMonetizationRoute
   '/api/dossier-pdf': typeof ApiDossierPdfRoute
+  '/archetypes/$slug': typeof ArchetypesSlugRoute
   '/tools/child-trauma': typeof ToolsChildTraumaRoute
   '/tools/dark-personality': typeof ToolsDarkPersonalityRoute
   '/tools/iq': typeof ToolsIqRoute
@@ -219,6 +226,7 @@ export interface FileRoutesByTo {
   '/admin/compliance': typeof AdminComplianceRoute
   '/admin/monetization': typeof AdminMonetizationRoute
   '/api/dossier-pdf': typeof ApiDossierPdfRoute
+  '/archetypes/$slug': typeof ArchetypesSlugRoute
   '/tools/child-trauma': typeof ToolsChildTraumaRoute
   '/tools/dark-personality': typeof ToolsDarkPersonalityRoute
   '/tools/iq': typeof ToolsIqRoute
@@ -250,6 +258,7 @@ export interface FileRoutesById {
   '/admin/compliance': typeof AdminComplianceRoute
   '/admin/monetization': typeof AdminMonetizationRoute
   '/api/dossier-pdf': typeof ApiDossierPdfRoute
+  '/archetypes/$slug': typeof ArchetypesSlugRoute
   '/tools/child-trauma': typeof ToolsChildTraumaRoute
   '/tools/dark-personality': typeof ToolsDarkPersonalityRoute
   '/tools/iq': typeof ToolsIqRoute
@@ -282,6 +291,7 @@ export interface FileRouteTypes {
     | '/admin/compliance'
     | '/admin/monetization'
     | '/api/dossier-pdf'
+    | '/archetypes/$slug'
     | '/tools/child-trauma'
     | '/tools/dark-personality'
     | '/tools/iq'
@@ -312,6 +322,7 @@ export interface FileRouteTypes {
     | '/admin/compliance'
     | '/admin/monetization'
     | '/api/dossier-pdf'
+    | '/archetypes/$slug'
     | '/tools/child-trauma'
     | '/tools/dark-personality'
     | '/tools/iq'
@@ -342,6 +353,7 @@ export interface FileRouteTypes {
     | '/admin/compliance'
     | '/admin/monetization'
     | '/api/dossier-pdf'
+    | '/archetypes/$slug'
     | '/tools/child-trauma'
     | '/tools/dark-personality'
     | '/tools/iq'
@@ -373,6 +385,7 @@ export interface RootRouteChildren {
   AdminComplianceRoute: typeof AdminComplianceRoute
   AdminMonetizationRoute: typeof AdminMonetizationRoute
   ApiDossierPdfRoute: typeof ApiDossierPdfRoute
+  ArchetypesSlugRoute: typeof ArchetypesSlugRoute
   ToolsChildTraumaRoute: typeof ToolsChildTraumaRoute
   ToolsDarkPersonalityRoute: typeof ToolsDarkPersonalityRoute
   ToolsIqRoute: typeof ToolsIqRoute
@@ -471,6 +484,13 @@ declare module '@tanstack/react-router' {
       path: '/archetypes'
       fullPath: '/archetypes/'
       preLoaderRoute: typeof ArchetypesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/archetypes/$slug': {
+      id: '/archetypes/$slug'
+      path: '/archetypes/$slug'
+      fullPath: '/archetypes/$slug'
+      preLoaderRoute: typeof ArchetypesSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/tools/': {
@@ -605,6 +625,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminComplianceRoute: AdminComplianceRoute,
   AdminMonetizationRoute: AdminMonetizationRoute,
   ApiDossierPdfRoute: ApiDossierPdfRoute,
+  ArchetypesSlugRoute: ArchetypesSlugRoute,
   ToolsChildTraumaRoute: ToolsChildTraumaRoute,
   ToolsDarkPersonalityRoute: ToolsDarkPersonalityRoute,
   ToolsIqRoute: ToolsIqRoute,
