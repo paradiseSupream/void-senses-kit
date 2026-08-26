@@ -518,6 +518,22 @@ export type AudienceReport = {
     active: boolean;
   }>;
   sessions: AudienceSession[];
+  /** Automatic data-quality audit for the capture pipeline. */
+  audit: {
+    rows: number;
+    suspectRows: number;
+    suspectRatePct: number;
+    fields: Array<{
+      field: string;
+      covered: number;
+      total: number;
+      coveragePct: number;
+      missing: number;
+      missingRatePct: number;
+      status: "good" | "warn" | "bad";
+      note: string;
+    }>;
+  };
 };
 
 type EventRow = {
@@ -710,7 +726,71 @@ export const adminAudience = createServerFn({ method: "POST" })
       }
     }
 
+    // ---- Data accuracy audit -------------------------------------------
+    const total = sessions.length;
+    const suspectRows = list.filter((r) => r.suspect).length;
+    const vipCount = (vipRows ?? []).length;
+    const grade = (pct: number): "good" | "warn" | "bad" =>
+      pct >= 95 ? "good" : pct >= 75 ? "warn" : "bad";
+    const field = (
+      name: string,
+      covered: number,
+      denom: number,
+      note: string,
+    ) => {
+      const coveragePct = denom ? (covered / denom) * 100 : 0;
+      return {
+        field: name,
+        covered,
+        total: denom,
+        coveragePct,
+        missing: Math.max(0, denom - covered),
+        missingRatePct: denom ? ((denom - covered) / denom) * 100 : 0,
+        status: grade(denom ? coveragePct : 100),
+        note,
+      };
+    };
+
+    const audit = {
+      rows: list.length,
+      suspectRows,
+      suspectRatePct: list.length ? (suspectRows / list.length) * 100 : 0,
+      fields: [
+        field(
+          "country",
+          sessions.filter((s) => s.country).length,
+          total,
+          "Edge header (cf-ipcountry)",
+        ),
+        field(
+          "device",
+          sessions.filter((s) => s.device).length,
+          total,
+          "Client device hint on each event",
+        ),
+        field(
+          "source",
+          sessions.filter((s) => s.source && s.source !== "direct").length,
+          total,
+          "UTM source or referrer host; 'direct' counts as unattributed",
+        ),
+        field(
+          "dwell",
+          sessions.filter((s) => s.durationSec > 0).length,
+          total,
+          "SessionPulse heartbeats + first/last event span",
+        ),
+        field(
+          "purchase",
+          Math.min(purchases, vipCount),
+          vipCount,
+          "VIP members matched by a conversion event in range",
+        ),
+      ],
+    };
+
     return {
+      audit,
       totals: {
         sessions: sessions.length,
         visitors: sessions.length,
