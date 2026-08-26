@@ -29,7 +29,7 @@ export function SampleResult() {
   const shape = AXES.map((a, i) => point(i, R * a.value).join(",")).join(" ");
 
   return (
-    <div className="panel overflow-hidden p-5 sm:p-6">
+    <div className="bento h-full p-5 sm:p-6">
       <div className="flex items-center justify-between gap-3">
         <div className="min-w-0">
           <span className="label-mono">Sample report</span>

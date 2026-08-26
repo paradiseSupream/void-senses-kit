@@ -34,7 +34,7 @@ export function StreakChallenge() {
   const pct = Math.round((completed / steps.length) * 100);
 
   return (
-    <div className="panel overflow-hidden p-5 sm:p-6">
+    <div className="bento h-full p-5 sm:p-6">
       <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4">
         <div className="min-w-0">
           <span className="label-mono">The 3-test run</span>

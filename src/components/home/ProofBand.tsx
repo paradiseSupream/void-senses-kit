@@ -37,7 +37,7 @@ const TRUST = [
  */
 export function ProofBand() {
   return (
-    <div className="panel overflow-hidden p-6 sm:p-8">
+    <div className="bento p-6 sm:p-8">
       <div className="grid gap-4 sm:grid-cols-3 sm:gap-5">
         {STEPS.map(({ icon: Icon, title, body }, i) => (
           <div key={title} className="flex items-start gap-3.5">
