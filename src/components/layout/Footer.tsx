@@ -47,6 +47,20 @@ export function Footer() {
 
 
         <div>
+          <h2 className="label-mono">Explore</h2>
+          <ul className="mt-3 space-y-2">
+            <li>
+              <Link
+                to="/archetypes"
+                className="text-sm text-muted-foreground transition-colors hover:text-primary"
+              >
+                The 8 Shadow Archetypes
+              </Link>
+            </li>
+          </ul>
+        </div>
+
+        <div>
           <h2 className="label-mono">Legal</h2>
           <ul className="mt-3 space-y-2">
             <li>
