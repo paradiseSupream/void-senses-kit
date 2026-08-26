@@ -2,7 +2,8 @@ import { useEffect } from "react";
 import { useRouterState } from "@tanstack/react-router";
 
 import { useConsent } from "@/lib/consent";
-import { ga4Enabled, gaPageView, loadGa4 } from "@/lib/ga4";
+import { configureGa4, ga4Enabled, gaPageView, loadGa4 } from "@/lib/ga4";
+import { useSiteConfig } from "@/lib/site-config";
 
 /**
  * Loads GA4 once analytics consent is granted and sends a page_view on every
@@ -12,12 +13,17 @@ export function Ga4Loader() {
   const consent = useConsent();
   const pathname = useRouterState({ select: (state) => state.location.pathname });
 
+  const tracking = useSiteConfig().tracking;
   const allowed = consent === "all";
+
+  useEffect(() => {
+    configureGa4(tracking?.ga4_id);
+  }, [tracking?.ga4_id]);
 
   useEffect(() => {
     if (!allowed || !ga4Enabled()) return;
     loadGa4();
-  }, [allowed]);
+  }, [allowed, tracking?.ga4_id]);
 
   useEffect(() => {
     if (!allowed || !ga4Enabled()) return;

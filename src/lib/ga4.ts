@@ -6,9 +6,14 @@
  * measured end-to-end (landing -> tool start -> result -> VIP).
  */
 
-const MEASUREMENT_ID = import.meta.env["VITE_LOVABLE_CONNECTOR_GOOGLE_ANALYTICS_API_KEY"] as
+let MEASUREMENT_ID = (import.meta.env["VITE_LOVABLE_CONNECTOR_GOOGLE_ANALYTICS_API_KEY"] as
   | string
-  | undefined;
+  | undefined) || undefined;
+
+/** Overrides the measurement id with the value saved in the admin panel. */
+export function configureGa4(id: string | undefined): void {
+  if (id) MEASUREMENT_ID = id;
+}
 
 declare global {
   interface Window {
