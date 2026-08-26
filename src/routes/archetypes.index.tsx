@@ -112,7 +112,7 @@ function ArchetypesIndex() {
           ))}
         </div>
 
-        <AdSlot slot="archetypes_footer" className="mt-10" />
+        <AdSlot id="archetypes_footer" className="mt-10" />
       </main>
     </div>
   );
