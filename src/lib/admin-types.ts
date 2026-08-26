@@ -89,8 +89,8 @@ export const ADSTERRA = {
  */
 export const DEFAULT_CAPS: AdCapSettings = {
   popunder: { perHour: 1, perSession: 1 },
-  vignette: { perHour: 2, perSession: 1 },
-  inpage_push: { perHour: 3, perSession: 2 },
+  vignette: { perHour: 1, perSession: 1 },
+  inpage_push: { perHour: 1, perSession: 1 },
 };
 
 export const DEFAULT_PRIVACY: PrivacySettings = {
@@ -105,14 +105,14 @@ export const DEFAULT_PUBLIC_CONFIG: PublicConfig = {
     enabled: true,
     lean_mode: false,
     monetag_zone: "",
-    monetag_popunder: true,
+    monetag_popunder: false,
     monetag_popunder_zone: MONETAG.popunder.zone,
-    monetag_inpage_push: true,
+    monetag_inpage_push: false,
     monetag_push_zone: MONETAG.push.zone,
     monetag_vignette: true,
     monetag_vignette_zone: MONETAG.vignette.zone,
     smartlink_url: MONETAG.smartlink,
-    adsterra_social_bar: true,
+    adsterra_social_bar: false,
     adsterra_social_bar_src: ADSTERRA.social_bar,
     slots: { result: true, gate: true, sticky_mobile: true, sticky_desktop: true, native_feed: true },
     caps: DEFAULT_CAPS,
