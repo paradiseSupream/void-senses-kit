@@ -61,6 +61,7 @@ export function SiteConfigProvider({ children }: { children: ReactNode }) {
         <MonetagLoader />
       </AdErrorBoundary>
       <Ga4Loader />
+      <PixelLoader />
       {children}
     </SiteConfigContext.Provider>
   );
