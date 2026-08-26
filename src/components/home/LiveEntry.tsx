@@ -49,7 +49,7 @@ export function LiveEntry({ arm }: { arm: string }) {
   };
 
   return (
-    <div className="panel spotlight overflow-hidden p-5 sm:p-6">
+    <div className="bento spotlight flex h-full flex-col p-5 sm:p-6">
       <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
         <div className="min-w-0">
           <span className="label-mono">Question 01 · Dark Personality</span>
@@ -62,11 +62,11 @@ export function LiveEntry({ arm }: { arm: string }) {
         </span>
       </div>
 
-      <h2 className="mt-4 font-display text-lg leading-[1.3] font-semibold tracking-[-0.02em] text-balance sm:text-xl">
+      <h2 className="mt-4 font-display text-2xl leading-[1.15] text-balance sm:text-[1.7rem]">
         {opener.text}
       </h2>
 
-      <div className="mt-4 grid gap-2">
+      <div className="mt-5 grid flex-1 content-start gap-2">
         {SCALE.map((option, i) => {
           const active = picked === option.weight;
           return (

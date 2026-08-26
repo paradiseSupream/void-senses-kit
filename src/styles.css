@@ -53,8 +53,8 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
-  --font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Instrument Serif", ui-serif, Georgia, serif;
+  --font-sans: "Work Sans", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
   --color-void-0: var(--void-0);
   --color-void-1: var(--void-1);
@@ -158,8 +158,19 @@
   h3,
   h4 {
     font-family: var(--font-display);
-    letter-spacing: -0.02em;
+    font-weight: 400;
+    letter-spacing: -0.01em;
   }
+
+  /* Instrument Serif ships a single weight — never let the browser fake bold. */
+  .font-display,
+  .text-display,
+  .text-section,
+  .serif-accent {
+    font-weight: 400 !important;
+    font-synthesis-weight: none;
+  }
+
 
   :focus-visible {
     outline: 2px solid var(--color-primary);
@@ -620,6 +631,11 @@
     background-clip: border-box;
     color: color-mix(in oklab, var(--primary) 85%, white);
   }
+
+  .reveal-seq {
+    opacity: 1 !important;
+    transform: none !important;
+  }
 }
 
 /* Mobile-first refinements: lighter effects, safe areas, comfortable type. */
@@ -657,20 +673,91 @@
 /* Fluid cinematic display scale used by hero + result headlines. */
 @utility text-display {
   font-family: var(--font-display);
-  font-weight: 700;
-  letter-spacing: -0.035em;
-  line-height: 1.02;
-  font-size: clamp(2.15rem, 7.2vw, 4.5rem);
+  font-weight: 400;
+  letter-spacing: -0.015em;
+  line-height: 1;
+  font-size: clamp(2.6rem, 8.6vw, 5.6rem);
   text-wrap: balance;
 }
 
 @utility text-section {
   font-family: var(--font-display);
-  font-weight: 700;
-  letter-spacing: -0.025em;
-  line-height: 1.1;
-  font-size: clamp(1.5rem, 3.6vw, 2.5rem);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  line-height: 1.06;
+  font-size: clamp(1.9rem, 4.4vw, 3rem);
+  text-wrap: balance;
 }
+
+/* Editorial serif italic used for the second line of display headlines. */
+@utility serif-accent {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 400;
+}
+
+/* Bento surface: quieter than `panel`, hairline-led, one light source per screen. */
+@utility bento {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border-radius: var(--radius-2xl);
+  border: 1px solid var(--hairline);
+  background-image: linear-gradient(
+    168deg,
+    color-mix(in oklab, var(--void-2) 74%, transparent),
+    color-mix(in oklab, var(--void-0) 82%, transparent)
+  );
+  box-shadow:
+    0 28px 70px -46px oklch(0 0 0 / 0.9),
+    inset 0 1px 0 0 oklch(1 0 0 / 0.04);
+  transition:
+    transform var(--dur-ui) var(--ease-out),
+    border-color var(--dur-ui) ease,
+    box-shadow var(--dur-ui) ease;
+
+  &:hover {
+    border-color: color-mix(in oklab, var(--tool-accent, var(--primary)) 26%, transparent);
+    box-shadow:
+      0 34px 80px -48px oklch(0 0 0 / 0.95),
+      0 0 40px -28px color-mix(in oklab, var(--tool-accent, var(--primary)) 45%, transparent),
+      inset 0 1px 0 0 oklch(1 0 0 / 0.06);
+  }
+}
+
+/* Single accent hairline used to open editorial blocks. */
+@utility edge-hairline {
+  position: relative;
+
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 1px;
+    background: linear-gradient(
+      180deg,
+      transparent,
+      color-mix(in oklab, var(--tool-accent, var(--primary)) 60%, transparent),
+      transparent
+    );
+  }
+}
+
+/* Scroll-reveal target. `.is-in` is toggled by the Reveal component. */
+@utility reveal-seq {
+  opacity: 0;
+  transform: translate3d(0, 22px, 0);
+  transition:
+    opacity var(--dur-major) var(--ease-out),
+    transform var(--dur-major) var(--ease-out);
+
+  &.is-in {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+
 
 
 /* Result radar: the scored shape draws itself once, then holds. */

@@ -19,7 +19,7 @@ export function SignatureCard() {
   return (
     <article
       style={{ ["--tool-accent" as string]: tool.accent }}
-      className="panel spotlight lift relative grid overflow-hidden lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)]"
+      className="bento spotlight relative grid h-full lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)]"
     >
       <div className="order-2 p-6 sm:p-8 lg:order-1">
         <span className="label-mono inline-flex items-center gap-2">

@@ -18,7 +18,7 @@ export function Header() {
       <div className="dock mx-auto flex max-w-7xl items-center gap-3 rounded-2xl px-3 py-2.5 sm:px-5">
         <Link to="/" className="group flex min-w-0 shrink-0 items-center gap-2.5">
           <LogoMark className="size-8 transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:rotate-90" />
-          <span className="truncate font-display text-[0.95rem] font-bold tracking-[-0.03em] sm:text-lg">
+          <span className="truncate font-display text-lg tracking-[-0.01em] sm:text-xl">
             Senses of Void
           </span>
         </Link>

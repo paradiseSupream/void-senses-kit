@@ -27,9 +27,9 @@ export function HomeFaq() {
   return (
     <div className="grid gap-2.5">
       {FAQ.map((item) => (
-        <details key={item.q} className="panel group px-5 py-4">
+        <details key={item.q} className="bento group px-5 py-4">
           <summary className="flex cursor-pointer list-none items-center justify-between gap-4">
-            <span className="font-display text-[0.95rem] font-semibold">{item.q}</span>
+            <span className="font-display text-lg">{item.q}</span>
             <ChevronDown
               className="size-4 shrink-0 text-muted-foreground transition-transform group-open:rotate-180"
               aria-hidden="true"

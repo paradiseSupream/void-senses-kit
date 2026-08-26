@@ -37,7 +37,7 @@ const TRUST = [
  */
 export function ProofBand() {
   return (
-    <div className="panel overflow-hidden p-6 sm:p-8">
+    <div className="bento p-6 sm:p-8">
       <div className="grid gap-4 sm:grid-cols-3 sm:gap-5">
         {STEPS.map(({ icon: Icon, title, body }, i) => (
           <div key={title} className="flex items-start gap-3.5">
@@ -45,7 +45,7 @@ export function ProofBand() {
               <Icon className="size-4.5" aria-hidden="true" />
             </span>
             <div className="min-w-0">
-              <h3 className="font-display text-base font-semibold">
+              <h3 className="font-display text-xl">
                 <span className="label-mono mr-2">0{i + 1}</span>
                 {title}
               </h3>
@@ -59,7 +59,7 @@ export function ProofBand() {
         {FACTS.map(({ icon: Icon, k, v }) => (
           <div key={k} className="hud-tile px-3 py-3 text-center">
             <Icon className="mx-auto size-4 text-primary" aria-hidden="true" />
-            <dt className="mt-2 font-display text-base font-semibold tracking-[-0.02em]">{k}</dt>
+            <dt className="mt-2 font-display text-xl">{k}</dt>
             <dd className="label-mono mt-0.5">{v}</dd>
           </div>
         ))}

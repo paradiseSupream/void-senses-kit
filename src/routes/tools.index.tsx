@@ -84,7 +84,7 @@ function ToolsIndex() {
             <Sparkles className="size-3.5 text-primary" aria-hidden="true" />
             7 tools · 100% free · no signup
           </span>
-          <h1 className="mt-4 max-w-3xl font-display text-3xl leading-[1.05] font-bold text-balance sm:text-5xl">
+          <h1 className="mt-4 max-w-3xl text-display">
             Every test and tool, in one place
           </h1>
           <p className="mt-4 max-w-2xl text-[0.95rem] leading-relaxed text-pretty text-muted-foreground sm:text-lg">

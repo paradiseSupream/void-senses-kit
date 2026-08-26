@@ -12,13 +12,13 @@ export function ToolRow({ tool }: { tool: ToolMeta }) {
     <a
       href={`${tool.path}?auto=1`}
       style={{ ["--tool-accent" as string]: tool.accent }}
-      className="panel lift group grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3.5 p-4 sm:gap-4 sm:p-5"
+      className="bento group grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3.5 p-4 sm:gap-4 sm:p-5"
     >
       <span className="accent-tile size-11 shrink-0">
         <Icon className="size-5" style={{ color: "var(--tool-accent)" }} aria-hidden="true" />
       </span>
       <span className="min-w-0">
-        <span className="block truncate font-display text-base font-semibold">{tool.name}</span>
+        <span className="block truncate font-display text-xl">{tool.name}</span>
         <span className="mt-0.5 block truncate text-sm text-muted-foreground">{tool.tagline}</span>
         <span className="label-mono mt-1 block">
           {tool.category} · {tool.duration}
