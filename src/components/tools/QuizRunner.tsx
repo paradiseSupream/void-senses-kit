@@ -58,14 +58,17 @@ export function QuizRunner({
       markQuizInteraction();
       const next = { ...answers, [item.id]: weight };
       setAnswers(next);
-      if (index === items.length - 1) {
+      // Skip anything already answered (a carried home-page answer), so the
+      // session ends as soon as every item in the set has a value.
+      const remaining = items.findIndex((q) => next[q.id] === undefined);
+      if (remaining === -1) {
         setQuizActive(false);
         onComplete(next);
-      }
-      else setIndex((i) => i + 1);
+      } else setIndex(remaining);
     },
-    [answers, index, item, items.length, onComplete],
+    [answers, item, items, onComplete],
   );
+
 
   if (!item) return null;
 
