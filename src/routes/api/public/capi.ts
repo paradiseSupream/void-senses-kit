@@ -73,6 +73,8 @@ export const Route = createFileRoute("/api/public/capi")({
         const timestamp = Math.floor(Date.now() / 1000);
 
         const tasks: Promise<unknown>[] = [];
+        const { logTrackingEvents } = await import("@/lib/tracking-log.server");
+        const log: Array<Parameters<typeof logTrackingEvents>[0][number]> = [];
 
         // Credentials live in the admin panel (app_settings.tracking) and fall
         // back to environment secrets when they were never saved there.
@@ -128,7 +130,17 @@ export const Route = createFileRoute("/api/public/capi")({
                 }),
               },
             ).then(async (res) => {
-              if (!res.ok) console.error("meta capi failed", res.status, await res.text());
+              const text = res.ok ? "" : await res.text();
+              if (!res.ok) console.error("meta capi failed", res.status, text);
+              log.push({
+                channel: "meta",
+                source: "server",
+                event,
+                ok: res.ok,
+                status: res.status,
+                detail: res.ok ? "Conversions API accepted" : text,
+                eventId,
+              });
             }),
           );
         }
@@ -164,12 +176,27 @@ export const Route = createFileRoute("/api/public/capi")({
                 ],
               }),
             }).then(async (res) => {
-              if (!res.ok) console.error("tiktok capi failed", res.status, await res.text());
+              const body = (await res.json().catch(() => ({}))) as {
+                code?: number;
+                message?: string;
+              };
+              const ok = res.ok && body.code === 0;
+              if (!ok) console.error("tiktok capi failed", res.status, body.message);
+              log.push({
+                channel: "tiktok",
+                source: "server",
+                event,
+                ok,
+                status: res.status,
+                detail: ok ? "Events API accepted" : (body.message ?? `HTTP ${res.status}`),
+                eventId,
+              });
             }),
           );
         }
 
         await Promise.allSettled(tasks);
+        await logTrackingEvents(log);
         return new Response(null, { status: 204 });
       },
     },
