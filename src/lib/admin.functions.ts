@@ -316,9 +316,10 @@ export const getPublicConfig = createServerFn({ method: "GET" }).handler(
   async (): Promise<{
     ads: PublicAdsConfig;
     site: Pick<SiteSettings, "announcement" | "vip_price_cents" | "vip_sol_address">;
+    tracking: PublicTrackingConfig;
   }> => {
     const { readSettings } = await import("@/lib/admin-core.server");
-    const { ads, site } = await readSettings();
+    const { ads, site, tracking } = await readSettings();
     return {
       ads: {
         enabled: ads.enabled,
