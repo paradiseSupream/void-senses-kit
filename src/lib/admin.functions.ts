@@ -518,6 +518,22 @@ export type AudienceReport = {
     active: boolean;
   }>;
   sessions: AudienceSession[];
+  /** Automatic data-quality audit for the capture pipeline. */
+  audit: {
+    rows: number;
+    suspectRows: number;
+    suspectRatePct: number;
+    fields: Array<{
+      field: string;
+      covered: number;
+      total: number;
+      coveragePct: number;
+      missing: number;
+      missingRatePct: number;
+      status: "good" | "warn" | "bad";
+      note: string;
+    }>;
+  };
 };
 
 type EventRow = {
