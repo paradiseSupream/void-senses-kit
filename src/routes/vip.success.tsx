@@ -64,6 +64,12 @@ function VipSuccessPage() {
           setVip(true, result.plan ?? "lifetime");
           setState("done");
           trackFunnel("vip_purchase");
+          pixelTrack("Purchase", {
+            value: result.plan === "monthly" ? 2.99 : 19,
+            currency: "USD",
+            contentName: `vip_${result.plan ?? "lifetime"}`,
+            ...(result.email ? { email: result.email } : {}),
+          });
           toast.success("VIP is active — ads and export gates are off.");
           return;
         }
