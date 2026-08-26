@@ -15,18 +15,31 @@ export function QuizRunner({
   onComplete,
   onReshuffle,
   intro,
+  initialAnswers,
 }: {
   items: Likert[];
   onComplete: (answers: Record<string, number>) => void;
   onReshuffle?: () => void;
   intro?: string;
+  /** Answers already given elsewhere (e.g. question one on the home hero). */
+  initialAnswers?: Record<string, number> | undefined;
 }) {
   const [index, setIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, number>>({});
 
   useEffect(() => {
-    setIndex(0);
-    setAnswers({});
+    // Keep only carried answers that belong to this drawn set, then resume on
+    // the first unanswered item.
+    const seeded: Record<string, number> = {};
+    for (const item of items) {
+      const carried = initialAnswers?.[item.id];
+      if (typeof carried === "number") seeded[item.id] = carried;
+    }
+    const first = items.findIndex((item) => seeded[item.id] === undefined);
+    setAnswers(seeded);
+    setIndex(first === -1 ? 0 : first);
+    // `initialAnswers` is a one-shot handoff; the drawn set is the real trigger.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [items]);
 
   // While the quiz is open and unfinished, no pop-under / vignette / push may
@@ -45,14 +58,17 @@ export function QuizRunner({
       markQuizInteraction();
       const next = { ...answers, [item.id]: weight };
       setAnswers(next);
-      if (index === items.length - 1) {
+      // Skip anything already answered (a carried home-page answer), so the
+      // session ends as soon as every item in the set has a value.
+      const remaining = items.findIndex((q) => next[q.id] === undefined);
+      if (remaining === -1) {
         setQuizActive(false);
         onComplete(next);
-      }
-      else setIndex((i) => i + 1);
+      } else setIndex(remaining);
     },
-    [answers, index, item, items.length, onComplete],
+    [answers, item, items, onComplete],
   );
+
 
   if (!item) return null;
 
