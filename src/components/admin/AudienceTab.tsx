@@ -307,6 +307,52 @@ export function AudienceTab({ token }: { token: string }) {
       {report ? (
         <>
           <div className="panel p-5">
+            <div className="flex flex-wrap items-baseline justify-between gap-2">
+              <h3 className="font-display text-base font-semibold">Data accuracy audit</h3>
+              <p className="text-xs text-muted-foreground">
+                {report.audit.rows.toLocaleString()} raw events ·{" "}
+                {report.audit.suspectRows.toLocaleString()} bot/suspect filtered (
+                {pct(report.audit.suspectRatePct)})
+              </p>
+            </div>
+            <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+              {report.audit.fields.map((f) => (
+                <div key={f.field} className="rounded-lg border border-hairline bg-surface-2 p-3">
+                  <div className="flex items-center justify-between">
+                    <span className="label-mono capitalize">{f.field}</span>
+                    <span
+                      className={`rounded-full px-2 py-0.5 text-[11px] ${
+                        f.status === "good"
+                          ? "bg-primary/15 text-primary"
+                          : f.status === "warn"
+                            ? "bg-amber-500/15 text-amber-400"
+                            : "bg-destructive/15 text-destructive"
+                      }`}
+                    >
+                      {f.status === "good" ? "healthy" : f.status === "warn" ? "partial" : "low"}
+                    </span>
+                  </div>
+                  <p className="mt-1 font-display text-xl font-semibold">
+                    {pct(f.coveragePct)}
+                    <span className="ml-1 text-xs font-normal text-muted-foreground">coverage</span>
+                  </p>
+                  <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-surface-1">
+                    <div
+                      className="h-full rounded-full bg-primary"
+                      style={{ width: `${Math.min(100, Math.max(0, f.coveragePct))}%` }}
+                    />
+                  </div>
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    {f.covered.toLocaleString()}/{f.total.toLocaleString()} captured · missing{" "}
+                    {f.missing.toLocaleString()} ({pct(f.missingRatePct)})
+                  </p>
+                  <p className="text-xs text-muted-foreground/80">{f.note}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="panel p-5">
             <h3 className="font-display text-base font-semibold">By country</h3>
             <div className="mt-3">
               <Table
