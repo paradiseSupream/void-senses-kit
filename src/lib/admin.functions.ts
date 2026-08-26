@@ -617,11 +617,3 @@ export const adminAudience = createServerFn({ method: "POST" })
       sessions: sessions.slice(0, 300),
     };
   });
-
-function hostOf(referrer: string): string {
-  try {
-    return new URL(referrer).hostname.replace(/^www\./, "");
-  } catch {
-    return "direct";
-  }
-}
