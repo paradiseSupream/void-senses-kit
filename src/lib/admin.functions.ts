@@ -283,14 +283,19 @@ export const adminTestTracking = createServerFn({ method: "POST" })
               `https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(id)}`,
             );
             const text = await res.text();
-            const live = res.ok && text.length > 500;
+            // Google always serves the gtag runtime; a *configured* container
+            // also ships tag definitions, which an unknown id does not.
+            const configured = /"tags":\s*\[\s*\{/.test(text);
             results.push({
               channel: label,
-              ok: live,
-              detail: live
-                ? "Tag served by Google — container live"
-                : `Google did not return a tag for ${id}`,
+              ok: res.ok && configured,
+              detail: !res.ok
+                ? `Google returned HTTP ${res.status}`
+                : configured
+                  ? "Tag served by Google — container is live and configured"
+                  : `Google served the runtime but no configuration for ${id} — check the id`,
             });
+
           } catch (error) {
             results.push({ channel: label, ok: false, detail: (error as Error).message });
           }
