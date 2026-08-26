@@ -34,6 +34,8 @@ import { DEFAULT_CAPS, DEFAULT_PRIVACY } from "@/lib/admin-types";
 import { AbTestsTab } from "@/components/admin/AbTestsTab";
 import { ReportsTab } from "@/components/admin/ReportsTab";
 import { SearchConsoleTab } from "@/components/admin/SearchConsoleTab";
+import { AudienceTab } from "@/components/admin/AudienceTab";
+import { TrackingTab } from "@/components/admin/TrackingTab";
 
 export const Route = createFileRoute("/admin/")({
   head: () => ({
@@ -58,7 +60,18 @@ const TOKEN_KEY = "sov.adminToken";
 const money = (cents: number) => `$${(cents / 100).toFixed(2)}`;
 const pct = (value: number) => `${value.toFixed(2)}%`;
 
-const TABS = ["Overview", "Reports", "A/B tests", "Search", "Ads", "VIP", "Affiliates", "Site"] as const;
+const TABS = [
+  "Overview",
+  "Audience",
+  "Reports",
+  "Tracking",
+  "A/B tests",
+  "Search",
+  "Ads",
+  "VIP",
+  "Affiliates",
+  "Site",
+] as const;
 type Tab = (typeof TABS)[number];
 
 function Field({
@@ -247,7 +260,9 @@ function AdminPanel() {
 
       <div className="mt-6">
         {tab === "Overview" ? <OverviewTab token={token} /> : null}
+        {tab === "Audience" ? <AudienceTab token={token} /> : null}
         {tab === "Reports" ? <ReportsTab token={token} /> : null}
+        {tab === "Tracking" ? <TrackingTab token={token} /> : null}
         {tab === "A/B tests" ? <AbTestsTab token={token} /> : null}
         {tab === "Search" ? <SearchConsoleTab token={token} /> : null}
         {tab === "Ads" || tab === "Site" ? <SettingsTab token={token} which={tab} /> : null}
