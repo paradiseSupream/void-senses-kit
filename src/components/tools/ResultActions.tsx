@@ -161,8 +161,14 @@ export function ResultActions({
 
 
   const copy = async () => {
+    const url = withUtm(shareUrl, {
+      source: "copy_link",
+      campaign: toolSlug,
+      content: "result_copy",
+    });
     try {
-      await navigator.clipboard.writeText(`${payload.text}\n${shareUrl}`);
+      await navigator.clipboard.writeText(`${payload.text}\n${url}`);
+      trackShare({ source: "copy_link", campaign: toolSlug, content: "result_copy", toolSlug });
       toast.success("Copied — paste it anywhere.");
     } catch {
       toast.error("Clipboard blocked by your browser.");
@@ -171,12 +177,19 @@ export function ResultActions({
 
   const nativeShare = async () => {
     if (!navigator.share) return copy();
+    const url = withUtm(shareUrl, {
+      source: "native_link",
+      campaign: toolSlug,
+      content: "result_share",
+    });
+    trackShare({ source: "native_link", campaign: toolSlug, content: "result_share", toolSlug });
     try {
-      await navigator.share({ title: payload.title, text: payload.text, url: shareUrl });
+      await navigator.share({ title: payload.title, text: payload.text, url });
     } catch {
       /* user dismissed */
     }
   };
+
 
   return (
     <>
