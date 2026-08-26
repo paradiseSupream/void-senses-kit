@@ -83,7 +83,7 @@ function Vault() {
   return (
     <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
       <span className="label-mono">Tool 07 · Assets</span>
-      <h1 className="mt-2 font-display text-3xl font-bold sm:text-4xl">Free Drive Vault</h1>
+      <h1 className="mt-2 text-section">Free Drive Vault</h1>
       <p className="mt-3 max-w-2xl text-muted-foreground">
         UI kits, developer boilerplates, AI prompt megapacks and cheat sheets — all free, all
         hosted on Drive, no account required.
@@ -141,7 +141,7 @@ function Vault() {
                 </span>
                 <span className="label-mono">{slot.item.download_count} dl</span>
               </div>
-              <h2 className="mt-4 font-display text-base font-semibold text-foreground">
+              <h2 className="mt-4 font-display text-xl text-foreground">
                 {slot.item.title}
               </h2>
               <p className="mt-2 flex-1 text-sm text-muted-foreground">{slot.item.description}</p>

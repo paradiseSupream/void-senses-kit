@@ -127,9 +127,9 @@ export function QuizRunner({
         </span>
       </div>
 
-      <div key={item.id} className="panel spotlight reveal p-5 sm:p-8">
+      <div key={item.id} className="bento spotlight reveal p-5 sm:p-8">
         {intro ? <span className="label-mono">{intro}</span> : null}
-        <h2 className="mt-2.5 font-display text-[1.35rem] leading-[1.25] font-semibold tracking-[-0.025em] text-balance sm:text-[1.75rem]">
+        <h2 className="mt-3 font-display text-[1.7rem] leading-[1.18] text-balance sm:text-[2.25rem]">
           {item.text}
         </h2>
 

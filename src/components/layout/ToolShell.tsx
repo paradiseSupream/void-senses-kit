@@ -70,7 +70,7 @@ export function ToolShell({
             ) : null}
             <div className="min-w-0">
               <span className="label-mono block">{eyebrow}</span>
-              <h1 className="mt-1 font-display text-[1.8rem] leading-[1.08] font-bold tracking-[-0.032em] text-balance sm:text-[2.6rem]">
+              <h1 className="mt-1 text-section text-balance">
                 {title}
               </h1>
             </div>

@@ -38,7 +38,7 @@ export function ToolCard({ tool, priority = false }: { tool: ToolMeta; priority?
       style={{ ["--tool-accent" as string]: tool.accent }}
       onPointerMove={tilt.onPointerMove}
       onPointerLeave={tilt.onPointerLeave}
-      className="panel lift spotlight tilt-3d group relative flex flex-col overflow-hidden"
+      className="bento spotlight tilt-3d group relative flex flex-col"
     >
       {/* Cover art plus a per-tool light recipe gives each test its own identity. */}
       <div className="relative aspect-[2/1] w-full overflow-hidden sm:aspect-[16/9]">
@@ -70,7 +70,7 @@ export function ToolCard({ tool, priority = false }: { tool: ToolMeta; priority?
       </div>
 
       <div className="flex flex-1 flex-col p-4 sm:p-5">
-        <h3 className="font-display text-[1.05rem] leading-tight font-semibold tracking-[-0.02em] sm:text-xl">
+        <h3 className="font-display text-xl leading-tight sm:text-2xl">
           {tool.name}
         </h3>
         <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{tool.promise}</p>

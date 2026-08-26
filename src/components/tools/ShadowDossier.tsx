@@ -93,7 +93,7 @@ export function ShadowDossier({
         </div>
 
         <div className="mt-4 rounded-xl border border-hairline bg-background/40 p-4">
-          <h4 className="font-display text-base font-semibold">
+          <h4 className="font-display text-lg">
             {axis.label} — {axis.band} · {axis.value}/100
           </h4>
           <p className="mt-1 text-xs text-muted-foreground">{axis.meaning}</p>
