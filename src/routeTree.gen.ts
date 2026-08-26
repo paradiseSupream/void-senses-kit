@@ -19,6 +19,7 @@ import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AdminComplianceRouteImport } from './routes/admin.compliance'
 import { Route as AdminMonetizationRouteImport } from './routes/admin.monetization'
 import { Route as ApiDossierPdfRouteImport } from './routes/api/dossier-pdf'
+import { Route as ArchetypesIndexRouteImport } from './routes/archetypes.index'
 import { Route as ToolsIndexRouteImport } from './routes/tools.index'
 import { Route as ToolsChildTraumaRouteImport } from './routes/tools.child-trauma'
 import { Route as ToolsDarkPersonalityRouteImport } from './routes/tools.dark-personality'
@@ -85,6 +86,11 @@ const AdminMonetizationRoute = AdminMonetizationRouteImport.update({
 const ApiDossierPdfRoute = ApiDossierPdfRouteImport.update({
   id: '/api/dossier-pdf',
   path: '/api/dossier-pdf',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ArchetypesIndexRoute = ArchetypesIndexRouteImport.update({
+  id: '/archetypes/',
+  path: '/archetypes/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ToolsIndexRoute = ToolsIndexRouteImport.update({
@@ -192,6 +198,7 @@ export interface FileRoutesByFullPath {
   '/vip/checkout': typeof VipCheckoutRoute
   '/vip/success': typeof VipSuccessRoute
   '/admin/': typeof AdminIndexRoute
+  '/archetypes/': typeof ArchetypesIndexRoute
   '/tools/': typeof ToolsIndexRoute
   '/api/public/capi': typeof ApiPublicCapiRoute
   '/api/public/geo': typeof ApiPublicGeoRoute
@@ -221,6 +228,7 @@ export interface FileRoutesByTo {
   '/vip/checkout': typeof VipCheckoutRoute
   '/vip/success': typeof VipSuccessRoute
   '/admin': typeof AdminIndexRoute
+  '/archetypes': typeof ArchetypesIndexRoute
   '/tools': typeof ToolsIndexRoute
   '/api/public/capi': typeof ApiPublicCapiRoute
   '/api/public/geo': typeof ApiPublicGeoRoute
@@ -251,6 +259,7 @@ export interface FileRoutesById {
   '/vip/checkout': typeof VipCheckoutRoute
   '/vip/success': typeof VipSuccessRoute
   '/admin/': typeof AdminIndexRoute
+  '/archetypes/': typeof ArchetypesIndexRoute
   '/tools/': typeof ToolsIndexRoute
   '/api/public/capi': typeof ApiPublicCapiRoute
   '/api/public/geo': typeof ApiPublicGeoRoute
@@ -282,6 +291,7 @@ export interface FileRouteTypes {
     | '/vip/checkout'
     | '/vip/success'
     | '/admin/'
+    | '/archetypes/'
     | '/tools/'
     | '/api/public/capi'
     | '/api/public/geo'
@@ -311,6 +321,7 @@ export interface FileRouteTypes {
     | '/vip/checkout'
     | '/vip/success'
     | '/admin'
+    | '/archetypes'
     | '/tools'
     | '/api/public/capi'
     | '/api/public/geo'
@@ -340,6 +351,7 @@ export interface FileRouteTypes {
     | '/vip/checkout'
     | '/vip/success'
     | '/admin/'
+    | '/archetypes/'
     | '/tools/'
     | '/api/public/capi'
     | '/api/public/geo'
@@ -370,6 +382,7 @@ export interface RootRouteChildren {
   VipCheckoutRoute: typeof VipCheckoutRoute
   VipSuccessRoute: typeof VipSuccessRoute
   AdminIndexRoute: typeof AdminIndexRoute
+  ArchetypesIndexRoute: typeof ArchetypesIndexRoute
   ToolsIndexRoute: typeof ToolsIndexRoute
   ApiPublicCapiRoute: typeof ApiPublicCapiRoute
   ApiPublicGeoRoute: typeof ApiPublicGeoRoute
@@ -451,6 +464,13 @@ declare module '@tanstack/react-router' {
       path: '/api/dossier-pdf'
       fullPath: '/api/dossier-pdf'
       preLoaderRoute: typeof ApiDossierPdfRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/archetypes/': {
+      id: '/archetypes/'
+      path: '/archetypes'
+      fullPath: '/archetypes/'
+      preLoaderRoute: typeof ArchetypesIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/tools/': {
@@ -594,6 +614,7 @@ const rootRouteChildren: RootRouteChildren = {
   VipCheckoutRoute: VipCheckoutRoute,
   VipSuccessRoute: VipSuccessRoute,
   AdminIndexRoute: AdminIndexRoute,
+  ArchetypesIndexRoute: ArchetypesIndexRoute,
   ToolsIndexRoute: ToolsIndexRoute,
   ApiPublicCapiRoute: ApiPublicCapiRoute,
   ApiPublicGeoRoute: ApiPublicGeoRoute,
