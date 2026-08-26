@@ -93,10 +93,10 @@ function DarkPersonality() {
   const [carried] = useState(() => takeCarriedAnswer("dark-personality"));
   const [seed, setSeed] = useState(() => {
     let s = newSeed();
-    if (!carriedRef.value) return s;
+    if (!carried) return s;
     for (let i = 0; i < 40; i++) {
       const set = pickBalanced(DARK_BANK, (it) => it.dim, DARK_PER_DIM, rngFrom(s));
-      if (set.some((it) => it.id === carriedRef.value!.id)) break;
+      if (set.some((it) => it.id === carried.id)) break;
       s = newSeed();
     }
     return s;
