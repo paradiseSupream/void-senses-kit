@@ -249,16 +249,16 @@ function Home() {
 
   return (
     <div>
-      {/* ---------------- Hero: live entry ---------------- */}
+      {/* ---------------- Hero band ---------------- */}
       <section className="aurora grain relative overflow-hidden border-b border-hairline">
         <div className="void-grid absolute inset-0 -z-10" aria-hidden="true" />
-        <AmbientCanvas className="-z-10 opacity-70" />
+        <AmbientCanvas className="-z-10 opacity-60" />
         <div
           aria-hidden="true"
           className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent"
         />
-        <div className="mx-auto grid max-w-7xl gap-8 px-4 py-9 sm:px-6 sm:py-16 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:items-center lg:gap-14">
-          <div className="text-center lg:text-left">
+        <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-20">
+          <div className="mx-auto max-w-4xl text-center">
             <span
               className="reveal label-mono inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/8 px-3.5 py-1.5 text-primary backdrop-blur-xl"
               style={{ animationDelay: "0ms" }}
@@ -270,25 +270,20 @@ function Home() {
               {copy.badge}
             </span>
 
-            <h1 className="reveal text-display mt-5 sm:mt-7" style={{ animationDelay: "60ms" }}>
+            <h1 className="reveal text-display mt-6 sm:mt-8" style={{ animationDelay: "60ms" }}>
               {copy.title}
-              <span className="sheen-word mt-1.5 block">{copy.accent}</span>
+              <span className="sheen-word serif-accent mt-1 block">{copy.accent}</span>
             </h1>
 
             <p
-              className="reveal mx-auto mt-4 max-w-xl text-[0.97rem] leading-relaxed text-pretty text-muted-foreground sm:text-lg lg:mx-0"
+              className="reveal mx-auto mt-5 max-w-xl text-[0.97rem] leading-relaxed text-pretty text-muted-foreground sm:text-lg"
               style={{ animationDelay: "120ms" }}
             >
               {copy.sub}
             </p>
 
-            {/* Mobile: the live panel comes first, before any secondary copy. */}
-            <div className="reveal mt-6 lg:hidden" style={{ animationDelay: "150ms" }}>
-              <LiveEntry arm={heroArm} />
-            </div>
-
             <div
-              className="reveal mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap lg:justify-start"
+              className="reveal mt-7 flex flex-col justify-center gap-3 sm:flex-row sm:flex-wrap"
               style={{ animationDelay: "180ms" }}
             >
               <a
@@ -307,20 +302,8 @@ function Home() {
               </a>
             </div>
 
-            <ul
-              className="reveal mx-auto mt-5 grid max-w-xl gap-2 text-left lg:mx-0"
-              style={{ animationDelay: "200ms" }}
-            >
-              {reasons.map((reason) => (
-                <li key={reason} className="flex items-start gap-2.5 text-sm text-muted-foreground">
-                  <BadgeCheck className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden="true" />
-                  <span>{reason}</span>
-                </li>
-              ))}
-            </ul>
-
             <p
-              className="reveal label-mono mt-4 flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 lg:justify-start"
+              className="reveal label-mono mt-6 flex flex-wrap items-center justify-center gap-x-5 gap-y-1.5"
               style={{ animationDelay: "220ms" }}
             >
               <span className="inline-flex items-center gap-1.5">
@@ -333,76 +316,106 @@ function Home() {
                 <ShieldCheck className="size-3.5 text-primary" aria-hidden="true" /> no account
               </span>
             </p>
-
-            {/* Quick picks keep the top-converting tools reachable without any scroll. */}
-            <ul className="reveal mt-4 flex flex-wrap justify-center gap-2 lg:justify-start">
-              {QUICK_PICKS.map((slug) => {
-                const t = TOOLS.find((x) => x.slug === slug);
-                if (!t) return null;
-                const Icon = t.icon;
-                return (
-                  <li key={slug}>
-                    <a
-                      href={`${t.path}?auto=1`}
-                      style={{ ["--tool-accent" as string]: t.accent }}
-                      className="inline-flex min-h-11 items-center gap-2 rounded-full border border-hairline bg-surface/60 px-4 text-sm font-semibold backdrop-blur-xl transition-colors hover:bg-surface-2"
-                    >
-                      <Icon
-                        className="size-4"
-                        style={{ color: "var(--tool-accent)" }}
-                        aria-hidden="true"
-                      />
-                      {t.name}
-                    </a>
-                  </li>
-                );
-              })}
-            </ul>
           </div>
 
-          <div className="reveal hidden lg:block" style={{ animationDelay: "260ms" }}>
-            <LiveEntry arm={heroArm} />
-          </div>
+          {/* ---------------- Bento 1: live entry · signature · reasons ---------------- */}
+          <BentoGrid className="mt-9 sm:mt-14">
+            <BentoTile span="lg:col-span-2 lg:row-span-2">
+              <Reveal className="h-full">
+                <LiveEntry arm={heroArm} />
+              </Reveal>
+            </BentoTile>
+
+            <BentoTile span="lg:col-span-4">
+              <Reveal delay={80} className="h-full">
+                <SignatureCard />
+              </Reveal>
+            </BentoTile>
+
+            <BentoTile span="lg:col-span-4">
+              <Reveal delay={140}>
+                <ul className="bento edge-hairline grid gap-3 p-5 sm:grid-cols-3 sm:p-6">
+                  {reasons.map((reason) => (
+                    <li key={reason} className="flex items-start gap-2.5 text-sm text-muted-foreground">
+                      <BadgeCheck className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden="true" />
+                      <span>{reason}</span>
+                    </li>
+                  ))}
+                </ul>
+              </Reveal>
+            </BentoTile>
+          </BentoGrid>
+
+          {/* Quick picks keep the top-converting tools one tap away. */}
+          <ul className="mt-4 flex flex-wrap justify-center gap-2 sm:mt-5">
+            {QUICK_PICKS.map((slug) => {
+              const t = TOOLS.find((x) => x.slug === slug);
+              if (!t) return null;
+              const Icon = t.icon;
+              return (
+                <li key={slug}>
+                  <a
+                    href={`${t.path}?auto=1`}
+                    style={{ ["--tool-accent" as string]: t.accent }}
+                    className="capsule inline-flex min-h-11 items-center gap-2 px-4 text-sm font-semibold hover:text-foreground"
+                  >
+                    <Icon
+                      className="size-4"
+                      style={{ color: "var(--tool-accent)" }}
+                      aria-hidden="true"
+                    />
+                    {t.name}
+                  </a>
+                </li>
+              );
+            })}
+          </ul>
         </div>
       </section>
 
-      {/* ---------------- Signature test ---------------- */}
-      <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-14">
-        <SignatureCard />
-      </section>
-
-      {/* ---------------- What a finished report looks like ---------------- */}
-      <section className="border-y border-hairline bg-surface/20">
-        <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14">
-          <div className="max-w-2xl">
+      {/* ---------------- Bento 2: the payoff ---------------- */}
+      <section className="border-b border-hairline bg-surface/15">
+        <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16">
+          <Reveal>
             <span className="label-mono">The payoff</span>
-            <h2 className="text-section mt-2.5">This is what you get at the end</h2>
-          </div>
-          <div className="-mx-4 mt-5 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2 sm:mx-0 sm:grid sm:grid-cols-2 sm:overflow-visible sm:px-0 lg:grid-cols-3">
-            <div className="w-[85vw] shrink-0 snap-center sm:w-auto">
-              <SampleResult />
-            </div>
-            {PAYOFF.map(({ icon: Icon, title, body }) => (
-              <div key={title} className="panel w-[85vw] shrink-0 snap-center p-6 sm:w-auto">
-                <span className="accent-tile size-11">
-                  <Icon className="size-5" aria-hidden="true" />
-                </span>
-                <h3 className="mt-5 font-display text-lg font-semibold">{title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{body}</p>
-              </div>
+            <h2 className="text-section mt-2">
+              This is what you get <span className="serif-accent">at the end</span>
+            </h2>
+          </Reveal>
+
+          <BentoGrid className="mt-6 sm:mt-8">
+            <BentoTile span="lg:col-span-4">
+              <Reveal className="h-full">
+                <SampleResult />
+              </Reveal>
+            </BentoTile>
+            {PAYOFF.map(({ icon: Icon, title, body }, i) => (
+              <BentoTile key={title} span="lg:col-span-2">
+                <Reveal delay={80 + i * 70} className="h-full">
+                  <div className="bento flex h-full flex-col p-6">
+                    <span className="accent-tile size-11">
+                      <Icon className="size-5" aria-hidden="true" />
+                    </span>
+                    <h3 className="mt-5 font-display text-2xl">{title}</h3>
+                    <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{body}</p>
+                  </div>
+                </Reveal>
+              </BentoTile>
             ))}
-          </div>
+          </BentoGrid>
         </div>
       </section>
 
       {/* ---------------- Rest of the suite ---------------- */}
-      <section id="suite" className="mx-auto max-w-7xl scroll-mt-20 px-4 py-8 sm:px-6 sm:py-16">
-        <div className="max-w-2xl">
+      <section id="suite" className="mx-auto max-w-7xl scroll-mt-20 px-4 py-12 sm:px-6 sm:py-16">
+        <Reveal>
           <span className="label-mono">The rest of the suite</span>
-          <h2 className="text-section mt-2.5">What else do you want to find out?</h2>
-        </div>
+          <h2 className="text-section mt-2">
+            What else do you want <span className="serif-accent">to find out?</span>
+          </h2>
+        </Reveal>
 
-        <div className="mt-5 flex flex-wrap gap-2">
+        <div className="mt-6 flex flex-wrap gap-2">
           {GOALS.map(({ id, label, icon: Icon }) => {
             const active = goal === id;
             return (
@@ -457,25 +470,37 @@ function Home() {
       </section>
 
       {/* ---------------- Proof band + 3-test run ---------------- */}
-      <section className="border-y border-hairline bg-surface/20">
-        <div className="mx-auto max-w-7xl space-y-8 px-4 py-12 sm:px-6 sm:py-16">
-          <ProofBand />
-          <StreakChallenge />
+      <section className="border-y border-hairline bg-surface/15">
+        <div className="mx-auto max-w-7xl space-y-4 px-4 py-12 sm:space-y-4 sm:px-6 sm:py-16">
+          <Reveal>
+            <ProofBand />
+          </Reveal>
+          <Reveal delay={80}>
+            <StreakChallenge />
+          </Reveal>
         </div>
       </section>
 
       {/* ---------------- FAQ ---------------- */}
       <section className="mx-auto max-w-3xl px-4 py-12 sm:px-6 sm:py-16">
-        <span className="label-mono">Questions people ask</span>
-        <h2 className="text-section mt-2.5 mb-6">Free to use, honestly explained</h2>
-        <HomeFaq />
+        <Reveal>
+          <span className="label-mono">Questions people ask</span>
+          <h2 className="text-section mt-2 mb-6">
+            Free to use, <span className="serif-accent">honestly explained</span>
+          </h2>
+        </Reveal>
+        <Reveal delay={80}>
+          <HomeFaq />
+        </Reveal>
       </section>
 
       {/* ---------------- Closing CTA ---------------- */}
       <section className="mx-auto max-w-7xl px-4 pb-12 sm:px-6 sm:pb-20">
-        <div className="panel aurora grain spotlight relative overflow-hidden p-7 text-center sm:p-14">
-          <h2 className="text-section text-balance">Everything here is free. Forever.</h2>
-          <p className="mx-auto mt-3.5 max-w-lg text-sm leading-relaxed text-muted-foreground">
+        <div className="bento aurora grain relative overflow-hidden p-7 text-center sm:p-16">
+          <h2 className="text-section text-balance">
+            Everything here is free. <span className="serif-accent">Forever.</span>
+          </h2>
+          <p className="mx-auto mt-4 max-w-lg text-sm leading-relaxed text-muted-foreground">
             All {TOOLS.length} tools and the whole vault stay free — ads keep the lights on. If you
             prefer a clean screen, lifetime VIP removes every ad and export gate for one $19
             payment. No subscription, no renewal, no account.
