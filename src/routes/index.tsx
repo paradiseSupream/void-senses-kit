@@ -356,17 +356,17 @@ function Home() {
 
 
           {/* Quick picks keep the top-converting tools one tap away. */}
-          <ul className="mt-4 flex flex-wrap justify-center gap-2 sm:mt-5">
+          <ul className="snap-rail mt-4 sm:mt-5 sm:flex-wrap sm:justify-center sm:overflow-visible sm:px-0">
             {QUICK_PICKS.map((slug) => {
               const t = TOOLS.find((x) => x.slug === slug);
               if (!t) return null;
               const Icon = t.icon;
               return (
-                <li key={slug}>
+                <li key={slug} className="snap-start">
                   <a
                     href={`${t.path}?auto=1`}
                     style={{ ["--tool-accent" as string]: t.accent }}
-                    className="capsule inline-flex min-h-11 items-center gap-2 px-4 text-sm font-semibold hover:text-foreground"
+                    className="capsule inline-flex min-h-11 items-center gap-2 px-4 text-sm font-semibold whitespace-nowrap hover:text-foreground"
                   >
                     <Icon
                       className="size-4"
@@ -379,6 +379,7 @@ function Home() {
               );
             })}
           </ul>
+
         </div>
       </section>
 
