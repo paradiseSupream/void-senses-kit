@@ -10,6 +10,8 @@ import {
   adminTestTracking,
 } from "@/lib/admin.functions";
 import { DEFAULT_TRACKING, type TrackingSettings } from "@/lib/admin-types";
+import { EventReplaySandbox } from "@/components/admin/EventReplaySandbox";
+
 
 type Channel = "meta" | "tiktok" | "google";
 type Check = { channel: string; ok: boolean; detail: string };
@@ -383,7 +385,10 @@ export function TrackingTab({ token }: { token: string }) {
         <Results checks={checks.google ?? []} />
       </div>
 
+      <EventReplaySandbox token={token} />
+
       <div className="panel p-5 text-sm text-muted-foreground">
+
         <h3 className="font-display text-base font-semibold text-foreground">
           Which events are sent
         </h3>
