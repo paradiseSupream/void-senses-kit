@@ -276,7 +276,7 @@ function Home() {
 
   return (
     <div>
-      {/* ---------------- Hero ---------------- */}
+      {/* ---------------- Hero: live entry ---------------- */}
       <section className="aurora grain relative overflow-hidden border-b border-hairline">
         <div className="void-grid absolute inset-0 -z-10" aria-hidden="true" />
         <AmbientCanvas className="-z-10 opacity-70" />
@@ -284,7 +284,7 @@ function Home() {
           aria-hidden="true"
           className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent"
         />
-        <div className="mx-auto grid max-w-7xl gap-10 px-4 py-10 sm:px-6 sm:py-24 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:items-center lg:gap-16">
+        <div className="mx-auto grid max-w-7xl gap-8 px-4 py-9 sm:px-6 sm:py-16 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:items-center lg:gap-14">
           <div className="text-center lg:text-left">
             <span
               className="reveal label-mono inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/8 px-3.5 py-1.5 text-primary backdrop-blur-xl"
@@ -297,45 +297,45 @@ function Home() {
               {copy.badge}
             </span>
 
-            <h1
-              className="reveal text-display mt-6 sm:mt-8"
-              style={{ animationDelay: "60ms" }}
-            >
+            <h1 className="reveal text-display mt-5 sm:mt-7" style={{ animationDelay: "60ms" }}>
               {copy.title}
               <span className="sheen-word mt-1.5 block">{copy.accent}</span>
             </h1>
 
-
             <p
-              className="reveal mx-auto mt-4 max-w-xl text-[0.97rem] leading-relaxed text-pretty text-muted-foreground sm:mt-6 sm:text-lg lg:mx-0"
+              className="reveal mx-auto mt-4 max-w-xl text-[0.97rem] leading-relaxed text-pretty text-muted-foreground sm:text-lg lg:mx-0"
               style={{ animationDelay: "120ms" }}
             >
               {copy.sub}
             </p>
 
+            {/* Mobile: the live panel comes first, before any secondary copy. */}
+            <div className="reveal mt-6 lg:hidden" style={{ animationDelay: "150ms" }}>
+              <LiveEntry arm={heroArm} />
+            </div>
+
             <div
-              className="reveal mt-7 flex flex-col gap-3 sm:mt-8 sm:flex-row sm:flex-wrap lg:justify-start"
+              className="reveal mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap lg:justify-start"
               style={{ animationDelay: "180ms" }}
             >
               <a
                 href={primaryPath}
                 onClick={() => trackExperiment("hero_cta", heroArm)}
-                className="btn-glow inline-flex min-h-14 items-center justify-center gap-2 rounded-full px-7 text-base font-semibold"
+                className="btn-glow inline-flex min-h-13 items-center justify-center gap-2 rounded-full px-7 text-base font-semibold"
               >
                 {copy.cta} <ArrowRight className="size-4" aria-hidden="true" />
               </a>
               <a
                 href="#suite"
                 onClick={() => trackExperiment("hero_secondary", heroArm)}
-                className="btn-ghost inline-flex min-h-14 items-center justify-center gap-2 rounded-full px-7 text-base font-semibold"
+                className="btn-ghost inline-flex min-h-13 items-center justify-center gap-2 rounded-full px-7 text-base font-semibold"
               >
                 {focusTool ? "See all 7 tests" : copy.second}
               </a>
-
             </div>
 
             <ul
-              className="reveal mx-auto mt-6 grid max-w-xl gap-2 text-left sm:mt-7 lg:mx-0"
+              className="reveal mx-auto mt-5 grid max-w-xl gap-2 text-left lg:mx-0"
               style={{ animationDelay: "200ms" }}
             >
               {reasons.map((reason) => (
@@ -387,37 +387,46 @@ function Home() {
             </ul>
           </div>
 
-
           <div className="reveal hidden lg:block" style={{ animationDelay: "260ms" }}>
-            <SampleResult />
+            <LiveEntry arm={heroArm} />
           </div>
-        </div>
-
-        <div className="mx-auto max-w-7xl px-4 pb-6 sm:px-6 sm:pb-14">
-          <dl className="grid grid-cols-2 gap-2.5 sm:grid-cols-4 sm:gap-3">
-            {STATS.map(({ icon: Icon, k, v }) => (
-              <div key={k} className="hud-tile px-3 py-3 text-center sm:py-4">
-                <Icon className="mx-auto size-4 text-primary" aria-hidden="true" />
-                <dt className="mt-2 font-display text-base font-semibold tracking-[-0.02em]">
-                  {k}
-                </dt>
-                <dd className="label-mono mt-0.5">{v}</dd>
-              </div>
-            ))}
-          </dl>
         </div>
       </section>
 
+      {/* ---------------- Signature test ---------------- */}
+      <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-14">
+        <SignatureCard />
+      </section>
 
-      {/* ---------------- Tool suite + goal finder ---------------- */}
-      <section id="suite" className="mx-auto max-w-7xl scroll-mt-20 px-4 py-8 sm:px-6 sm:py-20">
+      {/* ---------------- What a finished report looks like ---------------- */}
+      <section className="border-y border-hairline bg-surface/20">
+        <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14">
+          <div className="max-w-2xl">
+            <span className="label-mono">The payoff</span>
+            <h2 className="text-section mt-2.5">This is what you get at the end</h2>
+          </div>
+          <div className="-mx-4 mt-5 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2 sm:mx-0 sm:grid sm:grid-cols-2 sm:overflow-visible sm:px-0 lg:grid-cols-3">
+            <div className="w-[85vw] shrink-0 snap-center sm:w-auto">
+              <SampleResult />
+            </div>
+            {PAYOFF.map(({ icon: Icon, title, body }) => (
+              <div key={title} className="panel w-[85vw] shrink-0 snap-center p-6 sm:w-auto">
+                <span className="accent-tile size-11">
+                  <Icon className="size-5" aria-hidden="true" />
+                </span>
+                <h3 className="mt-5 font-display text-lg font-semibold">{title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{body}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ---------------- Rest of the suite ---------------- */}
+      <section id="suite" className="mx-auto max-w-7xl scroll-mt-20 px-4 py-8 sm:px-6 sm:py-16">
         <div className="max-w-2xl">
-          <span className="label-mono">Find your test</span>
-          <h2 className="text-section mt-2.5">What do you want to find out?</h2>
-          <p className="mt-2.5 hidden text-sm leading-relaxed text-muted-foreground sm:block">
-            Tap a goal and we&apos;ll show the right tools. Every one is free, starts instantly and
-            finishes in minutes.
-          </p>
+          <span className="label-mono">The rest of the suite</span>
+          <h2 className="text-section mt-2.5">What else do you want to find out?</h2>
         </div>
 
         <div className="mt-5 flex flex-wrap gap-2">
@@ -440,7 +449,6 @@ function Home() {
           })}
         </div>
 
-
         <div className="relative mt-4 hidden w-full sm:block sm:max-w-sm">
           <label htmlFor="hub-filter" className="sr-only">
             Filter tools
@@ -459,12 +467,12 @@ function Home() {
           />
         </div>
 
-        <div className="mt-5 grid gap-4 sm:mt-10 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3">
+        <div className="mt-5 grid gap-3 sm:mt-8 sm:grid-cols-2 sm:gap-4">
           {slots.map((slot, i) =>
             "ad" in slot ? (
               <NativeAdCard key={`ad-${i}`} index={slot.ad} />
             ) : (
-              <ToolCard key={slot.item.slug} tool={slot.item} priority={i < 2} />
+              <ToolRow key={slot.item.slug} tool={slot.item} />
             ),
           )}
           {results.length === 0 ? (
@@ -475,68 +483,23 @@ function Home() {
         </div>
       </section>
 
-      {/* ---------------- How it works ---------------- */}
+      {/* ---------------- Proof band + 3-test run ---------------- */}
       <section className="border-y border-hairline bg-surface/20">
-        <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16">
-          <span className="label-mono">How it works</span>
-          <div className="mt-5 grid gap-3 sm:grid-cols-3 sm:gap-5">
-            {STEPS.map(({ icon: Icon, title, body }, i) => (
-              <div key={title} className="panel flex items-start gap-4 p-5">
-                <span className="accent-tile size-10 shrink-0">
-                  <Icon className="size-4.5" aria-hidden="true" />
-                </span>
-                <div className="min-w-0">
-                  <h3 className="font-display text-base font-semibold">
-                    <span className="label-mono mr-2">0{i + 1}</span>
-                    {title}
-                  </h3>
-                  <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{body}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-
-
-      {/* ---------------- 3-test run (dwell time) ---------------- */}
-      <section className="border-y border-hairline bg-surface/20">
-        <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16">
+        <div className="mx-auto max-w-7xl space-y-8 px-4 py-12 sm:px-6 sm:py-16">
+          <ProofBand />
           <StreakChallenge />
         </div>
       </section>
 
-      {/* ---------------- Pillars ---------------- */}
-      <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-20">
-        <div className="max-w-xl">
-          <span className="label-mono">Why it feels different</span>
-          <h2 className="text-section mt-2.5">Engineered like a product, not a quiz page</h2>
-        </div>
-        <div className="mt-5 grid gap-4 sm:mt-10 sm:gap-5 md:grid-cols-3">
-          {PILLARS.map(({ icon: Icon, title, body }) => (
-            <div key={title} className="panel p-6">
-              <span className="accent-tile size-11">
-                <Icon className="size-5" aria-hidden="true" />
-              </span>
-              <h3 className="mt-5 font-display text-lg font-semibold">{title}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{body}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
       {/* ---------------- FAQ ---------------- */}
-      <section className="border-y border-hairline bg-surface/20">
-        <div className="mx-auto max-w-3xl px-4 py-12 sm:px-6 sm:py-20">
-          <span className="label-mono">Questions people ask</span>
-          <h2 className="text-section mt-2.5 mb-6">Free to use, honestly explained</h2>
-          <HomeFaq />
-        </div>
+      <section className="mx-auto max-w-3xl px-4 py-12 sm:px-6 sm:py-16">
+        <span className="label-mono">Questions people ask</span>
+        <h2 className="text-section mt-2.5 mb-6">Free to use, honestly explained</h2>
+        <HomeFaq />
       </section>
 
       {/* ---------------- Closing CTA ---------------- */}
-      <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-20">
+      <section className="mx-auto max-w-7xl px-4 pb-12 sm:px-6 sm:pb-20">
         <div className="panel aurora grain spotlight relative overflow-hidden p-7 text-center sm:p-14">
           <h2 className="text-section text-balance">Everything here is free. Forever.</h2>
           <p className="mx-auto mt-3.5 max-w-lg text-sm leading-relaxed text-muted-foreground">
@@ -569,3 +532,4 @@ function Home() {
     </div>
   );
 }
+
