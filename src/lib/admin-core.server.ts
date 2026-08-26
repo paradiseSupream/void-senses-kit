@@ -138,10 +138,25 @@ export async function readSettings(): Promise<{
       privacy: { ...DEFAULT_PRIVACY, ...(storedAds.privacy ?? {}) },
     },
     site: { ...DEFAULT_SITE, ...(map.get("site") as SiteSettings | undefined) },
+    tracking: (() => {
+      const envDefaults = trackingEnvDefaults();
+      const stored = (map.get("tracking") ?? {}) as Partial<TrackingSettings>;
+      const merged = { ...envDefaults, ...stored } as TrackingSettings;
+      // A blank stored value must not wipe out a working environment id.
+      for (const key of Object.keys(envDefaults) as Array<keyof TrackingSettings>) {
+        if (typeof merged[key] === "string" && merged[key] === "") {
+          (merged[key] as string) = envDefaults[key] as string;
+        }
+      }
+      return merged;
+    })(),
   };
 }
 
-export async function writeSetting(key: "ads" | "site", value: object): Promise<void> {
+export async function writeSetting(
+  key: "ads" | "site" | "tracking",
+  value: object,
+): Promise<void> {
   const db = admin();
   const { error } = await db
     .from("app_settings")
