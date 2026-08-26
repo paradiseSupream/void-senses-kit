@@ -7,6 +7,7 @@ import { useSiteConfig } from "@/lib/site-config";
 import { useActionGate } from "@/components/monetization/ActionGate";
 import { AdSlot } from "@/components/monetization/AdSlot";
 import { EmailCapture } from "@/components/monetization/EmailCapture";
+import { ScarcityTimer } from "@/components/monetization/ScarcityTimer";
 import { isUnlocked, onUnlock, unlockReport } from "@/lib/unlock";
 import { partnerLink, track } from "@/lib/monetization";
 import { trackFunnel } from "@/lib/funnel";
@@ -129,6 +130,7 @@ export function LockedReport({
         </span>
         <h3 className="mt-3 font-display text-lg font-semibold">{title} locked</h3>
         <p className="mx-auto mt-1 max-w-sm text-sm text-muted-foreground">{blurb}</p>
+        <ScarcityTimer className="mt-3" />
         <div className="mt-5 flex flex-col gap-2.5 sm:flex-row sm:justify-center">
           <button
             type="button"
