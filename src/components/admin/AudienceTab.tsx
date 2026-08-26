@@ -1,12 +1,14 @@
 import { useEffect, useMemo, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Crown, Globe2, RefreshCw, Timer, Users } from "lucide-react";
+import { Crown, Download, Globe2, RefreshCw, Timer, Users } from "lucide-react";
 import { toast } from "sonner";
 
-import { adminAudience } from "@/lib/admin.functions";
+import { adminAudience, adminExportEvents } from "@/lib/admin.functions";
+import { downloadCsv, toCsv } from "@/lib/csv";
 
 type Report = Awaited<ReturnType<typeof adminAudience>>;
+
 
 const money = (cents: number) => `$${(cents / 100).toFixed(2)}`;
 const pct = (value: number) => `${value.toFixed(1)}%`;
@@ -93,6 +95,121 @@ export function AudienceTab({ token }: { token: string }) {
   const totals = report?.totals;
   const sessions = useMemo(() => report?.sessions.slice(0, 100) ?? [], [report]);
 
+  const stamp = () =>
+    `${new Date().toISOString().slice(0, 10)}-${days}d${country ? `-${country}` : ""}`;
+
+  const exportSessions = useMutation({
+    mutationFn: () => run({ data: { token, days, country, onlyVip, full: true } }),
+    onSuccess: (full) => {
+      downloadCsv(
+        `sov-sessions-${stamp()}.csv`,
+        toCsv(
+          [
+            "session_id",
+            "first_seen",
+            "last_seen",
+            "country",
+            "device",
+            "source",
+            "utm_campaign",
+            "duration_sec",
+            "pageviews",
+            "events",
+            "tools_started",
+            "tools_completed",
+            "result_viewed",
+            "is_vip",
+            "purchased_cents",
+          ],
+          full.sessions.map((s) => [
+            s.sessionId,
+            s.firstSeen,
+            s.lastSeen,
+            s.country ?? "",
+            s.device ?? "",
+            s.source,
+            s.utmCampaign ?? "",
+            s.durationSec,
+            s.pageviews,
+            s.events,
+            s.toolsStarted.join(" | "),
+            s.toolsCompleted.join(" | "),
+            s.resultViewed,
+            s.isVip || s.purchasedCents > 0,
+            s.purchasedCents,
+          ]),
+        ),
+      );
+      toast.success(`Exported ${full.sessions.length} sessions.`);
+    },
+    onError: () => toast.error("Session export failed."),
+  });
+
+  const runEvents = useServerFn(adminExportEvents);
+  const exportEvents = useMutation({
+    mutationFn: () => runEvents({ data: { token, days, country } }),
+    onSuccess: (res) => {
+      downloadCsv(`sov-events-${stamp()}.csv`, res.csv);
+      toast.success(`Exported ${res.rows} raw events.`);
+    },
+    onError: () => toast.error("Event export failed."),
+  });
+
+  const exportSummary = () => {
+    if (!report) return;
+    const parts: string[] = [
+      toCsv(
+        ["metric", "value"],
+        [
+          ["sessions", report.totals.sessions],
+          ["completions", report.totals.completions],
+          ["completion_rate_pct", report.totals.completionRate.toFixed(2)],
+          ["avg_duration_sec", report.totals.avgDurationSec],
+          ["purchases", report.totals.purchases],
+          ["conversion_rate_pct", report.totals.conversionRate.toFixed(2)],
+          ["revenue_cents", report.totals.revenueCents],
+        ],
+      ),
+      "",
+      toCsv(
+        ["country", "sessions", "completions", "purchases", "avg_duration_sec", "revenue_cents"],
+        report.byCountry.map((c) => [
+          c.country,
+          c.sessions,
+          c.completions,
+          c.purchases,
+          c.avgDurationSec,
+          c.revenueCents,
+        ]),
+      ),
+      "",
+      toCsv(
+        ["source", "sessions", "purchases", "revenue_cents"],
+        report.bySource.map((s) => [s.source, s.sessions, s.purchases, s.revenueCents]),
+      ),
+      "",
+      toCsv(
+        ["tool", "starts", "completions", "completion_rate_pct"],
+        report.byTool.map((t) => [t.tool, t.starts, t.completions, t.completionRate.toFixed(2)]),
+      ),
+      "",
+      toCsv(
+        ["buyer_email", "plan", "source", "amount_cents", "created_at", "active"],
+        report.buyers.map((b) => [
+          b.email,
+          b.plan,
+          b.source,
+          b.amountCents,
+          b.createdAt,
+          b.active,
+        ]),
+      ),
+    ];
+    downloadCsv(`sov-summary-${stamp()}.csv`, parts.join("\r\n"));
+    toast.success("Summary exported.");
+  };
+
+
   return (
     <div className="space-y-4">
       <div className="panel flex flex-wrap items-end gap-3 p-4">
@@ -136,7 +253,37 @@ export function AudienceTab({ token }: { token: string }) {
         >
           <RefreshCw className="size-4" aria-hidden="true" /> Refresh
         </button>
+
+        <div className="ml-auto flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            disabled={!report}
+            onClick={exportSummary}
+            className="inline-flex items-center gap-1.5 rounded-lg border border-hairline bg-surface-2 px-3 py-2 text-sm disabled:opacity-50"
+          >
+            <Download className="size-4" aria-hidden="true" /> Summary CSV
+          </button>
+          <button
+            type="button"
+            disabled={exportSessions.isPending}
+            onClick={() => exportSessions.mutate()}
+            className="inline-flex items-center gap-1.5 rounded-lg border border-hairline bg-surface-2 px-3 py-2 text-sm disabled:opacity-50"
+          >
+            <Download className="size-4" aria-hidden="true" />
+            {exportSessions.isPending ? "Exporting…" : "Sessions CSV"}
+          </button>
+          <button
+            type="button"
+            disabled={exportEvents.isPending}
+            onClick={() => exportEvents.mutate()}
+            className="inline-flex items-center gap-1.5 rounded-lg border border-hairline bg-surface-2 px-3 py-2 text-sm disabled:opacity-50"
+          >
+            <Download className="size-4" aria-hidden="true" />
+            {exportEvents.isPending ? "Exporting…" : "Raw events CSV"}
+          </button>
+        </div>
       </div>
+
 
       {totals ? (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
