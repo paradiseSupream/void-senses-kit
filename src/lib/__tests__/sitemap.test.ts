@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
 import {
+  DYNAMIC_ROUTE_PREFIXES,
   EXCLUDED_ROUTE_PREFIXES,
   SITEMAP_ENTRIES,
   SITE_BASE_URL,
@@ -28,7 +29,9 @@ describe("sitemap", () => {
 
   it("does not list routes that no longer exist", () => {
     const existing = new Set(routeTreePaths());
-    const stale = SITEMAP_ENTRIES.map((entry) => entry.path).filter((path) => !existing.has(path));
+    const stale = SITEMAP_ENTRIES.map((entry) => entry.path)
+      .filter((path) => !DYNAMIC_ROUTE_PREFIXES.some((prefix) => path.startsWith(prefix)))
+      .filter((path) => !existing.has(path));
     expect(stale, `Remove these stale sitemap entries: ${stale.join(", ")}`).toEqual([]);
   });
 

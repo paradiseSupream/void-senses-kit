@@ -262,3 +262,40 @@ export function drawStoryCard(options: CardOptions): HTMLCanvasElement {
 
   return canvas;
 }
+
+/** Converts a rendered card canvas into a PNG File for the Web Share API. */
+export async function canvasToPngFile(
+  canvas: HTMLCanvasElement,
+  filename: string,
+): Promise<File | null> {
+  const blob = await new Promise<Blob | null>((resolve) =>
+    canvas.toBlob((b) => resolve(b), "image/png"),
+  );
+  if (!blob) return null;
+  return new File([blob], filename.endsWith(".png") ? filename : `${filename}.png`, {
+    type: "image/png",
+  });
+}
+
+/**
+ * Shares the card image itself (Web Share API level 2) so the recipient sees
+ * the visual, not just a link. Returns false when file sharing is unavailable
+ * so the caller can fall back to a download.
+ */
+export async function shareCanvasImage(
+  canvas: HTMLCanvasElement,
+  { filename, title, text }: { filename: string; title: string; text: string },
+): Promise<boolean> {
+  if (typeof navigator === "undefined" || !navigator.share) return false;
+  const file = await canvasToPngFile(canvas, filename);
+  if (!file) return false;
+  const payload = { files: [file], title, text };
+  if (navigator.canShare && !navigator.canShare(payload)) return false;
+  try {
+    await navigator.share(payload);
+    return true;
+  } catch {
+    // User dismissed the sheet — treat as handled, no noisy fallback.
+    return true;
+  }
+}

@@ -19,6 +19,8 @@ import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AdminComplianceRouteImport } from './routes/admin.compliance'
 import { Route as AdminMonetizationRouteImport } from './routes/admin.monetization'
 import { Route as ApiDossierPdfRouteImport } from './routes/api/dossier-pdf'
+import { Route as ArchetypesIndexRouteImport } from './routes/archetypes.index'
+import { Route as ArchetypesSlugRouteImport } from './routes/archetypes.$slug'
 import { Route as ToolsIndexRouteImport } from './routes/tools.index'
 import { Route as ToolsChildTraumaRouteImport } from './routes/tools.child-trauma'
 import { Route as ToolsDarkPersonalityRouteImport } from './routes/tools.dark-personality'
@@ -85,6 +87,16 @@ const AdminMonetizationRoute = AdminMonetizationRouteImport.update({
 const ApiDossierPdfRoute = ApiDossierPdfRouteImport.update({
   id: '/api/dossier-pdf',
   path: '/api/dossier-pdf',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ArchetypesIndexRoute = ArchetypesIndexRouteImport.update({
+  id: '/archetypes/',
+  path: '/archetypes/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ArchetypesSlugRoute = ArchetypesSlugRouteImport.update({
+  id: '/archetypes/$slug',
+  path: '/archetypes/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ToolsIndexRoute = ToolsIndexRouteImport.update({
@@ -183,6 +195,7 @@ export interface FileRoutesByFullPath {
   '/admin/compliance': typeof AdminComplianceRoute
   '/admin/monetization': typeof AdminMonetizationRoute
   '/api/dossier-pdf': typeof ApiDossierPdfRoute
+  '/archetypes/$slug': typeof ArchetypesSlugRoute
   '/tools/child-trauma': typeof ToolsChildTraumaRoute
   '/tools/dark-personality': typeof ToolsDarkPersonalityRoute
   '/tools/iq': typeof ToolsIqRoute
@@ -192,6 +205,7 @@ export interface FileRoutesByFullPath {
   '/vip/checkout': typeof VipCheckoutRoute
   '/vip/success': typeof VipSuccessRoute
   '/admin/': typeof AdminIndexRoute
+  '/archetypes/': typeof ArchetypesIndexRoute
   '/tools/': typeof ToolsIndexRoute
   '/api/public/capi': typeof ApiPublicCapiRoute
   '/api/public/geo': typeof ApiPublicGeoRoute
@@ -212,6 +226,7 @@ export interface FileRoutesByTo {
   '/admin/compliance': typeof AdminComplianceRoute
   '/admin/monetization': typeof AdminMonetizationRoute
   '/api/dossier-pdf': typeof ApiDossierPdfRoute
+  '/archetypes/$slug': typeof ArchetypesSlugRoute
   '/tools/child-trauma': typeof ToolsChildTraumaRoute
   '/tools/dark-personality': typeof ToolsDarkPersonalityRoute
   '/tools/iq': typeof ToolsIqRoute
@@ -221,6 +236,7 @@ export interface FileRoutesByTo {
   '/vip/checkout': typeof VipCheckoutRoute
   '/vip/success': typeof VipSuccessRoute
   '/admin': typeof AdminIndexRoute
+  '/archetypes': typeof ArchetypesIndexRoute
   '/tools': typeof ToolsIndexRoute
   '/api/public/capi': typeof ApiPublicCapiRoute
   '/api/public/geo': typeof ApiPublicGeoRoute
@@ -242,6 +258,7 @@ export interface FileRoutesById {
   '/admin/compliance': typeof AdminComplianceRoute
   '/admin/monetization': typeof AdminMonetizationRoute
   '/api/dossier-pdf': typeof ApiDossierPdfRoute
+  '/archetypes/$slug': typeof ArchetypesSlugRoute
   '/tools/child-trauma': typeof ToolsChildTraumaRoute
   '/tools/dark-personality': typeof ToolsDarkPersonalityRoute
   '/tools/iq': typeof ToolsIqRoute
@@ -251,6 +268,7 @@ export interface FileRoutesById {
   '/vip/checkout': typeof VipCheckoutRoute
   '/vip/success': typeof VipSuccessRoute
   '/admin/': typeof AdminIndexRoute
+  '/archetypes/': typeof ArchetypesIndexRoute
   '/tools/': typeof ToolsIndexRoute
   '/api/public/capi': typeof ApiPublicCapiRoute
   '/api/public/geo': typeof ApiPublicGeoRoute
@@ -273,6 +291,7 @@ export interface FileRouteTypes {
     | '/admin/compliance'
     | '/admin/monetization'
     | '/api/dossier-pdf'
+    | '/archetypes/$slug'
     | '/tools/child-trauma'
     | '/tools/dark-personality'
     | '/tools/iq'
@@ -282,6 +301,7 @@ export interface FileRouteTypes {
     | '/vip/checkout'
     | '/vip/success'
     | '/admin/'
+    | '/archetypes/'
     | '/tools/'
     | '/api/public/capi'
     | '/api/public/geo'
@@ -302,6 +322,7 @@ export interface FileRouteTypes {
     | '/admin/compliance'
     | '/admin/monetization'
     | '/api/dossier-pdf'
+    | '/archetypes/$slug'
     | '/tools/child-trauma'
     | '/tools/dark-personality'
     | '/tools/iq'
@@ -311,6 +332,7 @@ export interface FileRouteTypes {
     | '/vip/checkout'
     | '/vip/success'
     | '/admin'
+    | '/archetypes'
     | '/tools'
     | '/api/public/capi'
     | '/api/public/geo'
@@ -331,6 +353,7 @@ export interface FileRouteTypes {
     | '/admin/compliance'
     | '/admin/monetization'
     | '/api/dossier-pdf'
+    | '/archetypes/$slug'
     | '/tools/child-trauma'
     | '/tools/dark-personality'
     | '/tools/iq'
@@ -340,6 +363,7 @@ export interface FileRouteTypes {
     | '/vip/checkout'
     | '/vip/success'
     | '/admin/'
+    | '/archetypes/'
     | '/tools/'
     | '/api/public/capi'
     | '/api/public/geo'
@@ -361,6 +385,7 @@ export interface RootRouteChildren {
   AdminComplianceRoute: typeof AdminComplianceRoute
   AdminMonetizationRoute: typeof AdminMonetizationRoute
   ApiDossierPdfRoute: typeof ApiDossierPdfRoute
+  ArchetypesSlugRoute: typeof ArchetypesSlugRoute
   ToolsChildTraumaRoute: typeof ToolsChildTraumaRoute
   ToolsDarkPersonalityRoute: typeof ToolsDarkPersonalityRoute
   ToolsIqRoute: typeof ToolsIqRoute
@@ -370,6 +395,7 @@ export interface RootRouteChildren {
   VipCheckoutRoute: typeof VipCheckoutRoute
   VipSuccessRoute: typeof VipSuccessRoute
   AdminIndexRoute: typeof AdminIndexRoute
+  ArchetypesIndexRoute: typeof ArchetypesIndexRoute
   ToolsIndexRoute: typeof ToolsIndexRoute
   ApiPublicCapiRoute: typeof ApiPublicCapiRoute
   ApiPublicGeoRoute: typeof ApiPublicGeoRoute
@@ -451,6 +477,20 @@ declare module '@tanstack/react-router' {
       path: '/api/dossier-pdf'
       fullPath: '/api/dossier-pdf'
       preLoaderRoute: typeof ApiDossierPdfRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/archetypes/': {
+      id: '/archetypes/'
+      path: '/archetypes'
+      fullPath: '/archetypes/'
+      preLoaderRoute: typeof ArchetypesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/archetypes/$slug': {
+      id: '/archetypes/$slug'
+      path: '/archetypes/$slug'
+      fullPath: '/archetypes/$slug'
+      preLoaderRoute: typeof ArchetypesSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/tools/': {
@@ -585,6 +625,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminComplianceRoute: AdminComplianceRoute,
   AdminMonetizationRoute: AdminMonetizationRoute,
   ApiDossierPdfRoute: ApiDossierPdfRoute,
+  ArchetypesSlugRoute: ArchetypesSlugRoute,
   ToolsChildTraumaRoute: ToolsChildTraumaRoute,
   ToolsDarkPersonalityRoute: ToolsDarkPersonalityRoute,
   ToolsIqRoute: ToolsIqRoute,
@@ -594,6 +635,7 @@ const rootRouteChildren: RootRouteChildren = {
   VipCheckoutRoute: VipCheckoutRoute,
   VipSuccessRoute: VipSuccessRoute,
   AdminIndexRoute: AdminIndexRoute,
+  ArchetypesIndexRoute: ArchetypesIndexRoute,
   ToolsIndexRoute: ToolsIndexRoute,
   ApiPublicCapiRoute: ApiPublicCapiRoute,
   ApiPublicGeoRoute: ApiPublicGeoRoute,
