@@ -743,3 +743,62 @@ export const adminAudience = createServerFn({ method: "POST" })
       sessions: sessions.slice(0, data.full ? 20000 : 300),
     };
   });
+
+/**
+ * Raw event export: streams the underlying `ad_events` rows as CSV so every
+ * captured signal (country, device, source, dwell, revenue) can be analysed
+ * outside the dashboard.
+ */
+export const adminExportEvents = createServerFn({ method: "POST" })
+  .inputValidator((input: { token: string; days?: number; country?: string }) => ({
+    token: String(input?.token ?? ""),
+    days: Math.max(1, Math.min(90, Number(input?.days ?? 7))),
+    country: String(input?.country ?? "").trim().toUpperCase().slice(0, 2) || undefined,
+  }))
+  .handler(async ({ data }): Promise<{ csv: string; rows: number }> => {
+    const { requireAdmin, admin } = await import("@/lib/admin-core.server");
+    const { toCsv } = await import("@/lib/csv");
+    await requireAdmin(data.token);
+
+    const db = admin();
+    const since = new Date(Date.now() - data.days * 86_400_000).toISOString();
+    const columns = [
+      "created_at",
+      "event_type",
+      "slot",
+      "format",
+      "variant",
+      "session_id",
+      "tool_slug",
+      "country",
+      "device",
+      "utm_source",
+      "utm_medium",
+      "utm_campaign",
+      "referrer",
+      "path",
+      "click_id",
+      "is_vip",
+      "duration_ms",
+      "metric_value",
+      "revenue_cents",
+      "suspect",
+    ] as const;
+
+    let query = db
+      .from("ad_events")
+      .select(columns.join(","))
+      .gte("created_at", since)
+      .order("created_at", { ascending: false })
+      .limit(50000);
+    if (data.country) query = query.eq("country", data.country);
+
+    const { data: rows, error } = await query;
+    if (error) throw new Error(error.message);
+
+    const list = (rows ?? []) as unknown as Array<Record<string, unknown>>;
+    return {
+      csv: toCsv([...columns], list.map((row) => columns.map((c) => row[c]))),
+      rows: list.length,
+    };
+  });
