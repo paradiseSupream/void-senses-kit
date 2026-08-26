@@ -6,9 +6,34 @@
  * Conversions API (see /api/public/capi) can be de-duplicated by the platform.
  */
 
-const META_ID = import.meta.env["VITE_META_PIXEL_ID"] as string | undefined;
-const TIKTOK_ID = import.meta.env["VITE_TIKTOK_PIXEL_ID"] as string | undefined;
-const GOOGLE_ADS_ID = import.meta.env["VITE_GOOGLE_ADS_ID"] as string | undefined;
+/**
+ * Ids come from the admin panel at runtime; the build-time env values are only
+ * a fallback so an existing .env setup keeps working.
+ */
+type PixelIds = {
+  meta?: string | undefined;
+  tiktok?: string | undefined;
+  googleAds?: string | undefined;
+  googleLabel?: string | undefined;
+};
+
+const ids: PixelIds = {
+  meta: (import.meta.env["VITE_META_PIXEL_ID"] as string | undefined) || undefined,
+  tiktok: (import.meta.env["VITE_TIKTOK_PIXEL_ID"] as string | undefined) || undefined,
+  googleAds: (import.meta.env["VITE_GOOGLE_ADS_ID"] as string | undefined) || undefined,
+};
+
+/** Called by the pixel loader with the ids saved in the admin panel. */
+export function configurePixels(next: PixelIds) {
+  if (next.meta) ids.meta = next.meta;
+  if (next.tiktok) ids.tiktok = next.tiktok;
+  if (next.googleAds) ids.googleAds = next.googleAds;
+  if (next.googleLabel) ids.googleLabel = next.googleLabel;
+}
+
+const META_ID = () => ids.meta;
+const TIKTOK_ID = () => ids.tiktok;
+const GOOGLE_ADS_ID = () => ids.googleAds;
 
 declare global {
   interface Window {
@@ -23,9 +48,9 @@ let metaLoaded = false;
 let tiktokLoaded = false;
 let googleAdsLoaded = false;
 
-export const metaEnabled = () => typeof window !== "undefined" && Boolean(META_ID);
-export const tiktokEnabled = () => typeof window !== "undefined" && Boolean(TIKTOK_ID);
-export const googleAdsEnabled = () => typeof window !== "undefined" && Boolean(GOOGLE_ADS_ID);
+export const metaEnabled = () => typeof window !== "undefined" && Boolean(META_ID());
+export const tiktokEnabled = () => typeof window !== "undefined" && Boolean(TIKTOK_ID());
+export const googleAdsEnabled = () => typeof window !== "undefined" && Boolean(GOOGLE_ADS_ID());
 export const pixelsEnabled = () => metaEnabled() || tiktokEnabled() || googleAdsEnabled();
 
 export function newEventId(): string {
@@ -55,7 +80,7 @@ function loadMeta() {
   n.version = "2.0";
   n.queue = [];
   injectScript("https://connect.facebook.net/en_US/fbevents.js");
-  window.fbq!("init", META_ID);
+  window.fbq!("init", META_ID());
   window.fbq!("track", "PageView");
 }
 
@@ -88,10 +113,11 @@ function loadTikTok() {
         (ttq._q = ttq._q || []).push([m, args]);
       })(method);
   }
-  ttq._i[TIKTOK_ID!] = [];
-  ttq._t[TIKTOK_ID!] = Date.now();
-  ttq._o[TIKTOK_ID!] = {};
-  injectScript(`https://analytics.tiktok.com/i18n/pixel/events.js?sdkid=${TIKTOK_ID}&lib=ttq`);
+  const tid = TIKTOK_ID()!;
+  ttq._i[tid] = [];
+  ttq._t[tid] = Date.now();
+  ttq._o[tid] = {};
+  injectScript(`https://analytics.tiktok.com/i18n/pixel/events.js?sdkid=${TIKTOK_ID()}&lib=ttq`);
   ttq.page?.();
 }
 
@@ -99,14 +125,14 @@ function loadGoogleAds() {
   if (googleAdsLoaded || !googleAdsEnabled()) return;
   googleAdsLoaded = true;
   if (typeof window.gtag !== "function") {
-    injectScript(`https://www.googletagmanager.com/gtag/js?id=${GOOGLE_ADS_ID}`);
+    injectScript(`https://www.googletagmanager.com/gtag/js?id=${GOOGLE_ADS_ID()}`);
     window.dataLayer = window.dataLayer || [];
     window.gtag = (...args: unknown[]) => {
       window.dataLayer!.push(args);
     };
     window.gtag("js", new Date());
   }
-  window.gtag!("config", GOOGLE_ADS_ID);
+  window.gtag!("config", GOOGLE_ADS_ID());
 }
 
 /** Loads every configured pixel (call only after advertising consent). */
@@ -184,7 +210,9 @@ export function pixelTrack(event: PixelEvent, payload: PixelPayload = {}) {
 
   if (googleAdsEnabled()) {
     window.gtag?.("event", "conversion", {
-      send_to: GOOGLE_ADS_ID,
+      send_to: ids.googleLabel
+        ? `${GOOGLE_ADS_ID()}/${ids.googleLabel}`
+        : GOOGLE_ADS_ID(),
       value: payload.value,
       currency,
       transaction_id: eventId,
