@@ -1,6 +1,12 @@
 import { createServerFn } from "@tanstack/react-start";
 
-import type { AdsSettings, PublicAdsConfig, SiteSettings } from "@/lib/admin-types";
+import type {
+  AdsSettings,
+  PublicAdsConfig,
+  PublicTrackingConfig,
+  SiteSettings,
+  TrackingSettings,
+} from "@/lib/admin-types";
 import type { MonetizationStats } from "@/lib/analytics-agg";
 
 export type AdminOverview = {
