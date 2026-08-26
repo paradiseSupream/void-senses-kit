@@ -57,6 +57,11 @@ export function trackFunnel(step: FunnelStep, toolSlug?: string | null) {
   });
   // Mirror the funnel into GA4 so SEO traffic can be measured end to end.
   gaEvent(`funnel_${step}`, { tool_slug: toolSlug ?? undefined, dwell_ms: dwellMs() });
+
+  // Mirror the money steps into Meta / TikTok / Google Ads (Purchase is fired
+  // on the success page where the real order value is known).
+  const pixelEvent = PIXEL_STEPS[step];
+  if (pixelEvent) pixelTrack(pixelEvent, { contentName: toolSlug ?? step });
 }
 
 let startedAt = 0;
