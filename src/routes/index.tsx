@@ -489,7 +489,7 @@ function Home() {
 
       {/* ---------------- Proof band + 3-test run ---------------- */}
       <section className="border-y border-hairline bg-surface/15">
-        <div className="mx-auto max-w-7xl space-y-4 px-4 py-12 sm:space-y-4 sm:px-6 sm:py-16">
+        <div className="mx-auto max-w-7xl space-y-3 px-4 py-10 sm:space-y-4 sm:px-6 sm:py-16">
           <Reveal>
             <ProofBand />
           </Reveal>
@@ -500,10 +500,10 @@ function Home() {
       </section>
 
       {/* ---------------- FAQ ---------------- */}
-      <section className="mx-auto max-w-3xl px-4 py-12 sm:px-6 sm:py-16">
+      <section className="mx-auto max-w-3xl px-4 py-10 sm:px-6 sm:py-16">
         <Reveal>
           <span className="label-mono">Questions people ask</span>
-          <h2 className="text-section mt-2 mb-6">
+          <h2 className="text-section mt-2 mb-5 sm:mb-6">
             Free to use, <span className="serif-accent">honestly explained</span>
           </h2>
         </Reveal>
@@ -513,8 +513,9 @@ function Home() {
       </section>
 
       {/* ---------------- Closing CTA ---------------- */}
-      <section className="mx-auto max-w-7xl px-4 pb-12 sm:px-6 sm:pb-20">
-        <div className="bento aurora grain relative overflow-hidden p-7 text-center sm:p-16">
+      <section className="pb-tabbar mx-auto max-w-7xl px-4 sm:px-6 sm:pb-20">
+        <div className="bento aurora grain relative overflow-hidden p-6 text-center sm:p-16">
+
           <h2 className="text-section text-balance">
             Everything here is free. <span className="serif-accent">Forever.</span>
           </h2>
