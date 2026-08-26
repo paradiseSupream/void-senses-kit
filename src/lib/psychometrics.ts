@@ -25,7 +25,8 @@ export type QualityFlag =
   | "speeding"
   | "straight-lining"
   | "extreme-style"
-  | "inconsistent";
+  | "inconsistent"
+  | "failed-attention";
 
 export type QualityReport = {
   /** 0–100 measurement confidence for this specific session. */
@@ -139,6 +140,8 @@ export function responseQuality(
   items: readonly Likert[],
   answers: Record<string, number>,
   timingsMs?: Record<string, number>,
+  /** Instructed-response trap results for this session, when the tool uses them. */
+  attention?: { total: number; passed: number; answered: number },
 ): QualityReport {
   const total = items.length;
   const answered = items.filter((i) => answers[i.id] !== undefined).length;
@@ -216,6 +219,24 @@ export function responseQuality(
     }
   }
 
+  // 6. Attention checks: instructed-response traps the reader must pass.
+  if (attention && attention.total > 0) {
+    const missed = attention.answered - attention.passed;
+    if (missed >= 2) {
+      flags.push("failed-attention");
+      notes.push(
+        "Both attention checks were missed — the answers were not read, so treat this profile as unusable.",
+      );
+      score -= 55;
+    } else if (missed === 1) {
+      flags.push("failed-attention");
+      notes.push("One attention check was missed, so the profile is reported with less certainty.");
+      score -= 25;
+    } else if (attention.answered === attention.total) {
+      notes.push(`Passed ${attention.passed}/${attention.total} attention checks.`);
+    }
+  }
+
   score = clamp(Math.round(score), 5, 100);
   const label: Confidence = score >= 80 ? "High" : score >= 55 ? "Moderate" : "Low";
 
@@ -262,7 +283,14 @@ export type IqEstimate = {
 export function iqEstimate(
   items: readonly IqItem[],
   hits: Record<string, boolean>,
-  opts?: { timingsMs?: Record<string, number>; answeredIds?: readonly string[] },
+  opts?: {
+    timingsMs?: Record<string, number>;
+    answeredIds?: readonly string[];
+    /** Mean tier (1–3) of the items the adaptive staircase actually served. */
+    difficulty?: number;
+    /** True when items were chosen adaptively — a more informative session. */
+    adaptive?: boolean;
+  },
 ): IqEstimate {
   const total = items.length;
   const answered = opts?.answeredIds
@@ -280,12 +308,19 @@ export function iqEstimate(
   const weightedRatio = possible ? gained / possible : 0;
 
   // Reference distribution for this screener: an average adult clears about
-  // half of the weighted pool, with ~0.21 spread per SD.
-  const z = clamp((weightedRatio - 0.5) / 0.21, -2.6, 2.9);
+  // half of the weighted pool, with ~0.21 spread per SD. With adaptive
+  // delivery the pass mark moves with the difficulty the staircase settled on:
+  // clearing 60% of tier-3 items is not the same performance as clearing 60%
+  // of tier-1 items.
+  const difficulty = clamp(opts?.difficulty ?? 2, 1, 3);
+  const midpoint = clamp(0.5 - (difficulty - 2) * 0.09, 0.3, 0.7);
+  const z = clamp((weightedRatio - midpoint) / 0.21, -2.6, 2.9);
   const iq = clamp(Math.round(100 + z * 15), 62, 145);
 
-  // Reliability grows with item count; SEM = SD * sqrt(1 - reliability).
-  const reliability = clamp(total / (total + 7), 0.4, 0.95);
+  // Reliability grows with item count, and adaptive delivery buys roughly the
+  // information of a third more fixed items. SEM = SD * sqrt(1 - reliability).
+  const effective = total * (opts?.adaptive ? 1.35 : 1);
+  const reliability = clamp(effective / (effective + 7), 0.4, 0.95);
   const sem = Math.max(3, Math.round(15 * Math.sqrt(1 - reliability)));
 
   const tiers = ([1, 2, 3] as const).map((tier) => {

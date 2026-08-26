@@ -13,6 +13,8 @@ import { LockedReport } from "@/components/monetization/LockedReport";
 import { LOVE_BANK, LOVE_PER_DIM, LOVE_SESSION_SIZE, loveVerdict } from "@/lib/banks/love";
 import { newSeed, pickBalanced, rngFrom, scoreDimensions, type Likert } from "@/lib/quiz-engine";
 import { responseQuality } from "@/lib/psychometrics";
+import { evaluateAttention, scorableItems, withAttentionChecks } from "@/lib/attention";
+import { useNorms } from "@/hooks/use-norms";
 
 export const Route = createFileRoute("/tools/love-match")({
   head: () => ({
@@ -76,16 +78,23 @@ function LoveMatch() {
   const [answers, setAnswers] = useState<Record<string, number>>({});
   const [timings, setTimings] = useState<Record<string, number>>({});
 
+  // Drawn set plus two instructed-response attention checks, which are never
+  // scored into a dimension — they only grade whether the answers were read.
   const items: Likert[] = useMemo(
-    () => pickBalanced(LOVE_BANK, (i) => i.dim, LOVE_PER_DIM, rngFrom(seed)),
+    () =>
+      withAttentionChecks(
+        pickBalanced(LOVE_BANK, (i) => i.dim, LOVE_PER_DIM, rngFrom(seed)),
+        rngFrom(seed + 1),
+      ),
     [seed],
   );
+  const scored = useMemo(() => scorableItems(items), [items]);
 
   // Measurement confidence for this exact session: completeness, response
-  // style, within-axis agreement and answer speed.
+  // style, within-axis agreement, answer speed and attention checks.
   const quality = useMemo(
-    () => responseQuality(items, answers, timings),
-    [items, answers, timings],
+    () => responseQuality(scored, answers, timings, evaluateAttention(items, answers)),
+    [items, scored, answers, timings],
   );
 
   const reshuffle = useCallback(() => {
@@ -98,7 +107,7 @@ function LoveMatch() {
   const pair = `${a.trim() || "You"} + ${b.trim() || "Them"}`;
 
   const result = useMemo(() => {
-    const scores = scoreDimensions(items, answers);
+    const scores = scoreDimensions(scored, answers);
     const score = scores.length
       ? Math.round(scores.reduce((acc, s) => acc + s.value, 0) / scores.length)
       : 0;
@@ -110,7 +119,11 @@ function LoveMatch() {
       weakest: sorted[sorted.length - 1]?.dim ?? "Calm",
       verdict: loveVerdict(score),
     };
-  }, [items, answers]);
+  }, [scored, answers]);
+
+  // Percentiles from this site's own anonymous score pool once it is big
+  // enough; the reference curve until then.
+  const norms = useNorms("love-match", result.scores, phase === "result");
 
   return (
     <ToolShell
@@ -207,7 +220,11 @@ function LoveMatch() {
               }}
             >
           <div className="mt-8">
-              <TraitBars data={result.scores} />
+              <TraitBars
+                data={result.scores}
+                percentiles={norms.percentiles}
+                liveNorms={norms.live}
+              />
             </div>
             </LockedReport>
           </div>

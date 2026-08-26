@@ -9,16 +9,18 @@ import { QuizVipNudge } from "@/components/monetization/QuizVipNudge";
 import { ResultActions } from "@/components/tools/ResultActions";
 import { TraitBars } from "@/components/tools/TraitBars";
 import { LockedReport } from "@/components/monetization/LockedReport";
-import { IQ_BANK, IQ_PER_CATEGORY, IQ_SESSION_SIZE } from "@/lib/banks/iq";
+import { IQ_BANK, IQ_SESSION_SIZE } from "@/lib/banks/iq";
 import { iqEstimate } from "@/lib/psychometrics";
 import { QualityBadge } from "@/components/tools/QualityBadge";
+import { newSeed, rngFrom, shuffleOptions, type IqItem } from "@/lib/quiz-engine";
 import {
-  newSeed,
-  pickIqItems,
-  rngFrom,
-  shuffleOptions,
-  type IqItem,
-} from "@/lib/quiz-engine";
+  buildAdaptivePool,
+  drawItem,
+  nextTier,
+  reachedDifficulty,
+  type AdaptivePool,
+  type Tier,
+} from "@/lib/adaptive-iq";
 
 export const Route = createFileRoute("/tools/iq")({
   head: () => ({
@@ -76,6 +78,11 @@ const LIMIT = 20;
 
 type Prepared = IqItem & { shuffled: string[]; correctIndex: number };
 
+function prepare(item: IqItem, rand: () => number): Prepared {
+  const { options, answer } = shuffleOptions(item, rand);
+  return { ...item, shuffled: options, correctIndex: answer };
+}
+
 function IqTest() {
   const [seed, setSeed] = useState(() => newSeed());
   const [name, setName] = useState("");
@@ -93,24 +100,48 @@ function IqTest() {
   const [answeredIds, setAnsweredIds] = useState<string[]>([]);
   const shownAtRef = useRef(Date.now());
 
-  const items: Prepared[] = useMemo(() => {
-    const rand = rngFrom(seed);
-    return pickIqItems(IQ_BANK, IQ_PER_CATEGORY, rand).map((item) => {
-      const { options, answer } = shuffleOptions(item, rand);
-      return { ...item, shuffled: options, correctIndex: answer };
-    });
-  }, [seed]);
+  // Adaptive delivery: items are drawn one at a time by a 2-up / 2-down
+  // staircase, so difficulty converges on the point where the next answer is
+  // genuinely uncertain — that is where a short test gains its precision.
+  const [items, setItems] = useState<Prepared[]>([]);
+  const randRef = useRef<() => number>(rngFrom(seed));
+  const poolRef = useRef<AdaptivePool | null>(null);
+  const usedCatRef = useRef<Record<string, number>>({});
+  const tierRef = useRef<Tier>(1);
+  const historyRef = useRef<boolean[]>([]);
 
-  const restart = useCallback(() => {
-    setSeed(newSeed());
+  const startSession = useCallback((s: number) => {
+    const rand = rngFrom(s);
+    randRef.current = rand;
+    const pool = buildAdaptivePool(IQ_BANK, rand);
+    poolRef.current = pool;
+    usedCatRef.current = {};
+    tierRef.current = 1;
+    historyRef.current = [];
+    const first = drawItem(pool, 1, usedCatRef.current);
+    usedCatRef.current[first!.cat] = 1;
+    setItems(first ? [prepare(first, rand)] : []);
     setIndex(0);
     setHits({});
     setTimings({});
     setAnsweredIds([]);
     setLeft(LIMIT);
     shownAtRef.current = Date.now();
-    setPhase("quiz");
   }, []);
+
+  useEffect(() => {
+    startSession(seed);
+    // First mount only; every retake goes through `restart`.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+
+  const restart = useCallback(() => {
+    const s = newSeed();
+    setSeed(s);
+    startSession(s);
+    setPhase("quiz");
+  }, [startSession]);
 
   const advance = useCallback(
     (choice: number | null) => {
@@ -123,14 +154,29 @@ function IqTest() {
       const elapsed = Math.min(Date.now() - shownAtRef.current, LIMIT * 1000);
       setTimings((t) => ({ ...t, [item.id]: elapsed }));
       if (choice !== null) setAnsweredIds((ids) => (ids.includes(item.id) ? ids : [...ids, item.id]));
+
+      // Staircase: the answer just given moves the difficulty of the next item.
+      historyRef.current = [...historyRef.current, correct];
+      const tier = nextTier(tierRef.current, historyRef.current);
+      tierRef.current = tier;
+
       window.setTimeout(() => {
         lockRef.current = false;
-        if (index === items.length - 1) setPhase("result");
-        else {
-          setIndex((i) => i + 1);
-          setLeft(LIMIT);
-          shownAtRef.current = Date.now();
+        if (index >= IQ_SESSION_SIZE - 1) {
+          setPhase("result");
+          return;
         }
+        const pool = poolRef.current;
+        const next = pool ? drawItem(pool, tier, usedCatRef.current) : null;
+        if (!next) {
+          setPhase("result");
+          return;
+        }
+        usedCatRef.current[next.cat] = (usedCatRef.current[next.cat] ?? 0) + 1;
+        setItems((list) => [...list, prepare(next, randRef.current)]);
+        setIndex((i) => i + 1);
+        setLeft(LIMIT);
+        shownAtRef.current = Date.now();
       }, 140);
     },
     [index, items],
@@ -153,7 +199,12 @@ function IqTest() {
   }, [phase, index, advance]);
 
   const result = useMemo(() => {
-    const est = iqEstimate(items, hits, { timingsMs: timings, answeredIds });
+    const est = iqEstimate(items, hits, {
+      timingsMs: timings,
+      answeredIds,
+      difficulty: reachedDifficulty(items),
+      adaptive: true,
+    });
     const byCat = new Map<string, { hit: number; total: number }>();
     for (const item of items) {
       const entry = byCat.get(item.cat) ?? { hit: 0, total: 0 };
@@ -303,7 +354,8 @@ function IqTest() {
     );
   }
 
-  const item = items[index]!;
+  const item = items[index];
+  if (!item) return null;
 
   return (
     <ToolShell
@@ -315,7 +367,7 @@ function IqTest() {
       <div className="glass rounded-2xl p-5 sm:p-7">
         <div className="flex items-center justify-between">
           <span className="label-mono">
-            Item {index + 1} / {items.length} · {item.cat}
+            Item {index + 1} / {IQ_SESSION_SIZE} · {item.cat} · T{item.tier}
           </span>
           <span
             className={`flex items-center gap-1.5 font-mono text-sm ${left <= 5 ? "text-destructive" : "text-primary"}`}
@@ -348,7 +400,7 @@ function IqTest() {
           ))}
         </div>
       </div>
-      <QuizVipNudge step={index} total={items.length} />
+      <QuizVipNudge step={index} total={IQ_SESSION_SIZE} />
     </ToolShell>
   );
 }

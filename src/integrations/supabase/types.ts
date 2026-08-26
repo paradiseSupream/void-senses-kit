@@ -179,6 +179,30 @@ export type Database = {
         }
         Relationships: []
       }
+      norm_samples: {
+        Row: {
+          created_at: string
+          dim: string
+          id: string
+          tool: string
+          value: number
+        }
+        Insert: {
+          created_at?: string
+          dim: string
+          id?: string
+          tool: string
+          value: number
+        }
+        Update: {
+          created_at?: string
+          dim?: string
+          id?: string
+          tool?: string
+          value?: number
+        }
+        Relationships: []
+      }
       roast_requests: {
         Row: {
           id: string
@@ -379,7 +403,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      norm_stats: {
+        Args: { _tool: string }
+        Returns: {
+          dim: string
+          mean: number
+          n: number
+          sd: number
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never

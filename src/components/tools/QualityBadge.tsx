@@ -8,6 +8,7 @@ const FLAG_LABEL: Record<QualityFlag, string> = {
   "straight-lining": "Same option repeated",
   "extreme-style": "Only extremes used",
   inconsistent: "Mixed signals",
+  "failed-attention": "Attention check missed",
 };
 
 /**

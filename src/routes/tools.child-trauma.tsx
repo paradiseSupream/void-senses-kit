@@ -26,6 +26,8 @@ import {
   type Likert,
 } from "@/lib/quiz-engine";
 import { responseQuality } from "@/lib/psychometrics";
+import { evaluateAttention, scorableItems, withAttentionChecks } from "@/lib/attention";
+import { useNorms } from "@/hooks/use-norms";
 
 export const Route = createFileRoute("/tools/child-trauma")({
   head: () => ({
@@ -88,16 +90,23 @@ function ChildTrauma() {
   const [answers, setAnswers] = useState<Record<string, number>>({});
   const [timings, setTimings] = useState<Record<string, number>>({});
 
+  // Drawn set plus two instructed-response attention checks, which are never
+  // scored into a dimension — they only grade whether the answers were read.
   const items: Likert[] = useMemo(
-    () => pickBalanced(TRAUMA_BANK, (i) => i.dim, TRAUMA_PER_DIM, rngFrom(seed)),
+    () =>
+      withAttentionChecks(
+        pickBalanced(TRAUMA_BANK, (i) => i.dim, TRAUMA_PER_DIM, rngFrom(seed)),
+        rngFrom(seed + 1),
+      ),
     [seed],
   );
+  const scored = useMemo(() => scorableItems(items), [items]);
 
   // Measurement confidence for this exact session: completeness, response
-  // style, within-axis agreement and answer speed.
+  // style, within-axis agreement, answer speed and attention checks.
   const quality = useMemo(
-    () => responseQuality(items, answers, timings),
-    [items, answers, timings],
+    () => responseQuality(scored, answers, timings, evaluateAttention(items, answers)),
+    [items, scored, answers, timings],
   );
 
   const reshuffle = useCallback(() => {
@@ -108,7 +117,7 @@ function ChildTrauma() {
   }, []);
 
   const result = useMemo(() => {
-    const scores = scoreDimensions(items, answers);
+    const scores = scoreDimensions(scored, answers);
     const sorted = [...scores].sort((a, b) => b.value - a.value);
     const top = sorted[0]?.dim ?? "Safety";
     const low = sorted[sorted.length - 1]?.dim ?? "Trust";
@@ -116,7 +125,11 @@ function ChildTrauma() {
       ? Math.round(scores.reduce((a, b) => a + b.value, 0) / scores.length)
       : 0;
     return { scores, top, low, overall, archetype: traumaArchetype(top, low) };
-  }, [items, answers]);
+  }, [scored, answers]);
+
+  // Percentiles from this site's own anonymous score pool once it is big
+  // enough; the reference curve until then.
+  const norms = useNorms("child-trauma", result.scores, phase === "result");
 
   const notes = useMemo(
     () =>
@@ -212,7 +225,12 @@ function ChildTrauma() {
               }}
             >
           <div className="mt-8">
-              <TraitBars data={result.scores} notes={notes} />
+              <TraitBars
+                data={result.scores}
+                notes={notes}
+                percentiles={norms.percentiles}
+                liveNorms={norms.live}
+              />
             </div>
             </LockedReport>
           </div>
