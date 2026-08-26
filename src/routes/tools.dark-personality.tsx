@@ -4,6 +4,7 @@ import { Ghost, Loader2, Lock } from "lucide-react";
 
 import { ToolShell } from "@/components/layout/ToolShell";
 import { useAutoStart } from "@/lib/autostart";
+import { takeCarriedAnswer } from "@/lib/entry-carry";
 import { QuizRunner } from "@/components/tools/QuizRunner";
 import { RadarChart } from "@/components/tools/RadarChart";
 import { ResultActions } from "@/components/tools/ResultActions";
@@ -86,7 +87,20 @@ export const Route = createFileRoute("/tools/dark-personality")({
 });
 
 function DarkPersonality() {
-  const [seed, setSeed] = useState(() => newSeed());
+  // Question one may already be answered on the home hero. Draw a seed whose
+  // balanced set contains that item so the answer actually counts; the set is
+  // still randomly drawn and balanced exactly as before.
+  const [carried] = useState(() => takeCarriedAnswer("dark-personality"));
+  const [seed, setSeed] = useState(() => {
+    let s = newSeed();
+    if (!carriedRef.value) return s;
+    for (let i = 0; i < 40; i++) {
+      const set = pickBalanced(DARK_BANK, (it) => it.dim, DARK_PER_DIM, rngFrom(s));
+      if (set.some((it) => it.id === carriedRef.value!.id)) break;
+      s = newSeed();
+    }
+    return s;
+  });
   const [phase, setPhase] = useState<"intro" | "quiz" | "result">("intro");
 
   // Chained sessions: /tools/x?auto=1 skips the intro and starts immediately.
@@ -152,6 +166,7 @@ function DarkPersonality() {
           items={items}
           intro="How accurate is this about you?"
           onReshuffle={reshuffle}
+          initialAnswers={carried ? { [carried.id]: carried.weight } : undefined}
           onComplete={(all) => {
             setAnswers(all);
             setPhase("result");

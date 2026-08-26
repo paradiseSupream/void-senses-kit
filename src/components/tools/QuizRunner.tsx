@@ -15,18 +15,31 @@ export function QuizRunner({
   onComplete,
   onReshuffle,
   intro,
+  initialAnswers,
 }: {
   items: Likert[];
   onComplete: (answers: Record<string, number>) => void;
   onReshuffle?: () => void;
   intro?: string;
+  /** Answers already given elsewhere (e.g. question one on the home hero). */
+  initialAnswers?: Record<string, number>;
 }) {
   const [index, setIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, number>>({});
 
   useEffect(() => {
-    setIndex(0);
-    setAnswers({});
+    // Keep only carried answers that belong to this drawn set, then resume on
+    // the first unanswered item.
+    const seeded: Record<string, number> = {};
+    for (const item of items) {
+      const carried = initialAnswers?.[item.id];
+      if (typeof carried === "number") seeded[item.id] = carried;
+    }
+    const first = items.findIndex((item) => seeded[item.id] === undefined);
+    setAnswers(seeded);
+    setIndex(first === -1 ? 0 : first);
+    // `initialAnswers` is a one-shot handoff; the drawn set is the real trigger.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [items]);
 
   // While the quiz is open and unfinished, no pop-under / vignette / push may
