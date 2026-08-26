@@ -5,20 +5,17 @@ import {
   ArrowRight,
   BadgeCheck,
   Brain,
-  Cpu,
   Download,
   Fingerprint,
-  Gauge,
   Heart,
   Laugh,
-  MousePointerClick,
   Search,
   ShieldCheck,
   Sparkles,
   Timer,
   Wallet,
-  Zap,
 } from "lucide-react";
+
 
 import { TOOLS, searchTools, type ToolMeta } from "@/lib/tools";
 import { ToolRow } from "@/components/tools/ToolRow";
