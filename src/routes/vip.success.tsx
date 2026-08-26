@@ -8,6 +8,7 @@ import { vipOrderStatus } from "@/lib/vip.functions";
 import { useVip } from "@/lib/vip";
 import { rememberLicense, rememberOrder } from "@/lib/vip-unlock";
 import { trackFunnel } from "@/lib/funnel";
+import { pixelTrack } from "@/lib/pixels";
 
 type Search = { order?: string; status?: string };
 
