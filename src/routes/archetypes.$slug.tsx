@@ -1,31 +1,50 @@
+import { useEffect } from "react";
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { AlertTriangle, ArrowRight, Check, Sparkles } from "lucide-react";
 
 import { AXIS_LABELS } from "@/lib/archetype-core";
 import { archetypePageBySlug, type ArchetypePage } from "@/lib/archetype-seo";
+import { armCopy, type ArchetypeArm } from "@/lib/archetype-ab";
+import { getArchetypeArm } from "@/lib/archetype-ab.functions";
 import { AdSlot } from "@/components/monetization/AdSlot";
+import { ShareRow } from "@/components/tools/ShareRow";
+import { TOOLS } from "@/lib/tools";
+import { track } from "@/lib/monetization";
 
 const BASE = "https://sensesofvoid.app";
 
 export const Route = createFileRoute("/archetypes/$slug")({
-  loader: ({ params }) => {
+  loader: async ({ params }) => {
     const page = archetypePageBySlug(params.slug);
     if (!page) throw notFound();
-    return { slug: page.key };
+    // Arm is resolved server-side so crawlers and visitors see the same copy.
+    const { arm } = await getArchetypeArm({ data: { slug: page.key } }).catch(() => ({
+      arm: "authority" as ArchetypeArm,
+    }));
+    return { slug: page.key, arm };
   },
-  head: ({ params }) => {
+  head: ({ params, loaderData }) => {
     const page = archetypePageBySlug(params.slug);
     if (!page) {
       return { meta: [{ title: "Archetype not found" }, { name: "robots", content: "noindex" }] };
     }
+    const copy = armCopy({
+      arm: (loaderData?.arm ?? "authority") as ArchetypeArm,
+      name: page.archetype.name,
+      short: page.short,
+      baseTitle: page.title,
+      baseDescription: page.description,
+      tagline: page.archetype.tagline,
+      rarity: page.rarity,
+    });
     const url = `${BASE}${page.path}`;
     return {
       meta: [
-        { title: `${page.title} | Senses of Void` },
-        { name: "description", content: page.description },
+        { title: `${copy.title} | Senses of Void` },
+        { name: "description", content: copy.description },
         { name: "keywords", content: page.keywords.join(", ") },
-        { property: "og:title", content: page.title },
-        { property: "og:description", content: page.description },
+        { property: "og:title", content: copy.title },
+        { property: "og:description", content: copy.description },
         { property: "og:type", content: "article" },
         { name: "twitter:card", content: "summary_large_image" },
         { property: "og:url", content: url },
@@ -39,7 +58,7 @@ export const Route = createFileRoute("/archetypes/$slug")({
             "@context": "https://schema.org",
             "@type": "Article",
             headline: page.archetype.name,
-            description: page.description,
+            description: copy.description,
             url,
             isPartOf: { "@type": "WebSite", name: "Senses of Void", url: BASE },
             about: { "@type": "Thing", name: "Dark personality archetypes" },
@@ -94,8 +113,22 @@ function ArchetypeMissing() {
 }
 
 function ArchetypeDetail() {
-  const { slug } = Route.useLoaderData();
+  const { slug, arm } = Route.useLoaderData();
   const page = archetypePageBySlug(slug) as ArchetypePage;
+  const copy = armCopy({
+    arm,
+    name: page.archetype.name,
+    short: page.short,
+    baseTitle: page.title,
+    baseDescription: page.description,
+    tagline: page.archetype.tagline,
+    rarity: page.rarity,
+  });
+
+  // Hero exposure — the denominator of the arm CTR that picks the winner.
+  useEffect(() => {
+    track({ event_type: "experiment", slot: "arch_hero_view", zone: slug, format: arm });
+  }, [slug, arm]);
   const weights = Object.entries(page.archetype.weights) as [string, number][];
   const peak = Math.max(...weights.map(([, w]) => Math.abs(w)), 1);
 
@@ -122,10 +155,16 @@ function ArchetypeDetail() {
           </p>
           <Link
             to="/tools/dark-personality"
+            onClick={() =>
+              track({ event_type: "click", slot: "arch_cta_click", zone: slug, format: arm })
+            }
             className="mt-6 inline-flex min-h-11 items-center gap-2 rounded-full bg-primary px-6 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
           >
-            <Sparkles className="size-4" aria-hidden="true" /> Am I this archetype? Free test
+            <Sparkles className="size-4" aria-hidden="true" /> {copy.cta}
           </Link>
+          <p className="mt-2 font-mono text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
+            {copy.promise}
+          </p>
         </div>
       </header>
 
@@ -264,6 +303,48 @@ function ArchetypeDetail() {
             })}
           </div>
         </section>
+
+        <section className="mt-10">
+          <h2 className="text-xl font-semibold tracking-tight">Tests that map this profile</h2>
+          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+            {TOOLS.filter((tool) =>
+              ["dark-personality", "child-trauma", "love-match", "iq"].includes(tool.slug),
+            ).map((tool) => (
+              <Link
+                key={tool.slug}
+                to={tool.path}
+                onClick={() =>
+                  track({
+                    event_type: "click",
+                    slot: "arch_tool_link",
+                    zone: slug,
+                    format: tool.slug,
+                  })
+                }
+                className="flex items-start gap-3 rounded-2xl border border-hairline bg-surface-2/60 p-4 transition-colors hover:border-primary/40"
+              >
+                <tool.icon className="mt-0.5 size-5 text-primary" aria-hidden="true" />
+                <span>
+                  <span className="block text-sm font-semibold">{tool.name}</span>
+                  <span className="mt-1 block text-xs text-muted-foreground">{tool.tagline}</span>
+                  <span className="mt-1 block font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+                    {tool.duration}
+                  </span>
+                </span>
+              </Link>
+            ))}
+          </div>
+          <ShareRow
+            className="mt-5"
+            toolSlug="dark-personality"
+            campaign={slug}
+            content="archetype_page"
+            url={`${BASE}${page.path}`}
+            text={`${page.archetype.name} — ${page.archetype.tagline}`}
+          />
+        </section>
+
+
 
         <p className="mt-10 text-xs leading-relaxed text-muted-foreground">
           Senses of Void tests are psychometric-inspired tools for self-reflection and

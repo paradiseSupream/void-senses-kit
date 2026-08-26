@@ -1,3 +1,5 @@
+export type CardMetric = { label: string; value: number };
+
 type CardOptions = {
   width?: number;
   height?: number;
@@ -6,6 +8,14 @@ type CardOptions = {
   headline: string;
   lines: string[];
   footer?: string;
+  /** Per-result accent colour — personalises archetype / vibe cards. */
+  accent?: string;
+  /** Small pill in the top-right: rarity, band or verdict. */
+  badge?: string;
+  /** Name / pair label rendered beside the eyebrow. */
+  subject?: string;
+  /** Up to 4 axis bars (0–100) rendered above the footer. */
+  metrics?: CardMetric[];
 };
 
 const OBSIDIAN = "#09090b";
@@ -13,6 +23,63 @@ const SLATE = "#18181b";
 const LINE = "#27272a";
 const EMERALD = "#10b981";
 const VIOLET = "#7c3aed";
+
+/**
+ * Deterministic accent colour for a result seed (archetype name, verdict,
+ * score band) so every share card looks specific to that person's outcome.
+ */
+export function accentFor(seed: string): string {
+  let hash = 0;
+  for (let i = 0; i < seed.length; i += 1) hash = (hash * 31 + seed.charCodeAt(i)) % 360;
+  return `hsl(${hash} 78% 58%)`;
+}
+
+function drawBadge(ctx: CanvasRenderingContext2D, text: string, right: number, top: number, accent: string) {
+  ctx.font = "600 16px 'JetBrains Mono', monospace";
+  const width = ctx.measureText(text.toUpperCase()).width + 28;
+  const x = right - width;
+  ctx.fillStyle = accent;
+  ctx.globalAlpha = 0.16;
+  roundRect(ctx, x, top, width, 34, 17);
+  ctx.fill();
+  ctx.globalAlpha = 1;
+  ctx.strokeStyle = accent;
+  ctx.lineWidth = 1.2;
+  roundRect(ctx, x, top, width, 34, 17);
+  ctx.stroke();
+  ctx.fillStyle = accent;
+  ctx.fillText(text.toUpperCase(), x + 14, top + 23);
+}
+
+function drawMetrics(
+  ctx: CanvasRenderingContext2D,
+  metrics: CardMetric[],
+  x: number,
+  y: number,
+  width: number,
+  accent: string,
+) {
+  const items = metrics.slice(0, 4);
+  const gap = 14;
+  const colWidth = (width - gap * (items.length - 1)) / Math.max(1, items.length);
+  items.forEach((metric, index) => {
+    const cx = x + index * (colWidth + gap);
+    ctx.fillStyle = "#a1a1aa";
+    ctx.font = "500 13px 'JetBrains Mono', monospace";
+    ctx.fillText(metric.label.toUpperCase().slice(0, 14), cx, y);
+    ctx.fillStyle = "#27272a";
+    roundRect(ctx, cx, y + 10, colWidth, 8, 4);
+    ctx.fill();
+    ctx.fillStyle = accent;
+    const pct = Math.max(0, Math.min(100, metric.value)) / 100;
+    roundRect(ctx, cx, y + 10, Math.max(8, colWidth * pct), 8, 4);
+    ctx.fill();
+    ctx.fillStyle = "#fafafa";
+    ctx.font = "600 15px 'Space Grotesk', sans-serif";
+    ctx.fillText(String(Math.round(metric.value)), cx, y + 40);
+  });
+}
+
 
 /** Draws a branded 2x-resolution share card and returns the canvas. */
 export function drawBrandedCard(options: CardOptions): HTMLCanvasElement {
@@ -60,6 +127,8 @@ export function drawBrandedCard(options: CardOptions): HTMLCanvasElement {
   roundRect(ctx, pad / 2, pad / 2, w - pad, h - pad, 28);
   ctx.stroke();
 
+  const accent = options.accent ?? EMERALD;
+
   // logo mark
   const cx = pad + 8;
   const cy = pad + 14;
@@ -68,7 +137,7 @@ export function drawBrandedCard(options: CardOptions): HTMLCanvasElement {
   ctx.beginPath();
   ctx.arc(cx, cy, 16, 0, Math.PI * 2);
   ctx.stroke();
-  ctx.fillStyle = EMERALD;
+  ctx.fillStyle = accent;
   ctx.beginPath();
   ctx.arc(cx, cy, 6, 0, Math.PI * 2);
   ctx.fill();
@@ -77,15 +146,20 @@ export function drawBrandedCard(options: CardOptions): HTMLCanvasElement {
   ctx.font = "600 22px 'Space Grotesk', sans-serif";
   ctx.fillText("Senses of Void", cx + 30, cy + 8);
 
+  if (options.badge) drawBadge(ctx, options.badge, w - pad, pad - 4, accent);
+
   ctx.fillStyle = "#a1a1aa";
   ctx.font = "500 14px 'JetBrains Mono', monospace";
-  ctx.fillText(options.eyebrow.toUpperCase(), pad, pad + 78);
+  const eyebrow = options.subject
+    ? `${options.eyebrow} · ${options.subject}`
+    : options.eyebrow;
+  ctx.fillText(eyebrow.toUpperCase(), pad, pad + 78);
 
   ctx.fillStyle = "#fafafa";
   ctx.font = "700 46px 'Space Grotesk', sans-serif";
   ctx.fillText(options.title, pad, pad + 136);
 
-  ctx.fillStyle = EMERALD;
+  ctx.fillStyle = accent;
   ctx.font = "700 76px 'Space Grotesk', sans-serif";
   ctx.fillText(options.headline, pad, pad + 226);
 
@@ -99,12 +173,17 @@ export function drawBrandedCard(options: CardOptions): HTMLCanvasElement {
     y += 32 * Math.max(1, wrapText(ctx, line, pad, y, w - pad * 2, 32).length) + 8;
   });
 
+  if (options.metrics?.length) {
+    drawMetrics(ctx, options.metrics, pad, h - pad - 96, w - pad * 2, accent);
+  }
+
   ctx.fillStyle = "#71717a";
   ctx.font = "400 16px 'JetBrains Mono', monospace";
   ctx.fillText(options.footer ?? "sensesofvoid.app · entertainment & self-reflection only", pad, h - pad);
 
   return canvas;
 }
+
 
 export function downloadCanvas(canvas: HTMLCanvasElement, filename: string) {
   const url = canvas.toDataURL("image/png");
@@ -203,13 +282,15 @@ export function drawStoryCard(options: CardOptions): HTMLCanvasElement {
   roundRect(ctx, pad - 32, 300, w - (pad - 32) * 2, 1140, 48);
   ctx.stroke();
 
+  const accent = options.accent ?? EMERALD;
+
   // logo mark, centred
   ctx.strokeStyle = VIOLET;
   ctx.lineWidth = 4;
   ctx.beginPath();
   ctx.arc(w / 2, 170, 38, 0, Math.PI * 2);
   ctx.stroke();
-  ctx.fillStyle = EMERALD;
+  ctx.fillStyle = accent;
   ctx.beginPath();
   ctx.arc(w / 2, 170, 14, 0, Math.PI * 2);
   ctx.fill();
@@ -221,7 +302,10 @@ export function drawStoryCard(options: CardOptions): HTMLCanvasElement {
 
   ctx.fillStyle = "#a1a1aa";
   ctx.font = "500 26px 'JetBrains Mono', monospace";
-  ctx.fillText(options.eyebrow.toUpperCase(), w / 2, 400);
+  const eyebrow = options.subject
+    ? `${options.eyebrow} · ${options.subject}`
+    : options.eyebrow;
+  ctx.fillText(eyebrow.toUpperCase(), w / 2, 400);
 
   ctx.fillStyle = "#fafafa";
   ctx.font = "700 62px 'Space Grotesk', sans-serif";
@@ -229,8 +313,9 @@ export function drawStoryCard(options: CardOptions): HTMLCanvasElement {
     ctx.fillText(line, w / 2, 490 + i * 74);
   });
 
-  ctx.fillStyle = EMERALD;
-  ctx.font = "700 150px 'Space Grotesk', sans-serif";
+  ctx.fillStyle = accent;
+  const headlineFont = options.headline.length > 12 ? 84 : 150;
+  ctx.font = `700 ${headlineFont}px 'Space Grotesk', sans-serif`;
   ctx.fillText(options.headline, w / 2, 720);
 
   ctx.fillStyle = "#d4d4d8";
@@ -243,6 +328,19 @@ export function drawStoryCard(options: CardOptions): HTMLCanvasElement {
     });
     y += segments.length * 48 + 18;
   });
+
+  if (options.badge) {
+    ctx.textAlign = "left";
+    drawBadge(ctx, options.badge, w / 2 + 170, 1080, accent);
+    ctx.textAlign = "center";
+  }
+
+  if (options.metrics?.length) {
+    ctx.textAlign = "left";
+    drawMetrics(ctx, options.metrics, pad, 1180, w - pad * 2, accent);
+    ctx.textAlign = "center";
+  }
+
 
   ctx.fillStyle = VIOLET;
   ctx.font = "600 38px 'Space Grotesk', sans-serif";

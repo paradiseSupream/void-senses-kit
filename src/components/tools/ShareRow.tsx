@@ -2,6 +2,7 @@ import { Facebook, Link2, MessageCircle, Send, Share2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { track } from "@/lib/monetization";
+import { trackShare, withUtm } from "@/lib/share-link";
 
 /**
  * One-tap social share row. Every network opens a pre-filled composer with the
@@ -11,40 +12,49 @@ export function ShareRow({
   url,
   text,
   toolSlug,
+  campaign,
+  content = "share_row",
   className = "",
 }: {
   url: string;
   text: string;
   toolSlug?: string;
+  /** UTM campaign — tool or archetype slug. */
+  campaign?: string;
+  /** UTM content — which block on the page produced the share. */
+  content?: string;
   className?: string;
 }) {
   const enc = encodeURIComponent;
-  const message = `${text} ${url}`;
+  // Each network gets its own tagged deeplink so inbound clicks are attributable.
+  const link = (source: string) =>
+    withUtm(url, { source, campaign: campaign ?? toolSlug ?? "site", content });
+  const message = `${text} ${link("copy_link")}`;
 
   const targets = [
     {
       key: "whatsapp",
       label: "WhatsApp",
       Icon: MessageCircle,
-      href: `https://wa.me/?text=${enc(message)}`,
+      href: `https://wa.me/?text=${enc(`${text} ${link("whatsapp")}`)}`,
     },
     {
       key: "telegram",
       label: "Telegram",
       Icon: Send,
-      href: `https://t.me/share/url?url=${enc(url)}&text=${enc(text)}`,
+      href: `https://t.me/share/url?url=${enc(link("telegram"))}&text=${enc(text)}`,
     },
     {
       key: "x",
       label: "X",
       Icon: Share2,
-      href: `https://twitter.com/intent/tweet?text=${enc(text)}&url=${enc(url)}`,
+      href: `https://twitter.com/intent/tweet?text=${enc(text)}&url=${enc(link("x"))}`,
     },
     {
       key: "facebook",
       label: "Facebook",
       Icon: Facebook,
-      href: `https://www.facebook.com/sharer/sharer.php?u=${enc(url)}`,
+      href: `https://www.facebook.com/sharer/sharer.php?u=${enc(link("facebook"))}`,
     },
   ] as const;
 
@@ -53,6 +63,7 @@ export function ShareRow({
       await navigator.clipboard.writeText(message);
       toast.success("Link copied — paste it anywhere.");
       track({ event_type: "conversion", slot: "share_copy", tool_slug: toolSlug ?? null });
+      trackShare({ source: "copy_link", campaign: campaign ?? toolSlug ?? "site", content, ...(toolSlug ? { toolSlug } : {}) });
     } catch {
       toast.error("Clipboard blocked by your browser.");
     }
@@ -69,7 +80,12 @@ export function ShareRow({
           rel="noopener noreferrer"
           aria-label={`Share on ${label}`}
           onClick={() =>
-            track({ event_type: "click", slot: `share_${key}`, tool_slug: toolSlug ?? null })
+            trackShare({
+              source: key,
+              campaign: campaign ?? toolSlug ?? "site",
+              content,
+              ...(toolSlug ? { toolSlug } : {}),
+            })
           }
           className="inline-flex min-h-10 items-center gap-1.5 rounded-full border border-hairline px-3.5 text-xs font-medium transition-colors hover:border-primary/50 hover:bg-primary/10"
         >

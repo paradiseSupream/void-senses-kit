@@ -299,6 +299,10 @@ function DarkPersonality() {
               fileName: "senses-of-void-shadow-archetype.png",
               toolName: "Dark Personality Test",
               toolPath: "/tools/dark-personality",
+              accentSeed: summary.archetype.name,
+              badge: `intensity ${summary.intensity}`,
+              subject: summary.dominant,
+              metrics: summary.axes.slice(0, 4).map((a) => ({ label: a.dim, value: a.value })),
               text: `I'm ${summary.archetype.name} — shadow intensity ${summary.intensity}/100 on Senses of Void.`,
             }}
           />

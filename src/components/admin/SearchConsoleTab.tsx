@@ -2,6 +2,9 @@ import { useCallback, useEffect, useState } from "react";
 import { RefreshCw, Search, UploadCloud } from "lucide-react";
 
 import { gscResubmitSitemap, gscSnapshot, type GscResult } from "@/lib/gsc.functions";
+import { getArchetypeArmStats } from "@/lib/archetype-ab.functions";
+import { MIN_VIEWS_PER_ARM, pickArm, type ArmStat } from "@/lib/archetype-ab";
+import { ARCHETYPE_PAGES } from "@/lib/archetype-seo";
 
 const pct = (value: number) => `${(value * 100).toFixed(2)}%`;
 const num = (value: number) => value.toLocaleString();
@@ -110,6 +113,8 @@ export function SearchConsoleTab({ token }: { token: string }) {
       ) : null}
 
       {result?.status === "ok" ? <Snapshot data={result.snapshot} /> : null}
+
+      <ArchetypeAbPanel token={token} />
     </div>
   );
 }
@@ -190,6 +195,19 @@ function Snapshot({ data }: { data: NonNullable<Extract<GscResult, { status: "ok
         ])}
       />
       <Table
+        title="Archetype landing pages"
+        head={["Page", "Clicks", "Impr.", "CTR", "Pos."]}
+        rows={data.topPages
+          .filter((row) => row.page.includes("/archetypes/"))
+          .map((row) => [
+            row.page.replace("https://sensesofvoid.app", ""),
+            num(row.clicks),
+            num(row.impressions),
+            pct(row.ctr),
+            row.position.toFixed(1),
+          ])}
+      />
+      <Table
         title="Countries"
         head={["Country", "Clicks", "Impressions"]}
         rows={data.byCountry.map((row) => [row.country.toUpperCase(), num(row.clicks), num(row.impressions)])}
@@ -244,6 +262,79 @@ function Table({ title, head, rows }: { title: string; head: string[]; rows: str
           </table>
         </div>
       )}
+    </div>
+  );
+}
+
+function ArchetypeAbPanel({ token }: { token: string }) {
+  const [stats, setStats] = useState<ArmStat[] | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    try {
+      const response = await getArchetypeArmStats({ data: { token } });
+      setStats(response.stats);
+    } catch {
+      setStats([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [token]);
+
+  useEffect(() => {
+    void load();
+  }, [load]);
+
+  return (
+    <div className="rounded-xl border border-hairline bg-surface-2/60 p-4">
+      <div className="flex items-center justify-between gap-3">
+        <div className="label-mono text-xs text-muted-foreground">
+          archetype title/CTA A/B ({MIN_VIEWS_PER_ARM} views per arm to lock a winner)
+        </div>
+        <button
+          type="button"
+          onClick={() => void load()}
+          className="inline-flex items-center gap-2 rounded-lg border border-hairline px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground"
+        >
+          <RefreshCw className="h-3.5 w-3.5" aria-hidden /> Refresh
+        </button>
+      </div>
+      {loading ? <p className="mt-2 text-sm text-muted-foreground">Loading arm performance…</p> : null}
+      <div className="mt-3 overflow-x-auto">
+        <table className="w-full text-left text-sm">
+          <thead className="label-mono text-xs text-muted-foreground">
+            <tr>
+              {["Archetype", "Live arm", "State", "Views", "Clicks", "CTR"].map((head) => (
+                <th key={head} className="px-3 py-2">
+                  {head}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {ARCHETYPE_PAGES.map((page) => {
+              const rows = (stats ?? []).filter((row) => row.slug === page.key);
+              const decision = pickArm(page.key, stats ?? []);
+              const live = rows.find((row) => row.arm === decision.arm);
+              const views = live?.views ?? 0;
+              const clicks = live?.clicks ?? 0;
+              return (
+                <tr key={page.key} className="border-t border-hairline/60">
+                  <td className="px-3 py-2">{page.archetype.name}</td>
+                  <td className="px-3 py-2 font-mono text-xs">{decision.arm}</td>
+                  <td className="px-3 py-2 text-xs text-muted-foreground">
+                    {decision.reason === "winner" ? "winner locked" : "rotating"}
+                  </td>
+                  <td className="px-3 py-2">{num(views)}</td>
+                  <td className="px-3 py-2">{num(clicks)}</td>
+                  <td className="px-3 py-2">{views > 0 ? pct(clicks / views) : "—"}</td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }

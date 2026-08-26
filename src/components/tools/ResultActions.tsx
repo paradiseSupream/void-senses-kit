@@ -3,10 +3,18 @@ import { Copy, Download, ImageDown, RotateCcw, Share2, Smartphone, Swords } from
 import { toast } from "sonner";
 
 import { useActionGate } from "@/components/monetization/ActionGate";
-import { downloadCanvas, drawBrandedCard, drawStoryCard, shareCanvasImage } from "@/lib/canvas-card";
+import {
+  accentFor,
+  downloadCanvas,
+  drawBrandedCard,
+  drawStoryCard,
+  shareCanvasImage,
+  type CardMetric,
+} from "@/lib/canvas-card";
 import { compareUrl } from "@/lib/compare-link";
 import { ShareRow } from "@/components/tools/ShareRow";
 import { track } from "@/lib/monetization";
+import { trackShare, withUtm } from "@/lib/share-link";
 
 export type SharePayload = {
   eyebrow: string;
@@ -21,7 +29,16 @@ export type SharePayload = {
   toolName?: string;
   /** Route back to the tool, e.g. "/tools/iq". */
   toolPath?: string;
+  /** Personalisation seed — archetype / verdict name drives the card accent. */
+  accentSeed?: string;
+  /** Rarity, band or verdict pill on the card. */
+  badge?: string;
+  /** Participant name or pair label. */
+  subject?: string;
+  /** Up to 4 axis bars (0–100) rendered on the card. */
+  metrics?: CardMetric[];
 };
+
 
 
 /**
@@ -55,29 +72,31 @@ export function ResultActions({
   const shareUrl =
     typeof window === "undefined" ? "https://sensesofvoid.app" : window.location.href;
 
+  /** Personalised card options — accent, badge, subject and axis bars. */
+  const cardOptions = () => ({
+    eyebrow: payload.eyebrow,
+    title: payload.title,
+    headline: payload.headline,
+    lines: payload.lines,
+    accent: accentFor(payload.accentSeed ?? (payload.headline || payload.title)),
+    ...(payload.footer ? { footer: payload.footer } : {}),
+    ...(payload.badge ? { badge: payload.badge } : {}),
+    ...(payload.subject ? { subject: payload.subject } : {}),
+    ...(payload.metrics?.length ? { metrics: payload.metrics } : {}),
+  });
+
   const download = async () => {
     await runGated({ toolSlug });
-    const canvas = drawBrandedCard({
-      eyebrow: payload.eyebrow,
-      title: payload.title,
-      headline: payload.headline,
-      lines: payload.lines,
-      ...(payload.footer ? { footer: payload.footer } : {}),
-    });
-    downloadCanvas(canvas, payload.fileName);
+    downloadCanvas(drawBrandedCard(cardOptions()), payload.fileName);
     toast.success("HD card downloaded.");
   };
 
   const downloadStory = async () => {
     await runGated({ toolSlug });
-    const canvas = drawStoryCard({
-      eyebrow: payload.eyebrow,
-      title: payload.title,
-      headline: payload.headline,
-      lines: payload.lines,
-      ...(payload.footer ? { footer: payload.footer } : {}),
-    });
-    downloadCanvas(canvas, payload.fileName.replace(/\.png$/, "") + "-story.png");
+    downloadCanvas(
+      drawStoryCard(cardOptions()),
+      payload.fileName.replace(/\.png$/, "") + "-story.png",
+    );
     toast.success("Vertical story card downloaded — 1080×1920, ready for TikTok.");
   };
 
@@ -88,15 +107,10 @@ export function ResultActions({
    * no file-share support.
    */
   const shareImage = async () => {
-    const canvas = drawBrandedCard({
-      eyebrow: payload.eyebrow,
-      title: payload.title,
-      headline: payload.headline,
-      lines: payload.lines,
-      ...(payload.footer ? { footer: payload.footer } : {}),
-    });
-    const text = `${payload.text}\n${challengeLink()}`;
+    const canvas = drawBrandedCard(cardOptions());
+    const text = `${payload.text}\n${challengeLink("native_image", "share_image")}`;
     track({ event_type: "conversion", slot: "share_image", tool_slug: toolSlug });
+    trackShare({ source: "native_image", campaign: toolSlug, content: "share_image", toolSlug });
     const shared = await shareCanvasImage(canvas, {
       filename: payload.fileName,
       title: payload.title,
@@ -107,18 +121,28 @@ export function ResultActions({
     toast.success("Card saved — post it and tag the link.");
   };
 
-  const challengeLink = () =>
-    compareUrl({
-      t: toolSlug,
-      n: payload.toolName ?? payload.title,
-      h: payload.headline,
-      l: payload.lines,
-      p: payload.toolPath ?? `/tools/${toolSlug}`,
-    });
+  /** Compare deeplink, always UTM-tagged so inbound sessions are attributable. */
+  const challengeLink = (source: string, content: string) =>
+    withUtm(
+      compareUrl({
+        t: toolSlug,
+        n: payload.toolName ?? payload.title,
+        h: payload.headline,
+        l: payload.lines,
+        p: payload.toolPath ?? `/tools/${toolSlug}`,
+      }),
+      { source, campaign: toolSlug, content },
+    );
 
   const challenge = async () => {
-    const url = challengeLink();
+    const url = challengeLink("native_challenge", "challenge_button");
     const text = `I scored ${payload.headline} on ${payload.toolName ?? payload.title}. Beat me:`;
+    trackShare({
+      source: "native_challenge",
+      campaign: toolSlug,
+      content: "challenge_button",
+      toolSlug,
+    });
     if (navigator.share) {
       try {
         await navigator.share({ title: payload.title, text, url });
@@ -135,9 +159,16 @@ export function ResultActions({
     }
   };
 
+
   const copy = async () => {
+    const url = withUtm(shareUrl, {
+      source: "copy_link",
+      campaign: toolSlug,
+      content: "result_copy",
+    });
     try {
-      await navigator.clipboard.writeText(`${payload.text}\n${shareUrl}`);
+      await navigator.clipboard.writeText(`${payload.text}\n${url}`);
+      trackShare({ source: "copy_link", campaign: toolSlug, content: "result_copy", toolSlug });
       toast.success("Copied — paste it anywhere.");
     } catch {
       toast.error("Clipboard blocked by your browser.");
@@ -146,12 +177,19 @@ export function ResultActions({
 
   const nativeShare = async () => {
     if (!navigator.share) return copy();
+    const url = withUtm(shareUrl, {
+      source: "native_link",
+      campaign: toolSlug,
+      content: "result_share",
+    });
+    trackShare({ source: "native_link", campaign: toolSlug, content: "result_share", toolSlug });
     try {
-      await navigator.share({ title: payload.title, text: payload.text, url: shareUrl });
+      await navigator.share({ title: payload.title, text: payload.text, url });
     } catch {
       /* user dismissed */
     }
   };
+
 
   return (
     <>
@@ -212,9 +250,12 @@ export function ResultActions({
     <ShareRow
       className="mt-4 justify-center"
       toolSlug={toolSlug}
-      url={challengeLink()}
+      campaign={toolSlug}
+      content="result_share_row"
+      url={challengeLink("share_row", "result_share_row")}
       text={`I scored ${payload.headline} on ${payload.toolName ?? payload.title}. Beat me:`}
     />
+
     </>
   );
 }
