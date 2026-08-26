@@ -38,7 +38,7 @@ export function StreakChallenge() {
       <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4">
         <div className="min-w-0">
           <span className="label-mono">The 3-test run</span>
-          <h3 className="mt-1 font-display text-lg font-semibold tracking-tight">
+          <h3 className="mt-1 font-display text-2xl">
             Finish all three, unlock your full mind map
           </h3>
           <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">

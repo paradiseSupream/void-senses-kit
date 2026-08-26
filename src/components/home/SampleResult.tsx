@@ -33,7 +33,7 @@ export function SampleResult() {
       <div className="flex items-center justify-between gap-3">
         <div className="min-w-0">
           <span className="label-mono">Sample report</span>
-          <p className="mt-1 truncate font-display text-base font-semibold">
+          <p className="mt-1 truncate font-display text-xl">
             “The Vigilant Builder”
           </p>
         </div>

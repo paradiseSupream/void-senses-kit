@@ -18,7 +18,7 @@ export function ToolRow({ tool }: { tool: ToolMeta }) {
         <Icon className="size-5" style={{ color: "var(--tool-accent)" }} aria-hidden="true" />
       </span>
       <span className="min-w-0">
-        <span className="block truncate font-display text-base font-semibold">{tool.name}</span>
+        <span className="block truncate font-display text-xl">{tool.name}</span>
         <span className="mt-0.5 block truncate text-sm text-muted-foreground">{tool.tagline}</span>
         <span className="label-mono mt-1 block">
           {tool.category} · {tool.duration}
