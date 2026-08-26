@@ -6,6 +6,7 @@ import { ToolShell } from "@/components/layout/ToolShell";
 import { useAutoStart } from "@/lib/autostart";
 import { takeCarriedAnswer } from "@/lib/entry-carry";
 import { QuizRunner } from "@/components/tools/QuizRunner";
+import { QualityBadge } from "@/components/tools/QualityBadge";
 import { RadarChart } from "@/components/tools/RadarChart";
 import { ResultActions } from "@/components/tools/ResultActions";
 import { TraitBars } from "@/components/tools/TraitBars";
@@ -23,6 +24,7 @@ import {
 import { freeSummary } from "@/lib/archetype-core";
 import { usePremiumDossier } from "@/lib/premium-dossier";
 import { newSeed, pickBalanced, rngFrom, scoreDimensions, type Likert } from "@/lib/quiz-engine";
+import { responseQuality } from "@/lib/psychometrics";
 
 type Search = { auto?: string; vip_order?: string; matrix_order?: string };
 
@@ -106,6 +108,7 @@ function DarkPersonality() {
   // Chained sessions: /tools/x?auto=1 skips the intro and starts immediately.
   useAutoStart(() => setPhase("quiz"));
   const [answers, setAnswers] = useState<Record<string, number>>({});
+  const [timings, setTimings] = useState<Record<string, number>>({});
 
   // ?vip_order= / ?matrix_order= → server-verified unlock, then clean the URL
   // and queue the one-time post-purchase upsell.
@@ -116,9 +119,17 @@ function DarkPersonality() {
     [seed],
   );
 
+  // Measurement confidence for this exact session: completeness, response
+  // style, within-axis agreement and answer speed.
+  const quality = useMemo(
+    () => responseQuality(items, answers, timings),
+    [items, answers, timings],
+  );
+
   const reshuffle = useCallback(() => {
     setSeed(newSeed());
     setAnswers({});
+    setTimings({});
     setPhase("quiz");
   }, []);
 
@@ -167,8 +178,9 @@ function DarkPersonality() {
           intro="How accurate is this about you?"
           onReshuffle={reshuffle}
           initialAnswers={carried ? { [carried.id]: carried.weight } : undefined}
-          onComplete={(all) => {
+          onComplete={(all, meta) => {
             setAnswers(all);
+            setTimings(meta?.timingsMs ?? {});
             setPhase("result");
           }}
         />
