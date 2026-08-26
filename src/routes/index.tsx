@@ -22,6 +22,8 @@ import { ToolRow } from "@/components/tools/ToolRow";
 import { LiveEntry } from "@/components/home/LiveEntry";
 import { SignatureCard } from "@/components/home/SignatureCard";
 import { ProofBand } from "@/components/home/ProofBand";
+import { BentoGrid, BentoTile } from "@/components/home/BentoGrid";
+import { Reveal } from "@/components/ui/Reveal";
 import { NativeAdCard, withNativeAds } from "@/components/monetization/NativeAdCard";
 import { SampleResult } from "@/components/home/SampleResult";
 import { AmbientCanvas } from "@/components/visuals/AmbientCanvas";
