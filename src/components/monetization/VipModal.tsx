@@ -177,6 +177,19 @@ export function VipModal() {
           Pick a month to try it, or pay once and keep it forever.
         </p>
 
+        <div className="mt-4 flex items-center gap-3 rounded-xl border border-primary/30 bg-primary/10 p-3">
+          <span className="rounded-full bg-primary px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary-foreground">
+            Launch offer
+          </span>
+          <div className="flex items-baseline gap-2">
+            <span className="font-display text-lg text-muted-foreground line-through decoration-muted-foreground/60">
+              $49
+            </span>
+            <span className="font-display text-3xl font-bold text-primary">$19</span>
+            <span className="text-xs font-semibold text-emerald-400">Save 61%</span>
+          </div>
+        </div>
+
         <div className="mt-5 grid gap-2 sm:grid-cols-2">
           {[
             {
