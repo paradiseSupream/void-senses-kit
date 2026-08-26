@@ -463,6 +463,14 @@ export const adminAudience = createServerFn({ method: "POST" })
         .limit(500),
     ]);
 
+    const hostOf = (referrer: string): string => {
+      try {
+        return new URL(referrer).hostname.replace(/^www\./, "");
+      } catch {
+        return "direct";
+      }
+    };
+
     const list = (rows ?? []) as EventRow[];
     const map = new Map<string, AudienceSession>();
 
