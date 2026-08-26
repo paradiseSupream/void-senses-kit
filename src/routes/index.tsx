@@ -21,7 +21,10 @@ import {
 } from "lucide-react";
 
 import { TOOLS, searchTools, type ToolMeta } from "@/lib/tools";
-import { ToolCard } from "@/components/tools/ToolCard";
+import { ToolRow } from "@/components/tools/ToolRow";
+import { LiveEntry } from "@/components/home/LiveEntry";
+import { SignatureCard } from "@/components/home/SignatureCard";
+import { ProofBand } from "@/components/home/ProofBand";
 import { NativeAdCard, withNativeAds } from "@/components/monetization/NativeAdCard";
 import { SampleResult } from "@/components/home/SampleResult";
 import { AmbientCanvas } from "@/components/visuals/AmbientCanvas";
@@ -85,48 +88,21 @@ export const Route = createFileRoute("/")({
 
 const QUICK_PICKS = ["dark-personality", "love-match", "iq", "roast"] as const;
 
-const STATS = [
-  { icon: Gauge, k: "< 1.5s", v: "first paint" },
-  { icon: Fingerprint, k: "On-device", v: "test scoring" },
-  { icon: Download, k: "PDF · PNG", v: "instant export" },
-  { icon: Sparkles, k: "7 tools", v: "one suite" },
-];
 
-const STEPS = [
+
+
+const PAYOFF = [
   {
-    icon: MousePointerClick,
-    title: "Pick a test",
-    body: "Seven tools, each with one clear job. Tap and it starts — no account, no email.",
-  },
-  {
-    icon: Timer,
-    title: "Answer for 2–5 minutes",
-    body: "One plain-language question per screen, randomised every single time you take it.",
+    icon: Fingerprint,
+    title: "A radar of your traits",
+    body: "Every axis scored and plotted, so you see the shape of the result — not a single word verdict.",
   },
   {
     icon: Download,
-    title: "Get your visual report",
-    body: "A radar map, score bands, written analysis and an HD card ready to share.",
+    title: "Report + share card",
+    body: "Written analysis per band, an HD card for stories and a printable PDF dossier for VIP.",
   },
-];
-
-const PILLARS = [
-  {
-    icon: Zap,
-    title: "Instant, not eventual",
-    body: "Every test scores locally the moment you answer. No spinners, no round trips, no account wall between you and the result.",
-  },
-  {
-    icon: ShieldCheck,
-    title: "Private by architecture",
-    body: "Answers never leave the browser. Only the AI roast tool sends text to a server, and nothing about it is stored.",
-  },
-  {
-    icon: Cpu,
-    title: "Never the same test twice",
-    body: "Questions and answer order are drawn fresh from a large bank each run, so results stay honest and retakes stay interesting.",
-  },
-];
+] as const;
 
 type Goal = { id: string; label: string; icon: typeof Brain; slugs: string[] };
 
