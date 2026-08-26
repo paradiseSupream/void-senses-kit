@@ -10,6 +10,10 @@ const SESSION_KEY = "sov.session";
 const VARIANT_KEY = "sov.adVariant";
 const CAP_KEY = "sov.adCaps";
 const ATTR_KEY = "sov.attr";
+const MOBILE_TOTAL_KEY = "mobile:total";
+const MOBILE_SESSION_LIMIT = 3;
+const MOBILE_FORMAT_TOTAL_KEY = "mobile:format-total";
+const MOBILE_FORMAT_SESSION_LIMIT = 1;
 
 export type AdVariant = "result_heavy" | "gate_heavy";
 export const AD_VARIANTS: AdVariant[] = ["result_heavy", "gate_heavy"];
@@ -117,10 +121,10 @@ export function trackExperiment(slot: string, arm: string) {
 type CapState = { hour: number; counts: Record<string, number>; session: Record<string, number> };
 
 const CAPS: Record<string, { perHour: number; perSession: number }> = {
-  default: { perHour: 60, perSession: 40 },
-  sticky: { perHour: 30, perSession: 20 },
-  gate: { perHour: 20, perSession: 15 },
-  result: { perHour: 40, perSession: 30 },
+  default: { perHour: 8, perSession: 5 },
+  sticky: { perHour: 1, perSession: 1 },
+  gate: { perHour: 2, perSession: 2 },
+  result: { perHour: 4, perSession: 3 },
 };
 
 function capKind(slot: string) {
@@ -166,9 +170,13 @@ export function claimImpression(slot: string): boolean {
   const state = readCaps();
   const hourCount = state.counts[kind] ?? 0;
   const sessionCount = state.session[kind] ?? 0;
+  const isMobile = window.matchMedia("(max-width: 767px)").matches;
+  const mobileTotal = state.session[MOBILE_TOTAL_KEY] ?? 0;
+  if (isMobile && mobileTotal >= MOBILE_SESSION_LIMIT) return false;
   if (hourCount >= cap.perHour || sessionCount >= cap.perSession) return false;
   state.counts[kind] = hourCount + 1;
   state.session[kind] = sessionCount + 1;
+  if (isMobile) state.session[MOBILE_TOTAL_KEY] = mobileTotal + 1;
   writeCaps(state);
   return true;
 }
@@ -180,7 +188,7 @@ export function claimImpression(slot: string): boolean {
  * push loads.
  */
 export function claimFormat(
-  format: "popunder" | "vignette" | "inpage_push",
+  format: "popunder" | "vignette" | "inpage_push" | "adsterra_social_bar",
   cap: { perHour: number; perSession: number },
 ): boolean {
   if (typeof window === "undefined") return false;
@@ -188,11 +196,15 @@ export function claimFormat(
   const state = readCaps();
   const hourCount = state.counts[key] ?? 0;
   const sessionCount = state.session[key] ?? 0;
+  const isMobile = window.matchMedia("(max-width: 767px)").matches;
+  const mobileFormatTotal = state.session[MOBILE_FORMAT_TOTAL_KEY] ?? 0;
+  if (isMobile && mobileFormatTotal >= MOBILE_FORMAT_SESSION_LIMIT) return false;
   if (hourCount >= Math.max(0, cap.perHour) || sessionCount >= Math.max(0, cap.perSession)) {
     return false;
   }
   state.counts[key] = hourCount + 1;
   state.session[key] = sessionCount + 1;
+  if (isMobile) state.session[MOBILE_FORMAT_TOTAL_KEY] = mobileFormatTotal + 1;
   writeCaps(state);
   return true;
 }

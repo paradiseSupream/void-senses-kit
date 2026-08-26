@@ -4,6 +4,7 @@ import { X } from "lucide-react";
 import { useVip } from "@/lib/vip";
 import { useAdSlotEnabled } from "@/lib/site-config";
 import { claimImpression, partnerLink, track } from "@/lib/monetization";
+import { scheduleAdWork } from "@/lib/ad-safety";
 
 const SLOT = "sticky-bottom-mobile";
 const DISMISS_KEY = "sov.stickyDismissed";
@@ -33,11 +34,13 @@ export function StickyBottomAd() {
     // Wait until the visitor has settled into the page — the anchor is
     // persistent, so showing it instantly only raises the bounce rate.
     const timer = window.setTimeout(() => {
-      if (!claimImpression(SLOT)) return;
-      const partner = partnerLink(SLOT, null);
-      setLink(partner);
-      setVisible(true);
-      track({ event_type: "impression", slot: SLOT, click_id: partner.clickId });
+      scheduleAdWork(() => {
+        if (!claimImpression(SLOT)) return;
+        const partner = partnerLink(SLOT, null);
+        setLink(partner);
+        setVisible(true);
+        track({ event_type: "impression", slot: SLOT, click_id: partner.clickId });
+      });
     }, 8000);
 
     return () => window.clearTimeout(timer);

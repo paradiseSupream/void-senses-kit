@@ -4,6 +4,7 @@ import { ExternalLink } from "lucide-react";
 import { useVip } from "@/lib/vip";
 import { useAdSlotEnabled } from "@/lib/site-config";
 import { claimImpression, partnerLink, track } from "@/lib/monetization";
+import { scheduleAdWork } from "@/lib/ad-safety";
 
 const SPONSORED = [
   {
@@ -43,15 +44,17 @@ export function NativeAdCard({ index = 0, toolSlug }: { index?: number; toolSlug
         if (done || !entries.some((e) => e.isIntersecting)) return;
         done = true;
         observer.disconnect();
-        if (!claimImpression(slot)) return;
-        const partner = partnerLink(slot, toolSlug ?? null);
-        setLink(partner);
-        track({
-          event_type: "impression",
-          slot,
-          tool_slug: toolSlug ?? null,
-          format: "native_feed",
-          click_id: partner.clickId,
+        scheduleAdWork(() => {
+          if (!claimImpression(slot)) return;
+          const partner = partnerLink(slot, toolSlug ?? null);
+          setLink(partner);
+          track({
+            event_type: "impression",
+            slot,
+            tool_slug: toolSlug ?? null,
+            format: "native_feed",
+            click_id: partner.clickId,
+          });
         });
       },
       { rootMargin: "120px" },

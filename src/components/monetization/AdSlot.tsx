@@ -4,6 +4,7 @@ import { ArrowUpRight, Sparkles } from "lucide-react";
 import { useVip } from "@/lib/vip";
 import { useSiteConfig } from "@/lib/site-config";
 import { claimImpression, partnerLink, track } from "@/lib/monetization";
+import { scheduleAdWork } from "@/lib/ad-safety";
 
 function slotKind(slot: string): "result" | "gate" | "sticky_mobile" | "native_feed" {
   if (slot.startsWith("sticky")) return "sticky_mobile";
@@ -73,16 +74,18 @@ export function AdSlot({
         if (done || !entries.some((e) => e.isIntersecting)) return;
         done = true;
         observer.disconnect();
-        if (!claimImpression(id)) return;
-        const partner = partnerLink(id, toolSlug ?? null);
-        setLink(partner);
-        setAllowed(true);
-        track({
-          event_type: "impression",
-          slot: id,
-          tool_slug: toolSlug ?? null,
-          revenue_cents: 0,
-          click_id: partner.clickId,
+        scheduleAdWork(() => {
+          if (!claimImpression(id)) return;
+          const partner = partnerLink(id, toolSlug ?? null);
+          setLink(partner);
+          setAllowed(true);
+          track({
+            event_type: "impression",
+            slot: id,
+            tool_slug: toolSlug ?? null,
+            revenue_cents: 0,
+            click_id: partner.clickId,
+          });
         });
       },
       { rootMargin: "120px" },

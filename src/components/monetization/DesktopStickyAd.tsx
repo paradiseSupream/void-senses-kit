@@ -4,6 +4,7 @@ import { X } from "lucide-react";
 import { useVip } from "@/lib/vip";
 import { useAdSlotEnabled } from "@/lib/site-config";
 import { claimImpression, partnerLink, track } from "@/lib/monetization";
+import { scheduleAdWork } from "@/lib/ad-safety";
 
 const SLOT = "sticky-desktop";
 const DISMISS_KEY = "sov.desktopStickyDismissed";
@@ -30,11 +31,13 @@ export function DesktopStickyAd() {
     if (window.matchMedia("(max-width: 640px)").matches) return;
 
     const timer = window.setTimeout(() => {
-      if (!claimImpression(SLOT)) return;
-      const partner = partnerLink(SLOT, null);
-      setLink(partner);
-      setVisible(true);
-      track({ event_type: "impression", slot: SLOT, click_id: partner.clickId });
+      scheduleAdWork(() => {
+        if (!claimImpression(SLOT)) return;
+        const partner = partnerLink(SLOT, null);
+        setLink(partner);
+        setVisible(true);
+        track({ event_type: "impression", slot: SLOT, click_id: partner.clickId });
+      });
     }, 2500);
 
     return () => window.clearTimeout(timer);
