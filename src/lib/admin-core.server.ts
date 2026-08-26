@@ -61,14 +61,16 @@ export function admin(): SupabaseClient {
   return createClient(url, key, { auth: { persistSession: false } });
 }
 
-export type { AdsSettings, SiteSettings } from "@/lib/admin-types";
+export type { AdsSettings, SiteSettings, TrackingSettings } from "@/lib/admin-types";
 import {
   DEFAULT_CAPS,
   DEFAULT_PRIVACY,
+  DEFAULT_TRACKING,
   ADSTERRA,
   MONETAG,
   type AdsSettings,
   type SiteSettings,
+  type TrackingSettings,
 } from "@/lib/admin-types";
 
 
