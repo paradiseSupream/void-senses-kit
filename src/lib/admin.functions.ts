@@ -142,7 +142,12 @@ export const adminSaveSettings = createServerFn({ method: "POST" })
 
 /** Live check that each configured pixel / server-side token actually works. */
 export const adminTestTracking = createServerFn({ method: "POST" })
-  .inputValidator((input: { token: string }) => ({ token: String(input?.token ?? "") }))
+  .inputValidator((input: { token: string; channel?: string }) => ({
+    token: String(input?.token ?? ""),
+    channel: ["meta", "tiktok", "google", "all"].includes(String(input?.channel))
+      ? (String(input?.channel) as "meta" | "tiktok" | "google" | "all")
+      : ("all" as const),
+  }))
   .handler(
     async ({
       data,
@@ -151,61 +156,160 @@ export const adminTestTracking = createServerFn({ method: "POST" })
       await requireAdmin(data.token);
       const { tracking } = await readSettings();
       const results: Array<{ channel: string; ok: boolean; detail: string }> = [];
+      const want = (c: string) => data.channel === "all" || data.channel === c;
 
-      results.push({
-        channel: "Meta pixel",
-        ok: Boolean(tracking.meta_pixel_id),
-        detail: tracking.meta_pixel_id ? "Pixel id set" : "Pixel id missing",
-      });
-      if (tracking.meta_pixel_id && tracking.meta_capi_token) {
-        try {
-          const res = await fetch(
-            `https://graph.facebook.com/v20.0/${tracking.meta_pixel_id}?fields=id,name&access_token=${encodeURIComponent(tracking.meta_capi_token)}`,
-          );
-          const body = (await res.json()) as { error?: { message?: string } };
-          results.push({
-            channel: "Meta Conversions API",
-            ok: res.ok,
-            detail: res.ok ? "Token valid" : (body.error?.message ?? `HTTP ${res.status}`),
-          });
-        } catch (error) {
+      if (want("meta")) {
+        results.push({
+          channel: "Meta pixel",
+          ok: Boolean(tracking.meta_pixel_id),
+          detail: tracking.meta_pixel_id ? "Pixel id set" : "Pixel id missing",
+        });
+        if (tracking.meta_pixel_id && tracking.meta_capi_token) {
+          try {
+            const res = await fetch(
+              `https://graph.facebook.com/v20.0/${tracking.meta_pixel_id}?fields=id,name&access_token=${encodeURIComponent(tracking.meta_capi_token)}`,
+            );
+            const body = (await res.json()) as {
+              name?: string;
+              error?: { message?: string };
+            };
+            results.push({
+              channel: "Meta Conversions API",
+              ok: res.ok,
+              detail: res.ok
+                ? `Token valid — connected to "${body.name ?? tracking.meta_pixel_id}"`
+                : (body.error?.message ?? `HTTP ${res.status}`),
+            });
+          } catch (error) {
+            results.push({
+              channel: "Meta Conversions API",
+              ok: false,
+              detail: (error as Error).message,
+            });
+          }
+        } else {
           results.push({
             channel: "Meta Conversions API",
             ok: false,
-            detail: (error as Error).message,
+            detail: "Access token missing",
           });
         }
-      } else {
+      }
+
+      if (want("tiktok")) {
         results.push({
-          channel: "Meta Conversions API",
-          ok: false,
-          detail: "Access token missing",
+          channel: "TikTok pixel",
+          ok: Boolean(tracking.tiktok_pixel_id),
+          detail: tracking.tiktok_pixel_id ? "Pixel id set" : "Pixel id missing",
+        });
+        if (tracking.tiktok_pixel_id && tracking.tiktok_events_token) {
+          try {
+            // A real Events API round-trip: TikTok answers code 0 when the
+            // token + pixel pair is valid.
+            const res = await fetch(
+              "https://business-api.tiktok.com/open_api/v1.3/event/track/",
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  "Access-Token": tracking.tiktok_events_token,
+                },
+                body: JSON.stringify({
+                  event_source: "web",
+                  event_source_id: tracking.tiktok_pixel_id,
+                  data: [
+                    {
+                      event: "ViewContent",
+                      event_time: Math.floor(Date.now() / 1000),
+                      event_id: `admin-verify-${Date.now()}`,
+                      user: {},
+                      page: { url: "https://sensesofvoid.app/" },
+                    },
+                  ],
+                }),
+              },
+            );
+            const body = (await res.json()) as { code?: number; message?: string };
+            results.push({
+              channel: "TikTok Events API",
+              ok: body.code === 0,
+              detail:
+                body.code === 0
+                  ? "Token valid — test event accepted"
+                  : (body.message ?? `HTTP ${res.status}`),
+            });
+          } catch (error) {
+            results.push({
+              channel: "TikTok Events API",
+              ok: false,
+              detail: (error as Error).message,
+            });
+          }
+        } else {
+          results.push({
+            channel: "TikTok Events API",
+            ok: false,
+            detail: "Access token missing",
+          });
+        }
+      }
+
+      if (want("google")) {
+        const gid = tracking.google_ads_id.trim();
+        const ga4 = tracking.ga4_id.trim();
+        results.push({
+          channel: "Google Ads",
+          ok: /^AW-\d{6,}$/.test(gid),
+          detail: gid
+            ? /^AW-\d{6,}$/.test(gid)
+              ? "Conversion id format valid"
+              : "Should look like AW-123456789"
+            : "Conversion id missing",
+        });
+        for (const [label, id] of [
+          ["Google Ads tag", gid],
+          ["GA4 tag", ga4],
+        ] as const) {
+          if (!id) {
+            results.push({
+              channel: label,
+              ok: false,
+              detail: "Not configured",
+            });
+            continue;
+          }
+          try {
+            const res = await fetch(
+              `https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(id)}`,
+            );
+            const text = await res.text();
+            const live = res.ok && text.length > 500;
+            results.push({
+              channel: label,
+              ok: live,
+              detail: live
+                ? "Tag served by Google — container live"
+                : `Google did not return a tag for ${id}`,
+            });
+          } catch (error) {
+            results.push({ channel: label, ok: false, detail: (error as Error).message });
+          }
+        }
+        results.push({
+          channel: "GA4",
+          ok: /^G-[A-Z0-9]{6,}$/i.test(ga4),
+          detail: ga4
+            ? /^G-[A-Z0-9]{6,}$/i.test(ga4)
+              ? "Measurement id format valid"
+              : "Should look like G-XXXXXXX"
+            : "Measurement id missing",
         });
       }
 
-      results.push({
-        channel: "TikTok pixel",
-        ok: Boolean(tracking.tiktok_pixel_id),
-        detail: tracking.tiktok_pixel_id ? "Pixel id set" : "Pixel id missing",
-      });
-      results.push({
-        channel: "TikTok Events API",
-        ok: Boolean(tracking.tiktok_events_token),
-        detail: tracking.tiktok_events_token ? "Access token set" : "Access token missing",
-      });
-      results.push({
-        channel: "Google Ads",
-        ok: Boolean(tracking.google_ads_id),
-        detail: tracking.google_ads_id ? "Conversion id set" : "Conversion id missing",
-      });
-      results.push({
-        channel: "GA4",
-        ok: Boolean(tracking.ga4_id),
-        detail: tracking.ga4_id ? "Measurement id set" : "Measurement id missing",
-      });
       return results;
     },
   );
+
 
 export const adminListVips = createServerFn({ method: "POST" })
   .inputValidator((input: { token: string }) => ({ token: String(input?.token ?? "") }))
