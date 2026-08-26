@@ -9,6 +9,8 @@ import {
   Scripts,
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
+
+import { captureShareLanding } from "@/lib/share-link";
 import { Toaster } from "sonner";
 
 import appCss from "../styles.css?url";
@@ -152,6 +154,11 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const pathname = useRouterState({ select: (state) => state.location.pathname });
   const isAdmin = pathname.startsWith("/admin");
+
+  // Attribute inbound share deeplinks (utm_* + sid) once per session.
+  useEffect(() => {
+    captureShareLanding();
+  }, [pathname]);
 
   return (
     <QueryClientProvider client={queryClient}>
