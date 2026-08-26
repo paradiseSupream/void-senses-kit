@@ -74,8 +74,26 @@ export const Route = createFileRoute("/api/public/capi")({
 
         const tasks: Promise<unknown>[] = [];
 
-        const metaPixel = process.env["META_PIXEL_ID"];
-        const metaToken = process.env["META_CAPI_ACCESS_TOKEN"];
+        // Credentials live in the admin panel (app_settings.tracking) and fall
+        // back to environment secrets when they were never saved there.
+        let cfg: {
+          server_side?: boolean;
+          meta_pixel_id?: string;
+          meta_capi_token?: string;
+          meta_test_event_code?: string;
+          tiktok_pixel_id?: string;
+          tiktok_events_token?: string;
+        } = {};
+        try {
+          const { readSettings } = await import("@/lib/admin-core.server");
+          cfg = (await readSettings()).tracking;
+        } catch {
+          /* settings unavailable — fall back to env below */
+        }
+        if (cfg.server_side === false) return new Response(null, { status: 204 });
+
+        const metaPixel = cfg.meta_pixel_id || process.env["META_PIXEL_ID"];
+        const metaToken = cfg.meta_capi_token || process.env["META_CAPI_ACCESS_TOKEN"];
         if (metaPixel && metaToken) {
           const userData: Record<string, unknown> = {};
           if (emailHash) userData["em"] = [emailHash];
@@ -93,6 +111,9 @@ export const Route = createFileRoute("/api/public/capi")({
                 method: "POST",
                 headers: { "content-type": "application/json" },
                 body: JSON.stringify({
+                  ...(cfg.meta_test_event_code
+                    ? { test_event_code: cfg.meta_test_event_code }
+                    : {}),
                   data: [
                     {
                       event_name: event,
@@ -112,8 +133,8 @@ export const Route = createFileRoute("/api/public/capi")({
           );
         }
 
-        const tiktokPixel = process.env["TIKTOK_PIXEL_ID"];
-        const tiktokToken = process.env["TIKTOK_EVENTS_ACCESS_TOKEN"];
+        const tiktokPixel = cfg.tiktok_pixel_id || process.env["TIKTOK_PIXEL_ID"];
+        const tiktokToken = cfg.tiktok_events_token || process.env["TIKTOK_EVENTS_ACCESS_TOKEN"];
         if (tiktokPixel && tiktokToken) {
           const user: Record<string, unknown> = {};
           if (emailHash) user["email"] = emailHash;
