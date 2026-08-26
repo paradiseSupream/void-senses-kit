@@ -18,6 +18,7 @@ import { claimFormat, setPartnerBase, setVipFlag, track } from "@/lib/monetizati
 import { adsAllowed, useConsent } from "@/lib/consent";
 import { Ga4Loader } from "@/components/Ga4Loader";
 import { PixelLoader } from "@/components/PixelLoader";
+import { SessionPulse } from "@/components/SessionPulse";
 import { startWebVitals } from "@/lib/web-vitals";
 import { plannedAdScripts, tierAdjust, tierCapScale, type Tier } from "@/lib/ad-policy";
 import { startFunnel, stopFunnel } from "@/lib/funnel";
@@ -63,6 +64,7 @@ export function SiteConfigProvider({ children }: { children: ReactNode }) {
       </AdErrorBoundary>
       <Ga4Loader />
       <PixelLoader />
+      <SessionPulse />
       {children}
     </SiteConfigContext.Provider>
   );
