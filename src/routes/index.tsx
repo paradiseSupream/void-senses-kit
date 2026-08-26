@@ -422,7 +422,7 @@ function Home() {
       </section>
 
       {/* ---------------- Rest of the suite ---------------- */}
-      <section id="suite" className="mx-auto max-w-7xl scroll-mt-20 px-4 py-12 sm:px-6 sm:py-16">
+      <section id="suite" className="mx-auto max-w-7xl scroll-mt-20 px-4 py-10 sm:px-6 sm:py-16">
         <Reveal>
           <span className="label-mono">The rest of the suite</span>
           <h2 className="text-section mt-2">
@@ -430,7 +430,7 @@ function Home() {
           </h2>
         </Reveal>
 
-        <div className="mt-6 flex flex-wrap gap-2">
+        <div className="snap-rail mt-5 sm:mt-6 sm:flex-wrap sm:overflow-visible sm:px-0">
           {GOALS.map(({ id, label, icon: Icon }) => {
             const active = goal === id;
             return (
@@ -439,7 +439,7 @@ function Home() {
                 type="button"
                 onClick={() => setGoal(id)}
                 aria-pressed={active}
-                className={`capsule inline-flex min-h-11 items-center gap-2 px-4 text-sm font-semibold ${
+                className={`capsule inline-flex min-h-11 shrink-0 snap-start items-center gap-2 px-4 text-sm font-semibold whitespace-nowrap ${
                   active ? "capsule-active" : "text-muted-foreground hover:text-foreground"
                 }`}
               >
@@ -468,10 +468,12 @@ function Home() {
           />
         </div>
 
-        <div className="mt-5 grid gap-3 sm:mt-8 sm:grid-cols-2 sm:gap-4">
+        <div className="mt-5 grid grid-cols-2 gap-3 sm:mt-8 sm:gap-4">
           {slots.map((slot, i) =>
             "ad" in slot ? (
-              <NativeAdCard key={`ad-${i}`} index={slot.ad} />
+              <div key={`ad-${i}`} className="col-span-2 grid">
+                <NativeAdCard index={slot.ad} />
+              </div>
             ) : (
               <ToolRow key={slot.item.slug} tool={slot.item} />
             ),
@@ -483,6 +485,7 @@ function Home() {
           ) : null}
         </div>
       </section>
+
 
       {/* ---------------- Proof band + 3-test run ---------------- */}
       <section className="border-y border-hairline bg-surface/15">
