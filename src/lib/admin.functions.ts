@@ -343,6 +343,287 @@ export const getPublicConfig = createServerFn({ method: "GET" }).handler(
         vip_price_cents: site.vip_price_cents,
         vip_sol_address: site.vip_sol_address,
       },
+      // Only public pixel ids leave the server — CAPI tokens never do.
+      tracking: {
+        enabled: tracking.enabled,
+        meta_pixel_id: tracking.meta_pixel_id,
+        tiktok_pixel_id: tracking.tiktok_pixel_id,
+        google_ads_id: tracking.google_ads_id,
+        google_ads_conversion_label: tracking.google_ads_conversion_label,
+        ga4_id: tracking.ga4_id,
+        server_side: tracking.server_side,
+        require_consent: tracking.require_consent,
+      },
     };
   },
 );
+
+/* --------------------------------------------------------------- audience */
+
+export type AudienceSession = {
+  sessionId: string;
+  country: string | null;
+  device: string | null;
+  source: string;
+  utmCampaign: string | null;
+  firstSeen: string;
+  lastSeen: string;
+  durationSec: number;
+  pageviews: number;
+  toolsStarted: string[];
+  toolsCompleted: string[];
+  resultViewed: boolean;
+  isVip: boolean;
+  purchasedCents: number;
+  events: number;
+};
+
+export type AudienceReport = {
+  totals: {
+    sessions: number;
+    visitors: number;
+    completions: number;
+    completionRate: number;
+    avgDurationSec: number;
+    purchases: number;
+    revenueCents: number;
+    conversionRate: number;
+  };
+  byCountry: Array<{
+    country: string;
+    sessions: number;
+    completions: number;
+    purchases: number;
+    revenueCents: number;
+    avgDurationSec: number;
+  }>;
+  bySource: Array<{ source: string; sessions: number; purchases: number; revenueCents: number }>;
+  byTool: Array<{ tool: string; starts: number; completions: number; completionRate: number }>;
+  buyers: Array<{
+    email: string;
+    plan: string;
+    source: string;
+    amountCents: number;
+    country: string | null;
+    createdAt: string;
+    active: boolean;
+  }>;
+  sessions: AudienceSession[];
+};
+
+type EventRow = {
+  event_type: string;
+  slot: string;
+  session_id: string;
+  tool_slug: string | null;
+  device: string | null;
+  country: string | null;
+  utm_source: string | null;
+  utm_campaign: string | null;
+  referrer: string | null;
+  is_vip: boolean | null;
+  duration_ms: number | null;
+  revenue_cents: number | null;
+  created_at: string;
+  suspect: boolean | null;
+};
+
+/**
+ * Rebuilds per-visitor sessions out of `ad_events`: where they came from,
+ * which country, how long they stayed, which tools they finished and whether
+ * they bought VIP.
+ */
+export const adminAudience = createServerFn({ method: "POST" })
+  .inputValidator((input: { token: string; days?: number; country?: string; onlyVip?: boolean }) => ({
+    token: String(input?.token ?? ""),
+    days: Math.max(1, Math.min(90, Number(input?.days ?? 7))),
+    country: String(input?.country ?? "").trim().toUpperCase().slice(0, 2) || undefined,
+    onlyVip: Boolean(input?.onlyVip),
+  }))
+  .handler(async ({ data }): Promise<AudienceReport> => {
+    const { requireAdmin, admin } = await import("@/lib/admin-core.server");
+    await requireAdmin(data.token);
+    const db = admin();
+    const since = new Date(Date.now() - data.days * 86_400_000).toISOString();
+
+    const [{ data: rows }, { data: vipRows }] = await Promise.all([
+      db
+        .from("ad_events")
+        .select(
+          "event_type,slot,session_id,tool_slug,device,country,utm_source,utm_campaign,referrer,is_vip,duration_ms,revenue_cents,created_at,suspect",
+        )
+        .gte("created_at", since)
+        .order("created_at", { ascending: true })
+        .limit(50000),
+      db
+        .from("vip_members")
+        .select("email,plan,source,amount_cents,active,created_at")
+        .gte("created_at", since)
+        .order("created_at", { ascending: false })
+        .limit(500),
+    ]);
+
+    const list = (rows ?? []) as EventRow[];
+    const map = new Map<string, AudienceSession>();
+
+    for (const row of list) {
+      if (row.suspect) continue;
+      const id = row.session_id;
+      let s = map.get(id);
+      if (!s) {
+        s = {
+          sessionId: id,
+          country: row.country ?? null,
+          device: row.device ?? null,
+          source: row.utm_source ?? (row.referrer ? hostOf(row.referrer) : "direct"),
+          utmCampaign: row.utm_campaign ?? null,
+          firstSeen: row.created_at,
+          lastSeen: row.created_at,
+          durationSec: 0,
+          pageviews: 0,
+          toolsStarted: [],
+          toolsCompleted: [],
+          resultViewed: false,
+          isVip: false,
+          purchasedCents: 0,
+          events: 0,
+        };
+        map.set(id, s);
+      }
+      s.events += 1;
+      s.lastSeen = row.created_at;
+      if (!s.country && row.country) s.country = row.country;
+      if (!s.device && row.device) s.device = row.device;
+      if (row.is_vip) s.isVip = true;
+      if (row.event_type === "tool_start" && row.tool_slug && !s.toolsStarted.includes(row.tool_slug)) {
+        s.toolsStarted.push(row.tool_slug);
+      }
+      if (
+        row.event_type === "tool_complete" &&
+        row.tool_slug &&
+        !s.toolsCompleted.includes(row.tool_slug)
+      ) {
+        s.toolsCompleted.push(row.tool_slug);
+      }
+      if (row.event_type === "impression" || row.event_type === "heartbeat") s.pageviews += 1;
+      if (row.event_type === "funnel" && row.slot === "result_view") s.resultViewed = true;
+      if (row.event_type === "conversion" && (row.revenue_cents ?? 0) > 0) {
+        s.purchasedCents += row.revenue_cents ?? 0;
+      }
+      if (row.duration_ms != null) {
+        s.durationSec = Math.max(s.durationSec, Math.round(row.duration_ms / 1000));
+      }
+    }
+
+    for (const s of map.values()) {
+      const span = Math.round(
+        (new Date(s.lastSeen).getTime() - new Date(s.firstSeen).getTime()) / 1000,
+      );
+      s.durationSec = Math.max(s.durationSec, Math.max(0, Math.min(7200, span)));
+      s.pageviews = Math.max(1, s.pageviews);
+    }
+
+    let sessions = [...map.values()];
+    if (data.country) sessions = sessions.filter((s) => s.country === data.country);
+    if (data.onlyVip) sessions = sessions.filter((s) => s.isVip || s.purchasedCents > 0);
+    sessions.sort((a, b) => b.lastSeen.localeCompare(a.lastSeen));
+
+    const completions = sessions.filter((s) => s.toolsCompleted.length > 0).length;
+    const purchases = sessions.filter((s) => s.purchasedCents > 0).length;
+    const revenueCents = sessions.reduce((sum, s) => sum + s.purchasedCents, 0);
+    const totalDuration = sessions.reduce((sum, s) => sum + s.durationSec, 0);
+
+    const group = <T>(
+      key: (s: AudienceSession) => string,
+      make: (k: string, list: AudienceSession[]) => T,
+    ): T[] => {
+      const buckets = new Map<string, AudienceSession[]>();
+      for (const s of sessions) {
+        const k = key(s);
+        const arr = buckets.get(k) ?? [];
+        arr.push(s);
+        buckets.set(k, arr);
+      }
+      return [...buckets.entries()].map(([k, arr]) => make(k, arr));
+    };
+
+    const byCountry = group("" as never as never, () => null as never) as never;
+    void byCountry;
+
+    const countries = group(
+      (s) => s.country ?? "??",
+      (country, arr) => ({
+        country,
+        sessions: arr.length,
+        completions: arr.filter((s) => s.toolsCompleted.length > 0).length,
+        purchases: arr.filter((s) => s.purchasedCents > 0).length,
+        revenueCents: arr.reduce((sum, s) => sum + s.purchasedCents, 0),
+        avgDurationSec: Math.round(arr.reduce((sum, s) => sum + s.durationSec, 0) / arr.length),
+      }),
+    ).sort((a, b) => b.sessions - a.sessions);
+
+    const sources = group(
+      (s) => s.source || "direct",
+      (source, arr) => ({
+        source,
+        sessions: arr.length,
+        purchases: arr.filter((s) => s.purchasedCents > 0).length,
+        revenueCents: arr.reduce((sum, s) => sum + s.purchasedCents, 0),
+      }),
+    ).sort((a, b) => b.sessions - a.sessions);
+
+    const toolStats = new Map<string, { starts: number; completions: number }>();
+    for (const s of sessions) {
+      for (const tool of s.toolsStarted) {
+        const entry = toolStats.get(tool) ?? { starts: 0, completions: 0 };
+        entry.starts += 1;
+        toolStats.set(tool, entry);
+      }
+      for (const tool of s.toolsCompleted) {
+        const entry = toolStats.get(tool) ?? { starts: 0, completions: 0 };
+        entry.completions += 1;
+        toolStats.set(tool, entry);
+      }
+    }
+
+    return {
+      totals: {
+        sessions: sessions.length,
+        visitors: sessions.length,
+        completions,
+        completionRate: sessions.length ? (completions / sessions.length) * 100 : 0,
+        avgDurationSec: sessions.length ? Math.round(totalDuration / sessions.length) : 0,
+        purchases,
+        revenueCents,
+        conversionRate: sessions.length ? (purchases / sessions.length) * 100 : 0,
+      },
+      byCountry: countries.slice(0, 40),
+      bySource: sources.slice(0, 30),
+      byTool: [...toolStats.entries()]
+        .map(([tool, v]) => ({
+          tool,
+          starts: v.starts,
+          completions: v.completions,
+          completionRate: v.starts ? (v.completions / v.starts) * 100 : 0,
+        }))
+        .sort((a, b) => b.starts - a.starts),
+      buyers: ((vipRows ?? []) as Array<Record<string, unknown>>).map((row) => ({
+        email: String(row["email"] ?? ""),
+        plan: String(row["plan"] ?? "lifetime"),
+        source: String(row["source"] ?? "manual"),
+        amountCents: Number(row["amount_cents"] ?? 0),
+        country: null,
+        createdAt: String(row["created_at"] ?? ""),
+        active: row["active"] !== false,
+      })),
+      sessions: sessions.slice(0, 300),
+    };
+  });
+
+function hostOf(referrer: string): string {
+  try {
+    return new URL(referrer).hostname.replace(/^www\./, "");
+  } catch {
+    return "direct";
+  }
+}
