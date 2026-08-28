@@ -1230,6 +1230,72 @@ export const adminTrackingMonitor = createServerFn({ method: "POST" })
           event: row.event,
           status: row.status,
           detail: row.detail,
-        })),
+      })),
+    };
+  });
+
+/* ----------------------------------------------------------------- apple pay */
+
+export type ApplePayDomainResult = {
+  url: string;
+  status: number;
+  ok: boolean;
+  contentType: string;
+  bodyPreview: string;
+  hasPspId: boolean;
+};
+
+export type ApplePayCheckResult = {
+  checkedAt: string;
+  results: ApplePayDomainResult[];
+  allOk: boolean;
+};
+
+const APPLE_PAY_PATH = "/.well-known/apple-developer-merchantid-domain-association";
+
+export const adminCheckApplePay = createServerFn({ method: "POST" })
+  .inputValidator((input: { token: string }) => ({
+    token: String(input?.token ?? ""),
+  }))
+  .handler(async ({ data }): Promise<ApplePayCheckResult> => {
+    const { requireAdmin } = await import("@/lib/admin-core.server");
+    await requireAdmin(data.token);
+
+    const urls = [
+      "https://sensesofvoid.app",
+      "https://www.sensesofvoid.app",
+      `http://localhost:8080`,
+    ];
+
+    const results: ApplePayDomainResult[] = [];
+    for (const base of urls) {
+      const url = base + APPLE_PAY_PATH;
+      try {
+        const res = await fetch(url, { redirect: "follow" });
+        const text = await res.text();
+        results.push({
+          url,
+          status: res.status,
+          ok: res.status === 200,
+          contentType: res.headers.get("content-type") ?? "",
+          bodyPreview: text.slice(0, 300),
+          hasPspId: text.includes("pspId"),
+        });
+      } catch (err) {
+        results.push({
+          url,
+          status: 0,
+          ok: false,
+          contentType: "",
+          bodyPreview: String(err instanceof Error ? err.message : err),
+          hasPspId: false,
+        });
+      }
+    }
+
+    return {
+      checkedAt: new Date().toISOString(),
+      results,
+      allOk: results.every((r) => r.ok && r.hasPspId),
     };
   });
