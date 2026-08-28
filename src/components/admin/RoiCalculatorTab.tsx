@@ -1,13 +1,18 @@
-import { useMemo, useState } from "react";
-import { Calculator, TrendingUp } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import { Calculator, Database, Gauge, RotateCcw, TrendingUp } from "lucide-react";
+
+import { adminRoiDefaults } from "@/lib/ads-intel.functions";
+import type { RoiDefaults } from "@/lib/ads-intel.types";
 
 /**
- * FB ads ROI calculator.
+ * FB ads ROI calculator with live defaults, per-field overrides and
+ * CPA / VIP-based budget pacing.
  *
- * Models a paid campaign end to end: ad spend -> clicks -> quiz completion ->
- * VIP purchases + $9 matrix upsell + $2.99 monthly, plus the ad RPM the same
- * traffic earns while it is on site. Everything is a pure client calculation,
- * so an operator can model a budget before spending it.
+ * Benchmarks seed the model, measured numbers from the last N days replace
+ * them when available, and any field the operator edits is marked as an
+ * override so it is obvious which inputs are real and which are assumptions.
  */
 
 type Inputs = {
@@ -28,7 +33,7 @@ type Inputs = {
   processingPct: number;
 };
 
-const DEFAULTS: Inputs = {
+const BENCHMARKS: Inputs = {
   spend: 200,
   cpc: 0.35,
   landingRate: 85,
@@ -64,11 +69,52 @@ const FIELDS: Array<{ key: keyof Inputs; label: string; hint: string; step?: num
   { key: "processingPct", label: "Processing fee (%)", hint: "Whop / card fees" },
 ];
 
+const WINDOWS = [7, 14, 30, 60] as const;
+
 const usd = (value: number) =>
   `${value < 0 ? "-" : ""}$${Math.abs(value).toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
 
-export function RoiCalculatorTab() {
-  const [inputs, setInputs] = useState<Inputs>(DEFAULTS);
+/** Which fields the measured window can legitimately replace. */
+function measuredInputs(live: RoiDefaults): Partial<Inputs> {
+  const patch: Partial<Inputs> = {};
+  if (live.sessions > 0) patch.quizRate = Number(live.quizRate.toFixed(1));
+  if (live.resultViews > 0) patch.vipRate = Number(live.vipRate.toFixed(2));
+  if (live.purchases > 0) patch.vipPrice = Number(live.aov.toFixed(2));
+  return patch;
+}
+
+export function RoiCalculatorTab({ token }: { token: string }) {
+  const load = useServerFn(adminRoiDefaults);
+  const [days, setDays] = useState<(typeof WINDOWS)[number]>(30);
+  const [inputs, setInputs] = useState<Inputs>(BENCHMARKS);
+  const [overrides, setOverrides] = useState<Partial<Record<keyof Inputs, true>>>({});
+  const [useLive, setUseLive] = useState(true);
+
+  // Pacing controls: what the operator is willing to pay for one VIP buyer.
+  const [targetCpa, setTargetCpa] = useState(12);
+  const [targetRoas, setTargetRoas] = useState(2);
+  const [paceDays, setPaceDays] = useState(7);
+
+  const live = useQuery<RoiDefaults>({
+    queryKey: ["admin-roi-defaults", token, days],
+    queryFn: () => load({ data: { token, days } }),
+    enabled: Boolean(token),
+  });
+
+  const liveData = live.data;
+
+  // Live measurements seed every field the operator has not overridden.
+  useEffect(() => {
+    if (!liveData || !useLive) return;
+    const patch = measuredInputs(liveData);
+    setInputs((prev) => {
+      const next = { ...prev };
+      for (const [key, value] of Object.entries(patch) as Array<[keyof Inputs, number]>) {
+        if (!overrides[key] && Number.isFinite(value) && value > 0) next[key] = value;
+      }
+      return next;
+    });
+  }, [liveData, useLive, overrides]);
 
   const result = useMemo(() => {
     const clicks = inputs.cpc > 0 ? inputs.spend / inputs.cpc : 0;
@@ -89,6 +135,13 @@ export function RoiCalculatorTab() {
     const fees = (paid - refunds) * (inputs.processingPct / 100);
     const net = gross - refunds - fees - inputs.spend;
 
+    // Value of one VIP buyer including the upsell and the ad revenue their
+    // traffic earns — this is what the CPA ceiling is derived from.
+    const vipValue =
+      inputs.vipPrice * (1 - inputs.refundRate / 100) * (1 - inputs.processingPct / 100) +
+      (inputs.upsellRate / 100) * inputs.upsellPrice;
+    const grossPerVisitor = vipBuyers > 0 ? gross / vipBuyers : 0;
+
     return {
       clicks,
       visitors,
@@ -104,6 +157,8 @@ export function RoiCalculatorTab() {
       refunds,
       fees,
       net,
+      vipValue,
+      grossPerVisitor,
       roas: inputs.spend > 0 ? gross / inputs.spend : 0,
       roi: inputs.spend > 0 ? (net / inputs.spend) * 100 : 0,
       cpa: vipBuyers > 0 ? inputs.spend / vipBuyers : 0,
@@ -112,56 +167,183 @@ export function RoiCalculatorTab() {
     };
   }, [inputs]);
 
-  const set = (key: keyof Inputs, value: string) =>
+  // Budget pacing derived from the CPA ceiling and the modelled VIP value.
+  const pacing = useMemo(() => {
+    const maxCpa = targetRoas > 0 ? result.grossPerVisitor / targetRoas : 0;
+    const cpa = result.cpa;
+    const vipPerDay = paceDays > 0 ? result.vipBuyers / paceDays : 0;
+    const dailyAtTarget = targetCpa * vipPerDay;
+    const suggestedDaily = paceDays > 0 ? inputs.spend / paceDays : 0;
+    // Meta needs ~50 conversions per ad set per week to exit the learning phase.
+    const budgetForLearning = targetCpa * 50;
+    const headroom = cpa > 0 ? (maxCpa - cpa) / Math.max(0.01, maxCpa) : 0;
+    const status: "scale" | "hold" | "cut" =
+      cpa === 0 ? "hold" : cpa <= targetCpa ? "scale" : cpa <= maxCpa ? "hold" : "cut";
+    return {
+      maxCpa,
+      cpa,
+      vipPerDay,
+      dailyAtTarget,
+      suggestedDaily,
+      budgetForLearning,
+      headroom,
+      status,
+      nextDaily:
+        status === "scale"
+          ? suggestedDaily * 1.2
+          : status === "cut"
+            ? suggestedDaily * 0.7
+            : suggestedDaily,
+    };
+  }, [result, targetCpa, targetRoas, paceDays, inputs.spend]);
+
+  const set = (key: keyof Inputs, value: string) => {
     setInputs((prev) => ({ ...prev, [key]: Number(value) || 0 }));
+    setOverrides((prev) => ({ ...prev, [key]: true }));
+  };
+
+  const resetField = (key: keyof Inputs) => {
+    const measured = liveData && useLive ? measuredInputs(liveData)[key] : undefined;
+    setInputs((prev) => ({ ...prev, [key]: measured ?? BENCHMARKS[key] }));
+    setOverrides((prev) => {
+      const next = { ...prev };
+      delete next[key];
+      return next;
+    });
+  };
 
   const profitable = result.net >= 0;
+  const overrideCount = Object.keys(overrides).length;
+
+  const statusTone =
+    pacing.status === "scale"
+      ? "text-primary"
+      : pacing.status === "cut"
+        ? "text-destructive"
+        : "text-muted-foreground";
 
   return (
     <div className="space-y-4">
-      <div className="panel p-4">
-        <h2 className="flex items-center gap-2 font-display text-lg font-semibold">
-          <Calculator className="size-4 text-primary" aria-hidden="true" />
-          FB ads ROI calculator
-        </h2>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Model a campaign before you spend. Every number below is editable — the projection updates
-          instantly.
-        </p>
+      <div className="panel flex flex-wrap items-start justify-between gap-3 p-4">
+        <div>
+          <h2 className="flex items-center gap-2 font-display text-lg font-semibold">
+            <Calculator className="size-4 text-primary" aria-hidden="true" />
+            FB ads ROI calculator
+          </h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Defaults come from your own last {days} days where the data allows it. Edit any field to
+            override it — overrides are highlighted and never get overwritten.
+          </p>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          {WINDOWS.map((value) => (
+            <button
+              key={value}
+              type="button"
+              onClick={() => setDays(value)}
+              className={`rounded-lg px-3 py-1.5 text-xs ${
+                days === value ? "bg-surface text-foreground" : "text-muted-foreground"
+              }`}
+            >
+              {value}d
+            </button>
+          ))}
+          <button
+            type="button"
+            onClick={() => setUseLive((v) => !v)}
+            className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs ${
+              useLive ? "bg-surface text-foreground" : "text-muted-foreground"
+            }`}
+          >
+            <Database className="size-3.5" aria-hidden="true" />
+            {useLive ? "Live defaults" : "Benchmarks"}
+          </button>
+        </div>
       </div>
+
+      {liveData ? (
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+          {[
+            ["Sessions", liveData.sessions.toLocaleString()],
+            ["Results", liveData.resultViews.toLocaleString()],
+            ["Purchases", liveData.purchases.toLocaleString()],
+            ["Measured VIP %", `${liveData.vipRate.toFixed(2)}%`],
+            ["Measured AOV", usd(liveData.aov)],
+            ["Revenue / 1k sessions", usd(liveData.rpm)],
+          ].map(([label, value]) => (
+            <div key={label} className="panel p-3">
+              <span className="label-mono">{label}</span>
+              <p className="mt-1 font-display text-lg font-semibold">{value}</p>
+            </div>
+          ))}
+          {!liveData.confident ? (
+            <p className="col-span-full text-xs text-muted-foreground">
+              Small sample ({liveData.purchases} purchases) — measured rates are indicative only.
+            </p>
+          ) : null}
+        </div>
+      ) : null}
 
       <div className="grid gap-4 lg:grid-cols-[1fr_1fr]">
         <div className="panel space-y-3 p-4">
-          <span className="label-mono">Assumptions</span>
+          <div className="flex items-center justify-between">
+            <span className="label-mono">Assumptions</span>
+            <span className="text-xs text-muted-foreground">{overrideCount} overridden</span>
+          </div>
           <div className="grid gap-3 sm:grid-cols-2">
-            {FIELDS.map((field) => (
-              <label key={field.key} className="block text-sm">
-                <span className="label-mono">{field.label}</span>
-                <input
-                  type="number"
-                  min={0}
-                  step={field.step ?? 1}
-                  value={inputs[field.key]}
-                  onChange={(event) => set(field.key, event.target.value)}
-                  className="mt-1 w-full rounded-lg border border-hairline bg-surface-2 px-3 py-2 text-sm outline-none focus:border-primary/60"
-                />
-                <span className="mt-1 block text-xs text-muted-foreground">{field.hint}</span>
-              </label>
-            ))}
+            {FIELDS.map((field) => {
+              const overridden = Boolean(overrides[field.key]);
+              const measured =
+                liveData && useLive ? measuredInputs(liveData)[field.key] : undefined;
+              return (
+                <label key={field.key} className="block text-sm">
+                  <span className="label-mono flex items-center justify-between gap-2">
+                    {field.label}
+                    {overridden ? (
+                      <button
+                        type="button"
+                        onClick={() => resetField(field.key)}
+                        className="flex items-center gap-1 text-[10px] text-primary"
+                      >
+                        <RotateCcw className="size-3" aria-hidden="true" /> override
+                      </button>
+                    ) : measured !== undefined ? (
+                      <span className="text-[10px] text-primary/80">live</span>
+                    ) : null}
+                  </span>
+                  <input
+                    type="number"
+                    min={0}
+                    step={field.step ?? 1}
+                    value={inputs[field.key]}
+                    onChange={(event) => set(field.key, event.target.value)}
+                    className={`mt-1 w-full rounded-lg border bg-surface-2 px-3 py-2 text-sm outline-none focus:border-primary/60 ${
+                      overridden ? "border-primary/50" : "border-hairline"
+                    }`}
+                  />
+                  <span className="mt-1 block text-xs text-muted-foreground">
+                    {measured !== undefined && !overridden
+                      ? `Measured over ${days}d: ${measured}`
+                      : field.hint}
+                  </span>
+                </label>
+              );
+            })}
           </div>
           <button
             type="button"
-            onClick={() => setInputs(DEFAULTS)}
+            onClick={() => {
+              setOverrides({});
+              setInputs(BENCHMARKS);
+            }}
             className="rounded-lg border border-hairline px-3 py-2 text-xs text-muted-foreground hover:text-foreground"
           >
-            Reset to benchmarks
+            Reset everything to benchmarks
           </button>
         </div>
 
         <div className="space-y-4">
-          <div
-            className={`panel p-5 ${profitable ? "border-primary/40" : "border-destructive/40"}`}
-          >
+          <div className={`panel p-5 ${profitable ? "border-primary/40" : "border-destructive/40"}`}>
             <span className="label-mono flex items-center gap-1.5">
               <TrendingUp className="size-3.5 text-primary" aria-hidden="true" />
               Projected net profit
@@ -172,8 +354,62 @@ export function RoiCalculatorTab() {
               {usd(result.net)}
             </p>
             <p className="mt-1 text-sm text-muted-foreground">
-              ROAS {result.roas.toFixed(2)}× · ROI {result.roi.toFixed(0)}% · CPA{" "}
-              {usd(result.cpa)} per VIP
+              ROAS {result.roas.toFixed(2)}× · ROI {result.roi.toFixed(0)}% · CPA {usd(result.cpa)}{" "}
+              per VIP
+            </p>
+          </div>
+
+          <div className="panel p-4">
+            <span className="label-mono flex items-center gap-1.5">
+              <Gauge className="size-3.5 text-primary" aria-hidden="true" />
+              Budget pacing
+            </span>
+            <div className="mt-3 grid gap-3 sm:grid-cols-3">
+              {[
+                ["Target CPA ($)", targetCpa, setTargetCpa, 0.5],
+                ["Target ROAS (×)", targetRoas, setTargetRoas, 0.1],
+                ["Pacing window (days)", paceDays, setPaceDays, 1],
+              ].map(([label, value, setter, step]) => (
+                <label key={label as string} className="block text-sm">
+                  <span className="label-mono">{label as string}</span>
+                  <input
+                    type="number"
+                    min={0}
+                    step={step as number}
+                    value={value as number}
+                    onChange={(event) =>
+                      (setter as (n: number) => void)(Number(event.target.value) || 0)
+                    }
+                    className="mt-1 w-full rounded-lg border border-hairline bg-surface-2 px-3 py-2 text-sm outline-none focus:border-primary/60"
+                  />
+                </label>
+              ))}
+            </div>
+
+            <dl className="mt-3 space-y-1.5 text-sm">
+              {[
+                ["Value of one VIP buyer", usd(result.vipValue)],
+                ["Gross revenue per VIP buyer", usd(result.grossPerVisitor)],
+                ["Max CPA at target ROAS", usd(pacing.maxCpa)],
+                ["Modelled CPA", usd(pacing.cpa)],
+                ["VIP buyers / day", pacing.vipPerDay.toFixed(2)],
+                ["Current daily spend", usd(pacing.suggestedDaily)],
+                ["Daily spend at target CPA", usd(pacing.dailyAtTarget)],
+                ["Budget to exit learning (50 conv.)", usd(pacing.budgetForLearning)],
+              ].map(([label, value]) => (
+                <div key={label} className="flex justify-between">
+                  <dt className="text-muted-foreground">{label}</dt>
+                  <dd className="font-mono">{value}</dd>
+                </div>
+              ))}
+            </dl>
+
+            <p className={`mt-3 text-sm font-medium ${statusTone}`}>
+              {pacing.status === "scale"
+                ? `Scale: CPA is under target with ${(pacing.headroom * 100).toFixed(0)}% headroom — step daily budget to ${usd(pacing.nextDaily)}.`
+                : pacing.status === "cut"
+                  ? `Cut: CPA is above the ${usd(pacing.maxCpa)} ceiling — drop daily budget to ${usd(pacing.nextDaily)} or fix the creative.`
+                  : `Hold: CPA sits between target and ceiling — keep daily budget at ${usd(pacing.nextDaily)} and let Meta learn.`}
             </p>
           </div>
 
@@ -222,6 +458,10 @@ export function RoiCalculatorTab() {
           </div>
         </div>
       </div>
+
+      {live.error ? (
+        <p className="text-sm text-destructive">{(live.error as Error).message}</p>
+      ) : null}
     </div>
   );
 }
