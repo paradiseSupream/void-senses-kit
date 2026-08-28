@@ -16,6 +16,7 @@ import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as VaultRouteImport } from './routes/vault'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as AdminApplePayRouteImport } from './routes/admin.apple-pay'
 import { Route as AdminComplianceRouteImport } from './routes/admin.compliance'
 import { Route as AdminMonetizationRouteImport } from './routes/admin.monetization'
 import { Route as ApiDossierPdfRouteImport } from './routes/api/dossier-pdf'
@@ -72,6 +73,11 @@ const VaultRoute = VaultRouteImport.update({
 const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/admin/',
   path: '/admin/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminApplePayRoute = AdminApplePayRouteImport.update({
+  id: '/admin/apple-pay',
+  path: '/admin/apple-pay',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminComplianceRoute = AdminComplianceRouteImport.update({
@@ -192,6 +198,7 @@ export interface FileRoutesByFullPath {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/vault': typeof VaultRoute
+  '/admin/apple-pay': typeof AdminApplePayRoute
   '/admin/compliance': typeof AdminComplianceRoute
   '/admin/monetization': typeof AdminMonetizationRoute
   '/api/dossier-pdf': typeof ApiDossierPdfRoute
@@ -223,6 +230,7 @@ export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/vault': typeof VaultRoute
+  '/admin/apple-pay': typeof AdminApplePayRoute
   '/admin/compliance': typeof AdminComplianceRoute
   '/admin/monetization': typeof AdminMonetizationRoute
   '/api/dossier-pdf': typeof ApiDossierPdfRoute
@@ -255,6 +263,7 @@ export interface FileRoutesById {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/vault': typeof VaultRoute
+  '/admin/apple-pay': typeof AdminApplePayRoute
   '/admin/compliance': typeof AdminComplianceRoute
   '/admin/monetization': typeof AdminMonetizationRoute
   '/api/dossier-pdf': typeof ApiDossierPdfRoute
@@ -288,6 +297,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/terms'
     | '/vault'
+    | '/admin/apple-pay'
     | '/admin/compliance'
     | '/admin/monetization'
     | '/api/dossier-pdf'
@@ -319,6 +329,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/terms'
     | '/vault'
+    | '/admin/apple-pay'
     | '/admin/compliance'
     | '/admin/monetization'
     | '/api/dossier-pdf'
@@ -350,6 +361,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/terms'
     | '/vault'
+    | '/admin/apple-pay'
     | '/admin/compliance'
     | '/admin/monetization'
     | '/api/dossier-pdf'
@@ -382,6 +394,7 @@ export interface RootRouteChildren {
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TermsRoute: typeof TermsRoute
   VaultRoute: typeof VaultRoute
+  AdminApplePayRoute: typeof AdminApplePayRoute
   AdminComplianceRoute: typeof AdminComplianceRoute
   AdminMonetizationRoute: typeof AdminMonetizationRoute
   ApiDossierPdfRoute: typeof ApiDossierPdfRoute
@@ -456,6 +469,13 @@ declare module '@tanstack/react-router' {
       path: '/admin'
       fullPath: '/admin/'
       preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/apple-pay': {
+      id: '/admin/apple-pay'
+      path: '/admin/apple-pay'
+      fullPath: '/admin/apple-pay'
+      preLoaderRoute: typeof AdminApplePayRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/compliance': {
@@ -622,6 +642,7 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TermsRoute: TermsRoute,
   VaultRoute: VaultRoute,
+  AdminApplePayRoute: AdminApplePayRoute,
   AdminComplianceRoute: AdminComplianceRoute,
   AdminMonetizationRoute: AdminMonetizationRoute,
   ApiDossierPdfRoute: ApiDossierPdfRoute,
