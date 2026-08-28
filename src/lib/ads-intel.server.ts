@@ -8,11 +8,16 @@
 import type {
   AttributionReport,
   AttributionRow,
+  CohortKey,
+  CohortReport,
+  CohortRow,
   CreativeReport,
   CreativeRow,
   FunnelCounts,
   PixelDebugReport,
+  PixelDelivery,
   PixelEventPair,
+  RoiDefaults,
   RetargetReport,
   RetargetSegment,
 } from "@/lib/ads-intel.types";
@@ -30,6 +35,8 @@ type Row = {
   referrer: string | null;
   revenue_cents: number | null;
   suspect: boolean | null;
+  ip_hash: string | null;
+  ua_hash: string | null;
   created_at: string;
 };
 
@@ -46,11 +53,18 @@ export type SessionFacts = {
   gateShown: boolean;
   purchase: boolean;
   revenueCents: number;
+  firstSeen: string;
   lastSeen: string;
+  /** Pseudonymous visitor key (ip + ua hash) used for the returning cohort. */
+  visitorKey: string;
+  /** True when this visitor already had an earlier session in the window. */
+  returning: boolean;
+  /** True when the session carries a UTM / click id (i.e. paid or campaign). */
+  paid: boolean;
 };
 
 const SELECT =
-  "event_type,slot,session_id,tool_slug,utm_source,utm_campaign,utm_content,ad_click_id,ad_platform,referrer,revenue_cents,suspect,created_at";
+  "event_type,slot,session_id,tool_slug,utm_source,utm_campaign,utm_content,ad_click_id,ad_platform,referrer,revenue_cents,suspect,ip_hash,ua_hash,created_at";
 
 function hostOf(referrer: string | null): string {
   if (!referrer) return "direct";
@@ -92,11 +106,19 @@ export async function loadSessions(days: number): Promise<SessionFacts[]> {
         gateShown: false,
         purchase: false,
         revenueCents: 0,
+        firstSeen: row.created_at,
         lastSeen: row.created_at,
+        visitorKey: `${row.ip_hash ?? "?"}|${row.ua_hash ?? "?"}`,
+        returning: false,
+        paid: Boolean(row.utm_source || row.ad_click_id),
       };
       map.set(row.session_id, s);
     }
     s.lastSeen = row.created_at;
+    if (s.visitorKey.startsWith("?|") && (row.ip_hash || row.ua_hash)) {
+      s.visitorKey = `${row.ip_hash ?? "?"}|${row.ua_hash ?? "?"}`;
+    }
+    if (!s.paid && (row.utm_source || row.ad_click_id)) s.paid = true;
     if (!s.clickId && row.ad_click_id) s.clickId = row.ad_click_id;
     if (s.creative === "unattributed" && row.utm_content) s.creative = row.utm_content;
     if (s.campaign === "(none)" && row.utm_campaign) s.campaign = row.utm_campaign;
@@ -120,7 +142,14 @@ export async function loadSessions(days: number): Promise<SessionFacts[]> {
     }
   }
 
-  return [...map.values()];
+  const list = [...map.values()].sort((a, b) => (a.firstSeen < b.firstSeen ? -1 : 1));
+  const seen = new Set<string>();
+  for (const s of list) {
+    if (s.visitorKey === "?|?") continue;
+    if (seen.has(s.visitorKey)) s.returning = true;
+    else seen.add(s.visitorKey);
+  }
+  return list;
 }
 
 function emptyFunnel(): FunnelCounts {
@@ -331,6 +360,133 @@ export function buildAttributionReport(sessions: SessionFacts[], days: number): 
   return { days, rows, totals, revenueCents, dropOff };
 }
 
+/**
+ * Live benchmarks for the ROI calculator, measured from real sessions so the
+ * operator starts from this project's numbers instead of generic guesses.
+ */
+export function buildRoiDefaults(sessions: SessionFacts[], days: number): RoiDefaults {
+  const totals = emptyFunnel();
+  let revenueCents = 0;
+  let paidSessions = 0;
+  for (const s of sessions) {
+    addTo(totals, s);
+    revenueCents += s.revenueCents;
+    if (s.paid) paidSessions += 1;
+  }
+  return {
+    days,
+    sessions: totals.sessions,
+    resultViews: totals.resultView,
+    purchases: totals.purchase,
+    revenueCents,
+    quizRate: rate(totals.resultView, totals.sessions),
+    vipRate: rate(totals.purchase, totals.resultView),
+    aov: totals.purchase > 0 ? revenueCents / totals.purchase / 100 : 0,
+    rpm: totals.sessions > 0 ? (revenueCents / 100 / totals.sessions) * 1000 : 0,
+    paidSessions,
+    confident: totals.purchase >= 10 && totals.sessions >= 200,
+  };
+}
+
+const COHORTS: Array<{ key: CohortKey; label: string; match: (s: SessionFacts) => boolean }> = [
+  { key: "paid_new", label: "UTM / paid — new", match: (s) => s.paid && !s.returning },
+  { key: "paid_returning", label: "UTM / paid — returning", match: (s) => s.paid && s.returning },
+  { key: "organic_new", label: "Organic — new", match: (s) => !s.paid && !s.returning },
+  {
+    key: "organic_returning",
+    label: "Organic — returning",
+    match: (s) => !s.paid && s.returning,
+  },
+];
+
+const STEP_KEYS: Array<[string, keyof FunnelCounts]> = [
+  ["Landing", "sessions"],
+  ["Test start", "testStart"],
+  ["Result view", "resultView"],
+  ["VIP gate", "gateShown"],
+  ["Purchase", "purchase"],
+];
+
+/** UTM (paid) vs returning-visitor cohort revenue and funnel analytics. */
+export function buildCohortReport(sessions: SessionFacts[], days: number): CohortReport {
+  const totals = emptyFunnel();
+  let revenueCents = 0;
+  for (const s of sessions) {
+    addTo(totals, s);
+    revenueCents += s.revenueCents;
+  }
+
+  const cohorts: CohortRow[] = COHORTS.map((def) => {
+    const matched = sessions.filter(def.match);
+    const funnel = emptyFunnel();
+    let money = 0;
+    for (const s of matched) {
+      addTo(funnel, s);
+      money += s.revenueCents;
+    }
+    return {
+      key: def.key,
+      label: def.label,
+      funnel,
+      revenueCents: money,
+      conversionRate: rate(funnel.purchase, funnel.sessions),
+      epcCents: funnel.sessions > 0 ? money / funnel.sessions : 0,
+      sharePct: rate(funnel.sessions, totals.sessions),
+    };
+  });
+
+  const bySource = new Map<
+    string,
+    { newF: FunnelCounts; retF: FunnelCounts; newRev: number; retRev: number }
+  >();
+  for (const s of sessions) {
+    let entry = bySource.get(s.source);
+    if (!entry) {
+      entry = { newF: emptyFunnel(), retF: emptyFunnel(), newRev: 0, retRev: 0 };
+      bySource.set(s.source, entry);
+    }
+    if (s.returning) {
+      addTo(entry.retF, s);
+      entry.retRev += s.revenueCents;
+    } else {
+      addTo(entry.newF, s);
+      entry.newRev += s.revenueCents;
+    }
+  }
+
+  const sources = [...bySource.entries()]
+    .map(([source, e]) => ({
+      source,
+      newSessions: e.newF.sessions,
+      returningSessions: e.retF.sessions,
+      newRevenueCents: e.newRev,
+      returningRevenueCents: e.retRev,
+      newConvRate: rate(e.newF.purchase, e.newF.sessions),
+      returningConvRate: rate(e.retF.purchase, e.retF.sessions),
+    }))
+    .sort(
+      (a, b) =>
+        b.newRevenueCents + b.returningRevenueCents - (a.newRevenueCents + a.returningRevenueCents) ||
+        b.newSessions + b.returningSessions - (a.newSessions + a.returningSessions),
+    );
+
+  const newFunnel = emptyFunnel();
+  const retFunnel = emptyFunnel();
+  for (const s of sessions) addTo(s.returning ? retFunnel : newFunnel, s);
+
+  const dropOff = STEP_KEYS.slice(0, -1).map((step, i) => {
+    const next = STEP_KEYS[i + 1]!;
+    return {
+      from: step[0],
+      to: next[0],
+      newKeptPct: rate(newFunnel[next[1]], newFunnel[step[1]]),
+      returningKeptPct: rate(retFunnel[next[1]], retFunnel[step[1]]),
+    };
+  });
+
+  return { days, cohorts, sources, totals, revenueCents, dropOff };
+}
+
 type TrackingRow = {
   channel: string;
   source: string;
@@ -343,7 +499,11 @@ type TrackingRow = {
 };
 
 /** Live pixel / CAPI debug view: pairs browser fires with server deliveries. */
-export async function buildPixelDebug(limit: number, onlyPurchase: boolean): Promise<PixelDebugReport> {
+export async function buildPixelDebug(
+  limit: number,
+  onlyPurchase: boolean,
+  eventId?: string | null,
+): Promise<PixelDebugReport> {
   const { admin } = await import("@/lib/admin-core.server");
   let query = admin()
     .from("tracking_events")
@@ -351,6 +511,7 @@ export async function buildPixelDebug(limit: number, onlyPurchase: boolean): Pro
     .order("created_at", { ascending: false })
     .limit(Math.min(1000, limit * 6));
   if (onlyPurchase) query = query.eq("event", "Purchase");
+  if (eventId) query = query.ilike("event_id", `%${eventId}%`);
   const { data, error } = await query;
   if (error) throw new Error(error.message);
 
@@ -374,11 +535,21 @@ export async function buildPixelDebug(limit: number, onlyPurchase: boolean): Pro
         browser: [],
         server: [],
         failed: [],
+        deliveries: [],
         deduplicated: false,
       };
       pairs.set(id, pair);
     }
     if (row.created_at > pair.at) pair.at = row.created_at;
+    const delivery: PixelDelivery = {
+      channel: row.channel,
+      source: row.source,
+      ok: row.ok,
+      status: row.status,
+      detail: row.detail,
+      at: row.created_at,
+    };
+    pair.deliveries = [...(pair.deliveries ?? []), delivery];
     if (!row.ok) {
       if (!pair.failed.includes(row.channel)) pair.failed.push(`${row.channel}: ${row.detail ?? row.status ?? "failed"}`);
       continue;

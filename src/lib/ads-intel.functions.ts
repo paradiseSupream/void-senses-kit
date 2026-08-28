@@ -2,10 +2,12 @@ import { createServerFn } from "@tanstack/react-start";
 
 import type {
   AttributionReport,
+  CohortReport,
   CreativeReport,
   PixelDebugReport,
   RetargetReport,
   RetargetSegment,
+  RoiDefaults,
 } from "@/lib/ads-intel.types";
 
 /** Creative-level A/B report: VIP conversion per FB ad creative. */
@@ -24,16 +26,17 @@ export const adminCreativeTests = createServerFn({ method: "POST" })
 
 /** Live Meta Pixel / CAPI debug feed with de-duplication status. */
 export const adminPixelDebug = createServerFn({ method: "POST" })
-  .inputValidator((input: { token: string; limit?: number; onlyPurchase?: boolean }) => ({
+  .inputValidator((input: { token: string; limit?: number; onlyPurchase?: boolean; eventId?: string }) => ({
     token: String(input?.token ?? ""),
     limit: Math.max(10, Math.min(200, Number(input?.limit ?? 60))),
     onlyPurchase: input?.onlyPurchase === true,
+    eventId: String(input?.eventId ?? "").trim().slice(0, 120),
   }))
   .handler(async ({ data }): Promise<PixelDebugReport> => {
     const { requireAdmin } = await import("@/lib/admin-core.server");
     const { buildPixelDebug } = await import("@/lib/ads-intel.server");
     await requireAdmin(data.token);
-    return buildPixelDebug(data.limit, data.onlyPurchase);
+    return buildPixelDebug(data.limit, data.onlyPurchase, data.eventId || null);
   });
 
 /** Retargeting audiences built from quiz completion and checkout intent. */
@@ -79,4 +82,30 @@ export const adminAttribution = createServerFn({ method: "POST" })
     const { loadSessions, buildAttributionReport } = await import("@/lib/ads-intel.server");
     await requireAdmin(data.token);
     return buildAttributionReport(await loadSessions(data.days), data.days);
+  });
+
+/** Live ROI benchmarks measured from real sessions (calculator defaults). */
+export const adminRoiDefaults = createServerFn({ method: "POST" })
+  .inputValidator((input: { token: string; days?: number }) => ({
+    token: String(input?.token ?? ""),
+    days: Math.max(1, Math.min(90, Number(input?.days ?? 30))),
+  }))
+  .handler(async ({ data }): Promise<RoiDefaults> => {
+    const { requireAdmin } = await import("@/lib/admin-core.server");
+    const { loadSessions, buildRoiDefaults } = await import("@/lib/ads-intel.server");
+    await requireAdmin(data.token);
+    return buildRoiDefaults(await loadSessions(data.days), data.days);
+  });
+
+/** UTM/paid vs returning-visitor cohort revenue and funnel analytics. */
+export const adminCohorts = createServerFn({ method: "POST" })
+  .inputValidator((input: { token: string; days?: number }) => ({
+    token: String(input?.token ?? ""),
+    days: Math.max(1, Math.min(90, Number(input?.days ?? 30))),
+  }))
+  .handler(async ({ data }): Promise<CohortReport> => {
+    const { requireAdmin } = await import("@/lib/admin-core.server");
+    const { loadSessions, buildCohortReport } = await import("@/lib/ads-intel.server");
+    await requireAdmin(data.token);
+    return buildCohortReport(await loadSessions(data.days), data.days);
   });
