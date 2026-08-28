@@ -225,7 +225,7 @@ function AdminPanel() {
             to="/admin/monetization"
             className="rounded-lg border border-hairline px-3 py-2 text-xs font-medium text-muted-foreground hover:text-foreground"
           >
-            Deep analytics
+            Monetization
           </Link>
           <button
             type="button"
