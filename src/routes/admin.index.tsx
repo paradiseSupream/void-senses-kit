@@ -238,11 +238,18 @@ function AdminPanel() {
             Monetization
           </Link>
           <Link
+            to="/admin/attribution"
+            className="rounded-lg border border-hairline px-3 py-2 text-xs font-medium text-muted-foreground hover:text-foreground"
+          >
+            Attribution
+          </Link>
+          <Link
             to="/admin/apple-pay"
             className="rounded-lg border border-hairline px-3 py-2 text-xs font-medium text-muted-foreground hover:text-foreground"
           >
             Apple Pay
           </Link>
+
           <button
             type="button"
             onClick={() => {
