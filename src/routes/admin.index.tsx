@@ -37,6 +37,11 @@ import { SearchConsoleTab } from "@/components/admin/SearchConsoleTab";
 import { AudienceTab } from "@/components/admin/AudienceTab";
 import { TrackingTab } from "@/components/admin/TrackingTab";
 import { TrackingMonitorTab } from "@/components/admin/TrackingMonitorTab";
+import { RoiCalculatorTab } from "@/components/admin/RoiCalculatorTab";
+import { CreativeTestsTab } from "@/components/admin/CreativeTestsTab";
+import { PixelDebugTab } from "@/components/admin/PixelDebugTab";
+import { RetargetTab } from "@/components/admin/RetargetTab";
+
 
 export const Route = createFileRoute("/admin/")({
   head: () => ({
