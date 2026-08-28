@@ -37,6 +37,11 @@ import { SearchConsoleTab } from "@/components/admin/SearchConsoleTab";
 import { AudienceTab } from "@/components/admin/AudienceTab";
 import { TrackingTab } from "@/components/admin/TrackingTab";
 import { TrackingMonitorTab } from "@/components/admin/TrackingMonitorTab";
+import { RoiCalculatorTab } from "@/components/admin/RoiCalculatorTab";
+import { CreativeTestsTab } from "@/components/admin/CreativeTestsTab";
+import { PixelDebugTab } from "@/components/admin/PixelDebugTab";
+import { RetargetTab } from "@/components/admin/RetargetTab";
+
 
 export const Route = createFileRoute("/admin/")({
   head: () => ({
@@ -65,8 +70,12 @@ const TABS = [
   "Overview",
   "Audience",
   "Reports",
+  "ROI",
+  "Creatives",
+  "Retarget",
   "Tracking",
   "Monitor",
+  "Pixel debug",
   "A/B tests",
   "Search",
   "Ads",
@@ -75,6 +84,7 @@ const TABS = [
   "Site",
 ] as const;
 type Tab = (typeof TABS)[number];
+
 
 function Field({
   label,
@@ -228,11 +238,18 @@ function AdminPanel() {
             Monetization
           </Link>
           <Link
+            to="/admin/attribution"
+            className="rounded-lg border border-hairline px-3 py-2 text-xs font-medium text-muted-foreground hover:text-foreground"
+          >
+            Attribution
+          </Link>
+          <Link
             to="/admin/apple-pay"
             className="rounded-lg border border-hairline px-3 py-2 text-xs font-medium text-muted-foreground hover:text-foreground"
           >
             Apple Pay
           </Link>
+
           <button
             type="button"
             onClick={() => {
@@ -270,14 +287,19 @@ function AdminPanel() {
         {tab === "Overview" ? <OverviewTab token={token} /> : null}
         {tab === "Audience" ? <AudienceTab token={token} /> : null}
         {tab === "Reports" ? <ReportsTab token={token} /> : null}
+        {tab === "ROI" ? <RoiCalculatorTab /> : null}
+        {tab === "Creatives" ? <CreativeTestsTab token={token} /> : null}
+        {tab === "Retarget" ? <RetargetTab token={token} /> : null}
         {tab === "Tracking" ? <TrackingTab token={token} /> : null}
         {tab === "Monitor" ? <TrackingMonitorTab token={token} /> : null}
+        {tab === "Pixel debug" ? <PixelDebugTab token={token} /> : null}
         {tab === "A/B tests" ? <AbTestsTab token={token} /> : null}
         {tab === "Search" ? <SearchConsoleTab token={token} /> : null}
         {tab === "Ads" || tab === "Site" ? <SettingsTab token={token} which={tab} /> : null}
         {tab === "VIP" ? <VipTab token={token} /> : null}
         {tab === "Affiliates" ? <AffiliateTab token={token} /> : null}
       </div>
+
     </div>
   );
 }

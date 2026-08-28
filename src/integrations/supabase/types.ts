@@ -16,6 +16,8 @@ export type Database = {
     Tables: {
       ad_events: {
         Row: {
+          ad_click_id: string | null
+          ad_platform: string | null
           click_id: string | null
           country: string | null
           created_at: string
@@ -36,12 +38,16 @@ export type Database = {
           tool_slug: string | null
           ua_hash: string | null
           utm_campaign: string | null
+          utm_content: string | null
           utm_medium: string | null
           utm_source: string | null
+          utm_term: string | null
           variant: string
           zone: string | null
         }
         Insert: {
+          ad_click_id?: string | null
+          ad_platform?: string | null
           click_id?: string | null
           country?: string | null
           created_at?: string
@@ -62,12 +68,16 @@ export type Database = {
           tool_slug?: string | null
           ua_hash?: string | null
           utm_campaign?: string | null
+          utm_content?: string | null
           utm_medium?: string | null
           utm_source?: string | null
+          utm_term?: string | null
           variant?: string
           zone?: string | null
         }
         Update: {
+          ad_click_id?: string | null
+          ad_platform?: string | null
           click_id?: string | null
           country?: string | null
           created_at?: string
@@ -88,8 +98,10 @@ export type Database = {
           tool_slug?: string | null
           ua_hash?: string | null
           utm_campaign?: string | null
+          utm_content?: string | null
           utm_medium?: string | null
           utm_source?: string | null
+          utm_term?: string | null
           variant?: string
           zone?: string | null
         }

@@ -10,6 +10,7 @@
 import { track } from "@/lib/monetization";
 import { gaEvent } from "@/lib/ga4";
 import { pixelTrack, type PixelEvent } from "@/lib/pixels";
+import { markRetarget, segmentForFunnelStep } from "@/lib/retarget";
 
 /** Which funnel steps are worth reporting to the ad networks as conversions. */
 const PIXEL_STEPS: Partial<Record<string, PixelEvent>> = {
@@ -70,6 +71,10 @@ export function trackFunnel(step: FunnelStep, toolSlug?: string | null) {
   // on the success page where the real order value is known).
   const pixelEvent = PIXEL_STEPS[step];
   if (pixelEvent) pixelTrack(pixelEvent, { contentName: toolSlug ?? step });
+
+  // Remember the furthest step so returning non-buyers can be retargeted.
+  const segment = segmentForFunnelStep(step);
+  if (segment) markRetarget(segment);
 }
 
 let startedAt = 0;
