@@ -82,6 +82,8 @@ export type TrackingSettings = {
   server_side: boolean;
   /** Fire pixels only after the visitor accepts advertising consent. */
   require_consent: boolean;
+  /** Show the $2.99 monthly pass to returning non-buyers (retargeting). */
+  retarget_monthly: boolean;
 };
 
 export type PublicTrackingConfig = Pick<
@@ -94,6 +96,7 @@ export type PublicTrackingConfig = Pick<
   | "ga4_id"
   | "server_side"
   | "require_consent"
+  | "retarget_monthly"
 >;
 
 export const DEFAULT_TRACKING: TrackingSettings = {
@@ -108,6 +111,7 @@ export const DEFAULT_TRACKING: TrackingSettings = {
   ga4_id: "",
   server_side: true,
   require_consent: true,
+  retarget_monthly: true,
 };
 
 export const DEFAULT_PUBLIC_TRACKING: PublicTrackingConfig = {
@@ -119,6 +123,7 @@ export const DEFAULT_PUBLIC_TRACKING: PublicTrackingConfig = {
   ga4_id: "",
   server_side: true,
   require_consent: true,
+  retarget_monthly: true,
 };
 
 export type PublicConfig = {
