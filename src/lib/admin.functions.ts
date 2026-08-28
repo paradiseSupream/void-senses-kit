@@ -165,20 +165,56 @@ export const adminTestTracking = createServerFn({ method: "POST" })
           detail: tracking.meta_pixel_id ? "Pixel id set" : "Pixel id missing",
         });
         if (tracking.meta_pixel_id && tracking.meta_capi_token) {
+          // The Events Manager "Generate access token" grants only the
+          // Conversions API event-sending permission, NOT pixel-metadata
+          // reads — a GET on the pixel returns "(#100) Missing Permission"
+          // even for a perfectly valid token. So we validate by sending a
+          // real test event (to the Test Events queue when a test code is
+          // set, otherwise a single harmless ViewContent) and checking the
+          // response payload Meta returns.
           try {
+            const testCode = tracking.meta_test_event_code?.trim();
+            const eventId = `admintest-${Date.now()}`;
+            const dummyEmail =
+              "6e2b3a0f5c0a7e9b1d4f8c2a5e7b3d0f1a2c4e6b8d0a2f4c6e8b0a2d4f6c8e";
             const res = await fetch(
-              `https://graph.facebook.com/v20.0/${tracking.meta_pixel_id}?fields=id,name&access_token=${encodeURIComponent(tracking.meta_capi_token)}`,
+              `https://graph.facebook.com/v20.0/${tracking.meta_pixel_id}/events?access_token=${encodeURIComponent(tracking.meta_capi_token)}`,
+              {
+                method: "POST",
+                headers: { "content-type": "application/json" },
+                body: JSON.stringify({
+                  ...(testCode ? { test_event_code: testCode } : {}),
+                  data: [
+                    {
+                      event_name: "ViewContent",
+                      event_time: Math.floor(Date.now() / 1000),
+                      event_id: eventId,
+                      event_source_url: "https://sensesofvoid.app/",
+                      action_source: "website",
+                      user_data: {
+                        em: [dummyEmail],
+                        client_ip_address: "127.0.0.1",
+                        client_user_agent: "sensesofvoid-admin-test",
+                      },
+                    },
+                  ],
+                }),
+              },
             );
             const body = (await res.json()) as {
-              name?: string;
+              events_received?: number;
+              messages?: Array<{ description?: string }>;
               error?: { message?: string };
             };
+            const ok = res.ok && typeof body.events_received === "number";
             results.push({
               channel: "Meta Conversions API",
-              ok: res.ok,
-              detail: res.ok
-                ? `Token valid — connected to "${body.name ?? tracking.meta_pixel_id}"`
-                : (body.error?.message ?? `HTTP ${res.status}`),
+              ok,
+              detail: ok
+                ? `Token valid — ${body.events_received} test event received${testCode ? " (Test Events queue)" : ""}`
+                : (body.error?.message ??
+                  body.messages?.[0]?.description ??
+                  `HTTP ${res.status}`),
             });
           } catch (error) {
             results.push({
