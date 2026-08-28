@@ -113,38 +113,41 @@ export function ExitIntentOffer() {
             </>
           )}
         </p>
-        <button
-          type="button"
-          onClick={() => {
-            grantVipOffer();
-            track({ event_type: "click", slot: retarget ? "retarget_monthly" : "exit_intent_monthly" });
-            setOpen(false);
-            openVipModal("monthly");
-          }}
-          className={
-            retarget
-              ? "mt-5 w-full rounded-xl bg-primary px-4 py-3.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
-              : "order-2 mt-2.5 w-full rounded-xl border border-primary/40 bg-primary/10 px-4 py-3 text-sm font-semibold text-primary transition-colors hover:bg-primary/20"
-          }
-        >
-          {retarget ? `Start 1 month — ${monthly}` : `Or try 1 month ad-free — ${monthly}`}
-        </button>
-        <button
-          type="button"
-          onClick={() => {
-            grantVipOffer();
-            track({ event_type: "click", slot: "exit_intent" });
-            setOpen(false);
-            openVipModal("lifetime");
-          }}
-          className={
-            retarget
-              ? "mt-2.5 w-full rounded-xl border border-primary/40 bg-primary/10 px-4 py-3 text-sm font-semibold text-primary transition-colors hover:bg-primary/20"
-              : "mt-5 w-full rounded-xl bg-primary px-4 py-3.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
-          }
-        >
-          {retarget ? `Or take lifetime — ${offer}` : `Claim ${offer} lifetime VIP`}
-        </button>
+        <div className="mt-5 flex flex-col">
+          <button
+            type="button"
+            onClick={() => {
+              grantVipOffer();
+              track({ event_type: "click", slot: retarget ? "retarget_monthly" : "exit_intent_monthly" });
+              setOpen(false);
+              openVipModal("monthly");
+            }}
+            className={
+              retarget
+                ? "order-1 w-full rounded-xl bg-primary px-4 py-3.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
+                : "order-2 mt-2.5 w-full rounded-xl border border-primary/40 bg-primary/10 px-4 py-3 text-sm font-semibold text-primary transition-colors hover:bg-primary/20"
+            }
+          >
+            {retarget ? `Start 1 month — ${monthly}` : `Or try 1 month ad-free — ${monthly}`}
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              grantVipOffer();
+              track({ event_type: "click", slot: "exit_intent" });
+              setOpen(false);
+              openVipModal("lifetime");
+            }}
+            className={
+              retarget
+                ? "order-2 mt-2.5 w-full rounded-xl border border-primary/40 bg-primary/10 px-4 py-3 text-sm font-semibold text-primary transition-colors hover:bg-primary/20"
+                : "order-1 w-full rounded-xl bg-primary px-4 py-3.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
+            }
+          >
+            {retarget ? `Or take lifetime — ${offer}` : `Claim ${offer} lifetime VIP`}
+          </button>
+        </div>
+
         <button
           type="button"
           onClick={() => setOpen(false)}
