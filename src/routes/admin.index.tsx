@@ -270,14 +270,19 @@ function AdminPanel() {
         {tab === "Overview" ? <OverviewTab token={token} /> : null}
         {tab === "Audience" ? <AudienceTab token={token} /> : null}
         {tab === "Reports" ? <ReportsTab token={token} /> : null}
+        {tab === "ROI" ? <RoiCalculatorTab /> : null}
+        {tab === "Creatives" ? <CreativeTestsTab token={token} /> : null}
+        {tab === "Retarget" ? <RetargetTab token={token} /> : null}
         {tab === "Tracking" ? <TrackingTab token={token} /> : null}
         {tab === "Monitor" ? <TrackingMonitorTab token={token} /> : null}
+        {tab === "Pixel debug" ? <PixelDebugTab token={token} /> : null}
         {tab === "A/B tests" ? <AbTestsTab token={token} /> : null}
         {tab === "Search" ? <SearchConsoleTab token={token} /> : null}
         {tab === "Ads" || tab === "Site" ? <SettingsTab token={token} which={tab} /> : null}
         {tab === "VIP" ? <VipTab token={token} /> : null}
         {tab === "Affiliates" ? <AffiliateTab token={token} /> : null}
       </div>
+
     </div>
   );
 }
