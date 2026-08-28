@@ -498,6 +498,7 @@ export const getPublicConfig = createServerFn({ method: "GET" }).handler(
         ga4_id: tracking.ga4_id,
         server_side: tracking.server_side,
         require_consent: tracking.require_consent,
+        retarget_monthly: tracking.retarget_monthly !== false,
       },
     };
   },
