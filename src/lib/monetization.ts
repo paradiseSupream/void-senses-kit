@@ -242,20 +242,47 @@ export type Attribution = {
   utm_source?: string | undefined;
   utm_medium?: string | undefined;
   utm_campaign?: string | undefined;
+  /** Ad creative identifier (`utm_content`) — the A/B unit for FB creatives. */
+  utm_content?: string | undefined;
+  utm_term?: string | undefined;
+  /** Raw platform click id (fbclid / ttclid / gclid …). */
+  ad_click_id?: string | undefined;
+  /** Which ad platform the click id belongs to. */
+  ad_platform?: string | undefined;
   referrer?: string | undefined;
 };
 
-/** Captures first-touch UTM/referrer once per visitor. */
+/** Platform click-id parameters, in priority order. */
+const CLICK_ID_PARAMS: Array<[string, string]> = [
+  ["fbclid", "meta"],
+  ["ttclid", "tiktok"],
+  ["gclid", "google"],
+  ["gbraid", "google"],
+  ["wbraid", "google"],
+  ["twclid", "twitter"],
+  ["sclid", "snapchat"],
+];
+
+/** Captures first-touch UTM/referrer/click-id once per visitor. */
 export function attribution(): Attribution {
   if (typeof window === "undefined") return {};
   try {
     const existing = window.localStorage.getItem(ATTR_KEY);
-    if (existing) return JSON.parse(existing) as Attribution;
+    if (existing) {
+      const parsed = JSON.parse(existing) as Attribution;
+      // Older visitors were stored before creative/click-id capture existed.
+      if (parsed.utm_content !== undefined || parsed.ad_click_id !== undefined) return parsed;
+    }
     const params = new URLSearchParams(window.location.search);
+    const click = CLICK_ID_PARAMS.find(([key]) => params.get(key));
     const attr: Attribution = {
       utm_source: params.get("utm_source") ?? undefined,
       utm_medium: params.get("utm_medium") ?? undefined,
       utm_campaign: params.get("utm_campaign") ?? undefined,
+      utm_content: params.get("utm_content") ?? params.get("ad_id") ?? undefined,
+      utm_term: params.get("utm_term") ?? undefined,
+      ad_click_id: click ? (params.get(click[0]) ?? undefined) : undefined,
+      ad_platform: click ? click[1] : undefined,
       referrer: document.referrer || undefined,
     };
     window.localStorage.setItem(ATTR_KEY, JSON.stringify(attr));
