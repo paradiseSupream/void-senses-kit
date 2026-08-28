@@ -65,8 +65,12 @@ const TABS = [
   "Overview",
   "Audience",
   "Reports",
+  "ROI",
+  "Creatives",
+  "Retarget",
   "Tracking",
   "Monitor",
+  "Pixel debug",
   "A/B tests",
   "Search",
   "Ads",
@@ -75,6 +79,7 @@ const TABS = [
   "Site",
 ] as const;
 type Tab = (typeof TABS)[number];
+
 
 function Field({
   label,
