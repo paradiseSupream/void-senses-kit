@@ -4,8 +4,8 @@ import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
 import { ArrowLeft, GitBranch, RefreshCw } from "lucide-react";
 
-import { adminAttribution } from "@/lib/ads-intel.functions";
-import type { AttributionReport } from "@/lib/ads-intel.types";
+import { adminAttribution, adminCohorts } from "@/lib/ads-intel.functions";
+import type { AttributionReport, CohortReport } from "@/lib/ads-intel.types";
 
 export const Route = createFileRoute("/admin/attribution")({
   head: () => ({
@@ -32,6 +32,7 @@ const money = (cents: number) => `$${(cents / 100).toFixed(2)}`;
 
 function AttributionPage() {
   const load = useServerFn(adminAttribution);
+  const loadCohorts = useServerFn(adminCohorts);
   const [token, setToken] = useState<string | null>(null);
   const [days, setDays] = useState<(typeof WINDOWS)[number]>(30);
 
@@ -45,7 +46,14 @@ function AttributionPage() {
     enabled: Boolean(token),
   });
 
+  const cohortQuery = useQuery<CohortReport>({
+    queryKey: ["admin-cohorts", token, days],
+    queryFn: () => loadCohorts({ data: { token: token!, days } }),
+    enabled: Boolean(token),
+  });
+
   const data = query.data;
+  const cohorts = cohortQuery.data;
 
   return (
     <main className="mx-auto w-full max-w-6xl px-4 py-8">
@@ -138,6 +146,134 @@ function AttributionPage() {
               ))}
             </ul>
           </section>
+
+          {cohorts ? (
+            <>
+              <section className="mt-6">
+                <h2 className="font-display text-lg font-semibold">
+                  UTM vs returning-visitor cohorts
+                </h2>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Sessions are paired into pseudonymous visitors, so a second visit from the same
+                  device counts as returning even when the UTM tags are gone.
+                </p>
+                <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                  {cohorts.cohorts.map((cohort) => (
+                    <div key={cohort.key} className="panel p-4">
+                      <span className="label-mono">{cohort.label}</span>
+                      <p className="mt-1 font-display text-xl font-semibold">
+                        {money(cohort.revenueCents)}
+                      </p>
+                      <dl className="mt-2 space-y-1 text-xs text-muted-foreground">
+                        <div className="flex justify-between">
+                          <dt>Sessions</dt>
+                          <dd className="font-mono">
+                            {cohort.funnel.sessions} ({cohort.sharePct.toFixed(1)}%)
+                          </dd>
+                        </div>
+                        <div className="flex justify-between">
+                          <dt>Purchases</dt>
+                          <dd className="font-mono">{cohort.funnel.purchase}</dd>
+                        </div>
+                        <div className="flex justify-between">
+                          <dt>Conv %</dt>
+                          <dd className="font-mono">{cohort.conversionRate.toFixed(2)}%</dd>
+                        </div>
+                        <div className="flex justify-between">
+                          <dt>Rev / session</dt>
+                          <dd className="font-mono">{money(cohort.epcCents)}</dd>
+                        </div>
+                      </dl>
+                    </div>
+                  ))}
+                </div>
+              </section>
+
+              <section className="panel mt-4 p-4">
+                <span className="label-mono">Funnel retention — new vs returning</span>
+                <ul className="mt-3 space-y-3">
+                  {cohorts.dropOff.map((step) => (
+                    <li key={`cohort-${step.from}-${step.to}`}>
+                      <div className="flex justify-between text-sm">
+                        <span>
+                          {step.from} → {step.to}
+                        </span>
+                        <span className="font-mono text-xs">
+                          new {step.newKeptPct.toFixed(1)}% · returning{" "}
+                          {step.returningKeptPct.toFixed(1)}%
+                        </span>
+                      </div>
+                      <div className="mt-1 space-y-1">
+                        <div className="h-1.5 overflow-hidden rounded-full bg-surface-2">
+                          <div
+                            className="h-full rounded-full bg-primary"
+                            style={{ width: `${Math.max(0, Math.min(100, step.newKeptPct))}%` }}
+                          />
+                        </div>
+                        <div className="h-1.5 overflow-hidden rounded-full bg-surface-2">
+                          <div
+                            className="h-full rounded-full bg-primary/50"
+                            style={{
+                              width: `${Math.max(0, Math.min(100, step.returningKeptPct))}%`,
+                            }}
+                          />
+                        </div>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+
+              <section className="panel mt-4 overflow-x-auto p-0">
+                <table className="w-full text-left text-sm">
+                  <thead className="text-muted-foreground">
+                    <tr className="border-b border-hairline">
+                      {[
+                        "Source",
+                        "New sessions",
+                        "Returning sessions",
+                        "New conv %",
+                        "Returning conv %",
+                        "New revenue",
+                        "Returning revenue",
+                      ].map((head) => (
+                        <th
+                          key={head}
+                          className="px-3 py-2 text-xs font-medium tracking-wide uppercase"
+                        >
+                          {head}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {cohorts.sources.map((row) => (
+                      <tr key={`cohort-${row.source}`} className="border-b border-hairline/60">
+                        <td className="px-3 py-2 font-medium">{row.source}</td>
+                        <td className="px-3 py-2 font-mono">{row.newSessions}</td>
+                        <td className="px-3 py-2 font-mono">{row.returningSessions}</td>
+                        <td className="px-3 py-2 font-mono">{row.newConvRate.toFixed(2)}%</td>
+                        <td className="px-3 py-2 font-mono">
+                          {row.returningConvRate.toFixed(2)}%
+                        </td>
+                        <td className="px-3 py-2 font-mono">{money(row.newRevenueCents)}</td>
+                        <td className="px-3 py-2 font-mono">
+                          {money(row.returningRevenueCents)}
+                        </td>
+                      </tr>
+                    ))}
+                    {cohorts.sources.length === 0 ? (
+                      <tr>
+                        <td colSpan={7} className="px-3 py-6 text-center text-muted-foreground">
+                          No cohort data in this window.
+                        </td>
+                      </tr>
+                    ) : null}
+                  </tbody>
+                </table>
+              </section>
+            </>
+          ) : null}
 
           <section className="panel mt-4 overflow-x-auto p-0">
             <table className="w-full text-left text-sm">
