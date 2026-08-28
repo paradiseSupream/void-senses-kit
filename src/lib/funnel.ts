@@ -71,6 +71,10 @@ export function trackFunnel(step: FunnelStep, toolSlug?: string | null) {
   // on the success page where the real order value is known).
   const pixelEvent = PIXEL_STEPS[step];
   if (pixelEvent) pixelTrack(pixelEvent, { contentName: toolSlug ?? step });
+
+  // Remember the furthest step so returning non-buyers can be retargeted.
+  const segment = segmentForFunnelStep(step);
+  if (segment) markRetarget(segment);
 }
 
 let startedAt = 0;
