@@ -17,6 +17,7 @@ import { Route as TermsRouteImport } from './routes/terms'
 import { Route as VaultRouteImport } from './routes/vault'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AdminApplePayRouteImport } from './routes/admin.apple-pay'
+import { Route as AdminAttributionRouteImport } from './routes/admin.attribution'
 import { Route as AdminComplianceRouteImport } from './routes/admin.compliance'
 import { Route as AdminMonetizationRouteImport } from './routes/admin.monetization'
 import { Route as ApiDossierPdfRouteImport } from './routes/api/dossier-pdf'
@@ -78,6 +79,11 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
 const AdminApplePayRoute = AdminApplePayRouteImport.update({
   id: '/admin/apple-pay',
   path: '/admin/apple-pay',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminAttributionRoute = AdminAttributionRouteImport.update({
+  id: '/admin/attribution',
+  path: '/admin/attribution',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminComplianceRoute = AdminComplianceRouteImport.update({
@@ -199,6 +205,7 @@ export interface FileRoutesByFullPath {
   '/terms': typeof TermsRoute
   '/vault': typeof VaultRoute
   '/admin/apple-pay': typeof AdminApplePayRoute
+  '/admin/attribution': typeof AdminAttributionRoute
   '/admin/compliance': typeof AdminComplianceRoute
   '/admin/monetization': typeof AdminMonetizationRoute
   '/api/dossier-pdf': typeof ApiDossierPdfRoute
@@ -231,6 +238,7 @@ export interface FileRoutesByTo {
   '/terms': typeof TermsRoute
   '/vault': typeof VaultRoute
   '/admin/apple-pay': typeof AdminApplePayRoute
+  '/admin/attribution': typeof AdminAttributionRoute
   '/admin/compliance': typeof AdminComplianceRoute
   '/admin/monetization': typeof AdminMonetizationRoute
   '/api/dossier-pdf': typeof ApiDossierPdfRoute
@@ -264,6 +272,7 @@ export interface FileRoutesById {
   '/terms': typeof TermsRoute
   '/vault': typeof VaultRoute
   '/admin/apple-pay': typeof AdminApplePayRoute
+  '/admin/attribution': typeof AdminAttributionRoute
   '/admin/compliance': typeof AdminComplianceRoute
   '/admin/monetization': typeof AdminMonetizationRoute
   '/api/dossier-pdf': typeof ApiDossierPdfRoute
@@ -298,6 +307,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/vault'
     | '/admin/apple-pay'
+    | '/admin/attribution'
     | '/admin/compliance'
     | '/admin/monetization'
     | '/api/dossier-pdf'
@@ -330,6 +340,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/vault'
     | '/admin/apple-pay'
+    | '/admin/attribution'
     | '/admin/compliance'
     | '/admin/monetization'
     | '/api/dossier-pdf'
@@ -362,6 +373,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/vault'
     | '/admin/apple-pay'
+    | '/admin/attribution'
     | '/admin/compliance'
     | '/admin/monetization'
     | '/api/dossier-pdf'
@@ -395,6 +407,7 @@ export interface RootRouteChildren {
   TermsRoute: typeof TermsRoute
   VaultRoute: typeof VaultRoute
   AdminApplePayRoute: typeof AdminApplePayRoute
+  AdminAttributionRoute: typeof AdminAttributionRoute
   AdminComplianceRoute: typeof AdminComplianceRoute
   AdminMonetizationRoute: typeof AdminMonetizationRoute
   ApiDossierPdfRoute: typeof ApiDossierPdfRoute
@@ -476,6 +489,13 @@ declare module '@tanstack/react-router' {
       path: '/admin/apple-pay'
       fullPath: '/admin/apple-pay'
       preLoaderRoute: typeof AdminApplePayRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/attribution': {
+      id: '/admin/attribution'
+      path: '/admin/attribution'
+      fullPath: '/admin/attribution'
+      preLoaderRoute: typeof AdminAttributionRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/compliance': {
@@ -643,6 +663,7 @@ const rootRouteChildren: RootRouteChildren = {
   TermsRoute: TermsRoute,
   VaultRoute: VaultRoute,
   AdminApplePayRoute: AdminApplePayRoute,
+  AdminAttributionRoute: AdminAttributionRoute,
   AdminComplianceRoute: AdminComplianceRoute,
   AdminMonetizationRoute: AdminMonetizationRoute,
   ApiDossierPdfRoute: ApiDossierPdfRoute,
