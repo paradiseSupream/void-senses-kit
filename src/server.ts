@@ -90,6 +90,13 @@ function withSecurityHeaders(request: Request, response: Response): Response {
       return "/";
     }
   })();
+  if (pathname === "/.well-known/apple-developer-merchantid-domain-association") {
+    // Match the provider's canonical response exactly enough for strict
+    // merchant-domain validators, which can reject generic text MIME types.
+    headers.set("Content-Type", "application/octet-stream");
+    headers.set("Content-Disposition", 'inline; filename="apple-developer-merchantid-domain-association"');
+    headers.set("Cache-Control", "public, max-age=0, must-revalidate");
+  }
   if (isPremiumPath(pathname)) {
     headers.set("Cache-Control", "no-store, private, max-age=0");
     headers.set("X-Robots-Tag", "noindex, nofollow");
