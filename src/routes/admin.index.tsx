@@ -287,7 +287,7 @@ function AdminPanel() {
         {tab === "Overview" ? <OverviewTab token={token} /> : null}
         {tab === "Audience" ? <AudienceTab token={token} /> : null}
         {tab === "Reports" ? <ReportsTab token={token} /> : null}
-        {tab === "ROI" ? <RoiCalculatorTab /> : null}
+        {tab === "ROI" ? <RoiCalculatorTab token={token} /> : null}
         {tab === "Creatives" ? <CreativeTestsTab token={token} /> : null}
         {tab === "Retarget" ? <RetargetTab token={token} /> : null}
         {tab === "Tracking" ? <TrackingTab token={token} /> : null}
