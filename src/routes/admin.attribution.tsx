@@ -37,14 +37,15 @@ function AttributionPage() {
   const loadCohorts = useServerFn(adminCohorts);
   const [token, setToken] = useState<string | null>(null);
   const [days, setDays] = useState<(typeof WINDOWS)[number]>(30);
+  const [rules, setRules] = useState<AttributionRules>(DEFAULT_ATTRIBUTION_RULES);
 
   useEffect(() => {
     setToken(window.localStorage.getItem(TOKEN_KEY));
   }, []);
 
   const query = useQuery<AttributionReport>({
-    queryKey: ["admin-attribution", token, days],
-    queryFn: () => load({ data: { token: token!, days } }),
+    queryKey: ["admin-attribution", token, days, rules],
+    queryFn: () => load({ data: { token: token!, days, rules: { ...rules, days } } }),
     enabled: Boolean(token),
   });
 
