@@ -95,6 +95,38 @@ export type AttributionRow = {
   epcCents: number;
 };
 
+/**
+ * How credit is assigned when one visitor arrives more than once inside the
+ * lookback window.
+ */
+export type AttributionModel = "session" | "last_touch" | "first_touch";
+
+export type AttributionRules = {
+  /** Reporting window in days. */
+  days: number;
+  model: AttributionModel;
+  /** Visitor stitching window for the first/last touch models, in days. */
+  lookbackDays: number;
+  /** Include sessions with no UTM tag and no click id. */
+  includeOrganic: boolean;
+  /** Keep only sessions carrying a platform click id (fbclid/ttclid/gclid). */
+  requireClickId: boolean;
+  /** Fold source/campaign/creative spellings into canonical tokens. */
+  normalize: boolean;
+  /** Hide rows below this session count. */
+  minSessions: number;
+};
+
+export const DEFAULT_ATTRIBUTION_RULES: AttributionRules = {
+  days: 30,
+  model: "last_touch",
+  lookbackDays: 7,
+  includeOrganic: true,
+  requireClickId: false,
+  normalize: true,
+  minSessions: 0,
+};
+
 export type AttributionReport = {
   days: number;
   rows: AttributionRow[];
@@ -102,6 +134,10 @@ export type AttributionReport = {
   revenueCents: number;
   /** Drop-off between consecutive funnel steps, in percent. */
   dropOff: Array<{ from: string; to: string; kept: number; lost: number; lostPct: number }>;
+  /** Rules the report was built with (echoed so the UI can label the view). */
+  rules?: AttributionRules;
+  /** Sessions dropped by the rule filters. */
+  excludedSessions?: number;
 };
 
 /** One delivery attempt behind an `event_id`, browser or server. */

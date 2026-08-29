@@ -1,7 +1,10 @@
 import { createServerFn } from "@tanstack/react-start";
 
+import { DEFAULT_ATTRIBUTION_RULES } from "@/lib/ads-intel.types";
 import type {
+  AttributionModel,
   AttributionReport,
+  AttributionRules,
   CohortReport,
   CreativeReport,
   PixelDebugReport,
@@ -73,15 +76,33 @@ export const adminRetargetCsv = createServerFn({ method: "POST" })
 
 /** Revenue by UTM / click id plus landing-to-Purchase drop-off. */
 export const adminAttribution = createServerFn({ method: "POST" })
-  .inputValidator((input: { token: string; days?: number }) => ({
-    token: String(input?.token ?? ""),
-    days: Math.max(1, Math.min(90, Number(input?.days ?? 30))),
-  }))
+  .inputValidator((input: { token: string; days?: number; rules?: Partial<AttributionRules> }) => {
+    const raw = input?.rules ?? {};
+    const days = Math.max(1, Math.min(90, Number(input?.days ?? 30)));
+    const model = (["session", "last_touch", "first_touch"] as const).includes(
+      raw.model as AttributionModel,
+    )
+      ? (raw.model as AttributionModel)
+      : DEFAULT_ATTRIBUTION_RULES.model;
+    return {
+      token: String(input?.token ?? ""),
+      days,
+      rules: {
+        days,
+        model,
+        lookbackDays: Math.max(1, Math.min(90, Number(raw.lookbackDays ?? 7))),
+        includeOrganic: raw.includeOrganic !== false,
+        requireClickId: raw.requireClickId === true,
+        normalize: raw.normalize !== false,
+        minSessions: Math.max(0, Math.min(10_000, Number(raw.minSessions ?? 0))),
+      } satisfies AttributionRules,
+    };
+  })
   .handler(async ({ data }): Promise<AttributionReport> => {
     const { requireAdmin } = await import("@/lib/admin-core.server");
     const { loadSessions, buildAttributionReport } = await import("@/lib/ads-intel.server");
     await requireAdmin(data.token);
-    return buildAttributionReport(await loadSessions(data.days), data.days);
+    return buildAttributionReport(await loadSessions(data.days), data.days, data.rules);
   });
 
 /** Live ROI benchmarks measured from real sessions (calculator defaults). */

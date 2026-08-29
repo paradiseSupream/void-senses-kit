@@ -5,7 +5,9 @@ import { useEffect, useState } from "react";
 import { ArrowLeft, GitBranch, RefreshCw } from "lucide-react";
 
 import { adminAttribution, adminCohorts } from "@/lib/ads-intel.functions";
-import type { AttributionReport, CohortReport } from "@/lib/ads-intel.types";
+import { DEFAULT_ATTRIBUTION_RULES } from "@/lib/ads-intel.types";
+import type { AttributionModel, AttributionReport, AttributionRules, CohortReport } from "@/lib/ads-intel.types";
+import { UtmTemplatesCard } from "@/components/admin/UtmTemplatesCard";
 
 export const Route = createFileRoute("/admin/attribution")({
   head: () => ({
@@ -35,14 +37,15 @@ function AttributionPage() {
   const loadCohorts = useServerFn(adminCohorts);
   const [token, setToken] = useState<string | null>(null);
   const [days, setDays] = useState<(typeof WINDOWS)[number]>(30);
+  const [rules, setRules] = useState<AttributionRules>(DEFAULT_ATTRIBUTION_RULES);
 
   useEffect(() => {
     setToken(window.localStorage.getItem(TOKEN_KEY));
   }, []);
 
   const query = useQuery<AttributionReport>({
-    queryKey: ["admin-attribution", token, days],
-    queryFn: () => load({ data: { token: token!, days } }),
+    queryKey: ["admin-attribution", token, days, rules],
+    queryFn: () => load({ data: { token: token!, days, rules: { ...rules, days } } }),
     enabled: Boolean(token),
   });
 
@@ -104,6 +107,87 @@ function AttributionPage() {
           first.
         </p>
       ) : null}
+
+      <UtmTemplatesCard />
+
+      <section className="panel mt-4 p-4">
+        <span className="label-mono">Attribution rules</span>
+        <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <label className="text-xs text-muted-foreground">
+            Credit model
+            <select
+              value={rules.model}
+              onChange={(e) => setRules({ ...rules, model: e.target.value as AttributionModel })}
+              className="mt-1 w-full rounded-lg border border-hairline bg-surface px-2 py-1.5 text-sm text-foreground"
+            >
+              <option value="last_touch">Last touch (default)</option>
+              <option value="first_touch">First touch</option>
+              <option value="session">Per session (raw)</option>
+            </select>
+          </label>
+          <label className="text-xs text-muted-foreground">
+            Lookback window (days)
+            <input
+              type="number"
+              min={1}
+              max={90}
+              value={rules.lookbackDays}
+              disabled={rules.model === "session"}
+              onChange={(e) =>
+                setRules({ ...rules, lookbackDays: Number(e.target.value) || 1 })
+              }
+              className="mt-1 w-full rounded-lg border border-hairline bg-surface px-2 py-1.5 text-sm text-foreground disabled:opacity-50"
+            />
+          </label>
+          <label className="text-xs text-muted-foreground">
+            Min sessions per row
+            <input
+              type="number"
+              min={0}
+              max={10000}
+              value={rules.minSessions}
+              onChange={(e) => setRules({ ...rules, minSessions: Number(e.target.value) || 0 })}
+              className="mt-1 w-full rounded-lg border border-hairline bg-surface px-2 py-1.5 text-sm text-foreground"
+            />
+          </label>
+          <div className="flex flex-col justify-end gap-2 text-xs text-muted-foreground">
+            <label className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={rules.normalize}
+                onChange={(e) => setRules({ ...rules, normalize: e.target.checked })}
+                className="size-4 accent-[var(--primary)]"
+              />
+              Normalize UTM spellings
+            </label>
+            <label className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={rules.includeOrganic}
+                onChange={(e) => setRules({ ...rules, includeOrganic: e.target.checked })}
+                className="size-4 accent-[var(--primary)]"
+              />
+              Include organic sessions
+            </label>
+            <label className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={rules.requireClickId}
+                onChange={(e) => setRules({ ...rules, requireClickId: e.target.checked })}
+                className="size-4 accent-[var(--primary)]"
+              />
+              Paid clicks only (fbclid / ttclid / gclid)
+            </label>
+          </div>
+        </div>
+        <p className="mt-3 text-xs text-muted-foreground">
+          {data?.excludedSessions
+            ? `${data.excludedSessions} sessions excluded by these rules. `
+            : ""}
+          Normalization folds fb / FB / facebook.com into one row; touch models re-credit a
+          returning visitor&apos;s later sessions to their paid click inside the lookback window.
+        </p>
+      </section>
 
       {data ? (
         <>

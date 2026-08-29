@@ -73,8 +73,15 @@ export const Route = createFileRoute("/api/public/capi")({
         const timestamp = Math.floor(Date.now() / 1000);
 
         const tasks: Promise<unknown>[] = [];
-        const { logTrackingEvents } = await import("@/lib/tracking-log.server");
+        const { logTrackingEvents, claimServerEvent } = await import("@/lib/tracking-log.server");
         const log: Array<Parameters<typeof logTrackingEvents>[0][number]> = [];
+
+        // One `event_id` is forwarded server-side exactly once: a repeated
+        // beacon (retry, back/forward cache, double mount) is dropped here so
+        // Meta / TikTok never count the same conversion twice.
+        if (!(await claimServerEvent(eventId, event))) {
+          return new Response(null, { status: 204, headers: { "x-dedup": "1" } });
+        }
 
         // Credentials live in the admin panel (app_settings.tracking) and fall
         // back to environment secrets when they were never saved there.
