@@ -225,6 +225,7 @@ export function stableEventId(key: string): string {
 
 export function pixelTrack(event: PixelEvent, payload: PixelPayload = {}) {
   if (typeof window === "undefined") return;
+  ensurePixelsLoaded();
   const eventId = payload.eventId ?? newEventId();
   const currency = payload.currency ?? "USD";
 
