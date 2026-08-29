@@ -1,5 +1,5 @@
 import { useSiteConfig } from "@/lib/site-config";
-import { useConsent, writeConsent, type ConsentValue } from "@/lib/consent";
+import { useConsent, useConsentRequired, writeConsent, type ConsentValue } from "@/lib/consent";
 import { track } from "@/lib/monetization";
 import { DEFAULT_PRIVACY } from "@/lib/admin-types";
 
@@ -7,8 +7,9 @@ export function CookieBanner() {
   const consent = useConsent();
   const config = useSiteConfig();
   const privacy = config.ads.privacy ?? DEFAULT_PRIVACY;
+  const required = useConsentRequired(config.tracking?.require_consent !== false);
 
-  if (consent !== null) return null;
+  if (consent !== null || !required) return null;
 
   const choose = (value: ConsentValue) => {
     writeConsent(value);

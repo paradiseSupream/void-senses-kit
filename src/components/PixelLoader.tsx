@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useRouterState } from "@tanstack/react-router";
 
-import { useConsent } from "@/lib/consent";
+import { useConsent, useConsentRequired } from "@/lib/consent";
 import { useSiteConfig } from "@/lib/site-config";
 import { configurePixels, loadPixels, pixelPageView, pixelsEnabled } from "@/lib/pixels";
 
@@ -15,7 +15,7 @@ export function PixelLoader() {
   const tracking = useSiteConfig().tracking;
   const pathname = useRouterState({ select: (state) => state.location.pathname });
 
-  const requireConsent = tracking?.require_consent !== false;
+  const requireConsent = useConsentRequired(tracking?.require_consent !== false);
   const allowed = tracking?.enabled !== false && (!requireConsent || consent === "all");
 
   useEffect(() => {
