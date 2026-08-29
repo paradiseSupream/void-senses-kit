@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useRouterState } from "@tanstack/react-router";
 
-import { useConsent } from "@/lib/consent";
+import { useConsent, useConsentRequired } from "@/lib/consent";
 import { configureGa4, ga4Enabled, gaPageView, loadGa4 } from "@/lib/ga4";
 import { useSiteConfig } from "@/lib/site-config";
 
@@ -14,7 +14,8 @@ export function Ga4Loader() {
   const pathname = useRouterState({ select: (state) => state.location.pathname });
 
   const tracking = useSiteConfig().tracking;
-  const allowed = consent === "all";
+  const required = useConsentRequired(tracking?.require_consent !== false);
+  const allowed = !required ? consent !== "essential" : consent === "all";
 
   useEffect(() => {
     configureGa4(tracking?.ga4_id);
