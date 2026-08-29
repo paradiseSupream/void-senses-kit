@@ -29,6 +29,8 @@ export function configurePixels(next: PixelIds) {
   if (next.tiktok) ids.tiktok = next.tiktok;
   if (next.googleAds) ids.googleAds = next.googleAds;
   if (next.googleLabel) ids.googleLabel = next.googleLabel;
+  // Ids may arrive after an early conversion already queued itself; replay now.
+  flushBrowserFires();
 }
 
 const META_ID = () => ids.meta;
@@ -142,8 +144,17 @@ function loadGoogleAds() {
  */
 let pixelsAllowed = false;
 
+/**
+ * Browser pixel fires that happened before the pixels were allowed/loaded —
+ * e.g. during the ~2s geo-consent check, or a fast route change. They are
+ * replayed the moment pixels come online, so a conversion that fired a few
+ * hundred ms too early is never reported as "Pixel not loaded".
+ */
+const pendingBrowserFires: Array<() => void> = [];
+
 export function setPixelsAllowed(allowed: boolean) {
   pixelsAllowed = allowed;
+  if (allowed) flushBrowserFires();
 }
 
 /** Loads every configured pixel (call only after advertising consent). */
@@ -151,6 +162,19 @@ export function loadPixels() {
   loadMeta();
   loadTikTok();
   loadGoogleAds();
+  flushBrowserFires();
+}
+
+/** Replays any browser fires that were queued while pixels were offline. */
+function flushBrowserFires() {
+  if (!pixelsAllowed || pendingBrowserFires.length === 0) return;
+  // Make sure the pixel stubs exist before replaying, in case the loader
+  // effect has not run yet (ids configured late, fast route change, etc.).
+  loadMeta();
+  loadTikTok();
+  loadGoogleAds();
+  const fires = pendingBrowserFires.splice(0);
+  for (const fire of fires) fire();
 }
 
 /** Makes sure the pixels are live before a conversion event is fired. */
@@ -225,7 +249,6 @@ export function stableEventId(key: string): string {
 
 export function pixelTrack(event: PixelEvent, payload: PixelPayload = {}) {
   if (typeof window === "undefined") return;
-  ensurePixelsLoaded();
   const eventId = payload.eventId ?? newEventId();
   const currency = payload.currency ?? "USD";
 
@@ -234,36 +257,52 @@ export function pixelTrack(event: PixelEvent, payload: PixelPayload = {}) {
   if (firedEventIds.has(dedupeKey)) return;
   firedEventIds.add(dedupeKey);
 
-  window.fbq?.(
-    "track",
-    event,
-    {
+  /** Fires the browser pixels and reports their delivery status. */
+  const fireBrowser = () => {
+    ensurePixelsLoaded();
+    window.fbq?.(
+      "track",
+      event,
+      {
+        value: payload.value,
+        currency,
+        content_name: payload.contentName,
+      },
+      { eventID: eventId },
+    );
+
+    window.ttq?.["track"]?.(TIKTOK_MAP[event], {
       value: payload.value,
       currency,
       content_name: payload.contentName,
-    },
-    { eventID: eventId },
-  );
-
-  window.ttq?.["track"]?.(TIKTOK_MAP[event], {
-    value: payload.value,
-    currency,
-    content_name: payload.contentName,
-    event_id: eventId,
-  });
-
-  if (googleAdsEnabled()) {
-    window.gtag?.("event", "conversion", {
-      send_to: ids.googleLabel
-        ? `${GOOGLE_ADS_ID()}/${ids.googleLabel}`
-        : GOOGLE_ADS_ID(),
-      value: payload.value,
-      currency,
-      transaction_id: eventId,
+      event_id: eventId,
     });
+
+    if (googleAdsEnabled()) {
+      window.gtag?.("event", "conversion", {
+        send_to: ids.googleLabel
+          ? `${GOOGLE_ADS_ID()}/${ids.googleLabel}`
+          : GOOGLE_ADS_ID(),
+        value: payload.value,
+        currency,
+        transaction_id: eventId,
+      });
+    }
+
+    void reportPixelFires(event, eventId);
+  };
+
+  if (pixelsAllowed) {
+    fireBrowser();
+  } else {
+    // Pixels not yet allowed (geo/consent check still pending, or a fast route
+    // mount). Queue the browser fire and replay once pixels come online,
+    // instead of logging it as a "Pixel not loaded" failure.
+    pendingBrowserFires.push(fireBrowser);
   }
 
-  void reportPixelFires(event, eventId);
+  // Server-side CAPI fires immediately (deduped by event_id) so the conversion
+  // is captured even if the visitor bounces before the geo check resolves.
   void sendServerEvent(event, { ...payload, eventId, currency });
 }
 
