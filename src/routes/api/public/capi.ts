@@ -163,7 +163,6 @@ export const Route = createFileRoute("/api/public/capi")({
           const user: Record<string, unknown> = {};
           if (emailHash) user["email"] = emailHash;
           if (ip) user["ip"] = ip;
-          if (country) user["locale"] = user["locale"] ?? undefined;
           if (userAgent) user["user_agent"] = userAgent;
           const ttclid = str(body["ttclid"], 200);
           const ttp = str(body["ttp"], 200);
