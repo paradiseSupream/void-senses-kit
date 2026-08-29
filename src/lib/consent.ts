@@ -64,3 +64,48 @@ export function adsAllowed(consent: ConsentValue | null | undefined, required: b
   if (!required) return consent !== "essential";
   return consent === "all";
 }
+
+/**
+ * Regions where an opt-in consent banner is required before advertising
+ * cookies may load (EEA + UK + Switzerland + Brazil).
+ */
+export const CONSENT_REGIONS = new Set([
+  "AT","BE","BG","HR","CY","CZ","DK","EE","FI","FR","DE","GR","HU","IE","IT",
+  "LV","LT","LU","MT","NL","PL","PT","RO","SK","SI","ES","SE","IS","LI","NO",
+  "GB","CH","BR",
+]);
+
+/**
+ * Region gate for the consent banner: visitors outside the regulated regions
+ * are tracked without a banner, everyone inside sees it. Fails open (banner
+ * shown) whenever the country cannot be resolved.
+ */
+export function useConsentRequired(adminRequires: boolean): boolean {
+  const [required, setRequired] = useState(true);
+
+  useEffect(() => {
+    if (!adminRequires) {
+      setRequired(false);
+      return;
+    }
+    let alive = true;
+    const controller = new AbortController();
+    const timer = window.setTimeout(() => controller.abort(), 2000);
+    fetch("/cdn-cgi/trace", { signal: controller.signal })
+      .then((res) => (res.ok ? res.text() : Promise.reject(new Error("bad status"))))
+      .then((text) => {
+        const loc = /(?:^|\n)loc=([A-Z]{2})/.exec(text)?.[1];
+        if (!alive) return;
+        if (!loc || loc === "XX" || loc === "T1") setRequired(true);
+        else setRequired(CONSENT_REGIONS.has(loc));
+      })
+      .catch(() => alive && setRequired(true))
+      .finally(() => window.clearTimeout(timer));
+    return () => {
+      alive = false;
+      controller.abort();
+    };
+  }, [adminRequires]);
+
+  return required;
+}
