@@ -1,7 +1,10 @@
 import { createServerFn } from "@tanstack/react-start";
 
+import { DEFAULT_ATTRIBUTION_RULES } from "@/lib/ads-intel.types";
 import type {
+  AttributionModel,
   AttributionReport,
+  AttributionRules,
   CohortReport,
   CreativeReport,
   PixelDebugReport,
