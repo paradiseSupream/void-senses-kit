@@ -1,5 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 
+import { countryOf } from "@/lib/geo-header";
+
 /**
  * Server-side conversion forwarding (Meta Conversions API + TikTok Events API).
  *
@@ -68,6 +70,7 @@ export const Route = createFileRoute("/api/public/capi")({
         const value = Number.isFinite(rawValue) ? Math.max(0, Math.min(100000, rawValue)) : null;
         const email = str(body["email"], 200);
         const ip = clientIp(request);
+        const country = countryOf(request);
         const userAgent = request.headers.get("user-agent");
         const emailHash = email ? await sha256(email) : null;
         const timestamp = Math.floor(Date.now() / 1000);
@@ -107,6 +110,7 @@ export const Route = createFileRoute("/api/public/capi")({
           const userData: Record<string, unknown> = {};
           if (emailHash) userData["em"] = [emailHash];
           if (ip) userData["client_ip_address"] = ip;
+          if (country) userData["country"] = [await sha256(country)];
           if (userAgent) userData["client_user_agent"] = userAgent;
           const fbp = str(body["fbp"], 120);
           const fbc = str(body["fbc"], 200);
@@ -147,6 +151,7 @@ export const Route = createFileRoute("/api/public/capi")({
                 status: res.status,
                 detail: res.ok ? "Conversions API accepted" : text,
                 eventId,
+                country,
               });
             }),
           );
@@ -158,6 +163,7 @@ export const Route = createFileRoute("/api/public/capi")({
           const user: Record<string, unknown> = {};
           if (emailHash) user["email"] = emailHash;
           if (ip) user["ip"] = ip;
+          if (country) user["locale"] = user["locale"] ?? undefined;
           if (userAgent) user["user_agent"] = userAgent;
           const ttclid = str(body["ttclid"], 200);
           const ttp = str(body["ttp"], 200);
@@ -197,6 +203,7 @@ export const Route = createFileRoute("/api/public/capi")({
                 status: res.status,
                 detail: ok ? "Events API accepted" : (body.message ?? `HTTP ${res.status}`),
                 eventId,
+                country,
               });
             }),
           );
