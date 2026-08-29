@@ -135,11 +135,28 @@ function loadGoogleAds() {
   window.gtag!("config", GOOGLE_ADS_ID());
 }
 
+/**
+ * Whether advertising consent currently allows the pixels to run. Set by the
+ * pixel loader so conversions fired before the loader effect ran (or during a
+ * fast route change) can still bootstrap the pixel instead of being lost.
+ */
+let pixelsAllowed = false;
+
+export function setPixelsAllowed(allowed: boolean) {
+  pixelsAllowed = allowed;
+}
+
 /** Loads every configured pixel (call only after advertising consent). */
 export function loadPixels() {
   loadMeta();
   loadTikTok();
   loadGoogleAds();
+}
+
+/** Makes sure the pixels are live before a conversion event is fired. */
+function ensurePixelsLoaded() {
+  if (!pixelsAllowed || !pixelsEnabled()) return;
+  loadPixels();
 }
 
 export function pixelPageView(path: string) {
@@ -208,6 +225,7 @@ export function stableEventId(key: string): string {
 
 export function pixelTrack(event: PixelEvent, payload: PixelPayload = {}) {
   if (typeof window === "undefined") return;
+  ensurePixelsLoaded();
   const eventId = payload.eventId ?? newEventId();
   const currency = payload.currency ?? "USD";
 

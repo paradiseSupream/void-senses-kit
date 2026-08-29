@@ -3,7 +3,13 @@ import { useRouterState } from "@tanstack/react-router";
 
 import { useConsent, useConsentRequired } from "@/lib/consent";
 import { useSiteConfig } from "@/lib/site-config";
-import { configurePixels, loadPixels, pixelPageView, pixelsEnabled } from "@/lib/pixels";
+import {
+  configurePixels,
+  loadPixels,
+  pixelPageView,
+  pixelsEnabled,
+  setPixelsAllowed,
+} from "@/lib/pixels";
 
 /**
  * Loads Meta / TikTok / Google Ads pixels using the ids saved in the admin
@@ -33,6 +39,7 @@ export function PixelLoader() {
   ]);
 
   useEffect(() => {
+    setPixelsAllowed(allowed);
     if (!allowed || !pixelsEnabled()) return;
     loadPixels();
   }, [allowed]);
