@@ -71,7 +71,14 @@ function injectScript(src: string) {
 }
 
 function loadMeta() {
-  if (metaLoaded || !metaEnabled()) return;
+  if (!metaEnabled()) return;
+  // Some in-app browsers/privacy extensions remove `fbq` after the loader was
+  // requested. `metaLoaded` alone is therefore not proof that the callable
+  // queue still exists. Recreate the official stub whenever it disappeared.
+  if (typeof window.fbq === "function") {
+    metaLoaded = true;
+    return;
+  }
   metaLoaded = true;
   const n: any = (window.fbq = function (...args: unknown[]) {
     n.callMethod ? n.callMethod.apply(n, args) : n.queue!.push(args);
@@ -81,7 +88,9 @@ function loadMeta() {
   n.loaded = true;
   n.version = "2.0";
   n.queue = [];
-  injectScript("https://connect.facebook.net/en_US/fbevents.js");
+  if (!document.querySelector('script[src*="connect.facebook.net/en_US/fbevents.js"]')) {
+    injectScript("https://connect.facebook.net/en_US/fbevents.js");
+  }
   window.fbq!("init", META_ID());
   window.fbq!("track", "PageView");
 }
@@ -262,16 +271,23 @@ export function pixelTrack(event: PixelEvent, payload: PixelPayload = {}) {
   /** Fires the browser pixels and reports their delivery status. */
   const fireBrowser = () => {
     ensurePixelsLoaded();
-    window.fbq?.(
-      "track",
-      event,
-      {
-        value: payload.value,
-        currency,
-        content_name: payload.contentName,
-      },
-      { eventID: eventId },
-    );
+    // `ensurePixelsLoaded` normally creates the stub synchronously. If a host
+    // browser removed it between calls, rebuild it once before reporting the
+    // delivery result to the monitor.
+    if (metaEnabled() && typeof window.fbq !== "function") loadMeta();
+    const metaReady = typeof window.fbq === "function" && metaEnabled();
+    if (metaReady) {
+      window.fbq?.(
+        "track",
+        event,
+        {
+          value: payload.value,
+          currency,
+          content_name: payload.contentName,
+        },
+        { eventID: eventId },
+      );
+    }
 
     window.ttq?.["track"]?.(TIKTOK_MAP[event], {
       value: payload.value,
@@ -291,7 +307,7 @@ export function pixelTrack(event: PixelEvent, payload: PixelPayload = {}) {
       });
     }
 
-    void reportPixelFires(event, eventId);
+    void reportPixelFires(event, eventId, { meta: metaReady });
   };
 
   if (pixelsAllowed && pixelsEnabled()) {
@@ -311,11 +327,15 @@ export function pixelTrack(event: PixelEvent, payload: PixelPayload = {}) {
  * Tells our server which browser pixels actually fired, so the admin monitor
  * can chart browser coverage next to server-side deliveries.
  */
-export function reportPixelFires(event: string, eventId: string) {
+export function reportPixelFires(
+  event: string,
+  eventId: string,
+  delivery?: { meta?: boolean; tiktok?: boolean; googleAds?: boolean },
+) {
   const entries = [
-    { channel: "meta", event, ok: typeof window.fbq === "function" && metaEnabled() },
-    { channel: "tiktok", event, ok: Boolean(window.ttq?.["track"]) && tiktokEnabled() },
-    { channel: "google_ads", event, ok: typeof window.gtag === "function" && googleAdsEnabled() },
+    { channel: "meta", event, ok: delivery?.meta ?? (typeof window.fbq === "function" && metaEnabled()) },
+    { channel: "tiktok", event, ok: delivery?.tiktok ?? (Boolean(window.ttq?.["track"]) && tiktokEnabled()) },
+    { channel: "google_ads", event, ok: delivery?.googleAds ?? (typeof window.gtag === "function" && googleAdsEnabled()) },
   ].filter((entry) => entry.ok || entry.channel === "meta");
 
   const body = JSON.stringify({ event_id: eventId, entries });
