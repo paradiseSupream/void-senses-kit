@@ -167,7 +167,9 @@ export function loadPixels() {
 
 /** Replays any browser fires that were queued while pixels were offline. */
 function flushBrowserFires() {
-  if (!pixelsAllowed || pendingBrowserFires.length === 0) return;
+  // Consent and runtime configuration resolve independently. Do not replay
+  // until at least one configured pixel can actually accept the event.
+  if (!pixelsAllowed || !pixelsEnabled() || pendingBrowserFires.length === 0) return;
   // Make sure the pixel stubs exist before replaying, in case the loader
   // effect has not run yet (ids configured late, fast route change, etc.).
   loadMeta();
@@ -292,12 +294,11 @@ export function pixelTrack(event: PixelEvent, payload: PixelPayload = {}) {
     void reportPixelFires(event, eventId);
   };
 
-  if (pixelsAllowed) {
+  if (pixelsAllowed && pixelsEnabled()) {
     fireBrowser();
   } else {
-    // Pixels not yet allowed (geo/consent check still pending, or a fast route
-    // mount). Queue the browser fire and replay once pixels come online,
-    // instead of logging it as a "Pixel not loaded" failure.
+    // Consent and runtime pixel ids can resolve in either order. Queue until
+    // both are ready instead of logging a false "Pixel not loaded" failure.
     pendingBrowserFires.push(fireBrowser);
   }
 
