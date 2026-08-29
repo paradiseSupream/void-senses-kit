@@ -185,10 +185,36 @@ export type PixelPayload = {
  * Fires one conversion on every configured pixel and mirrors it to the
  * server-side Conversions API with the same event id (de-duplicated).
  */
+/** Event ids already fired in this tab — blocks accidental double sends. */
+const firedEventIds = new Set<string>();
+
+/**
+ * Stable `event_id` for a logical conversion (survives remounts and reloads in
+ * the same session), so browser and server deliveries always pair up.
+ */
+export function stableEventId(key: string): string {
+  if (typeof window === "undefined") return newEventId();
+  const storeKey = `sov.evid.${key}`;
+  try {
+    const existing = window.sessionStorage.getItem(storeKey);
+    if (existing) return existing;
+    const created = newEventId();
+    window.sessionStorage.setItem(storeKey, created);
+    return created;
+  } catch {
+    return newEventId();
+  }
+}
+
 export function pixelTrack(event: PixelEvent, payload: PixelPayload = {}) {
   if (typeof window === "undefined") return;
   const eventId = payload.eventId ?? newEventId();
   const currency = payload.currency ?? "USD";
+
+  // De-duplicate at the source: the same event id never fires twice.
+  const dedupeKey = `${event}:${eventId}`;
+  if (firedEventIds.has(dedupeKey)) return;
+  firedEventIds.add(dedupeKey);
 
   window.fbq?.(
     "track",
