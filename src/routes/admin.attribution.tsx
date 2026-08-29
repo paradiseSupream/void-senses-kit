@@ -5,7 +5,9 @@ import { useEffect, useState } from "react";
 import { ArrowLeft, GitBranch, RefreshCw } from "lucide-react";
 
 import { adminAttribution, adminCohorts } from "@/lib/ads-intel.functions";
-import type { AttributionReport, CohortReport } from "@/lib/ads-intel.types";
+import { DEFAULT_ATTRIBUTION_RULES } from "@/lib/ads-intel.types";
+import type { AttributionModel, AttributionReport, AttributionRules, CohortReport } from "@/lib/ads-intel.types";
+import { UtmTemplatesCard } from "@/components/admin/UtmTemplatesCard";
 
 export const Route = createFileRoute("/admin/attribution")({
   head: () => ({
