@@ -239,6 +239,7 @@ export type Database = {
       tracking_events: {
         Row: {
           channel: string
+          country: string | null
           created_at: string
           detail: string | null
           event: string
@@ -250,6 +251,7 @@ export type Database = {
         }
         Insert: {
           channel: string
+          country?: string | null
           created_at?: string
           detail?: string | null
           event: string
@@ -261,6 +263,7 @@ export type Database = {
         }
         Update: {
           channel?: string
+          country?: string | null
           created_at?: string
           detail?: string | null
           event?: string

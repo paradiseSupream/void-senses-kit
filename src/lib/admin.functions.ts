@@ -1141,8 +1141,11 @@ export type TrackingMonitor = {
     status: number | null;
     detail: string | null;
     eventId: string | null;
+    country: string | null;
   }>;
-  failures: Array<{ at: string; channel: string; event: string; status: number | null; detail: string | null }>;
+  failures: Array<{ at: string; channel: string; event: string; status: number | null; detail: string | null; country: string | null }>;
+  /** Delivery split by visitor country, best first. */
+  countries: Array<{ country: string; sent: number; failed: number; successRate: number }>;
 };
 
 export const adminTrackingMonitor = createServerFn({ method: "POST" })
@@ -1157,7 +1160,7 @@ export const adminTrackingMonitor = createServerFn({ method: "POST" })
 
     const { data: rows, error } = await admin()
       .from("tracking_events")
-      .select("created_at, channel, source, event, ok, status, detail, event_id")
+      .select("created_at, channel, source, event, ok, status, detail, event_id, country")
       .gte("created_at", since)
       .order("created_at", { ascending: false })
       .limit(5000);
@@ -1172,6 +1175,7 @@ export const adminTrackingMonitor = createServerFn({ method: "POST" })
       status: number | null;
       detail: string | null;
       event_id: string | null;
+      country: string | null;
     };
     const list = (rows ?? []) as Row[];
 
@@ -1221,6 +1225,7 @@ export const adminTrackingMonitor = createServerFn({ method: "POST" })
         status: row.status,
         detail: row.detail,
         eventId: row.event_id,
+        country: row.country,
       })),
       failures: list
         .filter((row) => !row.ok)
@@ -1231,7 +1236,27 @@ export const adminTrackingMonitor = createServerFn({ method: "POST" })
           event: row.event,
           status: row.status,
           detail: row.detail,
+          country: row.country,
       })),
+      countries: (() => {
+        const map = new Map<string, { sent: number; failed: number }>();
+        for (const row of list) {
+          const key = row.country ?? "??";
+          const stat = map.get(key) ?? { sent: 0, failed: 0 };
+          stat.sent += 1;
+          if (!row.ok) stat.failed += 1;
+          map.set(key, stat);
+        }
+        return [...map.entries()]
+          .map(([country, stat]) => ({
+            country,
+            sent: stat.sent,
+            failed: stat.failed,
+            successRate: stat.sent > 0 ? ((stat.sent - stat.failed) / stat.sent) * 100 : 0,
+          }))
+          .sort((a, b) => b.sent - a.sent)
+          .slice(0, 12);
+      })(),
     };
   });
 

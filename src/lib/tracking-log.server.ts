@@ -13,6 +13,8 @@ export type TrackingLogEntry = {
   status?: number | null;
   detail?: string | null;
   eventId?: string | null;
+  /** ISO-3166 alpha-2 country of the visitor this delivery belongs to. */
+  country?: string | null;
 };
 
 /**
@@ -74,6 +76,7 @@ export async function logTrackingEvents(entries: TrackingLogEntry[]): Promise<vo
           status: entry.status ?? null,
           detail: entry.detail ? entry.detail.slice(0, 500) : null,
           event_id: entry.eventId ? entry.eventId.slice(0, 80) : null,
+          country: entry.country ? entry.country.slice(0, 2).toUpperCase() : null,
         })),
       );
   } catch {

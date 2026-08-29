@@ -165,6 +165,7 @@ export function TrackingMonitorTab({ token }: { token: string }) {
                 <th>Channel</th>
                 <th>Source</th>
                 <th>Event</th>
+                <th>Country</th>
                 <th>Status</th>
                 <th>Detail</th>
               </tr>
@@ -176,6 +177,9 @@ export function TrackingMonitorTab({ token }: { token: string }) {
                   <td>{CHANNEL_LABEL[row.channel] ?? row.channel}</td>
                   <td className="text-muted-foreground">{row.source}</td>
                   <td>{row.event}</td>
+                  <td className="label-mono text-xs text-muted-foreground">
+                    {row.country ?? "—"}
+                  </td>
                   <td>
                     {row.ok ? (
                       <span className="inline-flex items-center gap-1 text-primary">
@@ -194,7 +198,7 @@ export function TrackingMonitorTab({ token }: { token: string }) {
               ))}
               {(data?.latest.length ?? 0) === 0 ? (
                 <tr>
-                  <td colSpan={6} className="py-6 text-center text-muted-foreground">
+                  <td colSpan={7} className="py-6 text-center text-muted-foreground">
                     No tracking events in this window yet.
                   </td>
                 </tr>
@@ -202,6 +206,32 @@ export function TrackingMonitorTab({ token }: { token: string }) {
             </tbody>
           </table>
         </div>
+      </div>
+
+      <div className="panel p-5">
+        <h3 className="font-display text-base font-semibold">Delivery by country</h3>
+        {(data?.countries.length ?? 0) === 0 ? (
+          <p className="mt-2 text-sm text-muted-foreground">
+            No geo-tagged deliveries in this window yet.
+          </p>
+        ) : (
+          <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+            {data?.countries.map((row) => (
+              <div
+                key={row.country}
+                className="flex items-center justify-between rounded-lg border border-hairline bg-surface-2 px-3 py-2 text-sm"
+              >
+                <span className="label-mono">{row.country === "??" ? "Unknown" : row.country}</span>
+                <span className="text-muted-foreground">
+                  {row.sent} sent ·{" "}
+                  <span className={row.failed > 0 ? "text-destructive" : "text-primary"}>
+                    {row.successRate.toFixed(0)}% ok
+                  </span>
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="panel p-5">
@@ -227,6 +257,9 @@ export function TrackingMonitorTab({ token }: { token: string }) {
                 <span className="font-medium">
                   {CHANNEL_LABEL[row.channel] ?? row.channel} · {row.event}
                 </span>
+                {row.country ? (
+                  <span className="text-muted-foreground"> · {row.country}</span>
+                ) : null}
                 {row.status ? (
                   <span className="text-muted-foreground"> · HTTP {row.status}</span>
                 ) : null}

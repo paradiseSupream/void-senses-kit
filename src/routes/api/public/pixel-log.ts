@@ -1,5 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 
+import { countryOf } from "@/lib/geo-header";
+
 /**
  * Browser-pixel delivery beacon.
  *
@@ -32,6 +34,7 @@ export const Route = createFileRoute("/api/public/pixel-log")({
 
         const rawEntries = Array.isArray(body["entries"]) ? body["entries"] : [];
         const eventId = String(body["event_id"] ?? "").slice(0, 80) || null;
+        const country = countryOf(request);
 
         const entries = rawEntries
           .slice(0, 6)
@@ -50,6 +53,7 @@ export const Route = createFileRoute("/api/public/pixel-log")({
                   ? "Pixel not loaded when the event fired"
                   : "Browser pixel fired",
               eventId,
+              country,
             };
           })
           .filter((entry): entry is NonNullable<typeof entry> => entry !== null);
