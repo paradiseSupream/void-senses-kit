@@ -9,7 +9,7 @@
 
 import { track } from "@/lib/monetization";
 import { gaEvent } from "@/lib/ga4";
-import { pixelTrack, type PixelEvent } from "@/lib/pixels";
+import { pixelTrack, stableEventId, type PixelEvent } from "@/lib/pixels";
 import { markRetarget, segmentForFunnelStep } from "@/lib/retarget";
 
 /** Which funnel steps are worth reporting to the ad networks as conversions. */
