@@ -303,8 +303,75 @@ export function segmentCsv(
   return { csv: `${header}\n${body}`, rows: list.length };
 }
 
+/**
+ * Applies the operator's attribution rules to a session list: UTM
+ * normalization, organic / click-id filters and the first- or last-touch
+ * credit model across a visitor's sessions inside the lookback window.
+ */
+export function applyAttributionRules(
+  sessions: SessionFacts[],
+  rules: AttributionRules,
+): { sessions: SessionFacts[]; excluded: number } {
+  let list = sessions.map((s) => ({ ...s }));
+
+  if (rules.normalize) {
+    for (const s of list) {
+      s.source = normalizeSource(s.source, "direct");
+      s.campaign = normalizeUtmValue(s.campaign, "(none)");
+      s.creative = normalizeUtmValue(s.creative, "unattributed");
+      s.platform = normalizeSource(s.platform, s.paid ? "utm" : "organic");
+    }
+  }
+
+  const before = list.length;
+  if (rules.requireClickId) list = list.filter((s) => Boolean(s.clickId));
+  if (!rules.includeOrganic) list = list.filter((s) => s.paid);
+  const excluded = before - list.length;
+
+  if (rules.model !== "session") {
+    const byVisitor = new Map<string, SessionFacts[]>();
+    for (const s of list) {
+      if (s.visitorKey === "?|?") continue;
+      const bucket = byVisitor.get(s.visitorKey) ?? [];
+      bucket.push(s);
+      byVisitor.set(s.visitorKey, bucket);
+    }
+    const windowMs = Math.max(1, rules.lookbackDays) * 86_400_000;
+    for (const bucket of byVisitor.values()) {
+      if (bucket.length < 2) continue;
+      bucket.sort((a, b) => (a.firstSeen < b.firstSeen ? -1 : 1));
+      const paid = bucket.filter((s) => s.paid);
+      if (paid.length === 0) continue;
+      const anchor = rules.model === "first_touch" ? paid[0]! : paid[paid.length - 1]!;
+      const anchorAt = new Date(anchor.firstSeen).getTime();
+      for (const s of bucket) {
+        const at = new Date(s.firstSeen).getTime();
+        if (Math.abs(at - anchorAt) > windowMs) continue;
+        // Credit the touch, but never rewrite the touch session itself.
+        if (s === anchor) continue;
+        s.source = anchor.source;
+        s.campaign = anchor.campaign;
+        s.creative = anchor.creative;
+        s.platform = anchor.platform;
+      }
+    }
+  }
+
+  return { sessions: list, excluded };
+}
+
 /** Source / campaign / creative revenue breakdown plus funnel drop-off. */
-export function buildAttributionReport(sessions: SessionFacts[], days: number): AttributionReport {
+export function buildAttributionReport(
+  sessions: SessionFacts[],
+  days: number,
+  rules?: AttributionRules,
+): AttributionReport {
+  let excludedSessions = 0;
+  if (rules) {
+    const applied = applyAttributionRules(sessions, rules);
+    sessions = applied.sessions;
+    excludedSessions = applied.excluded;
+  }
   const groups = new Map<string, AttributionRow>();
   const totals = emptyFunnel();
   let revenueCents = 0;
