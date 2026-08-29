@@ -5,9 +5,11 @@
  * and the `tracking_events` delivery log, so no extra tables are needed.
  */
 
+import { normalizeSource, normalizeUtmValue } from "@/lib/utm";
 import type {
   AttributionReport,
   AttributionRow,
+  AttributionRules,
   CohortKey,
   CohortReport,
   CohortRow,
