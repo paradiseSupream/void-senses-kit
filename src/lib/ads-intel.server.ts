@@ -427,7 +427,14 @@ export function buildAttributionReport(
     };
   });
 
-  return { days, rows, totals, revenueCents, dropOff };
+  return {
+    days,
+    rows,
+    totals,
+    revenueCents,
+    dropOff,
+    ...(rules ? { rules, excludedSessions } : {}),
+  };
 }
 
 /**
