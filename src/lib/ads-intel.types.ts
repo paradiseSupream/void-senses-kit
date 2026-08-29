@@ -216,3 +216,53 @@ export type CohortReport = {
     returningKeptPct: number;
   }>;
 };
+
+/** Per-country funnel and revenue used by the geo ROI / CPA planner. */
+export type GeoRow = {
+  /** ISO-3166 alpha-2 code, or "??" when the edge gave no country. */
+  country: string;
+  label: string;
+  funnel: FunnelCounts;
+  revenueCents: number;
+  /** Purchases / sessions, percent. */
+  conversionRate: number;
+  /** Revenue per session, cents. */
+  epcCents: number;
+  /** Share of all sessions in the window, percent. */
+  sharePct: number;
+  /** Sessions carrying a UTM tag or click id. */
+  paidSessions: number;
+};
+
+/** One creative inside one country, with its recommended budget share. */
+export type GeoCreativeRow = {
+  country: string;
+  creative: string;
+  campaign: string;
+  sessions: number;
+  purchases: number;
+  revenueCents: number;
+  convRate: number;
+  /** Revenue per session, cents. */
+  epcCents: number;
+  winner: boolean;
+  /** Performance-weighted share of the creative budget, percent. */
+  budgetSharePct: number;
+};
+
+export type GeoAlert = {
+  level: "warn" | "info";
+  title: string;
+  detail: string;
+  action: string;
+};
+
+export type GeoReport = {
+  days: number;
+  rows: GeoRow[];
+  creatives: GeoCreativeRow[];
+  totals: FunnelCounts;
+  revenueCents: number;
+  alerts: GeoAlert[];
+  winner: string | null;
+};

@@ -7,6 +7,7 @@ import type {
   AttributionRules,
   CohortReport,
   CreativeReport,
+  GeoReport,
   PixelDebugReport,
   RetargetReport,
   RetargetSegment,
@@ -129,4 +130,17 @@ export const adminCohorts = createServerFn({ method: "POST" })
     const { loadSessions, buildCohortReport } = await import("@/lib/ads-intel.server");
     await requireAdmin(data.token);
     return buildCohortReport(await loadSessions(data.days), data.days);
+  });
+
+/** Country-level ROI / CPA planner data plus creative budget balancing. */
+export const adminGeoRoi = createServerFn({ method: "POST" })
+  .inputValidator((input: { token: string; days?: number }) => ({
+    token: String(input?.token ?? ""),
+    days: Math.max(1, Math.min(90, Number(input?.days ?? 30))),
+  }))
+  .handler(async ({ data }): Promise<GeoReport> => {
+    const { requireAdmin } = await import("@/lib/admin-core.server");
+    const { loadSessions, buildGeoReport } = await import("@/lib/ads-intel.server");
+    await requireAdmin(data.token);
+    return buildGeoReport(await loadSessions(data.days), data.days);
   });
