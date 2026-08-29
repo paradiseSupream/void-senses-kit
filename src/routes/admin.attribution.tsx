@@ -40,7 +40,7 @@ function AttributionPage() {
   const [rules, setRules] = useState<AttributionRules>(DEFAULT_ATTRIBUTION_RULES);
 
   useEffect(() => {
-    setToken(window.localStorage.getItem(TOKEN_KEY));
+    setToken(window.sessionStorage.getItem(TOKEN_KEY) ?? window.localStorage.getItem(TOKEN_KEY));
   }, []);
 
   const query = useQuery<AttributionReport>({
