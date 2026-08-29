@@ -8,6 +8,7 @@ import { adminAttribution, adminCohorts } from "@/lib/ads-intel.functions";
 import { DEFAULT_ATTRIBUTION_RULES } from "@/lib/ads-intel.types";
 import type { AttributionModel, AttributionReport, AttributionRules, CohortReport } from "@/lib/ads-intel.types";
 import { UtmTemplatesCard } from "@/components/admin/UtmTemplatesCard";
+import { GeoRoiCard } from "@/components/admin/GeoRoiCard";
 
 export const Route = createFileRoute("/admin/attribution")({
   head: () => ({
@@ -109,6 +110,8 @@ function AttributionPage() {
       ) : null}
 
       <UtmTemplatesCard />
+
+      <GeoRoiCard token={token} days={days} />
 
       <section className="panel mt-4 p-4">
         <span className="label-mono">Attribution rules</span>
