@@ -8,6 +8,10 @@
 import { normalizeSource, normalizeUtmValue } from "@/lib/utm";
 import type {
   AttributionReport,
+  GeoAlert,
+  GeoCreativeRow,
+  GeoReport,
+  GeoRow,
   AttributionRow,
   AttributionRules,
   CohortKey,
@@ -39,6 +43,7 @@ type Row = {
   suspect: boolean | null;
   ip_hash: string | null;
   ua_hash: string | null;
+  country: string | null;
   created_at: string;
 };
 
@@ -63,10 +68,12 @@ export type SessionFacts = {
   returning: boolean;
   /** True when the session carries a UTM / click id (i.e. paid or campaign). */
   paid: boolean;
+  /** ISO-3166 alpha-2 country from the edge header, or null. */
+  country: string | null;
 };
 
 const SELECT =
-  "event_type,slot,session_id,tool_slug,utm_source,utm_campaign,utm_content,ad_click_id,ad_platform,referrer,revenue_cents,suspect,ip_hash,ua_hash,created_at";
+  "event_type,slot,session_id,tool_slug,utm_source,utm_campaign,utm_content,ad_click_id,ad_platform,referrer,revenue_cents,suspect,ip_hash,ua_hash,country,created_at";
 
 function hostOf(referrer: string | null): string {
   if (!referrer) return "direct";
@@ -113,6 +120,7 @@ export async function loadSessions(days: number): Promise<SessionFacts[]> {
         visitorKey: `${row.ip_hash ?? "?"}|${row.ua_hash ?? "?"}`,
         returning: false,
         paid: Boolean(row.utm_source || row.ad_click_id),
+        country: row.country ? row.country.toUpperCase().slice(0, 2) : null,
       };
       map.set(row.session_id, s);
     }
@@ -122,6 +130,7 @@ export async function loadSessions(days: number): Promise<SessionFacts[]> {
     }
     if (!s.paid && (row.utm_source || row.ad_click_id)) s.paid = true;
     if (!s.clickId && row.ad_click_id) s.clickId = row.ad_click_id;
+    if (!s.country && row.country) s.country = row.country.toUpperCase().slice(0, 2);
     if (s.creative === "unattributed" && row.utm_content) s.creative = row.utm_content;
     if (s.campaign === "(none)" && row.utm_campaign) s.campaign = row.utm_campaign;
 
@@ -656,5 +665,177 @@ export async function buildPixelDebug(
       failures: list.filter((p) => p.failed.length > 0).length,
     },
     channels: [...channels.entries()].map(([channel, stat]) => ({ channel, ...stat })),
+  };
+}
+
+
+/* ------------------------------------------------------------------ */
+/* Country-level ROI / CPA and creative budget balancing               */
+/* ------------------------------------------------------------------ */
+
+const COUNTRY_NAMES: Record<string, string> = {
+  AE: "United Arab Emirates",
+  SA: "Saudi Arabia",
+  QA: "Qatar",
+  KW: "Kuwait",
+  US: "United States",
+  BH: "Bahrain",
+  OM: "Oman",
+  GB: "United Kingdom",
+  IN: "India",
+  BD: "Bangladesh",
+};
+
+/** Countries always shown, even at zero sessions, so the plan stays stable. */
+const PINNED = ["AE", "SA", "QA", "KW", "US"];
+
+/**
+ * Per-country funnel, revenue and value-per-session, plus per-country creative
+ * rows and operator alerts. Spend is not stored anywhere, so CPA / ROAS are
+ * computed in the UI from the budget the operator types in.
+ */
+export function buildGeoReport(sessions: SessionFacts[], days: number): GeoReport {
+  const geo = new Map<string, GeoRow>();
+  const creatives = new Map<string, GeoCreativeRow>();
+  const totals = emptyFunnel();
+  let revenueCents = 0;
+
+  const ensure = (code: string): GeoRow => {
+    let row = geo.get(code);
+    if (!row) {
+      row = {
+        country: code,
+        label: COUNTRY_NAMES[code] ?? code,
+        funnel: emptyFunnel(),
+        revenueCents: 0,
+        conversionRate: 0,
+        epcCents: 0,
+        sharePct: 0,
+        paidSessions: 0,
+      };
+      geo.set(code, row);
+    }
+    return row;
+  };
+
+  for (const code of PINNED) ensure(code);
+
+  for (const s of sessions) {
+    addTo(totals, s);
+    revenueCents += s.revenueCents;
+    const code = s.country ?? "??";
+    const row = ensure(code);
+    addTo(row.funnel, s);
+    row.revenueCents += s.revenueCents;
+    if (s.paid) row.paidSessions += 1;
+
+    const key = `${code}|${s.creative}`;
+    let c = creatives.get(key);
+    if (!c) {
+      c = {
+        country: code,
+        creative: s.creative,
+        campaign: s.campaign,
+        sessions: 0,
+        purchases: 0,
+        revenueCents: 0,
+        convRate: 0,
+        epcCents: 0,
+        winner: false,
+        budgetSharePct: 0,
+      };
+      creatives.set(key, c);
+    }
+    c.sessions += 1;
+    if (s.purchase) c.purchases += 1;
+    c.revenueCents += s.revenueCents;
+  }
+
+  const rows = [...geo.values()].map((row) => {
+    row.conversionRate = rate(row.funnel.purchase, row.funnel.sessions);
+    row.epcCents = row.funnel.sessions > 0 ? row.revenueCents / row.funnel.sessions : 0;
+    row.sharePct = rate(row.funnel.sessions, totals.sessions);
+    return row;
+  });
+  rows.sort(
+    (a, b) =>
+      b.revenueCents - a.revenueCents ||
+      b.funnel.sessions - a.funnel.sessions ||
+      a.country.localeCompare(b.country),
+  );
+
+  const creativeRows = [...creatives.values()].map((c) => {
+    c.convRate = rate(c.purchases, c.sessions);
+    c.epcCents = c.sessions > 0 ? c.revenueCents / c.sessions : 0;
+    return c;
+  });
+
+  // Budget weight: value per session x sessions, so a creative only earns
+  // share once it has both traffic and revenue behind it.
+  const scored = creativeRows.filter((c) => c.creative !== "unattributed" && c.sessions >= 5);
+  const weightOf = (c: GeoCreativeRow) => c.epcCents * Math.log10(c.sessions + 10);
+  const totalWeight = scored.reduce((sum, c) => sum + weightOf(c), 0);
+  for (const c of scored) {
+    c.budgetSharePct = totalWeight > 0 ? (weightOf(c) / totalWeight) * 100 : 100 / scored.length;
+  }
+  const best = [...scored].sort(
+    (a, b) => b.epcCents - a.epcCents || b.convRate - a.convRate || b.sessions - a.sessions,
+  )[0];
+  if (best && best.revenueCents > 0) best.winner = true;
+
+  creativeRows.sort(
+    (a, b) => b.revenueCents - a.revenueCents || b.sessions - a.sessions,
+  );
+
+  const alerts: GeoAlert[] = [];
+  if (totals.purchase < 15) {
+    alerts.push({
+      level: "warn",
+      title: `Only ${totals.purchase} purchases in ${days} days`,
+      detail:
+        "Meta needs roughly 15-25 conversions per week before Purchase optimisation leaves the learning phase.",
+      action:
+        totals.testStart >= 50 || totals.gateShown >= 25
+          ? "Run the campaign on Lead (quiz completion) or AddToCart (VIP gate) for now - those events already have volume - and switch to Purchase once ~50 sales are logged."
+          : "Keep the daily budget small and optimise for Lead (quiz completion) until the funnel has volume.",
+    });
+  }
+  for (const row of rows) {
+    if (row.funnel.sessions >= 30 && row.funnel.purchase === 0) {
+      alerts.push({
+        level: "warn",
+        title: `${row.label}: ${row.funnel.sessions} sessions, no purchase`,
+        detail: "This country is spending without a single sale in the window.",
+        action: "Cut or pause this geo in the ad set and move its budget to the best-earning country.",
+      });
+    }
+  }
+  const us = rows.find((r) => r.country === "US");
+  if (us && us.funnel.sessions > 0) {
+    alerts.push({
+      level: "info",
+      title: "United States traffic detected",
+      detail: `${us.funnel.sessions} US sessions, ${us.funnel.purchase} purchases, ${(us.epcCents / 100).toFixed(2)} USD per session.`,
+      action:
+        "Keep the US in its own ad set with its own budget - CPC is higher there, so a shared ad set lets it eat the Gulf budget.",
+    });
+  }
+  if (best?.winner) {
+    alerts.push({
+      level: "info",
+      title: `Winner creative: ${best.creative}`,
+      detail: `${best.convRate.toFixed(2)}% conversion, ${(best.epcCents / 100).toFixed(2)} USD per session over ${best.sessions} sessions.`,
+      action: "Shift budget toward it using the split below and pause creatives with no revenue.",
+    });
+  }
+
+  return {
+    days,
+    rows,
+    creatives: creativeRows,
+    totals,
+    revenueCents,
+    alerts,
+    winner: best?.winner ? best.creative : null,
   };
 }
