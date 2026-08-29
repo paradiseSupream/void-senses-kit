@@ -398,11 +398,14 @@ export function buildAttributionReport(
     row.revenueCents += s.revenueCents;
   }
 
-  const rows = [...groups.values()].map((row) => {
-    row.conversionRate = rate(row.funnel.purchase, row.funnel.sessions);
-    row.epcCents = row.funnel.sessions > 0 ? row.revenueCents / row.funnel.sessions : 0;
-    return row;
-  });
+  const minSessions = rules?.minSessions ?? 0;
+  const rows = [...groups.values()]
+    .map((row) => {
+      row.conversionRate = rate(row.funnel.purchase, row.funnel.sessions);
+      row.epcCents = row.funnel.sessions > 0 ? row.revenueCents / row.funnel.sessions : 0;
+      return row;
+    })
+    .filter((row) => row.funnel.sessions >= minSessions);
   rows.sort((a, b) => b.revenueCents - a.revenueCents || b.funnel.sessions - a.funnel.sessions);
 
   const steps: Array<[string, number]> = [
