@@ -39,6 +39,7 @@ export function PixelLoader() {
   ]);
 
   useEffect(() => {
+    setPixelsAllowed(allowed);
     if (!allowed || !pixelsEnabled()) return;
     loadPixels();
   }, [allowed]);
