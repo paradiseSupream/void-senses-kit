@@ -16,11 +16,18 @@
 export const BOOT_META_PIXEL_ID =
   (import.meta.env["VITE_META_PIXEL_ID"] as string | undefined)?.trim() || "";
 
-export function metaBootSnippet(id: string): string {
+export function metaBootSnippet(id: string, consentRequired = true): string {
+  // Outside the consent-regulated regions the server already knows tracking is
+  // allowed, so consent is granted and the first PageView fires straight from
+  // the HTML — that is what Meta's auto-detection crawler checks for.
+  const consent = consentRequired
+    ? `fbq('consent','revoke');fbq('init','${id}');`
+    : `fbq('consent','grant');fbq('init','${id}');fbq('track','PageView');window.__sovMetaPV=1;`;
   return `!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
 n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
 n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
 t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
 document,'script','https://connect.facebook.net/en_US/fbevents.js');
-fbq('consent','revoke');fbq('init','${id}');window.__sovMetaBooted='${id}';`;
+${consent}window.__sovMetaBooted='${id}';`;
 }
+

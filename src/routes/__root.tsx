@@ -29,6 +29,7 @@ import { ActionGateProvider } from "@/components/monetization/ActionGate";
 import { VipProvider } from "@/lib/vip";
 import { SiteConfigProvider } from "@/lib/site-config";
 import { BOOT_META_PIXEL_ID, metaBootSnippet } from "@/lib/pixel-boot";
+import { getBootGeo } from "@/lib/geo-boot.functions";
 
 
 
@@ -93,7 +94,15 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 }
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
-  head: () => ({
+  loader: async () => {
+    try {
+      return await getBootGeo();
+    } catch {
+      return { country: null, consentRequired: true };
+    }
+  },
+  head: ({ loaderData }) => ({
+
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
@@ -134,8 +143,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     // Static Meta base code so Meta's crawler detects the pixel. It starts in
     // `consent: revoke`, so nothing is sent until the app grants consent.
     scripts: BOOT_META_PIXEL_ID
-      ? [{ children: metaBootSnippet(BOOT_META_PIXEL_ID) }]
+      ? [{ children: metaBootSnippet(BOOT_META_PIXEL_ID, loaderData?.consentRequired !== false) }]
       : [],
+
   }),
   shellComponent: RootShell,
   component: RootComponent,
