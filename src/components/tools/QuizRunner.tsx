@@ -117,7 +117,7 @@ export function QuizRunner({
   const timeLeft = leftSeconds >= 60 ? `~${Math.ceil(leftSeconds / 60)} min left` : "under a minute left";
 
   return (
-    <div>
+    <div ref={rootRef}>
       {/* Sticky progress rail so the finish line is always visible on mobile. */}
       <div className="sticky top-14 z-20 -mx-4 mb-5 border-b border-hairline bg-void-0/80 px-4 py-2.5 backdrop-blur-2xl sm:top-16">
         <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
