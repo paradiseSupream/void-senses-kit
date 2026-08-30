@@ -266,7 +266,8 @@ export function VipModal() {
           </button>
         </div>
         <p className="mt-1.5 text-xs text-muted-foreground">
-          We store it only to restore your VIP access on any device.
+          You can skip this — checkout asks for your email anyway. We only store it to restore
+          VIP on your other devices.
         </p>
 
         <div className="mt-6 grid grid-cols-2 gap-1 rounded-lg border border-hairline bg-surface-2/60 p-1">
