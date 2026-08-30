@@ -182,7 +182,15 @@ export function QuizRunner({
                     : "border-hairline bg-void-2/45 text-foreground/85 hover:border-primary/35 hover:bg-primary/8"
                 }`}
               >
-                {option.label}
+                <span className="flex min-w-0 items-center gap-2.5">
+                  <span
+                    aria-hidden="true"
+                    className="label-mono hidden size-5 shrink-0 place-items-center rounded-md border border-hairline text-[0.6rem] sm:grid"
+                  >
+                    {i + 1}
+                  </span>
+                  <span className="truncate">{option.label}</span>
+                </span>
                 <span
                   aria-hidden="true"
                   className="size-2.5 shrink-0 rounded-full transition-transform duration-[var(--dur-micro)]"
