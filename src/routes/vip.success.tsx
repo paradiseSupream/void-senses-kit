@@ -8,6 +8,7 @@ import { vipOrderStatus } from "@/lib/vip.functions";
 import { useVip } from "@/lib/vip";
 import { rememberLicense, rememberOrder } from "@/lib/vip-unlock";
 import { trackFunnel } from "@/lib/funnel";
+import { purchaseEventId } from "@/lib/purchase-event";
 import { pixelTrack } from "@/lib/pixels";
 
 type Search = { order?: string; status?: string };
@@ -66,6 +67,7 @@ function VipSuccessPage() {
           setState("done");
           trackFunnel("vip_purchase");
           pixelTrack("Purchase", {
+            eventId: purchaseEventId(order),
             value: result.plan === "monthly" ? 2.99 : 19,
             currency: "USD",
             contentName: `vip_${result.plan ?? "lifetime"}`,
