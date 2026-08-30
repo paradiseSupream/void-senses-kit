@@ -53,10 +53,18 @@ export function VipModal() {
   const monthlyPrice = `$${(monthlyCents / 100).toFixed(2)}`;
   const price = plan === "lifetime" ? lifetimePrice : monthlyPrice;
 
+  // Copy-only A/B arm for the gate — resolved on the client so the sticky
+  // bucket in localStorage is respected and SSR stays identical for everyone.
+  const [arm, setArm] = useState<VipGateArm>("value");
+  const copy = vipGateCopy(arm);
+
   useEffect(() => {
     if (vipModalOpen) {
+      const picked = vipGateArm();
+      setArm(picked);
       setPlan(preferredPlan);
       trackFunnel("vip_gate_shown");
+      trackExperiment(VIP_GATE_VIEW_SLOT, picked);
     }
   }, [vipModalOpen, preferredPlan]);
 
