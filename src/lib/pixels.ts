@@ -95,6 +95,12 @@ function loadMeta() {
       window.fbq("init", id);
     }
     setMetaConsent(true);
+    // The static base code never sends a PageView (consent starts revoked), so
+    // the first allowed load has to send it here.
+    if (!metaPageViewed) {
+      metaPageViewed = true;
+      window.fbq("track", "PageView");
+    }
     return;
   }
   metaLoaded = true;
