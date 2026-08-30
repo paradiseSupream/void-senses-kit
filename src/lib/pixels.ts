@@ -183,6 +183,8 @@ const pendingBrowserFires: Array<() => void> = [];
 
 export function setPixelsAllowed(allowed: boolean) {
   pixelsAllowed = allowed;
+  // The static base code boots with consent revoked; mirror the app decision.
+  setMetaConsent(allowed);
   if (allowed) flushBrowserFires();
 }
 
