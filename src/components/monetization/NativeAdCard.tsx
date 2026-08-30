@@ -26,7 +26,15 @@ const SPONSORED = [
  * disabled in /admin; links to the partner smartlink with full attribution and
  * reports impression/click like every other slot.
  */
-export function NativeAdCard({ index = 0, toolSlug }: { index?: number; toolSlug?: string }) {
+export function NativeAdCard({
+  index = 0,
+  toolSlug,
+  className,
+}: {
+  index?: number;
+  toolSlug?: string;
+  className?: string;
+}) {
   const ad = SPONSORED[index % SPONSORED.length]!;
   const { isVip } = useVip();
   const enabled = useAdSlotEnabled("native_feed");
@@ -66,7 +74,7 @@ export function NativeAdCard({ index = 0, toolSlug }: { index?: number; toolSlug
   if (isVip || !enabled) return null;
 
   return (
-    <div ref={ref} className={link ? "contents" : "min-h-px"} aria-hidden={!link}>
+    <div ref={ref} className={link ? (className ?? "contents") : "min-h-px"} aria-hidden={!link}>
       {link ? (
         <a
           href={link.url}
