@@ -1,5 +1,14 @@
 import { useEffect } from "react";
-import { Copy, Download, ImageDown, RotateCcw, Share2, Smartphone, Swords } from "lucide-react";
+import {
+  ChevronDown,
+  Copy,
+  Download,
+  ImageDown,
+  RotateCcw,
+  Share2,
+  Smartphone,
+  Swords,
+} from "lucide-react";
 import { toast } from "sonner";
 
 import { useActionGate } from "@/components/monetization/ActionGate";
