@@ -50,15 +50,26 @@ function VipCheckoutPage() {
     setOrigin(window.location.origin);
   }, []);
 
+  // Slow Gulf mobile networks sometimes never finish the embed. After 6s we
+  // surface a one-tap hosted-checkout fallback instead of a dead frame.
+  const [slow, setSlow] = useState(false);
+
   useEffect(() => {
     if (!origin) return;
-    if (document.getElementById("whop-checkout-loader")) return;
-    const script = document.createElement("script");
-    script.id = "whop-checkout-loader";
-    script.src = "https://js.whop.com/static/checkout/loader.js";
-    script.async = true;
-    script.defer = true;
-    document.body.appendChild(script);
+    const timer = window.setTimeout(() => {
+      const frame = document.querySelector("[data-whop-checkout-plan-id] iframe");
+      if (!frame) setSlow(true);
+    }, 6000);
+    if (!document.getElementById("whop-checkout-loader")) {
+      const script = document.createElement("script");
+      script.id = "whop-checkout-loader";
+      script.src = "https://js.whop.com/static/checkout/loader.js";
+      script.async = true;
+      script.defer = true;
+      script.onerror = () => setSlow(true);
+      document.body.appendChild(script);
+    }
+    return () => window.clearTimeout(timer);
   }, [origin]);
 
   // The $9 Shadow Matrix add-on returns straight into the dossier; VIP plans go
