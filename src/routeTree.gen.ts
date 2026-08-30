@@ -20,6 +20,7 @@ import { Route as AdminApplePayRouteImport } from './routes/admin.apple-pay'
 import { Route as AdminAttributionRouteImport } from './routes/admin.attribution'
 import { Route as AdminComplianceRouteImport } from './routes/admin.compliance'
 import { Route as AdminMonetizationRouteImport } from './routes/admin.monetization'
+import { Route as AdminOrdersRouteImport } from './routes/admin.orders'
 import { Route as ApiDossierPdfRouteImport } from './routes/api/dossier-pdf'
 import { Route as ArchetypesIndexRouteImport } from './routes/archetypes.index'
 import { Route as ArchetypesSlugRouteImport } from './routes/archetypes.$slug'
@@ -94,6 +95,11 @@ const AdminComplianceRoute = AdminComplianceRouteImport.update({
 const AdminMonetizationRoute = AdminMonetizationRouteImport.update({
   id: '/admin/monetization',
   path: '/admin/monetization',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminOrdersRoute = AdminOrdersRouteImport.update({
+  id: '/admin/orders',
+  path: '/admin/orders',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiDossierPdfRoute = ApiDossierPdfRouteImport.update({
@@ -208,6 +214,7 @@ export interface FileRoutesByFullPath {
   '/admin/attribution': typeof AdminAttributionRoute
   '/admin/compliance': typeof AdminComplianceRoute
   '/admin/monetization': typeof AdminMonetizationRoute
+  '/admin/orders': typeof AdminOrdersRoute
   '/api/dossier-pdf': typeof ApiDossierPdfRoute
   '/archetypes/$slug': typeof ArchetypesSlugRoute
   '/tools/child-trauma': typeof ToolsChildTraumaRoute
@@ -241,6 +248,7 @@ export interface FileRoutesByTo {
   '/admin/attribution': typeof AdminAttributionRoute
   '/admin/compliance': typeof AdminComplianceRoute
   '/admin/monetization': typeof AdminMonetizationRoute
+  '/admin/orders': typeof AdminOrdersRoute
   '/api/dossier-pdf': typeof ApiDossierPdfRoute
   '/archetypes/$slug': typeof ArchetypesSlugRoute
   '/tools/child-trauma': typeof ToolsChildTraumaRoute
@@ -275,6 +283,7 @@ export interface FileRoutesById {
   '/admin/attribution': typeof AdminAttributionRoute
   '/admin/compliance': typeof AdminComplianceRoute
   '/admin/monetization': typeof AdminMonetizationRoute
+  '/admin/orders': typeof AdminOrdersRoute
   '/api/dossier-pdf': typeof ApiDossierPdfRoute
   '/archetypes/$slug': typeof ArchetypesSlugRoute
   '/tools/child-trauma': typeof ToolsChildTraumaRoute
@@ -310,6 +319,7 @@ export interface FileRouteTypes {
     | '/admin/attribution'
     | '/admin/compliance'
     | '/admin/monetization'
+    | '/admin/orders'
     | '/api/dossier-pdf'
     | '/archetypes/$slug'
     | '/tools/child-trauma'
@@ -343,6 +353,7 @@ export interface FileRouteTypes {
     | '/admin/attribution'
     | '/admin/compliance'
     | '/admin/monetization'
+    | '/admin/orders'
     | '/api/dossier-pdf'
     | '/archetypes/$slug'
     | '/tools/child-trauma'
@@ -376,6 +387,7 @@ export interface FileRouteTypes {
     | '/admin/attribution'
     | '/admin/compliance'
     | '/admin/monetization'
+    | '/admin/orders'
     | '/api/dossier-pdf'
     | '/archetypes/$slug'
     | '/tools/child-trauma'
@@ -410,6 +422,7 @@ export interface RootRouteChildren {
   AdminAttributionRoute: typeof AdminAttributionRoute
   AdminComplianceRoute: typeof AdminComplianceRoute
   AdminMonetizationRoute: typeof AdminMonetizationRoute
+  AdminOrdersRoute: typeof AdminOrdersRoute
   ApiDossierPdfRoute: typeof ApiDossierPdfRoute
   ArchetypesSlugRoute: typeof ArchetypesSlugRoute
   ToolsChildTraumaRoute: typeof ToolsChildTraumaRoute
@@ -510,6 +523,13 @@ declare module '@tanstack/react-router' {
       path: '/admin/monetization'
       fullPath: '/admin/monetization'
       preLoaderRoute: typeof AdminMonetizationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/orders': {
+      id: '/admin/orders'
+      path: '/admin/orders'
+      fullPath: '/admin/orders'
+      preLoaderRoute: typeof AdminOrdersRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/dossier-pdf': {
@@ -666,6 +686,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminAttributionRoute: AdminAttributionRoute,
   AdminComplianceRoute: AdminComplianceRoute,
   AdminMonetizationRoute: AdminMonetizationRoute,
+  AdminOrdersRoute: AdminOrdersRoute,
   ApiDossierPdfRoute: ApiDossierPdfRoute,
   ArchetypesSlugRoute: ArchetypesSlugRoute,
   ToolsChildTraumaRoute: ToolsChildTraumaRoute,

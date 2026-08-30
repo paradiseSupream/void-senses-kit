@@ -8,7 +8,14 @@ import { useServerFn } from "@tanstack/react-start";
 import { subscribeLead } from "@/lib/leads.functions";
 import { restoreVipAccess, startVipCheckout } from "@/lib/vip.functions";
 import { rememberLicense, rememberOrder } from "@/lib/vip-unlock";
-import { attribution, sessionId } from "@/lib/monetization";
+import { attribution, sessionId, trackExperiment } from "@/lib/monetization";
+import {
+  VIP_CHECKOUT_SLOT,
+  VIP_GATE_VIEW_SLOT,
+  vipGateArm,
+  vipGateCopy,
+  type VipGateArm,
+} from "@/lib/vip-ab";
 import { useVip, type VipPlan } from "@/lib/vip";
 import { useSiteConfig } from "@/lib/site-config";
 import { trackFunnel } from "@/lib/funnel";
@@ -46,10 +53,18 @@ export function VipModal() {
   const monthlyPrice = `$${(monthlyCents / 100).toFixed(2)}`;
   const price = plan === "lifetime" ? lifetimePrice : monthlyPrice;
 
+  // Copy-only A/B arm for the gate — resolved on the client so the sticky
+  // bucket in localStorage is respected and SSR stays identical for everyone.
+  const [arm, setArm] = useState<VipGateArm>("value");
+  const copy = vipGateCopy(arm);
+
   useEffect(() => {
     if (vipModalOpen) {
+      const picked = vipGateArm();
+      setArm(picked);
       setPlan(preferredPlan);
       trackFunnel("vip_gate_shown");
+      trackExperiment(VIP_GATE_VIEW_SLOT, picked);
     }
   }, [vipModalOpen, preferredPlan]);
 
@@ -91,6 +106,7 @@ export function VipModal() {
     try {
       if (hasEmail) await persistEmail();
       trackFunnel("checkout_start");
+      trackExperiment(VIP_CHECKOUT_SLOT, arm);
       const result = await beginCheckout({
         data: {
           plan,
@@ -175,13 +191,11 @@ export function VipModal() {
           <X className="size-4" aria-hidden="true" />
         </button>
 
-        <span className="label-mono">Ad-free access</span>
+        <span className="label-mono">{copy.eyebrow}</span>
         <h2 id="vip-title" className="mt-2 font-display text-2xl font-bold">
-          Senses of Void VIP
+          {copy.title}
         </h2>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Pick a month to try it, or pay once and keep it forever.
-        </p>
+        <p className="mt-1 text-sm text-muted-foreground">{copy.subtitle}</p>
 
         <div className="mt-4 flex items-center gap-3 rounded-xl border border-primary/30 bg-primary/10 p-3">
           <span className="rounded-full bg-primary px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary-foreground">
@@ -305,11 +319,11 @@ export function VipModal() {
               className="mt-4 flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-60"
             >
               {busy ? <Loader2 className="size-4 animate-spin" aria-hidden="true" /> : null}
-              Continue to secure checkout — {price}
+              {copy.cta} — {price}
             </button>
-            <p className="mt-2 text-center text-xs text-muted-foreground">
-              Card, Apple&nbsp;Pay, Google&nbsp;Pay and local methods in 195 countries. Secured by
-              Whop — we never see your card details.
+            <p className="mt-2 text-center text-xs text-muted-foreground">{copy.reassurance}</p>
+            <p className="mt-1 text-center text-xs text-muted-foreground">
+              Secured by Whop — we never see your card details.
             </p>
           </>
         ) : (
