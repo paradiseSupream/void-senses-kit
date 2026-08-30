@@ -50,15 +50,26 @@ function VipCheckoutPage() {
     setOrigin(window.location.origin);
   }, []);
 
+  // Slow Gulf mobile networks sometimes never finish the embed. After 6s we
+  // surface a one-tap hosted-checkout fallback instead of a dead frame.
+  const [slow, setSlow] = useState(false);
+
   useEffect(() => {
     if (!origin) return;
-    if (document.getElementById("whop-checkout-loader")) return;
-    const script = document.createElement("script");
-    script.id = "whop-checkout-loader";
-    script.src = "https://js.whop.com/static/checkout/loader.js";
-    script.async = true;
-    script.defer = true;
-    document.body.appendChild(script);
+    const timer = window.setTimeout(() => {
+      const frame = document.querySelector("[data-whop-checkout-plan-id] iframe");
+      if (!frame) setSlow(true);
+    }, 6000);
+    if (!document.getElementById("whop-checkout-loader")) {
+      const script = document.createElement("script");
+      script.id = "whop-checkout-loader";
+      script.src = "https://js.whop.com/static/checkout/loader.js";
+      script.async = true;
+      script.defer = true;
+      script.onerror = () => setSlow(true);
+      document.body.appendChild(script);
+    }
+    return () => window.clearTimeout(timer);
   }, [origin]);
 
   // The $9 Shadow Matrix add-on returns straight into the dossier; VIP plans go
@@ -105,6 +116,32 @@ function VipCheckoutPage() {
           This checkout link has expired. Open the VIP panel again to start a fresh secure checkout.
         </div>
       )}
+
+      {s && p && slow ? (
+        <div className="glass mt-4 rounded-2xl p-4 text-sm">
+          <p className="text-muted-foreground">
+            Taking too long on your network? Open the same secure payment page directly — your
+            order stays the same.
+          </p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <a
+              href={`https://whop.com/checkout/${encodeURIComponent(p)}?session=${encodeURIComponent(s)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground"
+            >
+              Open secure checkout
+            </a>
+            <button
+              type="button"
+              onClick={() => window.location.reload()}
+              className="rounded-xl border border-hairline px-4 py-2 text-sm font-medium"
+            >
+              Retry
+            </button>
+          </div>
+        </div>
+      ) : null}
 
       <p className="mt-4 text-xs text-muted-foreground">
         Payments are processed by Whop. We never see or store your card details.{" "}

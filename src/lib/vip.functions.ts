@@ -1,5 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 
+import { purchaseEventId } from "@/lib/purchase-event";
+
 /**
  * VIP checkout + access server functions.
  *
@@ -42,6 +44,8 @@ export const startVipCheckout = createServerFn({ method: "POST" })
       sessionId?: string | null;
       toolSlug?: string | null;
       utmSource?: string | null;
+      fbp?: string | null;
+      fbc?: string | null;
     }) => ({
       plan: input?.plan === "monthly" ? ("monthly" as const) : ("lifetime" as const),
       offer: Boolean(input?.offer),
@@ -49,6 +53,8 @@ export const startVipCheckout = createServerFn({ method: "POST" })
       sessionId: input?.sessionId ? String(input.sessionId).slice(0, 80) : null,
       toolSlug: input?.toolSlug ? String(input.toolSlug).slice(0, 60) : null,
       utmSource: input?.utmSource ? String(input.utmSource).slice(0, 80) : null,
+      fbp: input?.fbp ? String(input.fbp).slice(0, 120) : null,
+      fbc: input?.fbc ? String(input.fbc).slice(0, 200) : null,
     }),
   )
   .handler(async ({ data }): Promise<CheckoutStart> => {
@@ -68,6 +74,7 @@ export const startVipCheckout = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { getRequestHeader } = await import("@tanstack/react-start/server");
     const country = getRequestHeader("cf-ipcountry") ?? null;
+    const userAgent = getRequestHeader("user-agent") ?? null;
     const orderId = `sov_${crypto.randomUUID()}`;
 
     let checkout;
@@ -96,6 +103,10 @@ export const startVipCheckout = createServerFn({ method: "POST" })
       session_id: data.sessionId,
       utm_source: data.utmSource,
       country,
+      user_agent: userAgent,
+      fbp: data.fbp,
+      fbc: data.fbc,
+      event_id: purchaseEventId(orderId),
     });
 
     return {
@@ -201,11 +212,15 @@ export const startMatrixCheckout = createServerFn({ method: "POST" })
       sessionId?: string | null;
       toolSlug?: string | null;
       utmSource?: string | null;
+      fbp?: string | null;
+      fbc?: string | null;
     }) => ({
       email: input?.email ? String(input.email).trim().toLowerCase().slice(0, 200) : null,
       sessionId: input?.sessionId ? String(input.sessionId).slice(0, 80) : null,
       toolSlug: input?.toolSlug ? String(input.toolSlug).slice(0, 60) : null,
       utmSource: input?.utmSource ? String(input.utmSource).slice(0, 80) : null,
+      fbp: input?.fbp ? String(input.fbp).slice(0, 120) : null,
+      fbc: input?.fbc ? String(input.fbc).slice(0, 200) : null,
     }),
   )
   .handler(async ({ data }): Promise<CheckoutStart> => {
@@ -216,6 +231,7 @@ export const startMatrixCheckout = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { getRequestHeader } = await import("@tanstack/react-start/server");
     const country = getRequestHeader("cf-ipcountry") ?? null;
+    const userAgent = getRequestHeader("user-agent") ?? null;
     const orderId = `sovm_${crypto.randomUUID()}`;
 
     let checkout;
@@ -244,6 +260,10 @@ export const startMatrixCheckout = createServerFn({ method: "POST" })
       session_id: data.sessionId,
       utm_source: data.utmSource,
       country,
+      user_agent: userAgent,
+      fbp: data.fbp,
+      fbc: data.fbc,
+      event_id: purchaseEventId(orderId),
     });
 
     return {

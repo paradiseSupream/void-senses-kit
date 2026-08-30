@@ -9,6 +9,7 @@ import { DEFAULT_ATTRIBUTION_RULES } from "@/lib/ads-intel.types";
 import type { AttributionModel, AttributionReport, AttributionRules, CohortReport } from "@/lib/ads-intel.types";
 import { UtmTemplatesCard } from "@/components/admin/UtmTemplatesCard";
 import { GeoRoiCard } from "@/components/admin/GeoRoiCard";
+import { GeoFunnelCard } from "@/components/admin/GeoFunnelCard";
 
 export const Route = createFileRoute("/admin/attribution")({
   head: () => ({
@@ -110,6 +111,8 @@ function AttributionPage() {
       ) : null}
 
       <UtmTemplatesCard />
+
+      <GeoFunnelCard token={token} days={days} />
 
       <GeoRoiCard token={token} days={days} />
 

@@ -1,5 +1,59 @@
 import { createFileRoute } from "@tanstack/react-router";
 
+import { purchaseEventId } from "@/lib/purchase-event";
+
+/**
+ * Reports a verified payment to Meta's Conversions API and logs the delivery
+ * for the admin tracking monitor. Never throws: a tracking failure must not
+ * fail the webhook (Whop would retry and re-grant access).
+ */
+async function reportPurchase(orderId: string, email: string | null, amountCents: number) {
+  try {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: row } = await supabaseAdmin
+      .from("vip_orders")
+      .select("country,fbp,fbc,user_agent")
+      .eq("order_id", orderId)
+      .maybeSingle();
+
+    const eventId = purchaseEventId(orderId);
+    const { claimServerEvent, logTrackingEvents } = await import("@/lib/tracking-log.server");
+    // The success page may already have mirrored this purchase server-side.
+    if (!(await claimServerEvent(eventId, "Purchase"))) return;
+
+    const { sendMetaEvent } = await import("@/lib/meta-capi.server");
+    const country = row?.country ? row.country.toUpperCase().slice(0, 2) : null;
+    const result = await sendMetaEvent({
+      event: "Purchase",
+      eventId,
+      value: amountCents / 100,
+      currency: "USD",
+      email,
+      country,
+      url: "https://sensesofvoid.app/vip/success",
+      userAgent: row?.user_agent ?? null,
+      fbp: row?.fbp ?? null,
+      fbc: row?.fbc ?? null,
+    });
+    if (!result.sent) return;
+    await logTrackingEvents([
+      {
+        channel: "meta",
+        source: "server",
+        event: "Purchase",
+        ok: result.ok,
+        status: result.status,
+        detail: `webhook: ${result.detail}`,
+        eventId,
+        country,
+      },
+    ]);
+  } catch (error) {
+    console.error("[whop] purchase tracking failed", error);
+  }
+}
+
+
 /**
  * Whop payment webhook — the only thing that actually activates paid VIP.
  *
@@ -93,6 +147,12 @@ export const Route = createFileRoute("/api/public/whop-webhook")({
             paymentRef: parsed.paymentId,
             provider: "whop",
           });
+        }
+
+        // Verified payment → authoritative server-side Purchase. The browser
+        // fire on /vip/success uses the same event id, so Meta de-duplicates.
+        if (parsed.orderId) {
+          await reportPurchase(parsed.orderId, email, amountCents);
         }
 
         return new Response("ok", { status: 200 });

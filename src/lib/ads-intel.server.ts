@@ -58,6 +58,7 @@ export type SessionFacts = {
   testStart: boolean;
   resultView: boolean;
   gateShown: boolean;
+  checkoutStart: boolean;
   purchase: boolean;
   revenueCents: number;
   firstSeen: string;
@@ -113,6 +114,7 @@ export async function loadSessions(days: number): Promise<SessionFacts[]> {
         testStart: false,
         resultView: false,
         gateShown: false,
+        checkoutStart: false,
         purchase: false,
         revenueCents: 0,
         firstSeen: row.created_at,
@@ -144,6 +146,7 @@ export async function loadSessions(days: number): Promise<SessionFacts[]> {
     ) {
       s.gateShown = true;
     }
+    if (row.event_type === "funnel" && row.slot === "checkout_start") s.checkoutStart = true;
     if (
       (row.event_type === "funnel" && row.slot === "vip_purchase") ||
       (row.event_type === "conversion" && (row.revenue_cents ?? 0) > 0)
@@ -164,7 +167,7 @@ export async function loadSessions(days: number): Promise<SessionFacts[]> {
 }
 
 function emptyFunnel(): FunnelCounts {
-  return { sessions: 0, testStart: 0, resultView: 0, gateShown: 0, purchase: 0 };
+  return { sessions: 0, testStart: 0, resultView: 0, gateShown: 0, checkoutStart: 0, purchase: 0 };
 }
 
 function addTo(funnel: FunnelCounts, s: SessionFacts) {
@@ -172,6 +175,7 @@ function addTo(funnel: FunnelCounts, s: SessionFacts) {
   if (s.testStart) funnel.testStart += 1;
   if (s.resultView) funnel.resultView += 1;
   if (s.gateShown) funnel.gateShown += 1;
+  if (s.checkoutStart) funnel.checkoutStart += 1;
   if (s.purchase) funnel.purchase += 1;
 }
 

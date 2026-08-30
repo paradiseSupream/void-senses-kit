@@ -12,6 +12,7 @@ import { attribution, sessionId } from "@/lib/monetization";
 import { useVip, type VipPlan } from "@/lib/vip";
 import { useSiteConfig } from "@/lib/site-config";
 import { trackFunnel } from "@/lib/funnel";
+import { cookie } from "@/lib/pixels";
 import { MONTHLY_OFFER_CENTS, OFFER_CENTS, useVipOffer } from "@/lib/vip-offer";
 
 /** Monthly no-ads pass — a low-friction entry point next to lifetime VIP. */
@@ -97,6 +98,8 @@ export function VipModal() {
           email: hasEmail ? email : null,
           sessionId: sessionId(),
           utmSource: attribution().utm_source ?? null,
+          fbp: cookie("_fbp") ?? null,
+          fbc: cookie("_fbc") ?? null,
         },
       });
       if (!result.ok || !result.checkoutId || !result.planId) {
