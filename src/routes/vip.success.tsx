@@ -49,6 +49,8 @@ function VipSuccessPage() {
   const [state, setState] = useState<"waiting" | "done" | "failed">(
     status === "error" ? "failed" : "waiting",
   );
+  // What the payment provider itself says about an order that never cleared.
+  const [reason, setReason] = useState<string | null>(null);
 
   useEffect(() => {
     if (!order || state === "failed") return;
@@ -76,6 +78,7 @@ function VipSuccessPage() {
           toast.success("VIP is active — ads and export gates are off.");
           return;
         }
+        if (result.reason) setReason(result.reason);
       } catch {
         /* keep polling */
       }
@@ -127,8 +130,9 @@ function VipSuccessPage() {
         <>
           <h1 className="font-display text-xl font-bold">We couldn&rsquo;t confirm the payment</h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            If you were charged, VIP activates automatically within a minute — reload this page, or
-            open the VIP panel and restore it with your purchase email.
+            {reason
+              ? `${reason} Nothing was charged — you can start the payment again.`
+              : "If you were charged, VIP activates automatically within a minute — reload this page, or open the VIP panel and restore it with your purchase email."}
           </p>
           <Link
             to="/"

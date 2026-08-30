@@ -104,6 +104,91 @@ export async function createWhopCheckout(input: {
   return { checkoutId: json.id, planId: json.plan.id };
 }
 
+export type WhopPaymentState = {
+  /** paid = money actually captured; open = buyer never finished; failed = declined. */
+  state: "paid" | "open" | "failed" | "refunded" | "none";
+  paymentId: string | null;
+  email: string | null;
+  amountCents: number | null;
+  /** Human readable reason a checkout never completed, when Whop gives one. */
+  reason: string | null;
+  method: string | null;
+};
+
+type WhopPaymentRow = {
+  id?: string;
+  status?: string;
+  substatus?: string;
+  refunded_at?: string | null;
+  usd_total?: number | null;
+  total?: number | null;
+  failure_message?: string | null;
+  decline_code?: string | null;
+  payment_method_type?: string | null;
+  metadata?: Record<string, string | undefined> | null;
+  user?: { email?: string } | null;
+};
+
+const PAID_STATUS = new Set(["paid", "succeeded", "completed", "settled"]);
+
+/**
+ * Looks the real payment for one of our order ids up on Whop.
+ *
+ * This is the safety net for the webhook: if a delivery is lost or rejected,
+ * the success page and the admin dashboard can still discover that a payment
+ * actually cleared (or exactly why it did not) straight from the provider.
+ */
+export async function fetchWhopPaymentForOrder(orderId: string): Promise<WhopPaymentState> {
+  const empty: WhopPaymentState = {
+    state: "none",
+    paymentId: null,
+    email: null,
+    amountCents: null,
+    reason: null,
+    method: null,
+  };
+  const { apiKey, accountId } = whopEnv();
+  if (!apiKey || !accountId || !orderId) return empty;
+
+  const res = await fetch(
+    `${API_BASE}/payments?company_id=${encodeURIComponent(accountId)}&limit=50`,
+    { headers: { Authorization: `Bearer ${apiKey}` } },
+  );
+  if (!res.ok) return { ...empty, reason: `Whop lookup failed (${res.status})` };
+
+  const json = (await res.json()) as { data?: WhopPaymentRow[] };
+  const rows = (json.data ?? []).filter((row) => row.metadata?.["order_id"] === orderId);
+  if (rows.length === 0) return empty;
+
+  const pick =
+    rows.find((row) => PAID_STATUS.has(String(row.status).toLowerCase()) && !row.refunded_at) ??
+    rows.find((row) => row.refunded_at) ??
+    rows[0]!;
+
+  const status = String(pick.status ?? "").toLowerCase();
+  const state: WhopPaymentState["state"] = pick.refunded_at
+    ? "refunded"
+    : PAID_STATUS.has(status)
+      ? "paid"
+      : status === "failed" || status === "canceled" || status === "voided"
+        ? "failed"
+        : "open";
+
+  const dollars = pick.usd_total ?? pick.total ?? null;
+  return {
+    state,
+    paymentId: pick.id ?? null,
+    email: pick.metadata?.["email"] || pick.user?.email || null,
+    amountCents: typeof dollars === "number" ? Math.round(dollars * 100) : null,
+    reason:
+      pick.failure_message ||
+      pick.decline_code ||
+      (state === "open" ? `Checkout started but never completed (${pick.substatus ?? status})` : null),
+    method: pick.payment_method_type ?? null,
+  };
+}
+
+
 function safeEqual(a: string, b: string): boolean {
   const left = Buffer.from(a);
   const right = Buffer.from(b);

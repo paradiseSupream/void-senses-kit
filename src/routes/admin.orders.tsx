@@ -4,7 +4,11 @@ import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
 import { AlertTriangle, ArrowLeft, RefreshCw } from "lucide-react";
 
-import { adminOrdersReport, type OrdersReport } from "@/lib/orders.functions";
+import {
+  adminOrdersReport,
+  adminReconcileOrders,
+  type OrdersReport,
+} from "@/lib/orders.functions";
 
 export const Route = createFileRoute("/admin/orders")({
   head: () => ({
@@ -53,7 +57,10 @@ function Stat({ label, value, tone }: { label: string; value: string; tone?: "ba
 
 function OrdersPage() {
   const load = useServerFn(adminOrdersReport);
+  const reconcile = useServerFn(adminReconcileOrders);
   const [token, setToken] = useState<string | null>(null);
+  const [reconciling, setReconciling] = useState(false);
+  const [reconResult, setReconResult] = useState<string | null>(null);
   const [days, setDays] = useState<(typeof WINDOWS)[number]>(14);
 
   useEffect(() => {
@@ -68,6 +75,36 @@ function OrdersPage() {
   });
 
   const data = query.data;
+
+  // Asks the payment provider directly about every pending order — the manual
+  // safety net when a webhook was lost or rejected.
+  const runReconcile = async () => {
+    if (!token || reconciling) return;
+    setReconciling(true);
+    setReconResult(null);
+    try {
+      const result = (await reconcile({ data: { token, days } })) as {
+        checked: number;
+        fulfilled: number;
+        rows: Array<{ orderId: string; status: string; reason: string | null }>;
+      };
+      const reasons = result.rows
+        .filter((row) => row.reason)
+        .slice(0, 3)
+        .map((row) => `${row.orderId.slice(0, 12)}…: ${row.reason}`)
+        .join(" · ");
+      setReconResult(
+        `Checked ${result.checked} pending order(s), ${result.fulfilled} were really paid and are now fulfilled.${
+          reasons ? ` ${reasons}` : ""
+        }`,
+      );
+      await query.refetch();
+    } catch (error) {
+      setReconResult((error as Error).message);
+    } finally {
+      setReconciling(false);
+    }
+  };
 
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-8">
@@ -92,8 +129,20 @@ function OrdersPage() {
           >
             <RefreshCw className="size-3.5" aria-hidden="true" /> Refresh
           </button>
+          <button
+            type="button"
+            onClick={runReconcile}
+            disabled={!token || reconciling}
+            className="inline-flex items-center gap-1.5 rounded-lg border border-primary/50 bg-primary/10 px-3 py-2 text-xs font-medium text-primary disabled:opacity-50"
+          >
+            {reconciling ? "Checking…" : "Reconcile pending"}
+          </button>
         </div>
       </div>
+
+      {reconResult ? (
+        <p className="glass mt-4 rounded-2xl p-3 text-xs text-muted-foreground">{reconResult}</p>
+      ) : null}
 
       <div className="mt-4 flex flex-wrap gap-2">
         {WINDOWS.map((window) => (
