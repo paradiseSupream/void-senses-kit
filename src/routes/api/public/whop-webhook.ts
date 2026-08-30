@@ -95,6 +95,12 @@ export const Route = createFileRoute("/api/public/whop-webhook")({
           });
         }
 
+        // Verified payment → authoritative server-side Purchase. The browser
+        // fire on /vip/success uses the same event id, so Meta de-duplicates.
+        if (parsed.orderId) {
+          await reportPurchase(parsed.orderId, email, amountCents);
+        }
+
         return new Response("ok", { status: 200 });
       },
     },
