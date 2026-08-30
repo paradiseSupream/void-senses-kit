@@ -76,22 +76,25 @@ export function VipModal() {
     }
   };
 
-  /** Opens the Whop card checkout for the selected plan. */
+  /**
+   * Opens the Whop card checkout for the selected plan.
+   *
+   * The email is optional on purpose: asking for it before payment was the
+   * single biggest drop-off point. Whop collects the buyer email during
+   * checkout and the webhook grants VIP on that address, so nothing is lost.
+   */
   const startCheckout = async () => {
     if (busy) return;
-    if (!email.includes("@")) {
-      toast.error("Enter your email first — VIP access is tied to it.");
-      return;
-    }
+    const hasEmail = email.includes("@");
     setBusy(true);
     try {
-      await persistEmail();
-      trackFunnel("vip_purchase");
+      if (hasEmail) await persistEmail();
+      trackFunnel("checkout_start");
       const result = await beginCheckout({
         data: {
           plan,
           offer: offerActive,
-          email,
+          email: hasEmail ? email : null,
           sessionId: sessionId(),
           utmSource: attribution().utm_source ?? null,
         },
@@ -242,7 +245,7 @@ export function VipModal() {
         </ul>
 
         <label htmlFor="vip-email" className="label-mono mt-6 mb-1.5 block">
-          Email for your VIP receipt & access
+          Email (optional) — for restore on other devices
         </label>
         <div className="flex gap-2">
           <input
@@ -263,7 +266,8 @@ export function VipModal() {
           </button>
         </div>
         <p className="mt-1.5 text-xs text-muted-foreground">
-          We store it only to restore your VIP access on any device.
+          You can skip this — checkout asks for your email anyway. We only store it to restore
+          VIP on your other devices.
         </p>
 
         <div className="mt-6 grid grid-cols-2 gap-1 rounded-lg border border-hairline bg-surface-2/60 p-1">

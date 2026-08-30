@@ -70,6 +70,17 @@ function injectScript(src: string) {
   document.head.appendChild(el);
 }
 
+let metaPageViewed = false;
+
+/** Pixel ids already initialised in this tab (static boot code included). */
+const metaInited = new Set<string>();
+
+/** Meta's own consent API — nothing is sent while consent is revoked. */
+function setMetaConsent(granted: boolean) {
+  if (typeof window.fbq !== "function") return;
+  window.fbq("consent", granted ? "grant" : "revoke");
+}
+
 function loadMeta() {
   if (!metaEnabled()) return;
   // Some in-app browsers/privacy extensions remove `fbq` after the loader was
@@ -77,6 +88,21 @@ function loadMeta() {
   // queue still exists. Recreate the official stub whenever it disappeared.
   if (typeof window.fbq === "function") {
     metaLoaded = true;
+    // The static base code in <head> may have booted another id (env value);
+    // initialise the admin-configured one too, exactly once.
+    const id = META_ID()!;
+    const booted = (window as unknown as { __sovMetaBooted?: string }).__sovMetaBooted;
+    if (!metaInited.has(id) && booted !== id) {
+      metaInited.add(id);
+      window.fbq("init", id);
+    }
+    setMetaConsent(true);
+    // The static base code never sends a PageView (consent starts revoked), so
+    // the first allowed load has to send it here.
+    if (!metaPageViewed) {
+      metaPageViewed = true;
+      window.fbq("track", "PageView");
+    }
     return;
   }
   metaLoaded = true;
@@ -91,7 +117,10 @@ function loadMeta() {
   if (!document.querySelector('script[src*="connect.facebook.net/en_US/fbevents.js"]')) {
     injectScript("https://connect.facebook.net/en_US/fbevents.js");
   }
+  metaInited.add(META_ID()!);
+  window.fbq!("consent", "grant");
   window.fbq!("init", META_ID());
+  metaPageViewed = true;
   window.fbq!("track", "PageView");
 }
 
@@ -163,6 +192,8 @@ const pendingBrowserFires: Array<() => void> = [];
 
 export function setPixelsAllowed(allowed: boolean) {
   pixelsAllowed = allowed;
+  // The static base code boots with consent revoked; mirror the app decision.
+  setMetaConsent(allowed);
   if (allowed) flushBrowserFires();
 }
 

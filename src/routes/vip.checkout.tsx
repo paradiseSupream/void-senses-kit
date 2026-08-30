@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 
 import { LogoMark } from "@/components/brand/LogoMark";
@@ -42,8 +42,16 @@ export const Route = createFileRoute("/vip/checkout")({
 
 function VipCheckoutPage() {
   const { s, p, order, amount, m } = Route.useSearch();
+  // The embedded checkout reads its data-attributes when the loader boots, so
+  // the mount target is rendered only once the real return URL is known.
+  const [origin, setOrigin] = useState("");
 
   useEffect(() => {
+    setOrigin(window.location.origin);
+  }, []);
+
+  useEffect(() => {
+    if (!origin) return;
     if (document.getElementById("whop-checkout-loader")) return;
     const script = document.createElement("script");
     script.id = "whop-checkout-loader";
@@ -51,16 +59,15 @@ function VipCheckoutPage() {
     script.async = true;
     script.defer = true;
     document.body.appendChild(script);
-  }, []);
+  }, [origin]);
 
   // The $9 Shadow Matrix add-on returns straight into the dossier; VIP plans go
   // through /vip/success so the webhook can be polled and a license shown.
-  const returnUrl =
-    typeof window !== "undefined"
-      ? m === "1"
-        ? `${window.location.origin}/tools/dark-personality?matrix_order=${encodeURIComponent(order ?? "")}`
-        : `${window.location.origin}/vip/success?order=${encodeURIComponent(order ?? "")}`
-      : "";
+  const returnUrl = origin
+    ? m === "1"
+      ? `${origin}/tools/dark-personality?matrix_order=${encodeURIComponent(order ?? "")}`
+      : `${origin}/vip/success?order=${encodeURIComponent(order ?? "")}`
+    : "";
 
   const price = amount ? `$${(Number(amount) / 100).toFixed(2)}` : null;
 
@@ -79,13 +86,19 @@ function VipCheckoutPage() {
 
       {s && p ? (
         <div className="glass mt-6 overflow-hidden rounded-2xl p-2">
-          <div
-            data-whop-checkout-plan-id={p}
-            data-whop-checkout-session={s}
-            data-whop-checkout-return-url={returnUrl}
-            data-whop-checkout-theme="dark"
-            className="min-h-[560px] w-full"
-          />
+          {origin ? (
+            <div
+              data-whop-checkout-plan-id={p}
+              data-whop-checkout-session={s}
+              data-whop-checkout-return-url={returnUrl}
+              data-whop-checkout-theme="dark"
+              className="min-h-[560px] w-full"
+            />
+          ) : (
+            <div className="grid min-h-[560px] w-full place-items-center text-sm text-muted-foreground">
+              Loading secure checkout…
+            </div>
+          )}
         </div>
       ) : (
         <div className="glass mt-6 rounded-2xl p-6 text-sm text-muted-foreground">
