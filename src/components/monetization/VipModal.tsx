@@ -8,7 +8,14 @@ import { useServerFn } from "@tanstack/react-start";
 import { subscribeLead } from "@/lib/leads.functions";
 import { restoreVipAccess, startVipCheckout } from "@/lib/vip.functions";
 import { rememberLicense, rememberOrder } from "@/lib/vip-unlock";
-import { attribution, sessionId } from "@/lib/monetization";
+import { attribution, sessionId, trackExperiment } from "@/lib/monetization";
+import {
+  VIP_CHECKOUT_SLOT,
+  VIP_GATE_VIEW_SLOT,
+  vipGateArm,
+  vipGateCopy,
+  type VipGateArm,
+} from "@/lib/vip-ab";
 import { useVip, type VipPlan } from "@/lib/vip";
 import { useSiteConfig } from "@/lib/site-config";
 import { trackFunnel } from "@/lib/funnel";
