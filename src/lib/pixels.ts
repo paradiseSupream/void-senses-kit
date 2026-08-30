@@ -70,6 +70,8 @@ function injectScript(src: string) {
   document.head.appendChild(el);
 }
 
+let metaPageViewed = false;
+
 /** Pixel ids already initialised in this tab (static boot code included). */
 const metaInited = new Set<string>();
 
@@ -118,6 +120,7 @@ function loadMeta() {
   metaInited.add(META_ID()!);
   window.fbq!("consent", "grant");
   window.fbq!("init", META_ID());
+  metaPageViewed = true;
   window.fbq!("track", "PageView");
 }
 
