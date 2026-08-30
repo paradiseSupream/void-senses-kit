@@ -17,6 +17,7 @@ const PIXEL_STEPS: Partial<Record<string, PixelEvent>> = {
   test_start: "ViewContent",
   result_view: "Lead",
   vip_gate_shown: "AddToCart",
+  checkout_start: "InitiateCheckout",
 };
 
 export const FUNNEL_STEPS = [
@@ -26,6 +27,7 @@ export const FUNNEL_STEPS = [
   "return_3m",
   "result_view",
   "vip_gate_shown",
+  "checkout_start",
   "vip_downgrade",
   "vip_purchase",
 ] as const;
