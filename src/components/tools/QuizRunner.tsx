@@ -80,7 +80,28 @@ export function QuizRunner({
   );
 
 
+  // Desktop speed-run: keys 1–5 pick the matching option, so a full set is
+  // finished without leaving the keyboard. Mobile is unaffected.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      const target = e.target as HTMLElement | null;
+      if (target && /^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName)) return;
+      const n = Number(e.key);
+      if (!Number.isInteger(n) || n < 1 || n > SCALE.length) return;
+      const option = SCALE[n - 1];
+      if (!option) return;
+      e.preventDefault();
+      choose(option.weight);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [choose]);
+
   if (!item) return null;
+
+  const leftSeconds = Math.max(1, Math.round(((items.length - index) * 7) / 5) * 5);
+  const timeLeft = leftSeconds >= 60 ? `~${Math.ceil(leftSeconds / 60)} min left` : "under a minute left";
 
   return (
     <div>
