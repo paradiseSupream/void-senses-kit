@@ -112,8 +112,3 @@ export async function sendMetaEvent(
     return { sent: true, ok: false, status: 0, detail: String(error).slice(0, 300) };
   }
 }
-
-/** Deterministic conversion id shared by the browser pixel and the webhook. */
-export function purchaseEventId(orderId: string): string {
-  return `purchase:${orderId}`;
-}
