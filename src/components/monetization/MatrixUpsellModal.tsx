@@ -9,6 +9,7 @@ import { startMatrixCheckout } from "@/lib/vip.functions";
 import { rememberOrder } from "@/lib/vip-unlock";
 import { attribution, sessionId } from "@/lib/monetization";
 import { trackFunnel } from "@/lib/funnel";
+import { cookie } from "@/lib/pixels";
 import { grantMatrix, useMatrix } from "@/lib/vip-unlock";
 import type { Dossier } from "@/lib/archetype-core";
 
@@ -28,6 +29,8 @@ function useMatrixCheckout() {
           sessionId: sessionId(),
           toolSlug: "dark-personality",
           utmSource: attr.utm_source ?? null,
+          fbp: cookie("_fbp") ?? null,
+          fbc: cookie("_fbc") ?? null,
         },
       });
       if (!result.ok || !result.checkoutId || !result.planId) {
