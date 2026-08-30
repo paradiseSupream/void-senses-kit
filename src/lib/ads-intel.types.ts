@@ -12,6 +12,8 @@ export type FunnelCounts = {
   testStart: number;
   resultView: number;
   gateShown: number;
+  /** Sessions that actually opened the payment checkout (InitiateCheckout). */
+  checkoutStart: number;
   purchase: number;
 };
 
