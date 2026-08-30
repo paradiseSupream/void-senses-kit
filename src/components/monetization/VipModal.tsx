@@ -192,11 +192,9 @@ export function VipModal() {
 
         <span className="label-mono">{copy.eyebrow}</span>
         <h2 id="vip-title" className="mt-2 font-display text-2xl font-bold">
-          Senses of Void VIP
+          {copy.title}
         </h2>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Pick a month to try it, or pay once and keep it forever.
-        </p>
+        <p className="mt-1 text-sm text-muted-foreground">{copy.subtitle}</p>
 
         <div className="mt-4 flex items-center gap-3 rounded-xl border border-primary/30 bg-primary/10 p-3">
           <span className="rounded-full bg-primary px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary-foreground">
