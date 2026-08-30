@@ -62,7 +62,7 @@ function OrdersPage() {
 
   const query = useQuery<OrdersReport>({
     queryKey: ["admin-orders", token, days],
-    queryFn: () => load({ data: { token: token!, days } }),
+    queryFn: async () => (await load({ data: { token: token!, days } })) as OrdersReport,
     enabled: Boolean(token),
     refetchInterval: 60_000,
   });
