@@ -129,6 +129,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "icon", type: "image/png", href: "/favicon.png" },
       { rel: "apple-touch-icon", href: "/apple-touch-icon.png" },
     ],
+
+    // Static Meta base code so Meta's crawler detects the pixel. It starts in
+    // `consent: revoke`, so nothing is sent until the app grants consent.
+    scripts: BOOT_META_PIXEL_ID
+      ? [{ children: metaBootSnippet(BOOT_META_PIXEL_ID) }]
+      : [],
   }),
   shellComponent: RootShell,
   component: RootComponent,
