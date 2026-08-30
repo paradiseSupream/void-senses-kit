@@ -56,6 +56,19 @@ export function QuizRunner({
     return () => setQuizActive(false);
   }, []);
 
+  // The tool intro pushes question one below the fold on phones. Bringing the
+  // runner to the top the moment it mounts removes that dead scroll.
+  const rootRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const node = rootRef.current;
+    if (!node) return;
+    const id = window.setTimeout(() => {
+      const top = node.getBoundingClientRect().top + window.scrollY - 72;
+      if (top > window.scrollY + 8) window.scrollTo({ top, behavior: "smooth" });
+    }, 120);
+    return () => window.clearTimeout(id);
+  }, []);
+
   const item = items[index];
   const progress = useMemo(() => (index / items.length) * 100, [index, items.length]);
 
