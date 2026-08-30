@@ -59,7 +59,7 @@ function VipCheckoutPage() {
     const timer = window.setTimeout(() => {
       const frame = document.querySelector("[data-whop-checkout-plan-id] iframe");
       if (!frame) setSlow(true);
-    }, 6000);
+    }, 4000);
     if (!document.getElementById("whop-checkout-loader")) {
       const script = document.createElement("script");
       script.id = "whop-checkout-loader";
