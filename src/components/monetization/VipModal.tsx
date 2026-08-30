@@ -190,7 +190,7 @@ export function VipModal() {
           <X className="size-4" aria-hidden="true" />
         </button>
 
-        <span className="label-mono">Ad-free access</span>
+        <span className="label-mono">{copy.eyebrow}</span>
         <h2 id="vip-title" className="mt-2 font-display text-2xl font-bold">
           Senses of Void VIP
         </h2>
