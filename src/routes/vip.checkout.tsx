@@ -117,6 +117,32 @@ function VipCheckoutPage() {
         </div>
       )}
 
+      {s && p && slow ? (
+        <div className="glass mt-4 rounded-2xl p-4 text-sm">
+          <p className="text-muted-foreground">
+            Taking too long on your network? Open the same secure payment page directly — your
+            order stays the same.
+          </p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <a
+              href={`https://whop.com/checkout/${encodeURIComponent(p)}?session=${encodeURIComponent(s)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground"
+            >
+              Open secure checkout
+            </a>
+            <button
+              type="button"
+              onClick={() => window.location.reload()}
+              className="rounded-xl border border-hairline px-4 py-2 text-sm font-medium"
+            >
+              Retry
+            </button>
+          </div>
+        </div>
+      ) : null}
+
       <p className="mt-4 text-xs text-muted-foreground">
         Payments are processed by Whop. We never see or store your card details.{" "}
         <Link to="/terms" className="underline underline-offset-4">
