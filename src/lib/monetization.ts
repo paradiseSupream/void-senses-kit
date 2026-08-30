@@ -319,6 +319,52 @@ export function partnerLink(slot: string, toolSlug?: string | null) {
 let queue: Array<Record<string, unknown>> = [];
 let flushTimer: number | null = null;
 
+/**
+ * Client-side country fallback. The track endpoint normally stamps country
+ * from CDN edge headers; when those are missing (dev, direct origin, some
+ * proxies) events used to land with country = null. We resolve the country
+ * once per session via the geo endpoint (which itself reads edge headers but
+ * is also our single place to add further fallbacks) and send it with every
+ * event — the server only uses it when its own header lookup failed.
+ */
+const GEO_KEY = "sov.geoCountry";
+let clientCountry: string | null = null;
+let geoRequested = false;
+
+function ensureCountry() {
+  if (geoRequested || typeof window === "undefined") return;
+  geoRequested = true;
+  try {
+    const cached = window.sessionStorage.getItem(GEO_KEY);
+    if (cached) {
+      clientCountry = cached;
+      return;
+    }
+  } catch {
+    /* ignore */
+  }
+  void fetch("/api/public/geo", { cache: "force-cache" })
+    .then((r) => (r.ok ? r.json() : null))
+    .then((data) => {
+      const country = typeof data?.country === "string" ? data.country : null;
+      if (country && /^[A-Z]{2}$/.test(country)) {
+        clientCountry = country;
+        try {
+          window.sessionStorage.setItem(GEO_KEY, country);
+        } catch {
+          /* ignore */
+        }
+      }
+    })
+    .catch(() => undefined);
+}
+
+/** Current best-known client country (null until the geo lookup resolves). */
+function clientGeo(): string | null {
+  ensureCountry();
+  return clientCountry;
+}
+
 /** VIP flag for reporting; read from storage so tracking stays hook-free. */
 function isVipVisitor(): boolean {
   try {
@@ -352,6 +398,7 @@ function payload(event: AdEvent) {
     zone: event.zone ?? null,
     duration_ms: event.duration_ms ?? null,
     metric_value: event.metric_value ?? null,
+    country: clientGeo(),
     is_vip: vipFlag || isVipVisitor(),
   };
 }
@@ -396,6 +443,8 @@ export function track(event: AdEvent) {
 }
 
 if (typeof window !== "undefined") {
+  // Start the geo lookup immediately so even the first flush carries country.
+  ensureCountry();
   window.addEventListener("pagehide", () => flush(true));
   document.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "hidden") flush(true);
