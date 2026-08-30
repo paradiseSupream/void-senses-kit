@@ -193,60 +193,73 @@ export function ResultActions({
 
   return (
     <>
-    <div className="mt-7 flex flex-wrap gap-2.5">
-      <button
-        type="button"
-        onClick={download}
-        className="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-full bg-primary px-5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 sm:flex-none"
-      >
-        <Download className="size-4" aria-hidden="true" /> Download HD card
-      </button>
+    {/* Two primary actions carry the viral loop; everything else is folded away
+        so the mobile result page is not a wall of equal buttons. */}
+    <div className="mt-7 grid gap-2.5 sm:grid-cols-2">
       <button
         type="button"
         onClick={shareImage}
-        className="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-5 text-sm font-semibold text-primary transition-colors hover:bg-primary/15 sm:flex-none"
+        className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-primary px-5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
       >
-        <ImageDown className="size-4" aria-hidden="true" /> Share image
+        <ImageDown className="size-4" aria-hidden="true" /> Share my result card
       </button>
       <button
         type="button"
         onClick={challenge}
-        className="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-5 text-sm font-semibold text-primary transition-colors hover:bg-primary/15 sm:flex-none"
+        className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-5 text-sm font-semibold text-primary transition-colors hover:bg-primary/15"
       >
         <Swords className="size-4" aria-hidden="true" /> Challenge a friend
       </button>
-      <button
-        type="button"
-        onClick={downloadStory}
-        className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-hairline px-4 text-sm font-medium transition-colors hover:bg-surface-2"
-      >
-        <Smartphone className="size-4" aria-hidden="true" /> Story card
-      </button>
-      <button
-        type="button"
-        onClick={nativeShare}
-        className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-hairline px-4 text-sm font-medium transition-colors hover:bg-surface-2"
-      >
+    </div>
 
-        <Share2 className="size-4" aria-hidden="true" /> Share
-      </button>
-      <button
-        type="button"
-        onClick={copy}
-        className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-hairline px-4 text-sm font-medium transition-colors hover:bg-surface-2"
-      >
-        <Copy className="size-4" aria-hidden="true" /> Copy
-      </button>
-      {onRetake ? (
+    <details className="group mt-3">
+      <summary className="label-mono inline-flex min-h-10 cursor-pointer list-none items-center gap-2 text-muted-foreground hover:text-foreground">
+        <ChevronDown
+          className="size-4 transition-transform group-open:rotate-180"
+          aria-hidden="true"
+        />
+        Save, download or copy
+      </summary>
+      <div className="mt-3 flex flex-wrap gap-2.5">
         <button
           type="button"
-          onClick={onRetake}
-          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-hairline px-4 text-sm font-medium transition-colors hover:bg-surface-2"
+          onClick={download}
+          className="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-full border border-hairline px-4 text-sm font-medium transition-colors hover:bg-surface-2 sm:flex-none"
         >
-          <RotateCcw className="size-4" aria-hidden="true" /> New set
+          <Download className="size-4" aria-hidden="true" /> Download HD card
         </button>
-      ) : null}
-    </div>
+        <button
+          type="button"
+          onClick={downloadStory}
+          className="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-full border border-hairline px-4 text-sm font-medium transition-colors hover:bg-surface-2 sm:flex-none"
+        >
+          <Smartphone className="size-4" aria-hidden="true" /> Story card
+        </button>
+        <button
+          type="button"
+          onClick={nativeShare}
+          className="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-full border border-hairline px-4 text-sm font-medium transition-colors hover:bg-surface-2 sm:flex-none"
+        >
+          <Share2 className="size-4" aria-hidden="true" /> Share link
+        </button>
+        <button
+          type="button"
+          onClick={copy}
+          className="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-full border border-hairline px-4 text-sm font-medium transition-colors hover:bg-surface-2 sm:flex-none"
+        >
+          <Copy className="size-4" aria-hidden="true" /> Copy
+        </button>
+        {onRetake ? (
+          <button
+            type="button"
+            onClick={onRetake}
+            className="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-full border border-hairline px-4 text-sm font-medium transition-colors hover:bg-surface-2 sm:flex-none"
+          >
+            <RotateCcw className="size-4" aria-hidden="true" /> New set
+          </button>
+        ) : null}
+      </div>
+    </details>
     <ShareRow
       className="mt-4 justify-center"
       toolSlug={toolSlug}
