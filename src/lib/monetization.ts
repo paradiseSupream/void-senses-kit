@@ -11,7 +11,7 @@ const VARIANT_KEY = "sov.adVariant";
 const CAP_KEY = "sov.adCaps";
 const ATTR_KEY = "sov.attr";
 const MOBILE_TOTAL_KEY = "mobile:total";
-const MOBILE_SESSION_LIMIT = 3;
+const MOBILE_SESSION_LIMIT = 5;
 const MOBILE_FORMAT_TOTAL_KEY = "mobile:format-total";
 const MOBILE_FORMAT_SESSION_LIMIT = 1;
 
