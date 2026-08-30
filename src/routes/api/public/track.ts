@@ -115,7 +115,14 @@ export const Route = createFileRoute("/api/public/track")({
               duration_ms: e["duration_ms"] != null && Number.isFinite(Number(e["duration_ms"]))
                 ? Math.max(0, Math.min(600_000, Math.round(Number(e["duration_ms"]))))
                 : null,
-              country,
+              country:
+                headerCountry ??
+                (() => {
+                  const raw = str(e["country"], 2);
+                  return raw && /^[A-Z]{2}$/.test(raw.toUpperCase())
+                    ? raw.toUpperCase()
+                    : null;
+                })(),
               ip_hash: ipHash,
               ua_hash: uaHash,
               suspect,
