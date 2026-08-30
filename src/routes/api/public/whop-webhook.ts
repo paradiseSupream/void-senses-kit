@@ -98,12 +98,22 @@ export const Route = createFileRoute("/api/public/whop-webhook")({
         const { logWhopWebhook } = await import("@/lib/webhook-log.server");
 
         if (!verifyWhopWebhook(raw, request.headers)) {
+          // Record which signature headers actually arrived: a missing header
+          // means the sender is not using Standard Webhooks, while present
+          // headers with a bad digest means the configured secret is wrong.
+          const seen = [...request.headers.keys()]
+            .filter((name) => name.includes("signature") || name.startsWith("webhook-") || name.includes("whop"))
+            .join(",");
+          const { whopEnv } = await import("@/lib/whop.server");
+          const detail = `Signature verification failed. secret_configured=${Boolean(
+            whopEnv().webhookSecret,
+          )}; signature_headers=${seen || "none"}`;
           await logWhopWebhook({
             eventType: "unknown",
             verified: false,
             outcome: "rejected",
             httpStatus: 401,
-            detail: "Signature verification failed",
+            detail,
             durationMs: Date.now() - startedAt,
           });
           return new Response("Invalid signature", { status: 401 });
