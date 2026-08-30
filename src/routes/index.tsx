@@ -25,6 +25,7 @@ import { ProofBand } from "@/components/home/ProofBand";
 import { BentoGrid, BentoTile } from "@/components/home/BentoGrid";
 import { Reveal } from "@/components/ui/Reveal";
 import { NativeAdCard, withNativeAds } from "@/components/monetization/NativeAdCard";
+import { AdSlot } from "@/components/monetization/AdSlot";
 import { SampleResult } from "@/components/home/SampleResult";
 import { AmbientCanvas } from "@/components/visuals/AmbientCanvas";
 import { StreakChallenge } from "@/components/home/StreakChallenge";
