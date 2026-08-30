@@ -106,6 +106,7 @@ export function VipModal() {
     try {
       if (hasEmail) await persistEmail();
       trackFunnel("checkout_start");
+      trackExperiment(VIP_CHECKOUT_SLOT, arm);
       const result = await beginCheckout({
         data: {
           plan,
