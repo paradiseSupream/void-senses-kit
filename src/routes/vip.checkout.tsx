@@ -86,13 +86,19 @@ function VipCheckoutPage() {
 
       {s && p ? (
         <div className="glass mt-6 overflow-hidden rounded-2xl p-2">
-          <div
-            data-whop-checkout-plan-id={p}
-            data-whop-checkout-session={s}
-            data-whop-checkout-return-url={returnUrl}
-            data-whop-checkout-theme="dark"
-            className="min-h-[560px] w-full"
-          />
+          {origin ? (
+            <div
+              data-whop-checkout-plan-id={p}
+              data-whop-checkout-session={s}
+              data-whop-checkout-return-url={returnUrl}
+              data-whop-checkout-theme="dark"
+              className="min-h-[560px] w-full"
+            />
+          ) : (
+            <div className="grid min-h-[560px] w-full place-items-center text-sm text-muted-foreground">
+              Loading secure checkout…
+            </div>
+          )}
         </div>
       ) : (
         <div className="glass mt-6 rounded-2xl p-6 text-sm text-muted-foreground">
