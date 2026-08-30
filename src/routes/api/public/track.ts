@@ -74,7 +74,7 @@ export const Route = createFileRoute("/api/public/track")({
         }
 
         const userAgent = request.headers.get("user-agent") ?? "";
-        const country = countryOf(request);
+        const headerCountry = countryOf(request);
         const ipHash = await sha(clientIp(request));
         const uaHash = await sha(userAgent || "none");
         const suspect = userAgent.length < 10 || BOT_UA.test(userAgent);

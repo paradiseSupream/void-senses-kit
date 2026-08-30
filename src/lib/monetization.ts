@@ -443,6 +443,8 @@ export function track(event: AdEvent) {
 }
 
 if (typeof window !== "undefined") {
+  // Start the geo lookup immediately so even the first flush carries country.
+  ensureCountry();
   window.addEventListener("pagehide", () => flush(true));
   document.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "hidden") flush(true);
