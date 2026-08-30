@@ -66,8 +66,6 @@ export function VipModal() {
           toolSlug: plan,
           sessionId: sessionId(),
           utmSource: attribution().utm_source ?? null,
-          fbp: cookie("_fbp") ?? null,
-          fbc: cookie("_fbc") ?? null,
         },
       });
       setEmailSaved(true);
