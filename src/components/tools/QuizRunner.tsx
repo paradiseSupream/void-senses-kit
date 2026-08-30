@@ -229,7 +229,8 @@ export function QuizRunner({
 
       {/* Quiet banner only once the visitor is deep in the quiz (7th question
           onward) — no interstitial, no pop-under, safe for paid social. */}
-      {index >= 6 ? <AdSlot id="quiz-inline" className="mt-4" /> : null}
+      {index >= 3 && index < 9 ? <AdSlot id="quiz-inline" className="mt-4" /> : null}
+      {index >= 9 ? <AdSlot id="quiz-inline-late" className="mt-4" /> : null}
 
       <QuizVipNudge step={index} total={items.length} />
       {/* One-time mid-test downsell with countdown + rewarded "see ads" path. */}
