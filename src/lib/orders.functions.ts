@@ -317,3 +317,41 @@ export const adminOrdersReport = createServerFn({ method: "POST" })
       gateTest,
     };
   });
+
+/**
+ * Asks the payment provider what really happened to every still-pending order.
+ *
+ * This is the operator-side safety net for a lost or rejected webhook: a
+ * payment that actually cleared is fulfilled here (order marked paid, VIP
+ * granted, Purchase reported once), and one that never completed comes back
+ * with the provider's own reason.
+ */
+export const adminReconcileOrders = createServerFn({ method: "POST" })
+  .inputValidator((input: { token: string; days?: number }) => ({
+    token: String(input?.token ?? ""),
+    days: [1, 7, 14, 30, 60].includes(Number(input?.days)) ? Number(input?.days) : 14,
+  }))
+  .handler(
+    async ({
+      data,
+    }): Promise<{
+      checked: number;
+      fulfilled: number;
+      rows: Array<{ orderId: string; status: string; changed: boolean; reason: string | null }>;
+    }> => {
+      const { requireAdmin } = await import("@/lib/admin-core.server");
+      await requireAdmin(data.token);
+      const { reconcilePendingOrders } = await import("@/lib/vip-reconcile.server");
+      const results = await reconcilePendingOrders(data.days);
+      return {
+        checked: results.length,
+        fulfilled: results.filter((row) => row.changed).length,
+        rows: results.map((row) => ({
+          orderId: row.orderId,
+          status: row.status,
+          changed: row.changed,
+          reason: row.reason,
+        })),
+      };
+    },
+  );
