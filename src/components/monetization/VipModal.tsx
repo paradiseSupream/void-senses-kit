@@ -76,22 +76,25 @@ export function VipModal() {
     }
   };
 
-  /** Opens the Whop card checkout for the selected plan. */
+  /**
+   * Opens the Whop card checkout for the selected plan.
+   *
+   * The email is optional on purpose: asking for it before payment was the
+   * single biggest drop-off point. Whop collects the buyer email during
+   * checkout and the webhook grants VIP on that address, so nothing is lost.
+   */
   const startCheckout = async () => {
     if (busy) return;
-    if (!email.includes("@")) {
-      toast.error("Enter your email first — VIP access is tied to it.");
-      return;
-    }
+    const hasEmail = email.includes("@");
     setBusy(true);
     try {
-      await persistEmail();
-      trackFunnel("vip_purchase");
+      if (hasEmail) await persistEmail();
+      trackFunnel("checkout_start");
       const result = await beginCheckout({
         data: {
           plan,
           offer: offerActive,
-          email,
+          email: hasEmail ? email : null,
           sessionId: sessionId(),
           utmSource: attribution().utm_source ?? null,
         },
