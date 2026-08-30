@@ -114,6 +114,8 @@ export function QuizRunner({
             </span>
             <span className="mx-1 opacity-50">/</span>
             {String(items.length).padStart(2, "0")}
+            <span className="ml-2 opacity-60">{Math.round(progress)}%</span>
+            <span className="ml-2 hidden opacity-60 sm:inline">· {timeLeft}</span>
           </span>
           <div className="flex shrink-0 items-center gap-2">
             {onReshuffle ? (
