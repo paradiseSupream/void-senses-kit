@@ -109,6 +109,8 @@ function loadMeta() {
   if (!document.querySelector('script[src*="connect.facebook.net/en_US/fbevents.js"]')) {
     injectScript("https://connect.facebook.net/en_US/fbevents.js");
   }
+  metaInited.add(META_ID()!);
+  window.fbq!("consent", "grant");
   window.fbq!("init", META_ID());
   window.fbq!("track", "PageView");
 }
