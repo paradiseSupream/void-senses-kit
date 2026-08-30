@@ -19,6 +19,18 @@ const SPONSORED = [
     title: "Learn systems design in 30 days",
     body: "A daily email course written by senior infra engineers.",
   },
+  {
+    title: "Generate stunning AI art free",
+    body: "Create logos, mockups and illustrations in seconds with free credits.",
+  },
+  {
+    title: "Master psychology fundamentals",
+    body: "A free 7-day course on behavioral science from top researchers.",
+  },
+  {
+    title: "Land your dream dev job",
+    body: "Real portfolio templates and interview prep that actually works.",
+  },
 ];
 
 /**

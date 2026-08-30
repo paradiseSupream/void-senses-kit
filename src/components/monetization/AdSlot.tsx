@@ -33,6 +33,24 @@ const CREATIVES = [
     body: "Daily brain-training drills built by cognitive science researchers.",
     cta: "Start today",
   },
+  {
+    tag: "Sponsored",
+    title: "Design stunning visuals with AI",
+    body: "Generate art, logos and mockups in seconds — free credits to start.",
+    cta: "Try free",
+  },
+  {
+    tag: "Recommended",
+    title: "Your free personality deep-dive",
+    body: "A 60-second assessment that reveals hidden traits most people miss.",
+    cta: "Reveal now",
+  },
+  {
+    tag: "Popular",
+    title: "Build a portfolio that gets hired",
+    body: "Real project templates and a guided path from junior to senior.",
+    cta: "Start free",
+  },
 ] as const;
 
 /**
