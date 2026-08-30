@@ -118,7 +118,13 @@ export const startVipCheckout = createServerFn({ method: "POST" })
     };
   });
 
-/** Polled by the success page until the webhook marks the order paid. */
+/**
+ * Polled by the success page until the order is confirmed paid.
+ *
+ * The webhook is the fast path; when it has not arrived we ask Whop directly,
+ * so a lost or rejected webhook can never leave a real buyer unpaid — and when
+ * the payment genuinely never completed we return the provider's own reason.
+ */
 export const vipOrderStatus = createServerFn({ method: "POST" })
   .inputValidator((input: { orderId: string }) => ({
     orderId: String(input?.orderId ?? "").slice(0, 80),
@@ -132,6 +138,7 @@ export const vipOrderStatus = createServerFn({ method: "POST" })
       email: string | null;
       licenseKey: string | null;
       expiresAt: string | null;
+      reason?: string | null;
     }> => {
       const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
       const { data: row } = await supabaseAdmin
@@ -144,14 +151,29 @@ export const vipOrderStatus = createServerFn({ method: "POST" })
         return { status: "unknown", plan: null, email: null, licenseKey: null, expiresAt: null };
       const plan = (row.plan as VipPlanName) ?? "lifetime";
       if (row.status !== "paid") {
+        const { reconcileOrder } = await import("@/lib/vip-reconcile.server");
+        const recon = await reconcileOrder(data.orderId);
+        if (recon.status !== "paid") {
+          return {
+            status: "pending",
+            plan,
+            email: recon.email ?? row.email ?? null,
+            licenseKey: null,
+            expiresAt: null,
+            reason: recon.reason,
+          };
+        }
+        const { lookupVip } = await import("@/lib/vip-fulfil.server");
+        const granted = recon.email ? await lookupVip(recon.email) : null;
         return {
-          status: "pending",
+          status: "paid",
           plan,
-          email: row.email ?? null,
-          licenseKey: null,
-          expiresAt: null,
+          email: recon.email ?? null,
+          licenseKey: granted?.licenseKey ?? null,
+          expiresAt: granted?.expiresAt ?? null,
         };
       }
+
 
       const { lookupVip } = await import("@/lib/vip-fulfil.server");
       const access = row.email ? await lookupVip(row.email) : null;
