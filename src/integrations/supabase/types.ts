@@ -18,6 +18,7 @@ export type Database = {
         Row: {
           ad_click_id: string | null
           ad_platform: string | null
+          arm: string | null
           click_id: string | null
           country: string | null
           created_at: string
@@ -48,6 +49,7 @@ export type Database = {
         Insert: {
           ad_click_id?: string | null
           ad_platform?: string | null
+          arm?: string | null
           click_id?: string | null
           country?: string | null
           created_at?: string
@@ -78,6 +80,7 @@ export type Database = {
         Update: {
           ad_click_id?: string | null
           ad_platform?: string | null
+          arm?: string | null
           click_id?: string | null
           country?: string | null
           created_at?: string
@@ -458,6 +461,54 @@ export type Database = {
           id?: string
           payload?: Json
           week_start?: string
+        }
+        Relationships: []
+      }
+      whop_webhook_logs: {
+        Row: {
+          capi_payload: Json | null
+          capi_response: string | null
+          capi_status: number | null
+          created_at: string
+          detail: string | null
+          duration_ms: number | null
+          email: string | null
+          event_type: string
+          http_status: number | null
+          id: string
+          order_id: string | null
+          outcome: string
+          verified: boolean
+        }
+        Insert: {
+          capi_payload?: Json | null
+          capi_response?: string | null
+          capi_status?: number | null
+          created_at?: string
+          detail?: string | null
+          duration_ms?: number | null
+          email?: string | null
+          event_type?: string
+          http_status?: number | null
+          id?: string
+          order_id?: string | null
+          outcome?: string
+          verified?: boolean
+        }
+        Update: {
+          capi_payload?: Json | null
+          capi_response?: string | null
+          capi_status?: number | null
+          created_at?: string
+          detail?: string | null
+          duration_ms?: number | null
+          email?: string | null
+          event_type?: string
+          http_status?: number | null
+          id?: string
+          order_id?: string | null
+          outcome?: string
+          verified?: boolean
         }
         Relationships: []
       }
