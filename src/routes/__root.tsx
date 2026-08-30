@@ -28,6 +28,7 @@ import { AdErrorBoundary } from "@/components/monetization/AdErrorBoundary";
 import { ActionGateProvider } from "@/components/monetization/ActionGate";
 import { VipProvider } from "@/lib/vip";
 import { SiteConfigProvider } from "@/lib/site-config";
+import { BOOT_META_PIXEL_ID, metaBootSnippet } from "@/lib/pixel-boot";
 
 
 
