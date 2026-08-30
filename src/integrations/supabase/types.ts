@@ -357,6 +357,9 @@ export type Database = {
           country: string | null
           created_at: string
           email: string | null
+          event_id: string | null
+          fbc: string | null
+          fbp: string | null
           id: string
           order_id: string
           paid_at: string | null
@@ -365,6 +368,7 @@ export type Database = {
           provider: string
           session_id: string | null
           status: string
+          user_agent: string | null
           utm_source: string | null
           whop_plan_id: string | null
         }
@@ -374,6 +378,9 @@ export type Database = {
           country?: string | null
           created_at?: string
           email?: string | null
+          event_id?: string | null
+          fbc?: string | null
+          fbp?: string | null
           id?: string
           order_id: string
           paid_at?: string | null
@@ -382,6 +389,7 @@ export type Database = {
           provider?: string
           session_id?: string | null
           status?: string
+          user_agent?: string | null
           utm_source?: string | null
           whop_plan_id?: string | null
         }
@@ -391,6 +399,9 @@ export type Database = {
           country?: string | null
           created_at?: string
           email?: string | null
+          event_id?: string | null
+          fbc?: string | null
+          fbp?: string | null
           id?: string
           order_id?: string
           paid_at?: string | null
@@ -399,6 +410,7 @@ export type Database = {
           provider?: string
           session_id?: string | null
           status?: string
+          user_agent?: string | null
           utm_source?: string | null
           whop_plan_id?: string | null
         }
