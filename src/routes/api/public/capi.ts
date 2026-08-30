@@ -106,18 +106,25 @@ export const Route = createFileRoute("/api/public/capi")({
 
         const metaPixel = cfg.meta_pixel_id || process.env["META_PIXEL_ID"];
         const metaToken = cfg.meta_capi_token || process.env["META_CAPI_ACCESS_TOKEN"];
-        if (metaPixel && metaToken) {
+        const metaFbp = str(body["fbp"], 120);
+        const metaFbc = str(body["fbc"], 200);
+        // Meta rejects (400 / subcode 2804050) any event without a usable
+        // matching key, so an anonymous hit is skipped instead of logged as a
+        // delivery failure.
+        const hasMatchKey = Boolean(emailHash || ip || metaFbp || metaFbc);
+        if (metaPixel && metaToken && hasMatchKey) {
           const userData: Record<string, unknown> = {};
           if (emailHash) userData["em"] = [emailHash];
           if (ip) userData["client_ip_address"] = ip;
           if (country) userData["country"] = [await sha256(country)];
           if (userAgent) userData["client_user_agent"] = userAgent;
-          const fbp = str(body["fbp"], 120);
-          const fbc = str(body["fbc"], 200);
+          const fbp = metaFbp;
+          const fbc = metaFbc;
           if (fbp) userData["fbp"] = fbp;
           if (fbc) userData["fbc"] = fbc;
 
           tasks.push(
+
             fetch(
               `https://graph.facebook.com/v20.0/${metaPixel}/events?access_token=${encodeURIComponent(metaToken)}`,
               {
