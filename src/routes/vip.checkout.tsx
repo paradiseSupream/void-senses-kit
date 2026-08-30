@@ -95,6 +95,22 @@ function VipCheckoutPage() {
         countries. VIP unlocks the moment the payment clears.
       </p>
 
+      {/* What the buyer is paying for, restated at the moment of payment —
+          the cheapest anti-drop-off move on a hosted checkout page. */}
+      <ul className="mt-4 grid gap-1.5 text-sm text-muted-foreground">
+        {[
+          "Every ad and export gate removed instantly",
+          "One payment — nothing renews, no account needed",
+          "Access restores on any device with your purchase email",
+        ].map((line) => (
+          <li key={line} className="flex items-start gap-2">
+            <ShieldCheck className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden="true" />
+            {line}
+          </li>
+        ))}
+      </ul>
+
+
       {s && p ? (
         <div className="glass mt-6 overflow-hidden rounded-2xl p-2">
           {origin ? (
