@@ -11,7 +11,7 @@ const VARIANT_KEY = "sov.adVariant";
 const CAP_KEY = "sov.adCaps";
 const ATTR_KEY = "sov.attr";
 const MOBILE_TOTAL_KEY = "mobile:total";
-const MOBILE_SESSION_LIMIT = 5;
+const MOBILE_SESSION_LIMIT = 8;
 const MOBILE_FORMAT_TOTAL_KEY = "mobile:format-total";
 const MOBILE_FORMAT_SESSION_LIMIT = 1;
 
@@ -122,10 +122,10 @@ export function trackExperiment(slot: string, arm: string) {
 type CapState = { hour: number; counts: Record<string, number>; session: Record<string, number> };
 
 const CAPS: Record<string, { perHour: number; perSession: number }> = {
-  default: { perHour: 8, perSession: 5 },
+  default: { perHour: 10, perSession: 7 },
   sticky: { perHour: 1, perSession: 1 },
   gate: { perHour: 2, perSession: 2 },
-  result: { perHour: 4, perSession: 3 },
+  result: { perHour: 6, perSession: 5 },
 };
 
 function capKind(slot: string) {

@@ -7,6 +7,7 @@ import { archetypePageBySlug, type ArchetypePage } from "@/lib/archetype-seo";
 import { armCopy, type ArchetypeArm } from "@/lib/archetype-ab";
 import { getArchetypeArm } from "@/lib/archetype-ab.functions";
 import { AdSlot } from "@/components/monetization/AdSlot";
+import { NativeAdCard } from "@/components/monetization/NativeAdCard";
 import { ShareRow } from "@/components/tools/ShareRow";
 import { TOOLS } from "@/lib/tools";
 import { track } from "@/lib/monetization";
@@ -282,6 +283,8 @@ function ArchetypeDetail() {
             ))}
           </dl>
         </section>
+
+        <NativeAdCard index={1} toolSlug="dark-personality" className="mt-10" />
 
         <section className="mt-10">
           <h2 className="text-xl font-semibold tracking-tight">Related archetypes</h2>

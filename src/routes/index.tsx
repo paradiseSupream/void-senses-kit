@@ -25,6 +25,7 @@ import { ProofBand } from "@/components/home/ProofBand";
 import { BentoGrid, BentoTile } from "@/components/home/BentoGrid";
 import { Reveal } from "@/components/ui/Reveal";
 import { NativeAdCard, withNativeAds } from "@/components/monetization/NativeAdCard";
+import { AdSlot } from "@/components/monetization/AdSlot";
 import { SampleResult } from "@/components/home/SampleResult";
 import { AmbientCanvas } from "@/components/visuals/AmbientCanvas";
 import { StreakChallenge } from "@/components/home/StreakChallenge";
@@ -500,6 +501,7 @@ function Home() {
       </section>
 
       {/* ---------------- FAQ ---------------- */}
+      <AdSlot id="result-home-faq" className="mx-auto max-w-3xl px-4 sm:px-6" />
       <section className="mx-auto max-w-3xl px-4 py-10 sm:px-6 sm:py-16">
         <Reveal>
           <span className="label-mono">Questions people ask</span>
