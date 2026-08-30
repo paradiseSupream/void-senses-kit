@@ -207,7 +207,11 @@ export function QuizRunner({
             );
           })}
         </div>
+        <p className="label-mono mt-4 hidden sm:block">
+          Tip — press 1–{SCALE.length} to answer without the mouse
+        </p>
       </div>
+
 
 
       {/* Quiet banner only once the visitor is deep in the quiz (7th question
