@@ -1,4 +1,4 @@
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
 import { ChevronLeft, Clock, Download, ListChecks, ShieldCheck } from "lucide-react";
 
@@ -23,12 +23,31 @@ export function ToolShell({
 }) {
   const tool = TOOLS.find((item) => item.slug === slug);
   const Icon = tool?.icon;
+  const contentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!slug) return;
     track({ event_type: "tool_start", slot: `tool-${slug}`, tool_slug: slug });
     trackFunnel("test_start", slug);
   }, [slug]);
+
+  // Landing from an ad or tool list puts the big hero header above the fold,
+  // so the actual test start sits off-screen — a top bounce source on mobile.
+  // On entry, bring the interactive content into view (keeps a sliver of the
+  // header visible for orientation).
+  useEffect(() => {
+    const el = contentRef.current;
+    if (!el) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      el.scrollIntoView({ block: "start" });
+      return;
+    }
+    const id = window.setTimeout(
+      () => el.scrollIntoView({ behavior: "smooth", block: "start" }),
+      150,
+    );
+    return () => window.clearTimeout(id);
+  }, []);
 
   return (
     <div style={tool ? ({ ["--tool-accent" as string]: tool.accent } as never) : undefined}>
@@ -118,7 +137,10 @@ export function ToolShell({
         </div>
       </header>
 
-      <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6 sm:py-12">
+      <div
+        ref={contentRef}
+        className="mx-auto max-w-3xl scroll-mt-16 px-4 py-8 sm:px-6 sm:py-12"
+      >
         {children}
 
         {slug ? <NextTools slug={slug} /> : null}
