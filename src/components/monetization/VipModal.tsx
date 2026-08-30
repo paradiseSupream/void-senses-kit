@@ -320,11 +320,11 @@ export function VipModal() {
               className="mt-4 flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-60"
             >
               {busy ? <Loader2 className="size-4 animate-spin" aria-hidden="true" /> : null}
-              Continue to secure checkout — {price}
+              {copy.cta} — {price}
             </button>
-            <p className="mt-2 text-center text-xs text-muted-foreground">
-              Card, Apple&nbsp;Pay, Google&nbsp;Pay and local methods in 195 countries. Secured by
-              Whop — we never see your card details.
+            <p className="mt-2 text-center text-xs text-muted-foreground">{copy.reassurance}</p>
+            <p className="mt-1 text-center text-xs text-muted-foreground">
+              Secured by Whop — we never see your card details.
             </p>
           </>
         ) : (
