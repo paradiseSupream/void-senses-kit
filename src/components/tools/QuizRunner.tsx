@@ -56,6 +56,19 @@ export function QuizRunner({
     return () => setQuizActive(false);
   }, []);
 
+  // The tool intro pushes question one below the fold on phones. Bringing the
+  // runner to the top the moment it mounts removes that dead scroll.
+  const rootRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const node = rootRef.current;
+    if (!node) return;
+    const id = window.setTimeout(() => {
+      const top = node.getBoundingClientRect().top + window.scrollY - 72;
+      if (top > window.scrollY + 8) window.scrollTo({ top, behavior: "smooth" });
+    }, 120);
+    return () => window.clearTimeout(id);
+  }, []);
+
   const item = items[index];
   const progress = useMemo(() => (index / items.length) * 100, [index, items.length]);
 
@@ -80,10 +93,31 @@ export function QuizRunner({
   );
 
 
+  // Desktop speed-run: keys 1–5 pick the matching option, so a full set is
+  // finished without leaving the keyboard. Mobile is unaffected.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      const target = e.target as HTMLElement | null;
+      if (target && /^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName)) return;
+      const n = Number(e.key);
+      if (!Number.isInteger(n) || n < 1 || n > SCALE.length) return;
+      const option = SCALE[n - 1];
+      if (!option) return;
+      e.preventDefault();
+      choose(option.weight);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [choose]);
+
   if (!item) return null;
 
+  const leftSeconds = Math.max(1, Math.round(((items.length - index) * 7) / 5) * 5);
+  const timeLeft = leftSeconds >= 60 ? `~${Math.ceil(leftSeconds / 60)} min left` : "under a minute left";
+
   return (
-    <div>
+    <div ref={rootRef}>
       {/* Sticky progress rail so the finish line is always visible on mobile. */}
       <div className="sticky top-14 z-20 -mx-4 mb-5 border-b border-hairline bg-void-0/80 px-4 py-2.5 backdrop-blur-2xl sm:top-16">
         <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
@@ -93,6 +127,8 @@ export function QuizRunner({
             </span>
             <span className="mx-1 opacity-50">/</span>
             {String(items.length).padStart(2, "0")}
+            <span className="ml-2 opacity-60">{Math.round(progress)}%</span>
+            <span className="ml-2 hidden opacity-60 sm:inline">· {timeLeft}</span>
           </span>
           <div className="flex shrink-0 items-center gap-2">
             {onReshuffle ? (
@@ -159,7 +195,15 @@ export function QuizRunner({
                     : "border-hairline bg-void-2/45 text-foreground/85 hover:border-primary/35 hover:bg-primary/8"
                 }`}
               >
-                {option.label}
+                <span className="flex min-w-0 items-center gap-2.5">
+                  <span
+                    aria-hidden="true"
+                    className="label-mono hidden size-5 shrink-0 place-items-center rounded-md border border-hairline text-[0.6rem] sm:grid"
+                  >
+                    {i + 1}
+                  </span>
+                  <span className="truncate">{option.label}</span>
+                </span>
                 <span
                   aria-hidden="true"
                   className="size-2.5 shrink-0 rounded-full transition-transform duration-[var(--dur-micro)]"
@@ -176,7 +220,11 @@ export function QuizRunner({
             );
           })}
         </div>
+        <p className="label-mono mt-4 hidden sm:block">
+          Tip — press 1–{SCALE.length} to answer without the mouse
+        </p>
       </div>
+
 
 
       {/* Quiet banner only once the visitor is deep in the quiz (7th question
