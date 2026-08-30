@@ -245,7 +245,7 @@ export function VipModal() {
         </ul>
 
         <label htmlFor="vip-email" className="label-mono mt-6 mb-1.5 block">
-          Email for your VIP receipt & access
+          Email (optional) — for restore on other devices
         </label>
         <div className="flex gap-2">
           <input
