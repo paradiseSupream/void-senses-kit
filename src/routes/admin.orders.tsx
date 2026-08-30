@@ -357,7 +357,7 @@ function OrdersPage() {
                           <details className="mt-1">
                             <summary className="cursor-pointer text-primary">payload</summary>
                             <pre className="mt-1 max-w-[260px] overflow-x-auto text-[10px]">
-                              {JSON.stringify(row.capiPayload, null, 1)}
+                              {row.capiPayload}
                             </pre>
                           </details>
                         ) : null}

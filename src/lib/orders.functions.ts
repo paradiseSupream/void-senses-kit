@@ -49,7 +49,7 @@ export type WebhookLogRow = {
   httpStatus: number | null;
   capiStatus: number | null;
   capiResponse: string | null;
-  capiPayload: unknown;
+  capiPayload: string | null;
   detail: string | null;
   durationMs: number | null;
 };
@@ -309,7 +309,7 @@ export const adminOrdersReport = createServerFn({ method: "POST" })
           httpStatus: row.http_status,
           capiStatus: row.capi_status,
           capiResponse: row.capi_response,
-          capiPayload: row.capi_payload,
+          capiPayload: row.capi_payload ? JSON.stringify(row.capi_payload) : null,
           detail: row.detail,
           durationMs: row.duration_ms,
         })),

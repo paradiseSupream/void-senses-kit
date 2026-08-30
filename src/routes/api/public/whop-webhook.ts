@@ -4,7 +4,7 @@ import { purchaseEventId } from "@/lib/purchase-event";
 
 type PurchaseReport = {
   attempted: boolean;
-  payload: Record<string, unknown> | null;
+  payload: Record<string, string | number | boolean | null> | null;
   status: number | null;
   response: string | null;
 };

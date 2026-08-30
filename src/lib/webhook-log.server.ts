@@ -15,7 +15,7 @@ export type WebhookLogEntry = {
   /** received | rejected | ignored | processed | closed | error */
   outcome: string;
   httpStatus?: number | null;
-  capiPayload?: Record<string, unknown> | null;
+  capiPayload?: Record<string, string | number | boolean | null> | null;
   capiStatus?: number | null;
   capiResponse?: string | null;
   detail?: string | null;
