@@ -12,6 +12,8 @@ import {
 import { toast } from "sonner";
 
 import { useActionGate } from "@/components/monetization/ActionGate";
+import { AdSlot } from "@/components/monetization/AdSlot";
+import { NativeAdCard } from "@/components/monetization/NativeAdCard";
 import {
   accentFor,
   downloadCanvas,
@@ -202,6 +204,10 @@ export function ResultActions({
 
   return (
     <>
+    {/* Free users monetise here: the result is the highest-intent moment, and
+        the placement sits above the actions without covering the score. */}
+    <AdSlot id={`result-${toolSlug}`} toolSlug={toolSlug} className="mt-7" />
+
     {/* Two primary actions carry the viral loop; everything else is folded away
         so the mobile result page is not a wall of equal buttons. */}
     <div className="mt-7 grid gap-2.5 sm:grid-cols-2">
@@ -277,6 +283,10 @@ export function ResultActions({
       url={challengeLink("share_row", "result_share_row")}
       text={`I scored ${payload.headline} on ${payload.toolName ?? payload.title}. Beat me:`}
     />
+
+    {/* Second, lighter placement after the share row — end of the page, so it
+        never competes with the primary actions. */}
+    <NativeAdCard index={0} toolSlug={toolSlug} className="mt-8" />
 
     </>
   );
