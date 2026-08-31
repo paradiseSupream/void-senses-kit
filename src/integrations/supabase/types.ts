@@ -171,6 +171,8 @@ export type Database = {
           source: string
           tool_slug: string | null
           utm_source: string | null
+          welcome_sent_at: string | null
+          welcome_status: string | null
         }
         Insert: {
           country?: string | null
@@ -181,6 +183,8 @@ export type Database = {
           source?: string
           tool_slug?: string | null
           utm_source?: string | null
+          welcome_sent_at?: string | null
+          welcome_status?: string | null
         }
         Update: {
           country?: string | null
@@ -191,6 +195,8 @@ export type Database = {
           source?: string
           tool_slug?: string | null
           utm_source?: string | null
+          welcome_sent_at?: string | null
+          welcome_status?: string | null
         }
         Relationships: []
       }
