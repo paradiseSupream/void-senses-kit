@@ -248,7 +248,7 @@ function Home() {
     const active = GOALS.find((g) => g.id === goal) ?? GOALS[0]!;
     return searchTools(query).filter((t) => active.slugs.includes(t.slug));
   }, [query, goal]);
-  const slots = useMemo(() => withNativeAds(results), [results]);
+  const slots = useMemo(() => withNativeAds(results, 4), [results]);
 
   return (
     <div>
@@ -469,7 +469,7 @@ function Home() {
           />
         </div>
 
-        <div className="mt-5 grid grid-cols-2 gap-3 sm:mt-8 sm:gap-4">
+        <div className="mt-5 grid auto-rows-fr grid-flow-row-dense grid-cols-2 gap-3 sm:mt-8 sm:gap-4">
           {slots.map((slot, i) =>
             "ad" in slot ? (
               <div key={`ad-${i}`} className="col-span-2 grid">
@@ -479,6 +479,7 @@ function Home() {
               <ToolRow key={slot.item.slug} tool={slot.item} />
             ),
           )}
+
           {results.length === 0 ? (
             <p className="col-span-full py-14 text-center text-sm text-muted-foreground">
               Nothing matches "{query}".
