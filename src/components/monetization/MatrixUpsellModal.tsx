@@ -11,6 +11,7 @@ import { attribution, sessionId } from "@/lib/monetization";
 import { trackFunnel } from "@/lib/funnel";
 import { cookie } from "@/lib/pixels";
 import { grantMatrix, useMatrix } from "@/lib/vip-unlock";
+import { useVip } from "@/lib/vip";
 import type { Dossier } from "@/lib/archetype-core";
 
 /** Shared checkout kick-off for the $9 Shadow Matrix add-on. */
