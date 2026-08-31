@@ -21,7 +21,10 @@ export function MidQuizOffer({
   step,
   total,
   toolSlug,
-  showFrom = 0.55,
+  // Interrupting at the halfway mark cost completions — the offer now waits
+  // until the visitor is nearly finished, where abandoning costs them more
+  // than closing the dialog.
+  showFrom = 0.85,
 }: {
   step: number;
   total: number;
@@ -84,25 +87,14 @@ export function MidQuizOffer({
           <Crown className="size-5 text-primary" aria-hidden="true" />
         </span>
         <h2 id="midquiz-offer-title" className="mt-4 font-display text-xl font-bold">
-          Halfway there — {offer} lifetime
+          Almost done — unlock the full report for {monthly}
         </h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Finish ad-free and get your full report the moment you submit. Normally{" "}
-          <span className="line-through">{full}</span>.
+          Finish ad-free and your complete breakdown opens the moment you submit. The
+          lifetime pass is <span className="line-through">{full}</span> — this entry price
+          is {monthly}.
         </p>
         <ScarcityTimer className="mt-3" label="This price ends in" />
-        <button
-          type="button"
-          onClick={() => {
-            grantVipOffer();
-            track({ event_type: "click", slot: "midquiz_offer", tool_slug: toolSlug ?? null });
-            setOpen(false);
-            openVipModal("lifetime");
-          }}
-          className="mt-4 w-full rounded-xl bg-primary px-4 py-3.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
-        >
-          Claim {offer} lifetime VIP
-        </button>
         <button
           type="button"
           onClick={() => {
@@ -111,10 +103,23 @@ export function MidQuizOffer({
             setOpen(false);
             openVipModal("monthly");
           }}
+          className="mt-4 w-full rounded-xl bg-primary px-4 py-3.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
+        >
+          Unlock now · {monthly}
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            grantVipOffer();
+            track({ event_type: "click", slot: "midquiz_offer", tool_slug: toolSlug ?? null });
+            setOpen(false);
+            openVipModal("lifetime");
+          }}
           className="mt-2.5 w-full rounded-xl border border-primary/40 bg-primary/10 px-4 py-3 text-sm font-semibold text-primary transition-colors hover:bg-primary/20"
         >
-          Or 1 month ad-free — {monthly}
+          Or keep it forever — {offer} lifetime
         </button>
+
         <button
           type="button"
           onClick={continueFree}
