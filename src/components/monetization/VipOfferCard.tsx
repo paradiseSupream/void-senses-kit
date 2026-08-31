@@ -59,20 +59,35 @@ export function VipOfferCard({
     // This component only mounts on a finished result, so it is the honest
     // place for the completion signals (they used to fire from the tool shell
     // on page load, which made every bounced session look like a completion).
-    track({ event_type: "tool_complete", slot: `result-${toolSlug}`, tool_slug: toolSlug });
-    trackFunnel("result_view", toolSlug);
-    if (isVip) return;
-    track({ event_type: "impression", slot: "vip_offer_card", tool_slug: toolSlug });
-    trackFunnel("vip_gate_shown", toolSlug);
-    // Record which persuasion arm this visitor was actually exposed to. The
-    // gate card is the real exposure point; the modal only sees a fraction.
-    trackExperiment(VIP_GATE_VIEW_SLOT, vipGateArm());
-    // The buyer's next tap is checkout — warm it now so the page is instant.
-    preloadWhopCheckout();
-    // Tell the exit offer the visitor just reached a finished result, so the
-    // one-time price can appear at the real leaving moment.
-    window.dispatchEvent(new Event("sov:result-ready"));
+    //
+    // The offer-side signals run FIRST and each one is isolated: a throwing ad
+    // tag inside one call used to abort the whole effect, so the gate exposure
+    // and its A/B arm vanished from reporting while `result_view` still landed.
+    const safe = (fn: () => void) => {
+      try {
+        fn();
+      } catch {
+        /* reporting must never break the offer */
+      }
+    };
+    if (!isVip) {
+      safe(() => track({ event_type: "impression", slot: "vip_offer_card", tool_slug: toolSlug }));
+      safe(() => trackFunnel("vip_gate_shown", toolSlug));
+      // Record which persuasion arm this visitor was actually exposed to. The
+      // gate card is the real exposure point; the modal only sees a fraction.
+      safe(() => trackExperiment(VIP_GATE_VIEW_SLOT, vipGateArm()));
+      // The buyer's next tap is checkout — warm it now so the page is instant.
+      safe(() => preloadWhopCheckout());
+      // Tell the exit offer the visitor just reached a finished result, so the
+      // one-time price can appear at the real leaving moment.
+      safe(() => window.dispatchEvent(new Event("sov:result-ready")));
+    }
+    safe(() =>
+      track({ event_type: "tool_complete", slot: `result-${toolSlug}`, tool_slug: toolSlug }),
+    );
+    safe(() => trackFunnel("result_view", toolSlug));
   }, [isVip, toolSlug]);
+
 
 
   useEffect(() => {
