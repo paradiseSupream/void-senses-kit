@@ -21,6 +21,8 @@ import { useSiteConfig } from "@/lib/site-config";
 import { trackFunnel } from "@/lib/funnel";
 import { cookie } from "@/lib/pixels";
 import { useVipPrices } from "@/lib/vip-pricing";
+import { markVipOfferUsed } from "@/lib/vip-offer";
+import { VipStatusCard } from "@/components/monetization/VipStatusCard";
 
 export { VIP_MONTHLY_CENTS } from "@/lib/vip-pricing";
 
@@ -136,6 +138,8 @@ export function VipModal() {
       }
       track({ event_type: "funnel", slot: "checkout_session_created", format: plan });
       trackFunnel("checkout_start");
+      // One-time means one time: the discount is burned as soon as it is used.
+      if (offerActive) markVipOfferUsed();
       if (result.orderId) rememberOrder(result.orderId, email || null);
       closeVipModal();
       const search = {
@@ -204,27 +208,11 @@ export function VipModal() {
           >
             <X className="size-4" aria-hidden="true" />
           </button>
-          <span className="label-mono text-primary">VIP active</span>
-          <h2 id="vip-title" className="mt-2 font-display text-2xl font-bold">
-            {activePlan === "monthly" ? "Monthly VIP" : "Lifetime VIP"}
-          </h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            {activePlan === "monthly"
-              ? "Ad-free access renews monthly — cancel anytime."
-              : "One payment — every current and future tool stays unlocked."}
-          </p>
-          <ul className="mt-4 grid gap-2 text-sm text-muted-foreground">
-            {PERKS.map((perk) => (
-              <li key={perk} className="flex items-start gap-2">
-                <Check className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden="true" />
-                {perk}
-              </li>
-            ))}
-          </ul>
+          <VipStatusCard />
           <button
             type="button"
             onClick={closeVipModal}
-            className="mt-6 w-full rounded-xl bg-primary px-4 py-3 text-sm font-bold text-primary-foreground"
+            className="mt-4 w-full rounded-xl bg-primary px-4 py-3 text-sm font-bold text-primary-foreground"
           >
             Back to my report
           </button>
@@ -290,7 +278,7 @@ export function VipModal() {
               label: "1 month, no ads",
               amount: monthlyPrice,
               note: offerActive
-                ? `one-visit offer — normally ${monthlyFull}`
+                ? `one-time offer — regular price ${monthlyFull}`
                 : "renews monthly — cancel anytime",
             },
             {
@@ -298,7 +286,7 @@ export function VipModal() {
               label: "Lifetime VIP",
               amount: lifetimePrice,
               note: offerActive
-                ? `one-visit offer — normally ${lifetimeFull}`
+                ? `one-time offer — regular price ${lifetimeFull}`
                 : "one payment, every future tool",
             },
           ].map((option) => {
@@ -341,7 +329,9 @@ export function VipModal() {
             </button>
             <p className="mt-2 text-center text-xs text-muted-foreground">{copy.reassurance}</p>
             <p className="mt-1 text-center text-xs text-muted-foreground">
-              Card, Apple&nbsp;Pay and Google&nbsp;Pay — secured by Whop, we never see your card.
+              {plan === "monthly"
+                ? "Monthly plans accept card and bank (ACH). Apple Pay, Google Pay and crypto are available on Lifetime VIP."
+                : "Card, Apple\u00a0Pay, Google\u00a0Pay and crypto — secured by Whop, we never see your card."}
             </p>
           </>
         ) : (
