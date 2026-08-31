@@ -112,47 +112,67 @@ function VipCheckoutPage() {
     setOrigin(window.location.origin);
   }, []);
 
-  // Slow Gulf mobile networks sometimes never finish the embed. After 6s we
-  // surface a one-tap hosted-checkout fallback instead of a dead frame.
+  // Slow Gulf mobile networks routinely need 4-8s for the embed's own bundle
+  // plus its first paint. The old 2.5s cut-off reported a "timeout" for frames
+  // that were still perfectly on their way, which is why 42% of checkouts
+  // looked broken while the buyer actually saw a form. We now wait 9s before
+  // declaring failure, still record a soft "slow" mark at 3s for diagnostics,
+  // and recover automatically if the frame lands late.
   const [slow, setSlow] = useState(false);
   const [embedded, setEmbedded] = useState(false);
 
   useEffect(() => {
     if (!origin) return;
     track({ event_type: "impression", slot: "vip_checkout_page", format: "checkout" });
+    const startedAt = performance.now();
+    let loaded = false;
+    let timedOut = false;
     const mount = document.querySelector("[data-whop-checkout-plan-id]");
     const observeFrame = () => {
       const frame = mount?.querySelector("iframe");
-      if (!frame) return false;
+      if (!frame || loaded) return Boolean(frame);
+      loaded = true;
       setEmbedded(true);
-      track({ event_type: "funnel", slot: "checkout_embed_loaded", format: "whop" });
+      track({
+        event_type: "funnel",
+        slot: timedOut ? "checkout_embed_recovered" : "checkout_embed_loaded",
+        format: "whop",
+        // Real mount latency, so the timeout budget can be tuned from data
+        // instead of guesswork.
+        metric_value: Math.round(performance.now() - startedAt),
+      });
       return true;
     };
     const observer = new MutationObserver(() => observeFrame());
     if (mount && !observeFrame()) observer.observe(mount, { childList: true, subtree: true });
+    const softTimer = window.setTimeout(() => {
+      if (!loaded) track({ event_type: "funnel", slot: "checkout_embed_slow", format: "whop" });
+    }, 3000);
     const timer = window.setTimeout(() => {
-      const frame = document.querySelector("[data-whop-checkout-plan-id] iframe");
-      if (!frame) {
-        setSlow(true);
-        track({ event_type: "funnel", slot: "checkout_embed_timeout", format: "whop" });
-      }
-    }, 2500);
+      if (observeFrame()) return;
+      timedOut = true;
+      setSlow(true);
+      track({ event_type: "funnel", slot: "checkout_embed_timeout", format: "whop" });
+    }, 9000);
 
-    if (!document.getElementById("whop-checkout-loader")) {
-      const script = document.createElement("script");
-      script.id = "whop-checkout-loader";
-      script.src = "https://js.whop.com/static/checkout/loader.js";
-      script.async = true;
-      script.defer = true;
-      script.onerror = () => {
-        setSlow(true);
-        track({ event_type: "funnel", slot: "checkout_loader_failed", format: "whop" });
-      };
-      document.body.appendChild(script);
-    }
+    // The loader scans the DOM once when it boots. On a client-side navigation
+    // (offer → checkout) a cached loader has already booted, so it never sees
+    // this mount node and the frame can never appear. Re-injecting a fresh
+    // script node forces a rescan for every checkout page view.
+    document.getElementById("whop-checkout-loader")?.remove();
+    const script = document.createElement("script");
+    script.id = "whop-checkout-loader";
+    script.src = "https://js.whop.com/static/checkout/loader.js";
+    script.async = true;
+    script.onerror = () => {
+      setSlow(true);
+      track({ event_type: "funnel", slot: "checkout_loader_failed", format: "whop" });
+    };
+    document.body.appendChild(script);
     return () => {
       observer.disconnect();
       window.clearTimeout(timer);
+      window.clearTimeout(softTimer);
     };
   }, [origin]);
 
