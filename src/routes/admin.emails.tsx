@@ -2,14 +2,16 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
-import { ArrowLeft, Mail, RefreshCw } from "lucide-react";
+import { ArrowLeft, Download, Mail, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 
+import { downloadCsv, toCsv } from "@/lib/csv";
 import {
   adminEmailsReport,
   adminRetryWelcomeEmails,
   type EmailsReport,
 } from "@/lib/emails.functions";
+
 
 export const Route = createFileRoute("/admin/emails")({
   head: () => ({
