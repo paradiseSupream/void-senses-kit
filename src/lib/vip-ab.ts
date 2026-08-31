@@ -59,7 +59,8 @@ const ROTOR_KEY = "sov.vipGateArm.rotor";
  */
 function balancedIndex(size: number): number {
   try {
-    const raw = Number(window.localStorage.getItem(ROTOR_KEY));
+    const stored = window.localStorage.getItem(ROTOR_KEY);
+    const raw = stored === null ? Number.NaN : Number(stored);
     const cursor = Number.isFinite(raw) && raw >= 0 ? raw : unbiasedInt(size);
     window.localStorage.setItem(ROTOR_KEY, String((cursor + 1) % size));
     return cursor % size;
