@@ -50,7 +50,7 @@ export function VipOfferCard({
 
   // One shared price source — the card, the modal and the checkout page all
   // read the same numbers, so the quoted price is the charged price.
-  const { monthly, lifetime, lifetimeFull, offerActive } = useVipPrices();
+  const { monthly, lifetime, lifetimeFull } = useVipPrices();
 
   useEffect(() => {
     if (isVip) return;
