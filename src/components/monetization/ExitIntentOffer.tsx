@@ -29,7 +29,7 @@ export function ExitIntentOffer() {
     const isRetarget = tracking?.retarget_monthly !== false && isMonthlyRetargetVisitor();
     setRetarget(isRetarget);
     try {
-      if (window.sessionStorage.getItem(SEEN_KEY) === "1") return;
+      if (window.localStorage.getItem(SEEN_KEY) === "1") return;
     } catch {
       /* storage unavailable */
     }
@@ -39,7 +39,7 @@ export function ExitIntentOffer() {
       if (done) return;
       done = true;
       try {
-        window.sessionStorage.setItem(SEEN_KEY, "1");
+        window.localStorage.setItem(SEEN_KEY, "1");
       } catch {
         /* storage unavailable */
       }
