@@ -469,10 +469,10 @@ function Home() {
           />
         </div>
 
-        <div className="mt-5 grid auto-rows-fr grid-flow-row-dense grid-cols-2 gap-3 sm:mt-8 sm:gap-4">
+        <div className="mt-5 grid grid-flow-row-dense grid-cols-2 gap-3 sm:mt-8 sm:gap-4">
           {slots.map((slot, i) =>
             "ad" in slot ? (
-              <div key={`ad-${i}`} className="col-span-2 grid">
+              <div key={`ad-${i}`} className="col-span-2 grid empty:hidden">
                 <NativeAdCard index={slot.ad} />
               </div>
             ) : (
