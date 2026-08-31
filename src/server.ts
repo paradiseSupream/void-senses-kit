@@ -76,7 +76,14 @@ function withSecurityHeaders(request: Request, response: Response): Response {
   headers.set("X-Content-Type-Options", "nosniff");
   headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
   headers.set("X-Frame-Options", "SAMEORIGIN");
-  headers.set("Permissions-Policy", "camera=(), microphone=(), geolocation=(), payment=(self)");
+  // `payment=(self)` silently disabled Apple Pay / Google Pay inside the Whop
+  // checkout iframe ("payment is not allowed in this document"), which is why
+  // checkout sessions were created but never completed. The provider origins
+  // must be allow-listed for the Payment Request API to work.
+  headers.set(
+    "Permissions-Policy",
+    'camera=(), microphone=(), geolocation=(), payment=(self "https://whop.com" "https://js.stripe.com" "https://checkout.whop.com"), publickey-credentials-get=(self "https://whop.com")',
+  );
   headers.set("Cross-Origin-Opener-Policy", "same-origin-allow-popups");
   headers.set("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
   if (!headers.has("Content-Security-Policy-Report-Only")) {
