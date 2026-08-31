@@ -36,7 +36,6 @@ const PERKS = [
 
 export function VipModal() {
   const { vipModalOpen, closeVipModal, setVip, isVip, preferredPlan } = useVip();
-  const { plan: activePlan } = useVip();
   const saveLead = useServerFn(subscribeLead);
   const beginCheckout = useServerFn(startVipCheckout);
   const restoreVip = useServerFn(restoreVipAccess);
@@ -197,7 +196,7 @@ export function VipModal() {
         className="fixed inset-0 z-50 grid place-items-center overflow-y-auto bg-background/85 p-4 backdrop-blur-sm"
         role="dialog"
         aria-modal="true"
-        aria-labelledby="vip-title"
+        aria-label="Your VIP plan"
       >
         <div className="glass relative w-full max-w-md rounded-2xl p-7">
           <button
