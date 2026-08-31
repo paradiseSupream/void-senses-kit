@@ -25,7 +25,7 @@ export const Route = createFileRoute("/vip/checkout")({
     if (typeof search["p"] === "string") parsed.p = search["p"];
     if (typeof search["order"] === "string") parsed.order = search["order"];
     // The router serialises string search params as JSON, so `amount` can
-    // arrive quoted ("299"). Unquoting keeps the displayed price — and the
+    // arrive quoted (for example "349"). Unquoting keeps the displayed price — and the
     // monthly-plan copy — from silently falling back to NaN.
     const rawAmount = search["amount"];
     if (typeof rawAmount === "string" || typeof rawAmount === "number") {
@@ -152,7 +152,7 @@ function VipCheckoutPage() {
     };
   }, [origin]);
 
-  // The $9 Shadow Matrix add-on returns straight into the dossier; VIP plans go
+  // The Shadow Matrix add-on returns straight into the dossier; VIP plans go
   // through /vip/success so the webhook can be polled and a license shown.
   const returnUrl = origin
     ? m === "1"
@@ -161,7 +161,7 @@ function VipCheckoutPage() {
     : "";
 
   const price = amount ? `$${(Number(amount) / 100).toFixed(2)}` : null;
-  const isMonthly = amount === "199" || amount === "299";
+  const isMonthly = amount === "249" || amount === "349";
   const hostedCheckoutUrl = s && p
     ? `https://whop.com/checkout/${encodeURIComponent(p)}?session=${encodeURIComponent(s)}`
     : null;
@@ -182,6 +182,10 @@ function VipCheckoutPage() {
         {price ? `${price} — ` : ""}card, Apple&nbsp;Pay, Google&nbsp;Pay and bank (ACH) in 195
         countries, or pay in crypto below. VIP unlocks the moment the payment clears.
       </p>
+      <p className="mt-1 text-xs text-muted-foreground">
+        The displayed total already includes estimated payment processing — no extra app fee is
+        added at checkout.
+      </p>
       {isMonthly ? (
         <div className="glass mt-4 rounded-2xl border border-primary/25 p-3">
           <p className="text-xs text-muted-foreground">
@@ -199,7 +203,7 @@ function VipCheckoutPage() {
             className="mt-2 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-4 text-sm font-semibold text-primary disabled:opacity-60"
           >
             {busyLifetime ? <Loader2 className="size-4 animate-spin" aria-hidden="true" /> : null}
-            Switch to Lifetime VIP · {usd(VIP_LIFETIME_CENTS, 0)} one payment
+            Switch to Lifetime VIP · {usd(VIP_LIFETIME_CENTS)} one payment
           </button>
         </div>
       ) : null}

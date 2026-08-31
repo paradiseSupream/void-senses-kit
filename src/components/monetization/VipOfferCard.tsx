@@ -33,7 +33,7 @@ const REGION_NAME: Record<string, string> = {
  *
  * The persuasion stack here is deliberate and each layer is honest:
  * ownership ("your report" — they already earned it), loss aversion (what
- * stays hidden), anchoring ($19 lifetime next to the $2.99 entry), real
+ * stays hidden), honest lifetime-vs-monthly anchoring, real
  * social proof counted from live events, session-true scarcity, and risk
  * reversal right under the button where the hesitation actually happens.
  */

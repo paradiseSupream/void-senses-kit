@@ -14,7 +14,7 @@ import { grantMatrix, useMatrix } from "@/lib/vip-unlock";
 import { useVip } from "@/lib/vip";
 import type { Dossier } from "@/lib/archetype-core";
 
-/** Shared checkout kick-off for the $9 Shadow Matrix add-on. */
+/** Shared checkout kick-off for the Shadow Matrix add-on. */
 function useMatrixCheckout() {
   const begin = useServerFn(startMatrixCheckout);
   const navigate = useNavigate();
@@ -46,7 +46,7 @@ function useMatrixCheckout() {
           s: result.checkoutId,
           p: result.planId,
           order: result.orderId ?? "",
-          amount: String(result.amountCents ?? 900),
+          amount: String(result.amountCents ?? 999),
           m: "1",
         },
       });
@@ -123,7 +123,7 @@ export function MatrixUpsellModal({ onDismiss }: { onDismiss: () => void }) {
         </ul>
 
         <p className="mt-5 font-display text-3xl font-bold text-primary">
-          $9.00 <span className="text-sm font-medium text-muted-foreground">one-time access</span>
+          $9.99 <span className="text-sm font-medium text-muted-foreground">one-time access</span>
         </p>
 
         <button
@@ -133,7 +133,7 @@ export function MatrixUpsellModal({ onDismiss }: { onDismiss: () => void }) {
           className="mt-4 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-primary px-5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-60"
         >
           {busy ? <Loader2 className="size-4 animate-spin" aria-hidden="true" /> : null}
-          Add Shadow Matrix for $9
+          Add Shadow Matrix for $9.99
         </button>
         <button
           type="button"
@@ -154,7 +154,7 @@ export function MatrixUpsellModal({ onDismiss }: { onDismiss: () => void }) {
  */
 export function MatrixModule({ dossier }: { dossier: Dossier }) {
   // VIP members already paid for the full dossier — the add-on is included for
-  // them, so the $9 tease must never appear after a VIP purchase.
+  // them, so the add-on tease must never appear after a VIP purchase.
   const { isVip } = useVip();
   const owned = useMatrix() || isVip;
   const { start, busy } = useMatrixCheckout();
@@ -171,7 +171,7 @@ export function MatrixModule({ dossier }: { dossier: Dossier }) {
         </h3>
         <p className="mt-1 text-sm text-muted-foreground">
           How {dossier.archetype.name} attracts, triggers and destroys relationships — plus the
-          defence protocol and archetype pairings. $9 one-time.
+          defence protocol and archetype pairings. $9.99 one-time.
         </p>
         <button
           type="button"
@@ -180,7 +180,7 @@ export function MatrixModule({ dossier }: { dossier: Dossier }) {
           className="mt-4 inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-primary px-5 text-sm font-semibold text-primary-foreground disabled:opacity-60"
         >
           {busy ? <Loader2 className="size-4 animate-spin" aria-hidden="true" /> : null}
-          Add Shadow Matrix for $9
+          Add Shadow Matrix for $9.99
         </button>
         {import.meta.env.DEV ? (
           <button

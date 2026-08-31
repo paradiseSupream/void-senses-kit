@@ -116,7 +116,10 @@ export async function lookupVipByLicense(
     .maybeSingle();
 
   if (!row || !row.active) return miss;
-  const expired = Boolean(row.expires_at && new Date(row.expires_at).getTime() < Date.now());
+  // Lifetime always wins, even if an old monthly expiry survived a legacy row.
+  const expired = Boolean(
+    row.plan === "monthly" && row.expires_at && new Date(row.expires_at).getTime() < Date.now(),
+  );
   if (expired) return miss;
   return {
     active: true,
@@ -137,7 +140,9 @@ export async function lookupVip(email: string): Promise<VipAccess> {
     .maybeSingle();
 
   if (!row || !row.active) return { active: false, plan: null, expiresAt: null, licenseKey: null };
-  const expired = Boolean(row.expires_at && new Date(row.expires_at).getTime() < Date.now());
+  const expired = Boolean(
+    row.plan === "monthly" && row.expires_at && new Date(row.expires_at).getTime() < Date.now(),
+  );
   return {
     active: !expired,
     plan: expired ? null : ((row.plan as VipPlanName) ?? "lifetime"),

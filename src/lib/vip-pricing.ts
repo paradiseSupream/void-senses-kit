@@ -11,11 +11,14 @@
 import { useVipOffer } from "@/lib/vip-offer";
 import { MONTHLY_OFFER_CENTS, OFFER_CENTS } from "@/lib/vip-offer";
 
-/** Entry-priced monthly no-ads pass — the first offer cold traffic sees. */
-export const VIP_MONTHLY_CENTS = 299;
+/**
+ * Customer-facing totals. Provider/processing cost is folded into these
+ * amounts, so checkout never adds a surprise line after the CTA price.
+ */
+export const VIP_MONTHLY_CENTS = 349;
 
 /** Standard lifetime pass. */
-export const VIP_LIFETIME_CENTS = 1900;
+export const VIP_LIFETIME_CENTS = 2049;
 
 /** Discounted amounts once the one-visit downsell has been granted. */
 export const VIP_MONTHLY_OFFER_CENTS = MONTHLY_OFFER_CENTS;
@@ -27,9 +30,9 @@ export type VipPrices = {
   offerActive: boolean;
   monthlyCents: number;
   lifetimeCents: number;
-  /** Formatted, e.g. "$2.99". */
+  /** Formatted customer total, e.g. "$3.49". */
   monthly: string;
-  /** Formatted, e.g. "$19". */
+  /** Formatted customer total, e.g. "$20.49". */
   lifetime: string;
   /** Undiscounted list prices, used only as honest strike-through anchors. */
   monthlyFull: string;
@@ -49,8 +52,8 @@ export function useVipPrices(): VipPrices {
     monthlyCents,
     lifetimeCents,
     monthly: usd(monthlyCents),
-    lifetime: usd(lifetimeCents, 0),
+    lifetime: usd(lifetimeCents),
     monthlyFull: usd(VIP_MONTHLY_CENTS),
-    lifetimeFull: usd(VIP_LIFETIME_CENTS, 0),
+    lifetimeFull: usd(VIP_LIFETIME_CENTS),
   };
 }

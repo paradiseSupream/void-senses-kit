@@ -63,8 +63,8 @@ export const startVipCheckout = createServerFn({ method: "POST" })
   )
   .handler(async ({ data }): Promise<CheckoutStart> => {
     const PRICES: Record<VipPlanName, { full: number; offer: number }> = {
-      lifetime: { full: 1900, offer: 900 },
-      monthly: { full: 299, offer: 199 },
+      lifetime: { full: 2049, offer: 999 },
+      monthly: { full: 349, offer: 249 },
     };
     const { createWhopCheckout, isWhopPrice, whopConfigured } = await import("@/lib/whop.server");
     if (!whopConfigured()) {
@@ -146,17 +146,18 @@ export const vipOrderStatus = createServerFn({ method: "POST" })
       email: string | null;
       licenseKey: string | null;
       expiresAt: string | null;
+      amountCents: number | null;
       reason?: string | null;
     }> => {
       const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
       const { data: row } = await supabaseAdmin
         .from("vip_orders")
-        .select("status,plan,email")
+        .select("status,plan,email,amount_cents")
         .eq("order_id", data.orderId)
         .maybeSingle();
 
       if (!row)
-        return { status: "unknown", plan: null, email: null, licenseKey: null, expiresAt: null };
+        return { status: "unknown", plan: null, email: null, licenseKey: null, expiresAt: null, amountCents: null };
       const plan = (row.plan as VipPlanName) ?? "lifetime";
       if (row.status !== "paid") {
         const { reconcileOrder } = await import("@/lib/vip-reconcile.server");
@@ -168,6 +169,7 @@ export const vipOrderStatus = createServerFn({ method: "POST" })
             email: recon.email ?? row.email ?? null,
             licenseKey: null,
             expiresAt: null,
+            amountCents: row.amount_cents ?? null,
             reason: recon.reason,
           };
         }
@@ -179,6 +181,7 @@ export const vipOrderStatus = createServerFn({ method: "POST" })
           email: recon.email ?? null,
           licenseKey: granted?.licenseKey ?? null,
           expiresAt: granted?.expiresAt ?? null,
+          amountCents: row.amount_cents ?? null,
         };
       }
 
@@ -191,6 +194,7 @@ export const vipOrderStatus = createServerFn({ method: "POST" })
         email: row.email ?? null,
         licenseKey: access?.licenseKey ?? null,
         expiresAt: access?.expiresAt ?? null,
+        amountCents: row.amount_cents ?? null,
       };
     },
   );
@@ -232,7 +236,7 @@ export const restoreVipAccess = createServerFn({ method: "POST" })
   });
 
 /**
- * $9 Shadow Matrix add-on checkout (one-time). The price is fixed server-side;
+ * Shadow Matrix add-on checkout (one-time). The price is fixed server-side;
  * the client can only ask for it, never name it.
  */
 export const startMatrixCheckout = createServerFn({ method: "POST" })
@@ -254,7 +258,7 @@ export const startMatrixCheckout = createServerFn({ method: "POST" })
     }),
   )
   .handler(async ({ data }): Promise<CheckoutStart> => {
-    const AMOUNT_CENTS = 900;
+    const AMOUNT_CENTS = 999;
     const { createWhopCheckout, whopConfigured } = await import("@/lib/whop.server");
     if (!whopConfigured()) return { ok: false, reason: "Card checkout is not connected yet." };
 

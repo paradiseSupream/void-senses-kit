@@ -25,7 +25,7 @@ export function ExitIntentOffer() {
 
   useEffect(() => {
     if (isVip) return;
-    // Returning non-buyers get the $2.99 monthly pass first, and sooner.
+    // Returning non-buyers get the monthly pass first, and sooner.
     const isRetarget = tracking?.retarget_monthly !== false && isMonthlyRetargetVisitor();
     setRetarget(isRetarget);
     try {
