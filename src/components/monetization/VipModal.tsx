@@ -20,8 +20,7 @@ import { useVip, type VipPlan } from "@/lib/vip";
 import { useSiteConfig } from "@/lib/site-config";
 import { trackFunnel } from "@/lib/funnel";
 import { cookie } from "@/lib/pixels";
-import { MONTHLY_OFFER_CENTS, OFFER_CENTS, useVipOffer } from "@/lib/vip-offer";
-import { VIP_MONTHLY_CENTS } from "@/lib/vip-pricing";
+import { useVipPrices } from "@/lib/vip-pricing";
 
 export { VIP_MONTHLY_CENTS } from "@/lib/vip-pricing";
 
@@ -45,12 +44,13 @@ export function VipModal() {
   const [tab, setTab] = useState<"card" | "crypto">("card");
   const [plan, setPlan] = useState<VipPlan>(preferredPlan);
   const { site } = useSiteConfig();
-  const offerActive = useVipOffer();
-
-  const lifetimeCents = offerActive ? OFFER_CENTS : site.vip_price_cents;
-  const monthlyCents = offerActive ? MONTHLY_OFFER_CENTS : VIP_MONTHLY_CENTS;
-  const lifetimePrice = `$${(lifetimeCents / 100).toFixed(0)}`;
-  const monthlyPrice = `$${(monthlyCents / 100).toFixed(2)}`;
+  const {
+    offerActive,
+    monthly: monthlyPrice,
+    lifetime: lifetimePrice,
+    monthlyFull,
+    lifetimeFull,
+  } = useVipPrices();
   const price = plan === "lifetime" ? lifetimePrice : monthlyPrice;
 
   // Copy-only A/B arm for the gate — resolved on the client so the sticky
@@ -213,15 +213,23 @@ export function VipModal() {
 
         <div className="mt-4 flex items-center gap-3 rounded-xl border border-primary/30 bg-primary/10 p-3">
           <span className="rounded-full bg-primary px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary-foreground">
-            {plan === "monthly" ? "Entry offer" : "Launch offer"}
+            {plan === "monthly" ? "Entry offer" : "Lifetime"}
           </span>
           <div className="flex items-baseline gap-2">
-            <span className="font-display text-lg text-muted-foreground line-through decoration-muted-foreground/60">
-              {plan === "monthly" ? "$9.99" : "$49"}
-            </span>
+            {/* Only strike through a price we actually charge otherwise —
+                a fake anchor is what made the numbers look inconsistent. */}
+            {offerActive ? (
+              <span className="font-display text-lg text-muted-foreground line-through decoration-muted-foreground/60">
+                {plan === "monthly" ? monthlyFull : lifetimeFull}
+              </span>
+            ) : plan === "monthly" ? (
+              <span className="font-display text-lg text-muted-foreground line-through decoration-muted-foreground/60">
+                {lifetimeFull}
+              </span>
+            ) : null}
             <span className="font-display text-3xl font-bold text-primary">{price}</span>
             <span className="text-xs font-semibold text-emerald-400">
-              {plan === "monthly" ? "Best way to start" : "Save 61%"}
+              {plan === "monthly" ? "Best way to start" : "One payment, forever"}
             </span>
           </div>
         </div>
@@ -233,7 +241,7 @@ export function VipModal() {
               label: "1 month, no ads",
               amount: monthlyPrice,
               note: offerActive
-                ? `one-visit offer — normally $${(VIP_MONTHLY_CENTS / 100).toFixed(2)}`
+                ? `one-visit offer — normally ${monthlyFull}`
                 : "renews monthly — cancel anytime",
             },
             {
@@ -241,7 +249,7 @@ export function VipModal() {
               label: "Lifetime VIP",
               amount: lifetimePrice,
               note: offerActive
-                ? `one-visit offer — normally $${(site.vip_price_cents / 100).toFixed(0)}`
+                ? `one-visit offer — normally ${lifetimeFull}`
                 : "one payment, every future tool",
             },
           ].map((option) => {
