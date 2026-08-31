@@ -7,7 +7,9 @@ import { ScarcityTimer } from "@/components/monetization/ScarcityTimer";
 import { VipStatusCard } from "@/components/monetization/VipStatusCard";
 import { useVip } from "@/lib/vip";
 
-import { track, visitorCountry } from "@/lib/monetization";
+import { track, trackExperiment, visitorCountry } from "@/lib/monetization";
+import { VIP_GATE_VIEW_SLOT, vipGateArm } from "@/lib/vip-ab";
+
 import { trackFunnel } from "@/lib/funnel";
 import { useDirectCheckout } from "@/lib/use-direct-checkout";
 import { preloadWhopCheckout } from "@/lib/whop-preload";
@@ -54,15 +56,24 @@ export function VipOfferCard({
   const { monthly, lifetime, lifetimeFull } = useVipPrices();
 
   useEffect(() => {
+    // This component only mounts on a finished result, so it is the honest
+    // place for the completion signals (they used to fire from the tool shell
+    // on page load, which made every bounced session look like a completion).
+    track({ event_type: "tool_complete", slot: `result-${toolSlug}`, tool_slug: toolSlug });
+    trackFunnel("result_view", toolSlug);
     if (isVip) return;
     track({ event_type: "impression", slot: "vip_offer_card", tool_slug: toolSlug });
     trackFunnel("vip_gate_shown", toolSlug);
+    // Record which persuasion arm this visitor was actually exposed to. The
+    // gate card is the real exposure point; the modal only sees a fraction.
+    trackExperiment(VIP_GATE_VIEW_SLOT, vipGateArm());
     // The buyer's next tap is checkout — warm it now so the page is instant.
     preloadWhopCheckout();
     // Tell the exit offer the visitor just reached a finished result, so the
     // one-time price can appear at the real leaving moment.
     window.dispatchEvent(new Event("sov:result-ready"));
   }, [isVip, toolSlug]);
+
 
   useEffect(() => {
     if (isVip) return;
