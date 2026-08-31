@@ -130,9 +130,11 @@ export function LockedReport({
         <span className="mx-auto grid size-11 place-items-center rounded-xl border border-hairline bg-surface-2">
           <Lock className="size-5 text-primary" aria-hidden="true" />
         </span>
-        <h3 className="mt-3 font-display text-lg font-semibold">{title} locked</h3>
+        <h3 className="mt-3 font-display text-lg font-semibold">
+          You&apos;ve earned this {title.toLowerCase()} — it&apos;s still locked
+        </h3>
         <p className="mx-auto mt-1 max-w-sm text-sm text-muted-foreground">{blurb}</p>
-        <ScarcityTimer className="mt-3" />
+        <ScarcityTimer className="mt-3" label="This price ends in" />
         <div className="mt-5 flex flex-col gap-2.5 sm:flex-row sm:justify-center">
           <button
             type="button"
