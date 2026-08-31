@@ -2,12 +2,14 @@ import { useEffect, useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 
-import { Bitcoin, ShieldCheck } from "lucide-react";
+import { Bitcoin, Loader2, ShieldCheck } from "lucide-react";
 
 import { LogoMark } from "@/components/brand/LogoMark";
 import { track } from "@/lib/monetization";
 import { useVip } from "@/lib/vip";
 import { vipOrderStatus } from "@/lib/vip.functions";
+import { useDirectCheckout } from "@/lib/use-direct-checkout";
+import { VIP_LIFETIME_CENTS, usd } from "@/lib/vip-pricing";
 
 
 type Search = { s?: string; p?: string; order?: string; amount?: string; m?: string };
@@ -59,6 +61,7 @@ function VipCheckoutPage() {
   const { openVipModal } = useVip();
   const navigate = useNavigate();
   const checkOrder = useServerFn(vipOrderStatus);
+  const { busy: busyLifetime, go: goLifetime } = useDirectCheckout();
 
   // Whop's embed sometimes paints its success tick without ever firing the
   // return-url redirect (in-app browsers block the top-level navigation). We

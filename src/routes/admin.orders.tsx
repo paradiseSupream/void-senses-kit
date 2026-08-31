@@ -308,7 +308,7 @@ function OrdersPage() {
                 <tr>
                   <th className="p-3">Order</th>
                   <th className="p-3">Status</th>
-                  <th className="p-3">Amount</th>
+                  <th className="p-3">Amount (gross · net)</th>
                   <th className="p-3">Payment</th>
                   <th className="p-3">Billing</th>
                   <th className="p-3">Buyer</th>
@@ -354,7 +354,9 @@ function OrdersPage() {
                     </td>
                     <td className="p-3 whitespace-nowrap">
                       {money(row.amountCents)}
-                      <span className="block text-[11px] text-muted-foreground">{row.currency}</span>
+                      <span className="block text-[11px] text-muted-foreground">
+                        {row.currency} · net ≈ {money(netCents(row.amountCents))}
+                      </span>
                     </td>
                     <td className="p-3 text-xs">
                       {row.cardBrand || row.cardLast4 ? (
