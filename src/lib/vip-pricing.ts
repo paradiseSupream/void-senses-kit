@@ -30,9 +30,9 @@ export type VipPrices = {
   offerActive: boolean;
   monthlyCents: number;
   lifetimeCents: number;
-  /** Formatted, e.g. "$2.99". */
+  /** Formatted customer total, e.g. "$3.49". */
   monthly: string;
-  /** Formatted, e.g. "$19". */
+  /** Formatted customer total, e.g. "$20.49". */
   lifetime: string;
   /** Undiscounted list prices, used only as honest strike-through anchors. */
   monthlyFull: string;
@@ -52,8 +52,8 @@ export function useVipPrices(): VipPrices {
     monthlyCents,
     lifetimeCents,
     monthly: usd(monthlyCents),
-    lifetime: usd(lifetimeCents, 0),
+    lifetime: usd(lifetimeCents),
     monthlyFull: usd(VIP_MONTHLY_CENTS),
-    lifetimeFull: usd(VIP_LIFETIME_CENTS, 0),
+    lifetimeFull: usd(VIP_LIFETIME_CENTS),
   };
 }

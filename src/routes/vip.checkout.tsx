@@ -152,7 +152,7 @@ function VipCheckoutPage() {
     };
   }, [origin]);
 
-  // The $9 Shadow Matrix add-on returns straight into the dossier; VIP plans go
+  // The Shadow Matrix add-on returns straight into the dossier; VIP plans go
   // through /vip/success so the webhook can be polled and a license shown.
   const returnUrl = origin
     ? m === "1"
@@ -203,7 +203,7 @@ function VipCheckoutPage() {
             className="mt-2 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-4 text-sm font-semibold text-primary disabled:opacity-60"
           >
             {busyLifetime ? <Loader2 className="size-4 animate-spin" aria-hidden="true" /> : null}
-            Switch to Lifetime VIP · {usd(VIP_LIFETIME_CENTS, 0)} one payment
+            Switch to Lifetime VIP · {usd(VIP_LIFETIME_CENTS)} one payment
           </button>
         </div>
       ) : null}

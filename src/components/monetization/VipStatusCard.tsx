@@ -99,7 +99,7 @@ export function VipStatusCard({ className = "" }: { className?: string }) {
         <div className="mt-4 rounded-xl border border-hairline bg-surface-2/50 p-3">
           <p className="text-sm font-medium">Stop the monthly renewal</p>
           <p className="mt-0.5 text-xs text-muted-foreground">
-            Upgrade to Lifetime VIP — {usd(VIP_LIFETIME_CENTS, 0)} one payment, never renews. Wallet
+            Upgrade to Lifetime VIP — {usd(VIP_LIFETIME_CENTS)} one payment, never renews. Wallet
             and crypto payment are available on this plan.
           </p>
           <button
@@ -114,7 +114,7 @@ export function VipStatusCard({ className = "" }: { className?: string }) {
             className="mt-2.5 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-4 text-sm font-semibold text-primary transition-colors hover:bg-primary/15 disabled:opacity-60"
           >
             {busy ? <Loader2 className="size-4 animate-spin" aria-hidden="true" /> : null}
-            Upgrade to Lifetime · {usd(VIP_LIFETIME_CENTS, 0)}
+            Upgrade to Lifetime · {usd(VIP_LIFETIME_CENTS)}
           </button>
           {error ? (
             <p role="alert" className="mt-2 text-center text-xs text-destructive">

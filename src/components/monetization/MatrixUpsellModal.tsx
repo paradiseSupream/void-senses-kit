@@ -46,7 +46,7 @@ function useMatrixCheckout() {
           s: result.checkoutId,
           p: result.planId,
           order: result.orderId ?? "",
-          amount: String(result.amountCents ?? 900),
+          amount: String(result.amountCents ?? 999),
           m: "1",
         },
       });

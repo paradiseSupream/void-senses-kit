@@ -52,6 +52,7 @@ function VipSuccessPage() {
   );
   // What the payment provider itself says about an order that never cleared.
   const [reason, setReason] = useState<string | null>(null);
+  const [activatedPlan, setActivatedPlan] = useState<"monthly" | "lifetime">("lifetime");
 
   useEffect(() => {
     if (!order || state === "failed") return;
@@ -64,6 +65,7 @@ function VipSuccessPage() {
         const result = await checkOrder({ data: { orderId: order } });
         if (cancelled) return;
         if (result.status === "paid") {
+          setActivatedPlan(result.plan ?? "lifetime");
           rememberOrder(order, result.email);
           rememberLicense(result.licenseKey);
           setVip(true, result.plan ?? "lifetime");
@@ -104,7 +106,7 @@ function VipSuccessPage() {
             <CheckCircle2 className="size-7 text-primary" aria-hidden="true" />
           </span>
           <h1 className="mt-5 font-display text-2xl font-bold">
-            {resultPlan === "monthly" ? "Monthly VIP is active" : "Lifetime VIP is active"}
+            {activatedPlan === "monthly" ? "Monthly VIP is active" : "Lifetime VIP is active"}
           </h1>
           <p className="mt-2 text-sm text-muted-foreground">
             Ads, interstitials and export gates are off on this device. On any other device, open
