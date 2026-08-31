@@ -14,7 +14,6 @@ import { Route as CompareRouteImport } from './routes/compare'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as TermsRouteImport } from './routes/terms'
-import { Route as VaultRouteImport } from './routes/vault'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AdminApplePayRouteImport } from './routes/admin.apple-pay'
 import { Route as AdminAttributionRouteImport } from './routes/admin.attribution'
@@ -32,6 +31,7 @@ import { Route as ToolsIqRouteImport } from './routes/tools.iq'
 import { Route as ToolsLoveMatchRouteImport } from './routes/tools.love-match'
 import { Route as ToolsPromptMakerRouteImport } from './routes/tools.prompt-maker'
 import { Route as ToolsRoastRouteImport } from './routes/tools.roast'
+import { Route as VaultIndexRouteImport } from './routes/vault.index'
 import { Route as VipCheckoutRouteImport } from './routes/vip.checkout'
 import { Route as VipSuccessRouteImport } from './routes/vip.success'
 import { Route as ApiPublicCapiRouteImport } from './routes/api/public/capi'
@@ -69,11 +69,6 @@ const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
   path: '/terms',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const VaultRoute = VaultRouteImport.update({
-  id: '/vault',
-  path: '/vault',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminIndexRoute = AdminIndexRouteImport.update({
@@ -161,6 +156,11 @@ const ToolsRoastRoute = ToolsRoastRouteImport.update({
   path: '/tools/roast',
   getParentRoute: () => rootRouteImport,
 } as any)
+const VaultIndexRoute = VaultIndexRouteImport.update({
+  id: '/vault/',
+  path: '/vault/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const VipCheckoutRoute = VipCheckoutRouteImport.update({
   id: '/vip/checkout',
   path: '/vip/checkout',
@@ -234,7 +234,6 @@ export interface FileRoutesByFullPath {
   '/privacy': typeof PrivacyRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
-  '/vault': typeof VaultRoute
   '/admin/apple-pay': typeof AdminApplePayRoute
   '/admin/attribution': typeof AdminAttributionRoute
   '/admin/compliance': typeof AdminComplianceRoute
@@ -254,6 +253,7 @@ export interface FileRoutesByFullPath {
   '/admin/': typeof AdminIndexRoute
   '/archetypes/': typeof ArchetypesIndexRoute
   '/tools/': typeof ToolsIndexRoute
+  '/vault/': typeof VaultIndexRoute
   '/api/public/capi': typeof ApiPublicCapiRoute
   '/api/public/geo': typeof ApiPublicGeoRoute
   '/api/public/gsc-sync': typeof ApiPublicGscSyncRoute
@@ -272,7 +272,6 @@ export interface FileRoutesByTo {
   '/privacy': typeof PrivacyRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
-  '/vault': typeof VaultRoute
   '/admin/apple-pay': typeof AdminApplePayRoute
   '/admin/attribution': typeof AdminAttributionRoute
   '/admin/compliance': typeof AdminComplianceRoute
@@ -292,6 +291,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminIndexRoute
   '/archetypes': typeof ArchetypesIndexRoute
   '/tools': typeof ToolsIndexRoute
+  '/vault': typeof VaultIndexRoute
   '/api/public/capi': typeof ApiPublicCapiRoute
   '/api/public/geo': typeof ApiPublicGeoRoute
   '/api/public/gsc-sync': typeof ApiPublicGscSyncRoute
@@ -311,7 +311,6 @@ export interface FileRoutesById {
   '/privacy': typeof PrivacyRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
-  '/vault': typeof VaultRoute
   '/admin/apple-pay': typeof AdminApplePayRoute
   '/admin/attribution': typeof AdminAttributionRoute
   '/admin/compliance': typeof AdminComplianceRoute
@@ -331,6 +330,7 @@ export interface FileRoutesById {
   '/admin/': typeof AdminIndexRoute
   '/archetypes/': typeof ArchetypesIndexRoute
   '/tools/': typeof ToolsIndexRoute
+  '/vault/': typeof VaultIndexRoute
   '/api/public/capi': typeof ApiPublicCapiRoute
   '/api/public/geo': typeof ApiPublicGeoRoute
   '/api/public/gsc-sync': typeof ApiPublicGscSyncRoute
@@ -351,7 +351,6 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/sitemap.xml'
     | '/terms'
-    | '/vault'
     | '/admin/apple-pay'
     | '/admin/attribution'
     | '/admin/compliance'
@@ -371,6 +370,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/archetypes/'
     | '/tools/'
+    | '/vault/'
     | '/api/public/capi'
     | '/api/public/geo'
     | '/api/public/gsc-sync'
@@ -389,7 +389,6 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/sitemap.xml'
     | '/terms'
-    | '/vault'
     | '/admin/apple-pay'
     | '/admin/attribution'
     | '/admin/compliance'
@@ -409,6 +408,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/archetypes'
     | '/tools'
+    | '/vault'
     | '/api/public/capi'
     | '/api/public/geo'
     | '/api/public/gsc-sync'
@@ -427,7 +427,6 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/sitemap.xml'
     | '/terms'
-    | '/vault'
     | '/admin/apple-pay'
     | '/admin/attribution'
     | '/admin/compliance'
@@ -447,6 +446,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/archetypes/'
     | '/tools/'
+    | '/vault/'
     | '/api/public/capi'
     | '/api/public/geo'
     | '/api/public/gsc-sync'
@@ -466,7 +466,6 @@ export interface RootRouteChildren {
   PrivacyRoute: typeof PrivacyRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TermsRoute: typeof TermsRoute
-  VaultRoute: typeof VaultRoute
   AdminApplePayRoute: typeof AdminApplePayRoute
   AdminAttributionRoute: typeof AdminAttributionRoute
   AdminComplianceRoute: typeof AdminComplianceRoute
@@ -486,6 +485,7 @@ export interface RootRouteChildren {
   AdminIndexRoute: typeof AdminIndexRoute
   ArchetypesIndexRoute: typeof ArchetypesIndexRoute
   ToolsIndexRoute: typeof ToolsIndexRoute
+  VaultIndexRoute: typeof VaultIndexRoute
   ApiPublicCapiRoute: typeof ApiPublicCapiRoute
   ApiPublicGeoRoute: typeof ApiPublicGeoRoute
   ApiPublicGscSyncRoute: typeof ApiPublicGscSyncRoute
@@ -534,13 +534,6 @@ declare module '@tanstack/react-router' {
       path: '/terms'
       fullPath: '/terms'
       preLoaderRoute: typeof TermsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/vault': {
-      id: '/vault'
-      path: '/vault'
-      fullPath: '/vault'
-      preLoaderRoute: typeof VaultRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/': {
@@ -662,6 +655,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ToolsRoastRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/vault/': {
+      id: '/vault/'
+      path: '/vault'
+      fullPath: '/vault/'
+      preLoaderRoute: typeof VaultIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/vip/checkout': {
       id: '/vip/checkout'
       path: '/vip/checkout'
@@ -762,7 +762,6 @@ const rootRouteChildren: RootRouteChildren = {
   PrivacyRoute: PrivacyRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TermsRoute: TermsRoute,
-  VaultRoute: VaultRoute,
   AdminApplePayRoute: AdminApplePayRoute,
   AdminAttributionRoute: AdminAttributionRoute,
   AdminComplianceRoute: AdminComplianceRoute,
@@ -782,6 +781,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminIndexRoute: AdminIndexRoute,
   ArchetypesIndexRoute: ArchetypesIndexRoute,
   ToolsIndexRoute: ToolsIndexRoute,
+  VaultIndexRoute: VaultIndexRoute,
   ApiPublicCapiRoute: ApiPublicCapiRoute,
   ApiPublicGeoRoute: ApiPublicGeoRoute,
   ApiPublicGscSyncRoute: ApiPublicGscSyncRoute,
