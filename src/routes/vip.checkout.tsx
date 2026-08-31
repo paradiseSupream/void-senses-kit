@@ -54,6 +54,8 @@ export const Route = createFileRoute("/vip/checkout")({
 
 function VipCheckoutPage() {
   const { s, p, order, amount, m } = Route.useSearch();
+  const { openVipModal } = useVip();
+
   // The embedded checkout reads its data-attributes when the loader boots, so
   // the mount target is rendered only once the real return URL is known.
   const [origin, setOrigin] = useState("");
