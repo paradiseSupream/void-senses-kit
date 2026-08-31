@@ -173,9 +173,9 @@ function VipCheckoutPage() {
     document.getElementById("whop-checkout-loader")?.remove();
     const script = document.createElement("script");
     script.id = "whop-checkout-loader";
-    // Cache-busted per mount so the browser re-executes the loader instead of
-    // treating the identical URL as an already-evaluated module.
-    script.src = `https://js.whop.com/static/checkout/loader.js?v=${Date.now()}`;
+    // No query string: the loader derives its bundle URL from its own `src`
+    // with a `/loader\.js$/` replace, so any suffix breaks the boot.
+    script.src = "https://js.whop.com/static/checkout/loader.js";
     script.async = true;
     script.onerror = () => {
       setSlow(true);
