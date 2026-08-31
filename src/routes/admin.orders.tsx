@@ -109,6 +109,37 @@ function OrdersPage() {
     }
   };
 
+  /**
+   * Refunds a paid order (money back through the provider, VIP revoked) or
+   * closes an abandoned checkout. Both are confirmed in the browser first and
+   * re-verified against the admin token on the server.
+   */
+  const closeOrder = async (orderId: string, action: "refund" | "cancel") => {
+    if (!token || busyOrder) return;
+    const message =
+      action === "refund"
+        ? "Refund this payment through Whop and revoke VIP access? This cannot be undone."
+        : "Close this abandoned checkout? It will stop being reconciled.";
+    if (!window.confirm(message)) return;
+    setBusyOrder(orderId);
+    setReconResult(null);
+    try {
+      const result = (await close({ data: { token, orderId, action } })) as {
+        ok: boolean;
+        status: string;
+        detail: string;
+      };
+      setReconResult(`${orderId.slice(0, 14)}… → ${result.status}: ${result.detail}`);
+      await query.refetch();
+    } catch (error) {
+      setReconResult((error as Error).message);
+    } finally {
+      setBusyOrder(null);
+    }
+  };
+
+
+
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-8">
       <div className="flex flex-wrap items-center justify-between gap-3">
