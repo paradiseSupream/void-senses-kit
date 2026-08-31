@@ -21,9 +21,9 @@ import { useSiteConfig } from "@/lib/site-config";
 import { trackFunnel } from "@/lib/funnel";
 import { cookie } from "@/lib/pixels";
 import { MONTHLY_OFFER_CENTS, OFFER_CENTS, useVipOffer } from "@/lib/vip-offer";
+import { VIP_MONTHLY_CENTS } from "@/lib/vip-pricing";
 
-/** Monthly no-ads pass — a low-friction entry point next to lifetime VIP. */
-export const VIP_MONTHLY_CENTS = 499;
+export { VIP_MONTHLY_CENTS } from "@/lib/vip-pricing";
 
 const PERKS = [
   "No interstitial gate on any export",
@@ -199,14 +199,16 @@ export function VipModal() {
 
         <div className="mt-4 flex items-center gap-3 rounded-xl border border-primary/30 bg-primary/10 p-3">
           <span className="rounded-full bg-primary px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary-foreground">
-            Launch offer
+            {plan === "monthly" ? "Entry offer" : "Launch offer"}
           </span>
           <div className="flex items-baseline gap-2">
             <span className="font-display text-lg text-muted-foreground line-through decoration-muted-foreground/60">
-              $49
+              {plan === "monthly" ? "$9.99" : "$49"}
             </span>
-            <span className="font-display text-3xl font-bold text-primary">$19</span>
-            <span className="text-xs font-semibold text-emerald-400">Save 61%</span>
+            <span className="font-display text-3xl font-bold text-primary">{price}</span>
+            <span className="text-xs font-semibold text-emerald-400">
+              {plan === "monthly" ? "Best way to start" : "Save 61%"}
+            </span>
           </div>
         </div>
 
