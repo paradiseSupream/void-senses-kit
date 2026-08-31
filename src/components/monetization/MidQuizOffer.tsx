@@ -21,7 +21,10 @@ export function MidQuizOffer({
   step,
   total,
   toolSlug,
-  showFrom = 0.55,
+  // Interrupting at the halfway mark cost completions — the offer now waits
+  // until the visitor is nearly finished, where abandoning costs them more
+  // than closing the dialog.
+  showFrom = 0.85,
 }: {
   step: number;
   total: number;
