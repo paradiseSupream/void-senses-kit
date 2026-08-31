@@ -11,8 +11,7 @@ import { trackFunnel } from "@/lib/funnel";
 import { useDirectCheckout } from "@/lib/use-direct-checkout";
 import { preloadWhopCheckout } from "@/lib/whop-preload";
 import { getSocialProof, type SocialProof } from "@/lib/social-proof.functions";
-import { MONTHLY_OFFER_CENTS, useVipOffer } from "@/lib/vip-offer";
-import { VIP_MONTHLY_CENTS } from "@/lib/vip-pricing";
+import { useVipPrices } from "@/lib/vip-pricing";
 
 const REGION_NAME: Record<string, string> = {
   SA: "Saudi Arabia",
