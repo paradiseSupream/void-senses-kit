@@ -11,6 +11,8 @@ import { track } from "@/lib/monetization";
 import { gaEvent } from "@/lib/ga4";
 import { pixelTrack, stableEventId, type PixelEvent } from "@/lib/pixels";
 import { markRetarget, segmentForFunnelStep } from "@/lib/retarget";
+import { VIP_MONTHLY_CENTS } from "@/lib/vip-pricing";
+
 
 /**
  * Which funnel steps are worth reporting to the ad networks as conversions.
