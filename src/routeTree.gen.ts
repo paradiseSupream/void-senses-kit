@@ -32,6 +32,7 @@ import { Route as ToolsLoveMatchRouteImport } from './routes/tools.love-match'
 import { Route as ToolsPromptMakerRouteImport } from './routes/tools.prompt-maker'
 import { Route as ToolsRoastRouteImport } from './routes/tools.roast'
 import { Route as VaultIndexRouteImport } from './routes/vault.index'
+import { Route as VaultSlugRouteImport } from './routes/vault.$slug'
 import { Route as VipCheckoutRouteImport } from './routes/vip.checkout'
 import { Route as VipSuccessRouteImport } from './routes/vip.success'
 import { Route as ApiPublicCapiRouteImport } from './routes/api/public/capi'
@@ -161,6 +162,11 @@ const VaultIndexRoute = VaultIndexRouteImport.update({
   path: '/vault/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const VaultSlugRoute = VaultSlugRouteImport.update({
+  id: '/vault/$slug',
+  path: '/vault/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const VipCheckoutRoute = VipCheckoutRouteImport.update({
   id: '/vip/checkout',
   path: '/vip/checkout',
@@ -248,6 +254,7 @@ export interface FileRoutesByFullPath {
   '/tools/love-match': typeof ToolsLoveMatchRoute
   '/tools/prompt-maker': typeof ToolsPromptMakerRoute
   '/tools/roast': typeof ToolsRoastRoute
+  '/vault/$slug': typeof VaultSlugRoute
   '/vip/checkout': typeof VipCheckoutRoute
   '/vip/success': typeof VipSuccessRoute
   '/admin/': typeof AdminIndexRoute
@@ -286,6 +293,7 @@ export interface FileRoutesByTo {
   '/tools/love-match': typeof ToolsLoveMatchRoute
   '/tools/prompt-maker': typeof ToolsPromptMakerRoute
   '/tools/roast': typeof ToolsRoastRoute
+  '/vault/$slug': typeof VaultSlugRoute
   '/vip/checkout': typeof VipCheckoutRoute
   '/vip/success': typeof VipSuccessRoute
   '/admin': typeof AdminIndexRoute
@@ -325,6 +333,7 @@ export interface FileRoutesById {
   '/tools/love-match': typeof ToolsLoveMatchRoute
   '/tools/prompt-maker': typeof ToolsPromptMakerRoute
   '/tools/roast': typeof ToolsRoastRoute
+  '/vault/$slug': typeof VaultSlugRoute
   '/vip/checkout': typeof VipCheckoutRoute
   '/vip/success': typeof VipSuccessRoute
   '/admin/': typeof AdminIndexRoute
@@ -365,6 +374,7 @@ export interface FileRouteTypes {
     | '/tools/love-match'
     | '/tools/prompt-maker'
     | '/tools/roast'
+    | '/vault/$slug'
     | '/vip/checkout'
     | '/vip/success'
     | '/admin/'
@@ -403,6 +413,7 @@ export interface FileRouteTypes {
     | '/tools/love-match'
     | '/tools/prompt-maker'
     | '/tools/roast'
+    | '/vault/$slug'
     | '/vip/checkout'
     | '/vip/success'
     | '/admin'
@@ -441,6 +452,7 @@ export interface FileRouteTypes {
     | '/tools/love-match'
     | '/tools/prompt-maker'
     | '/tools/roast'
+    | '/vault/$slug'
     | '/vip/checkout'
     | '/vip/success'
     | '/admin/'
@@ -480,6 +492,7 @@ export interface RootRouteChildren {
   ToolsLoveMatchRoute: typeof ToolsLoveMatchRoute
   ToolsPromptMakerRoute: typeof ToolsPromptMakerRoute
   ToolsRoastRoute: typeof ToolsRoastRoute
+  VaultSlugRoute: typeof VaultSlugRoute
   VipCheckoutRoute: typeof VipCheckoutRoute
   VipSuccessRoute: typeof VipSuccessRoute
   AdminIndexRoute: typeof AdminIndexRoute
@@ -662,6 +675,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof VaultIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/vault/$slug': {
+      id: '/vault/$slug'
+      path: '/vault/$slug'
+      fullPath: '/vault/$slug'
+      preLoaderRoute: typeof VaultSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/vip/checkout': {
       id: '/vip/checkout'
       path: '/vip/checkout'
@@ -776,6 +796,7 @@ const rootRouteChildren: RootRouteChildren = {
   ToolsLoveMatchRoute: ToolsLoveMatchRoute,
   ToolsPromptMakerRoute: ToolsPromptMakerRoute,
   ToolsRoastRoute: ToolsRoastRoute,
+  VaultSlugRoute: VaultSlugRoute,
   VipCheckoutRoute: VipCheckoutRoute,
   VipSuccessRoute: VipSuccessRoute,
   AdminIndexRoute: AdminIndexRoute,

@@ -7,6 +7,7 @@
 export const SITE_BASE_URL = "https://sensesofvoid.app";
 
 import { ARCHETYPE_PATHS } from "@/lib/archetype-seo";
+import { VAULT_PATHS } from "@/lib/vault-catalog";
 
 export type SitemapEntry = {
   path: string;
@@ -30,7 +31,7 @@ export const EXCLUDED_ROUTE_PREFIXES = [
  * generated from data, so they are listed in the sitemap even though the
  * generated route tree only knows the parameterised parent.
  */
-export const DYNAMIC_ROUTE_PREFIXES = ["/archetypes/"] as const;
+export const DYNAMIC_ROUTE_PREFIXES = ["/archetypes/", "/vault/"] as const;
 
 export const SITEMAP_ENTRIES: SitemapEntry[] = [
   { path: "/", changefreq: "daily", priority: "1.0" },
@@ -48,6 +49,11 @@ export const SITEMAP_ENTRIES: SitemapEntry[] = [
     priority: "0.7",
   })),
   { path: "/vault", changefreq: "weekly", priority: "0.8" },
+  ...VAULT_PATHS.map((path) => ({
+    path,
+    changefreq: "monthly" as const,
+    priority: "0.6",
+  })),
   { path: "/privacy", changefreq: "yearly", priority: "0.3" },
   { path: "/terms", changefreq: "yearly", priority: "0.3" },
 ];
