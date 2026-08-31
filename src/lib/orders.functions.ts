@@ -28,7 +28,20 @@ export type AdminOrderRow = {
   /** Pending, young, still plausibly mid-payment. */
   atRisk: boolean;
   hasFbp: boolean;
+  /** Provider billing record, captured on the webhook and on reconciliation. */
+  paymentId: string | null;
+  paymentMethod: string | null;
+  cardBrand: string | null;
+  cardLast4: string | null;
+  billingCountry: string | null;
+  billingName: string | null;
+  receiptUrl: string | null;
+  currency: string;
+  refundedAt: string | null;
+  /** Everything Meta needs for a well-matched Purchase is on the row. */
+  trackingComplete: boolean;
 };
+
 
 export type PurchaseReconRow = {
   orderId: string;
