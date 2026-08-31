@@ -80,9 +80,19 @@ function withSecurityHeaders(request: Request, response: Response): Response {
   // checkout iframe ("payment is not allowed in this document"), which is why
   // checkout sessions were created but never completed. The provider origins
   // must be allow-listed for the Payment Request API to work.
+  // Camera stays available to the provider only, so mobile buyers can scan a
+  // card instead of typing 16 digits; clipboard-write keeps paste-to-copy
+  // affordances alive inside the same frame.
   headers.set(
     "Permissions-Policy",
-    'camera=(), microphone=(), geolocation=(), payment=(self "https://whop.com" "https://js.stripe.com" "https://checkout.whop.com"), publickey-credentials-get=(self "https://whop.com")',
+    [
+      'camera=(self "https://whop.com")',
+      "microphone=()",
+      "geolocation=()",
+      'payment=(self "https://whop.com" "https://js.stripe.com" "https://checkout.whop.com")',
+      'publickey-credentials-get=(self "https://whop.com")',
+      'clipboard-write=(self "https://whop.com")',
+    ].join(", "),
   );
   headers.set("Cross-Origin-Opener-Policy", "same-origin-allow-popups");
   headers.set("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
