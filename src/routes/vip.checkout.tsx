@@ -133,6 +133,13 @@ function VipCheckoutPage() {
       if (!frame || loaded) return Boolean(frame);
       loaded = true;
       setEmbedded(true);
+      // Only a frame that really mounted clears the reboot guard, so a page
+      // that keeps failing can never reload in a loop.
+      try {
+        window.sessionStorage.removeItem("sov.checkout.reboot");
+      } catch {
+        /* storage unavailable */
+      }
       track({
         event_type: "funnel",
         slot: timedOut ? "checkout_embed_recovered" : "checkout_embed_loaded",
@@ -175,7 +182,6 @@ function VipCheckoutPage() {
         return;
       }
     } else {
-      window.sessionStorage.removeItem(RELOAD_KEY);
       const script = document.createElement("script");
       script.id = "whop-checkout-loader";
       script.src = "https://js.whop.com/static/checkout/loader.js";
