@@ -155,14 +155,27 @@ function VipCheckoutPage() {
       track({ event_type: "funnel", slot: "checkout_embed_timeout", format: "whop" });
     }, 9000);
 
-    // The loader scans the DOM once when it boots. On a client-side navigation
-    // (offer → checkout) a cached loader has already booted, so it never sees
-    // this mount node and the frame can never appear. Re-injecting a fresh
-    // script node forces a rescan for every checkout page view.
+    // Whop's loader boots exactly once: it guards on `window.wco` and its
+    // checkout bundle only scans the DOM it saw at boot. After any client-side
+    // navigation (offer → checkout, "Retry in-page form", back-and-forth) the
+    // bundle is already loaded, so the freshly rendered mount node is never
+    // picked up and the frame can never appear — the single biggest source of
+    // "checkout_embed_timeout". Tearing the loader state down and re-injecting
+    // it forces a full re-initialisation for every checkout page view.
+    const w = window as unknown as { wco?: unknown };
+    if (w.wco) {
+      delete w.wco;
+      document
+        .querySelectorAll('script[src*="js.whop.com/static/checkout"]')
+        .forEach((node) => node.remove());
+      track({ event_type: "funnel", slot: "checkout_embed_reinit", format: "whop" });
+    }
     document.getElementById("whop-checkout-loader")?.remove();
     const script = document.createElement("script");
     script.id = "whop-checkout-loader";
-    script.src = "https://js.whop.com/static/checkout/loader.js";
+    // Cache-busted per mount so the browser re-executes the loader instead of
+    // treating the identical URL as an already-evaluated module.
+    script.src = `https://js.whop.com/static/checkout/loader.js?v=${Date.now()}`;
     script.async = true;
     script.onerror = () => {
       setSlow(true);
