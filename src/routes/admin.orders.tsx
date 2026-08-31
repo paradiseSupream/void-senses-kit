@@ -260,24 +260,44 @@ function OrdersPage() {
           </div>
 
           {/* --- orders --- */}
-          <h2 className="mt-8 font-display text-lg font-semibold">Orders</h2>
+          <h2 className="mt-8 font-display text-lg font-semibold">Orders &amp; billing detail</h2>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Card brand, last four and billing country come straight from the payment provider on
+            the webhook, so every real sale can be audited here. “Tracking” is green only when the
+            click id, browser agent and country were all captured for the Meta Purchase.
+          </p>
           <div className="glass mt-3 overflow-x-auto rounded-2xl">
-            <table className="w-full min-w-[720px] text-sm">
+            <table className="w-full min-w-[1040px] text-sm">
               <thead className="text-left text-xs text-muted-foreground">
                 <tr>
                   <th className="p-3">Order</th>
                   <th className="p-3">Status</th>
                   <th className="p-3">Amount</th>
-                  <th className="p-3">Country</th>
+                  <th className="p-3">Payment</th>
+                  <th className="p-3">Billing</th>
+                  <th className="p-3">Buyer</th>
                   <th className="p-3">Age</th>
                   <th className="p-3">Source</th>
-                  <th className="p-3">Flag</th>
+                  <th className="p-3">Tracking</th>
+                  <th className="p-3">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {data.orders.map((row) => (
-                  <tr key={row.orderId} className="border-t border-hairline">
-                    <td className="p-3 font-mono text-xs">{row.orderId.slice(0, 18)}…</td>
+                  <tr key={row.orderId} className="border-t border-hairline align-top">
+                    <td className="p-3 font-mono text-xs">
+                      {row.orderId.slice(0, 14)}…
+                      {row.receiptUrl ? (
+                        <a
+                          href={row.receiptUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="mt-1 block text-primary underline"
+                        >
+                          receipt
+                        </a>
+                      ) : null}
+                    </td>
                     <td className="p-3">
                       <span
                         className={
@@ -290,20 +310,71 @@ function OrdersPage() {
                       >
                         {row.status}
                       </span>
-                    </td>
-                    <td className="p-3">{money(row.amountCents)}</td>
-                    <td className="p-3">{row.country ?? "—"}</td>
-                    <td className="p-3">{age(row.ageMinutes)}</td>
-                    <td className="p-3">{row.utmSource ?? "direct"}</td>
-                    <td className="p-3 text-xs">
                       {row.abandoned ? (
-                        <span className="text-destructive">abandoned</span>
+                        <span className="block text-[11px] text-destructive">abandoned</span>
                       ) : row.atRisk ? (
-                        <span className="text-amber-400">in progress</span>
-                      ) : row.hasFbp ? (
-                        "attributed"
+                        <span className="block text-[11px] text-amber-400">in progress</span>
+                      ) : null}
+                    </td>
+                    <td className="p-3 whitespace-nowrap">
+                      {money(row.amountCents)}
+                      <span className="block text-[11px] text-muted-foreground">{row.currency}</span>
+                    </td>
+                    <td className="p-3 text-xs">
+                      {row.cardBrand || row.cardLast4 ? (
+                        <span className="capitalize">
+                          {row.cardBrand ?? "card"} ••{row.cardLast4 ?? "····"}
+                        </span>
                       ) : (
-                        "—"
+                        <span className="text-muted-foreground">{row.paymentMethod ?? "—"}</span>
+                      )}
+                      {row.paymentId ? (
+                        <span className="block font-mono text-[10px] text-muted-foreground">
+                          {row.paymentId.slice(0, 16)}
+                        </span>
+                      ) : null}
+                    </td>
+                    <td className="p-3 text-xs">
+                      {row.billingCountry ?? row.country ?? "—"}
+                      {row.billingName ? (
+                        <span className="block text-muted-foreground">{row.billingName}</span>
+                      ) : null}
+                    </td>
+                    <td className="p-3 text-xs">
+                      <span className="block max-w-[160px] truncate">{row.email ?? "—"}</span>
+                    </td>
+                    <td className="p-3">{age(row.ageMinutes)}</td>
+                    <td className="p-3 text-xs">{row.utmSource ?? "direct"}</td>
+                    <td className="p-3 text-xs">
+                      {row.trackingComplete ? (
+                        <span className="text-primary">complete</span>
+                      ) : row.hasFbp ? (
+                        <span className="text-amber-400">partial</span>
+                      ) : (
+                        <span className="text-muted-foreground">none</span>
+                      )}
+                    </td>
+                    <td className="p-3">
+                      {row.status === "paid" ? (
+                        <button
+                          type="button"
+                          onClick={() => void closeOrder(row.orderId, "refund")}
+                          disabled={busyOrder === row.orderId}
+                          className="rounded-lg border border-destructive/50 px-2.5 py-1.5 text-[11px] font-medium text-destructive disabled:opacity-50"
+                        >
+                          {busyOrder === row.orderId ? "…" : "Refund"}
+                        </button>
+                      ) : row.status === "pending" ? (
+                        <button
+                          type="button"
+                          onClick={() => void closeOrder(row.orderId, "cancel")}
+                          disabled={busyOrder === row.orderId}
+                          className="rounded-lg border border-hairline px-2.5 py-1.5 text-[11px] font-medium text-muted-foreground disabled:opacity-50"
+                        >
+                          {busyOrder === row.orderId ? "…" : "Cancel"}
+                        </button>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">closed</span>
                       )}
                     </td>
                   </tr>
@@ -311,6 +382,7 @@ function OrdersPage() {
               </tbody>
             </table>
           </div>
+
 
           {/* --- reconciliation --- */}
           <h2 className="mt-8 font-display text-lg font-semibold">
