@@ -2,14 +2,16 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
-import { ArrowLeft, Mail, RefreshCw } from "lucide-react";
+import { ArrowLeft, Download, Mail, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 
+import { downloadCsv, toCsv } from "@/lib/csv";
 import {
   adminEmailsReport,
   adminRetryWelcomeEmails,
   type EmailsReport,
 } from "@/lib/emails.functions";
+
 
 export const Route = createFileRoute("/admin/emails")({
   head: () => ({
@@ -120,8 +122,39 @@ function EmailsPage() {
             <RefreshCw className={`size-3.5 ${busy ? "animate-spin" : ""}`} aria-hidden="true" />
             Retry unsent
           </button>
+          <button
+            type="button"
+            disabled={!data?.leads?.length}
+            onClick={() => {
+              if (!data) return;
+              // Lovable email only sends one action-triggered message per lead,
+              // so a multi-day discount sequence has to run in a dedicated
+              // marketing tool — this export is the hand-off for it.
+              downloadCsv(
+                `sov-leads-${days}d.csv`,
+                toCsv(
+                  ["email", "source", "tool", "country", "utm_source", "captured_at", "welcome_status"],
+                  data.leads.map((lead) => [
+                    lead.email,
+                    lead.source,
+                    lead.tool_slug ?? "",
+                    lead.country ?? "",
+                    lead.utm_source ?? "",
+                    lead.created_at,
+                    lead.welcome_status ?? "pending",
+                  ]),
+                ),
+              );
+            }}
+            className="inline-flex items-center gap-2 rounded-full border border-hairline px-3 py-1.5 text-xs font-semibold disabled:opacity-50"
+          >
+            <Download className="size-3.5" aria-hidden="true" /> Export CSV
+          </button>
         </div>
       </header>
+
+
+
 
       <section className="mt-5 grid gap-3 sm:grid-cols-4">
         <Stat label="Leads" value={String(data?.totalLeads ?? 0)} />

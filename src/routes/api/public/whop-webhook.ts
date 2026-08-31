@@ -159,11 +159,16 @@ export const Route = createFileRoute("/api/public/whop-webhook")({
           // Close the order first so a replayed `payment.succeeded` cannot
           // silently re-grant access after a refund/cancellation.
           if (parsed.orderId) {
+            const refunded = parsed.type === "payment.refunded";
             await supabaseAdmin
               .from("vip_orders")
-              .update({ status: parsed.type === "payment.refunded" ? "refunded" : "cancelled" })
+              .update({
+                status: refunded ? "refunded" : "cancelled",
+                ...(refunded ? { refunded_at: new Date().toISOString() } : {}),
+              })
               .eq("order_id", parsed.orderId);
           }
+
           if (parsed.email) {
             await supabaseAdmin
               .from("vip_members")
@@ -223,7 +228,14 @@ export const Route = createFileRoute("/api/public/whop-webhook")({
               paid_at: new Date().toISOString(),
             })
             .eq("order_id", order.order_id);
+
+          // Enrich the row with the provider's own billing record (card brand,
+          // last four, billing country, receipt link) so every real sale can be
+          // audited from the admin dashboard. Never fatal.
+          const { syncOrderPaymentDetails } = await import("@/lib/vip-reconcile.server");
+          await syncOrderPaymentDetails(order.order_id as string);
         }
+
 
         if (email) {
           const { grantVip } = await import("@/lib/vip-fulfil.server");

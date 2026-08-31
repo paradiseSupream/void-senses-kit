@@ -113,6 +113,23 @@ export type WhopPaymentState = {
   /** Human readable reason a checkout never completed, when Whop gives one. */
   reason: string | null;
   method: string | null;
+  /** Billing detail captured from the provider, for the operator dashboard. */
+  currency: string | null;
+  cardBrand: string | null;
+  cardLast4: string | null;
+  billingCountry: string | null;
+  billingName: string | null;
+  receiptUrl: string | null;
+  refundedAt: string | null;
+};
+
+type WhopCard = {
+  brand?: string | null;
+  card_brand?: string | null;
+  last4?: string | null;
+  last_four?: string | null;
+  country?: string | null;
+  name?: string | null;
 };
 
 type WhopPaymentRow = {
@@ -122,31 +139,71 @@ type WhopPaymentRow = {
   refunded_at?: string | null;
   usd_total?: number | null;
   total?: number | null;
+  currency?: string | null;
   failure_message?: string | null;
   decline_code?: string | null;
   payment_method_type?: string | null;
+  payment_method?: (WhopCard & { type?: string | null; card?: WhopCard | null }) | null;
+  card?: WhopCard | null;
+  receipt_url?: string | null;
+  hosted_invoice_url?: string | null;
+  billing_address?: { country?: string | null; name?: string | null } | null;
+  billing_country?: string | null;
   metadata?: Record<string, string | undefined> | null;
-  user?: { email?: string } | null;
+  user?: { email?: string; name?: string | null; country?: string | null } | null;
 };
 
 const PAID_STATUS = new Set(["paid", "succeeded", "completed", "settled"]);
+
+const EMPTY_PAYMENT: WhopPaymentState = {
+  state: "none",
+  paymentId: null,
+  email: null,
+  amountCents: null,
+  reason: null,
+  method: null,
+  currency: null,
+  cardBrand: null,
+  cardLast4: null,
+  billingCountry: null,
+  billingName: null,
+  receiptUrl: null,
+  refundedAt: null,
+};
+
+/** Pulls the billing fields out of whichever shape Whop returned them in. */
+function readBilling(pick: WhopPaymentRow) {
+  const card = pick.payment_method?.card ?? pick.card ?? pick.payment_method ?? null;
+  const clean = (value: unknown): string | null => {
+    const text = value == null ? "" : String(value).trim();
+    return text ? text.slice(0, 60) : null;
+  };
+  return {
+    method: clean(pick.payment_method_type ?? pick.payment_method?.type),
+    currency: clean(pick.currency)?.toUpperCase() ?? "USD",
+    cardBrand: clean(card?.brand ?? card?.card_brand),
+    cardLast4: clean(card?.last4 ?? card?.last_four),
+    billingCountry:
+      clean(pick.billing_address?.country ?? pick.billing_country ?? card?.country ?? pick.user?.country)?.
+        toUpperCase()
+        .slice(0, 2) ?? null,
+    billingName: clean(pick.billing_address?.name ?? card?.name ?? pick.user?.name),
+    receiptUrl: clean(pick.receipt_url ?? pick.hosted_invoice_url)
+      ? String(pick.receipt_url ?? pick.hosted_invoice_url).slice(0, 400)
+      : null,
+  };
+}
 
 /**
  * Looks the real payment for one of our order ids up on Whop.
  *
  * This is the safety net for the webhook: if a delivery is lost or rejected,
  * the success page and the admin dashboard can still discover that a payment
- * actually cleared (or exactly why it did not) straight from the provider.
+ * actually cleared (or exactly why it did not) straight from the provider —
+ * together with the billing detail needed to audit the first real sales.
  */
 export async function fetchWhopPaymentForOrder(orderId: string): Promise<WhopPaymentState> {
-  const empty: WhopPaymentState = {
-    state: "none",
-    paymentId: null,
-    email: null,
-    amountCents: null,
-    reason: null,
-    method: null,
-  };
+  const empty = EMPTY_PAYMENT;
   const { apiKey, accountId } = whopEnv();
   if (!apiKey || !accountId || !orderId) return empty;
 
@@ -175,7 +232,10 @@ export async function fetchWhopPaymentForOrder(orderId: string): Promise<WhopPay
         : "open";
 
   const dollars = pick.usd_total ?? pick.total ?? null;
+  const billing = readBilling(pick);
   return {
+    ...empty,
+    ...billing,
     state,
     paymentId: pick.id ?? null,
     email: pick.metadata?.["email"] || pick.user?.email || null,
@@ -184,9 +244,30 @@ export async function fetchWhopPaymentForOrder(orderId: string): Promise<WhopPay
       pick.failure_message ||
       pick.decline_code ||
       (state === "open" ? `Checkout started but never completed (${pick.substatus ?? status})` : null),
-    method: pick.payment_method_type ?? null,
+    refundedAt: pick.refunded_at ?? null,
   };
 }
+
+/**
+ * Refunds a captured Whop payment. Used only by the admin dashboard, behind the
+ * admin token — the app itself never refunds anything automatically.
+ */
+export async function refundWhopPayment(
+  paymentId: string,
+): Promise<{ ok: boolean; detail: string }> {
+  const { apiKey } = whopEnv();
+  if (!apiKey) return { ok: false, detail: "Whop API key is not configured." };
+  if (!paymentId) return { ok: false, detail: "This order has no provider payment id yet." };
+
+  const res = await fetch(`${API_BASE}/payments/${encodeURIComponent(paymentId)}/refund`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+    body: JSON.stringify({}),
+  });
+  const text = await res.text();
+  return { ok: res.ok, detail: res.ok ? "Refund accepted by Whop." : `Whop refused the refund (${res.status}): ${text.slice(0, 200)}` };
+}
+
 
 
 function safeEqual(a: string, b: string): boolean {

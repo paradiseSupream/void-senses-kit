@@ -362,9 +362,14 @@ export type Database = {
       vip_orders: {
         Row: {
           amount_cents: number
+          billing_country: string | null
+          billing_name: string | null
+          card_brand: string | null
+          card_last4: string | null
           checkout_id: string | null
           country: string | null
           created_at: string
+          currency: string
           email: string | null
           event_id: string | null
           fbc: string | null
@@ -373,19 +378,29 @@ export type Database = {
           order_id: string
           paid_at: string | null
           payment_id: string | null
+          payment_method: string | null
           plan: string
           provider: string
+          receipt_url: string | null
+          refund_reason: string | null
+          refunded_at: string | null
           session_id: string | null
           status: string
+          synced_at: string | null
           user_agent: string | null
           utm_source: string | null
           whop_plan_id: string | null
         }
         Insert: {
           amount_cents?: number
+          billing_country?: string | null
+          billing_name?: string | null
+          card_brand?: string | null
+          card_last4?: string | null
           checkout_id?: string | null
           country?: string | null
           created_at?: string
+          currency?: string
           email?: string | null
           event_id?: string | null
           fbc?: string | null
@@ -394,19 +409,29 @@ export type Database = {
           order_id: string
           paid_at?: string | null
           payment_id?: string | null
+          payment_method?: string | null
           plan?: string
           provider?: string
+          receipt_url?: string | null
+          refund_reason?: string | null
+          refunded_at?: string | null
           session_id?: string | null
           status?: string
+          synced_at?: string | null
           user_agent?: string | null
           utm_source?: string | null
           whop_plan_id?: string | null
         }
         Update: {
           amount_cents?: number
+          billing_country?: string | null
+          billing_name?: string | null
+          card_brand?: string | null
+          card_last4?: string | null
           checkout_id?: string | null
           country?: string | null
           created_at?: string
+          currency?: string
           email?: string | null
           event_id?: string | null
           fbc?: string | null
@@ -415,10 +440,15 @@ export type Database = {
           order_id?: string
           paid_at?: string | null
           payment_id?: string | null
+          payment_method?: string | null
           plan?: string
           provider?: string
+          receipt_url?: string | null
+          refund_reason?: string | null
+          refunded_at?: string | null
           session_id?: string | null
           status?: string
+          synced_at?: string | null
           user_agent?: string | null
           utm_source?: string | null
           whop_plan_id?: string | null

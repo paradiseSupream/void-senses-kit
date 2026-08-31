@@ -100,8 +100,17 @@ export async function reconcileOrder(orderId: string): Promise<ReconcileResult> 
       email,
       payment_id: payment.paymentId,
       paid_at: new Date().toISOString(),
+      payment_method: payment.method,
+      card_brand: payment.cardBrand,
+      card_last4: payment.cardLast4,
+      billing_country: payment.billingCountry,
+      billing_name: payment.billingName,
+      receipt_url: payment.receiptUrl,
+      currency: payment.currency ?? "USD",
+      synced_at: new Date().toISOString(),
     })
     .eq("order_id", orderId);
+
 
   if (email) {
     const { grantVip } = await import("@/lib/vip-fulfil.server");
@@ -170,7 +179,43 @@ async function reportReconciledPurchase(
   }
 }
 
+/**
+ * Pulls the provider's billing detail (method, card brand/last4, billing
+ * country, receipt link) onto an order that is already known to be paid.
+ *
+ * Best effort by design: this only enriches the operator dashboard, so a
+ * provider hiccup must never fail the webhook that grants access.
+ */
+export async function syncOrderPaymentDetails(orderId: string): Promise<void> {
+  if (!orderId) return;
+  try {
+    const { whopConfigured, fetchWhopPaymentForOrder } = await import("@/lib/whop.server");
+    if (!whopConfigured()) return;
+    const payment = await fetchWhopPaymentForOrder(orderId);
+    if (payment.state === "none") return;
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    await supabaseAdmin
+      .from("vip_orders")
+      .update({
+        payment_method: payment.method,
+        card_brand: payment.cardBrand,
+        card_last4: payment.cardLast4,
+        billing_country: payment.billingCountry,
+        billing_name: payment.billingName,
+        receipt_url: payment.receiptUrl,
+        currency: payment.currency ?? "USD",
+        ...(payment.paymentId ? { payment_id: payment.paymentId } : {}),
+        ...(payment.refundedAt ? { refunded_at: payment.refundedAt } : {}),
+        synced_at: new Date().toISOString(),
+      })
+      .eq("order_id", orderId);
+  } catch (error) {
+    console.error("[vip] billing sync failed", error);
+  }
+}
+
 /** Reconciles every still-pending order in a window. Used by the admin panel. */
+
 export async function reconcilePendingOrders(days: number): Promise<ReconcileResult[]> {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const since = new Date(Date.now() - days * 86_400_000).toISOString();

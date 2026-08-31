@@ -11,14 +11,25 @@ import { track } from "@/lib/monetization";
 import { gaEvent } from "@/lib/ga4";
 import { pixelTrack, stableEventId, type PixelEvent } from "@/lib/pixels";
 import { markRetarget, segmentForFunnelStep } from "@/lib/retarget";
+import { VIP_MONTHLY_CENTS } from "@/lib/vip-pricing";
+import { preloadWhopCheckout } from "@/lib/whop-preload";
 
-/** Which funnel steps are worth reporting to the ad networks as conversions. */
-const PIXEL_STEPS: Partial<Record<string, PixelEvent>> = {
-  test_start: "ViewContent",
-  result_view: "Lead",
-  vip_gate_shown: "AddToCart",
-  checkout_start: "InitiateCheckout",
+
+
+/**
+ * Which funnel steps are worth reporting to the ad networks as conversions.
+ *
+ * The money steps carry the real entry price. Meta cannot bid toward value on
+ * a valueless AddToCart, and the Gulf campaigns optimise on exactly that event
+ * while purchase volume is still too thin to learn from.
+ */
+const PIXEL_STEPS: Partial<Record<string, { event: PixelEvent; valueCents?: number }>> = {
+  test_start: { event: "ViewContent" },
+  result_view: { event: "Lead" },
+  vip_gate_shown: { event: "AddToCart", valueCents: VIP_MONTHLY_CENTS },
+  checkout_start: { event: "InitiateCheckout", valueCents: VIP_MONTHLY_CENTS },
 };
+
 
 export const FUNNEL_STEPS = [
   "visit",
@@ -71,15 +82,21 @@ export function trackFunnel(step: FunnelStep, toolSlug?: string | null) {
 
   // Mirror the money steps into Meta / TikTok / Google Ads (Purchase is fired
   // on the success page where the real order value is known).
-  const pixelEvent = PIXEL_STEPS[step];
-  if (pixelEvent) {
-    pixelTrack(pixelEvent, {
+  const mapped = PIXEL_STEPS[step];
+  if (mapped) {
+    pixelTrack(mapped.event, {
       contentName: toolSlug ?? step,
+      ...(mapped.valueCents ? { value: mapped.valueCents / 100, currency: "USD" } : {}),
       // Stable per step + session so the browser fire and the server-side
       // Conversions API delivery de-duplicate into one conversion.
       eventId: stableEventId(`funnel:${step}:${toolSlug ?? "none"}`),
     });
   }
+
+  // The moment an offer is on screen, warm the hosted checkout so the buyer
+  // never waits for its script after tapping "Unlock".
+  if (step === "vip_gate_shown" || step === "checkout_start") preloadWhopCheckout();
+
 
   // Remember the furthest step so returning non-buyers can be retargeted.
   const segment = segmentForFunnelStep(step);
