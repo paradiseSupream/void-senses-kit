@@ -5,7 +5,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { EmailCapture } from "@/components/monetization/EmailCapture";
 import { ScarcityTimer } from "@/components/monetization/ScarcityTimer";
 import { useVip } from "@/lib/vip";
-import { useSiteConfig } from "@/lib/site-config";
+
 import { track, visitorCountry } from "@/lib/monetization";
 import { trackFunnel } from "@/lib/funnel";
 import { useDirectCheckout } from "@/lib/use-direct-checkout";
@@ -107,7 +107,9 @@ export function VipOfferCard({
       {/* Anchor: the lifetime price is shown first so the entry price reads as
           a decision that's already been discounted for them. */}
       <div className="mt-4 flex flex-wrap items-baseline gap-x-2.5 gap-y-1">
-        <span className="text-sm text-muted-foreground line-through">{lifetime} lifetime</span>
+        <span className="text-sm text-muted-foreground line-through">
+          {lifetimeFull} lifetime
+        </span>
         <span className="font-display text-3xl font-bold text-primary">{monthly}</span>
         <span className="text-sm text-muted-foreground">to open everything right now</span>
       </div>
