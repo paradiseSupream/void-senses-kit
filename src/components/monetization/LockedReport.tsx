@@ -12,6 +12,8 @@ import { isUnlocked, onUnlock, unlockReport } from "@/lib/unlock";
 import { partnerLink, track } from "@/lib/monetization";
 import { trackFunnel } from "@/lib/funnel";
 import { compareUrl, type ComparePayload } from "@/lib/compare-link";
+import { MONTHLY_OFFER_CENTS, useVipOffer } from "@/lib/vip-offer";
+import { VIP_MONTHLY_CENTS } from "@/lib/vip-pricing";
 
 
 /**
@@ -38,6 +40,7 @@ export function LockedReport({
   const { isVip, openVipModal } = useVip();
   const { site } = useSiteConfig();
   const runGated = useActionGate();
+  const offerActive = useVipOffer();
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
 
@@ -63,7 +66,8 @@ export function LockedReport({
   }
 
 
-  const price = `$${(site.vip_price_cents / 100).toFixed(0)}`;
+  const entryCents = offerActive ? MONTHLY_OFFER_CENTS : VIP_MONTHLY_CENTS;
+  const price = `$${(entryCents / 100).toFixed(2)}`;
 
   const rewardedUnlock = async () => {
     if (busy) return;
@@ -134,10 +138,10 @@ export function LockedReport({
         <div className="mt-5 flex flex-col gap-2.5 sm:flex-row sm:justify-center">
           <button
             type="button"
-            onClick={() => openVipModal()}
+            onClick={() => openVipModal("monthly")}
             className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-primary px-5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
           >
-            <Crown className="size-4" aria-hidden="true" /> Unlock forever · {price}
+            <Crown className="size-4" aria-hidden="true" /> Unlock now · {price}
           </button>
           {share ? (
             <button
