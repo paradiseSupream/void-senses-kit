@@ -1,9 +1,7 @@
 import { Crown } from "lucide-react";
 
 import { useVip } from "@/lib/vip";
-import { VIP_MONTHLY_CENTS } from "@/lib/vip-pricing";
-
-const ENTRY_PRICE = `$${(VIP_MONTHLY_CENTS / 100).toFixed(2)}`;
+import { useVipPrices } from "@/lib/vip-pricing";
 
 /**
  * Soft in-quiz upsell. Only appears once the user is already invested in the
@@ -20,6 +18,7 @@ export function QuizVipNudge({
   showFrom?: number;
 }) {
   const { isVip, openVipModal } = useVip();
+  const { monthly: ENTRY_PRICE } = useVipPrices();
 
   if (isVip || total < 3) return null;
   if ((step + 1) / total < showFrom) return null;

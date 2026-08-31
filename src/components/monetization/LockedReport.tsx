@@ -11,8 +11,7 @@ import { isUnlocked, onUnlock, unlockReport } from "@/lib/unlock";
 import { partnerLink, track } from "@/lib/monetization";
 import { trackFunnel } from "@/lib/funnel";
 import { compareUrl, type ComparePayload } from "@/lib/compare-link";
-import { MONTHLY_OFFER_CENTS, useVipOffer } from "@/lib/vip-offer";
-import { VIP_MONTHLY_CENTS } from "@/lib/vip-pricing";
+import { useVipPrices } from "@/lib/vip-pricing";
 import { useDirectCheckout } from "@/lib/use-direct-checkout";
 
 
@@ -40,7 +39,7 @@ export function LockedReport({
   const { isVip } = useVip();
   const runGated = useActionGate();
   const { busy: checkoutBusy, error: checkoutError, go } = useDirectCheckout();
-  const offerActive = useVipOffer();
+  const { monthly: price } = useVipPrices();
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
 
@@ -66,8 +65,6 @@ export function LockedReport({
   }
 
 
-  const entryCents = offerActive ? MONTHLY_OFFER_CENTS : VIP_MONTHLY_CENTS;
-  const price = `$${(entryCents / 100).toFixed(2)}`;
 
   const rewardedUnlock = async () => {
     if (busy) return;

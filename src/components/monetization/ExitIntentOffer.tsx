@@ -3,7 +3,8 @@ import { Crown, X } from "lucide-react";
 
 import { useVip } from "@/lib/vip";
 import { useSiteConfig } from "@/lib/site-config";
-import { grantVipOffer, MONTHLY_OFFER_CENTS, OFFER_CENTS } from "@/lib/vip-offer";
+import { grantVipOffer } from "@/lib/vip-offer";
+import { useVipPrices } from "@/lib/vip-pricing";
 import { track } from "@/lib/monetization";
 import { trackFunnel } from "@/lib/funnel";
 import { isMonthlyRetargetVisitor } from "@/lib/retarget";
@@ -17,7 +18,8 @@ const SEEN_KEY = "sov.exitOfferSeen";
  */
 export function ExitIntentOffer() {
   const { isVip, openVipModal } = useVip();
-  const { site, tracking } = useSiteConfig();
+  const { monthly, lifetime: offer, lifetimeFull: full } = useVipPrices();
+  const { tracking } = useSiteConfig();
   const [open, setOpen] = useState(false);
   const [retarget, setRetarget] = useState(false);
 
@@ -41,6 +43,9 @@ export function ExitIntentOffer() {
       } catch {
         /* storage unavailable */
       }
+      // Grant the downsell before showing it so the discounted price on
+      // screen is the exact price the checkout will charge.
+      grantVipOffer();
       setOpen(true);
       track({ event_type: "impression", slot: "exit_intent" });
       trackFunnel("vip_gate_shown");
@@ -74,9 +79,6 @@ export function ExitIntentOffer() {
 
   if (!open || isVip) return null;
 
-  const full = `$${(site.vip_price_cents / 100).toFixed(0)}`;
-  const offer = `$${(OFFER_CENTS / 100).toFixed(0)}`;
-  const monthly = `$${(MONTHLY_OFFER_CENTS / 100).toFixed(2)}`;
 
   return (
     <div

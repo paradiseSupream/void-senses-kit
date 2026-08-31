@@ -2,10 +2,10 @@ import { useEffect, useState } from "react";
 import { Crown, PlayCircle, X } from "lucide-react";
 
 import { useVip } from "@/lib/vip";
-import { useSiteConfig } from "@/lib/site-config";
 import { useActionGate } from "@/components/monetization/ActionGate";
 import { ScarcityTimer } from "@/components/monetization/ScarcityTimer";
-import { grantVipOffer, MONTHLY_OFFER_CENTS, OFFER_CENTS } from "@/lib/vip-offer";
+import { grantVipOffer } from "@/lib/vip-offer";
+import { useVipPrices } from "@/lib/vip-pricing";
 import { track } from "@/lib/monetization";
 import { trackFunnel } from "@/lib/funnel";
 
@@ -32,7 +32,7 @@ export function MidQuizOffer({
   showFrom?: number;
 }) {
   const { isVip, openVipModal } = useVip();
-  const { site } = useSiteConfig();
+  const { monthly, lifetime: offer, lifetimeFull: full } = useVipPrices();
   const runGated = useActionGate();
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -47,6 +47,8 @@ export function MidQuizOffer({
     } catch {
       /* storage unavailable */
     }
+    // Same discount the dialog advertises must be live before it renders.
+    grantVipOffer();
     setOpen(true);
     track({ event_type: "impression", slot: "midquiz_offer", tool_slug: toolSlug ?? null });
     trackFunnel("vip_gate_shown", toolSlug);
@@ -54,9 +56,6 @@ export function MidQuizOffer({
 
   if (!open || isVip) return null;
 
-  const full = `$${(site.vip_price_cents / 100).toFixed(0)}`;
-  const offer = `$${(OFFER_CENTS / 100).toFixed(0)}`;
-  const monthly = `$${(MONTHLY_OFFER_CENTS / 100).toFixed(2)}`;
 
   const continueFree = async () => {
     if (busy) return;

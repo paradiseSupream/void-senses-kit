@@ -5,14 +5,13 @@ import { useServerFn } from "@tanstack/react-start";
 import { EmailCapture } from "@/components/monetization/EmailCapture";
 import { ScarcityTimer } from "@/components/monetization/ScarcityTimer";
 import { useVip } from "@/lib/vip";
-import { useSiteConfig } from "@/lib/site-config";
+
 import { track, visitorCountry } from "@/lib/monetization";
 import { trackFunnel } from "@/lib/funnel";
 import { useDirectCheckout } from "@/lib/use-direct-checkout";
 import { preloadWhopCheckout } from "@/lib/whop-preload";
 import { getSocialProof, type SocialProof } from "@/lib/social-proof.functions";
-import { MONTHLY_OFFER_CENTS, useVipOffer } from "@/lib/vip-offer";
-import { VIP_MONTHLY_CENTS } from "@/lib/vip-pricing";
+import { useVipPrices } from "@/lib/vip-pricing";
 
 const REGION_NAME: Record<string, string> = {
   SA: "Saudi Arabia",
@@ -46,15 +45,12 @@ export function VipOfferCard({
 }) {
   const { isVip, openVipModal } = useVip();
   const { busy, error, go } = useDirectCheckout();
-  const { site } = useSiteConfig();
   const loadProof = useServerFn(getSocialProof);
   const [proof, setProof] = useState<SocialProof | null>(null);
 
-  const offerActive = useVipOffer();
-
-  const monthlyCents = offerActive ? MONTHLY_OFFER_CENTS : VIP_MONTHLY_CENTS;
-  const monthly = `$${(monthlyCents / 100).toFixed(2)}`;
-  const lifetime = `$${(site.vip_price_cents / 100).toFixed(0)}`;
+  // One shared price source — the card, the modal and the checkout page all
+  // read the same numbers, so the quoted price is the charged price.
+  const { monthly, lifetime, lifetimeFull } = useVipPrices();
 
   useEffect(() => {
     if (isVip) return;
@@ -111,7 +107,9 @@ export function VipOfferCard({
       {/* Anchor: the lifetime price is shown first so the entry price reads as
           a decision that's already been discounted for them. */}
       <div className="mt-4 flex flex-wrap items-baseline gap-x-2.5 gap-y-1">
-        <span className="text-sm text-muted-foreground line-through">{lifetime} lifetime</span>
+        <span className="text-sm text-muted-foreground line-through">
+          {lifetimeFull} lifetime
+        </span>
         <span className="font-display text-3xl font-bold text-primary">{monthly}</span>
         <span className="text-sm text-muted-foreground">to open everything right now</span>
       </div>
