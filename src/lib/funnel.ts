@@ -91,6 +91,10 @@ export function trackFunnel(step: FunnelStep, toolSlug?: string | null) {
     });
   }
 
+  // The moment an offer is on screen, warm the hosted checkout so the buyer
+  // never waits for its script after tapping "Unlock".
+  if (step === "vip_gate_shown" || step === "checkout_start") preloadWhopCheckout();
+
 
   // Remember the furthest step so returning non-buyers can be retargeted.
   const segment = segmentForFunnelStep(step);
