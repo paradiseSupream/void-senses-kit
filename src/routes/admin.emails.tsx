@@ -120,8 +120,35 @@ function EmailsPage() {
             <RefreshCw className={`size-3.5 ${busy ? "animate-spin" : ""}`} aria-hidden="true" />
             Retry unsent
           </button>
-        </div>
-      </header>
+          <button
+            type="button"
+            disabled={!data?.leads?.length}
+            onClick={() => {
+              if (!data) return;
+              // Lovable email only sends one action-triggered message per lead,
+              // so a multi-day discount sequence has to run in a dedicated
+              // marketing tool — this export is the hand-off for it.
+              downloadCsv(
+                `sov-leads-${days}d.csv`,
+                toCsv(
+                  ["email", "source", "tool", "country", "utm_source", "captured_at", "welcome_status"],
+                  data.leads.map((lead) => [
+                    lead.email,
+                    lead.source,
+                    lead.tool_slug ?? "",
+                    lead.country ?? "",
+                    lead.utm_source ?? "",
+                    lead.created_at,
+                    lead.welcome_status ?? "pending",
+                  ]),
+                ),
+              );
+            }}
+            className="inline-flex items-center gap-2 rounded-full border border-hairline px-3 py-1.5 text-xs font-semibold disabled:opacity-50"
+          >
+            <Download className="size-3.5" aria-hidden="true" /> Export CSV
+          </button>
+
 
       <section className="mt-5 grid gap-3 sm:grid-cols-4">
         <Stat label="Leads" value={String(data?.totalLeads ?? 0)} />
