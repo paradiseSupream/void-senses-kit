@@ -58,10 +58,13 @@ function Stat({ label, value, tone }: { label: string; value: string; tone?: "ba
 function OrdersPage() {
   const load = useServerFn(adminOrdersReport);
   const reconcile = useServerFn(adminReconcileOrders);
+  const close = useServerFn(adminCloseOrder);
   const [token, setToken] = useState<string | null>(null);
   const [reconciling, setReconciling] = useState(false);
   const [reconResult, setReconResult] = useState<string | null>(null);
+  const [busyOrder, setBusyOrder] = useState<string | null>(null);
   const [days, setDays] = useState<(typeof WINDOWS)[number]>(14);
+
 
   useEffect(() => {
     setToken(window.sessionStorage.getItem(TOKEN_KEY) ?? window.localStorage.getItem(TOKEN_KEY));
