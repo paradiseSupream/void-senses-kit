@@ -2,7 +2,7 @@
  * Whop payment gateway (server only).
  *
  * Whop is the card / international checkout for VIP. Every plan the app sells
- * ($19 lifetime, $9 exit-offer lifetime, $4.99 monthly, $2.99 downsell monthly)
+ * ($19 lifetime, $9 exit-offer lifetime, $2.99 monthly, $1.99 monthly offer)
  * is created as an inline Whop plan on a fresh checkout configuration, so no
  * plan IDs have to be maintained by hand and the price is always decided on the
  * server — a tampered client can never buy VIP cheaper than the real offer.
@@ -16,7 +16,7 @@ const API_BASE = "https://api.whop.com/api/v1";
 export const WHOP_PRICES = {
   1900: { plan: "lifetime", type: "one_time" },
   900: { plan: "lifetime", type: "one_time" },
-  499: { plan: "monthly", type: "renewal" },
+  199: { plan: "monthly", type: "renewal" },
   299: { plan: "monthly", type: "renewal" },
 } as const;
 
@@ -88,6 +88,7 @@ export async function createWhopCheckout(input: {
 
   const res = await fetch(`${API_BASE}/checkout_configurations`, {
     method: "POST",
+    signal: AbortSignal.timeout(12_000),
     headers: {
       Authorization: `Bearer ${apiKey}`,
       "Content-Type": "application/json",

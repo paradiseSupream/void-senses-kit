@@ -15,7 +15,7 @@ import { toast } from "sonner";
 
 import { startVipCheckout } from "@/lib/vip.functions";
 import { rememberOrder } from "@/lib/vip-unlock";
-import { attribution, sessionId, trackExperiment } from "@/lib/monetization";
+import { attribution, sessionId, track, trackExperiment, visitorCountry } from "@/lib/monetization";
 import { trackFunnel } from "@/lib/funnel";
 import { cookie } from "@/lib/pixels";
 import { hasVipOffer } from "@/lib/vip-offer";
@@ -26,28 +26,41 @@ export function useDirectCheckout() {
   const beginCheckout = useServerFn(startVipCheckout);
   const navigate = useNavigate();
   const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const go = async (plan: VipPlan) => {
     if (busy) return;
     setBusy(true);
+    setError(null);
+    track({ event_type: "click", slot: "vip_checkout_tap", format: plan });
     try {
-      trackFunnel("checkout_start");
       trackExperiment(VIP_CHECKOUT_SLOT, vipGateArm());
-      const result = await beginCheckout({
-        data: {
-          plan,
-          offer: hasVipOffer(),
-          email: null,
-          sessionId: sessionId(),
-          utmSource: attribution().utm_source ?? null,
-          fbp: cookie("_fbp") ?? null,
-          fbc: cookie("_fbc") ?? null,
-        },
-      });
+      const result = await Promise.race([
+        beginCheckout({
+          data: {
+            plan,
+            offer: hasVipOffer(),
+            email: null,
+            sessionId: sessionId(),
+            utmSource: attribution().utm_source ?? null,
+            country: visitorCountry(),
+            fbp: cookie("_fbp") ?? null,
+            fbc: cookie("_fbc") ?? null,
+          },
+        }),
+        new Promise<never>((_, reject) => {
+          window.setTimeout(() => reject(new Error("checkout_timeout")), 15_000);
+        }),
+      ]);
       if (!result.ok || !result.checkoutId || !result.planId) {
-        toast.error(result.reason ?? "Checkout is unavailable right now.");
+        const reason = result.reason ?? "Checkout is unavailable right now.";
+        track({ event_type: "script_error", slot: "vip_checkout_session", format: plan });
+        setError(reason);
+        toast.error(reason);
         return;
       }
+      track({ event_type: "script_load", slot: "vip_checkout_session", format: plan });
+      trackFunnel("checkout_start");
       if (result.orderId) rememberOrder(result.orderId, null);
       await navigate({
         to: "/vip/checkout",
@@ -60,12 +73,17 @@ export function useDirectCheckout() {
             : {}),
         },
       });
-    } catch {
-      toast.error("Could not open checkout — please try again.");
+    } catch (caught) {
+      const reason = caught instanceof Error && caught.message === "checkout_timeout"
+        ? "Checkout took too long. Check your connection and try again."
+        : "Could not open checkout — please try again.";
+      track({ event_type: "script_error", slot: "vip_checkout_request", format: plan });
+      setError(reason);
+      toast.error(reason);
     } finally {
       setBusy(false);
     }
   };
 
-  return { busy, go };
+  return { busy, error, go };
 }
