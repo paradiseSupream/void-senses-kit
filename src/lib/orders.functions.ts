@@ -124,8 +124,9 @@ export const adminOrdersReport = createServerFn({ method: "POST" })
       db
         .from("vip_orders")
         .select(
-          "order_id,email,plan,amount_cents,status,provider,country,utm_source,session_id,created_at,paid_at,fbp",
+          "order_id,email,plan,amount_cents,status,provider,country,utm_source,session_id,created_at,paid_at,fbp,fbc,user_agent,payment_id,payment_method,card_brand,card_last4,billing_country,billing_name,receipt_url,currency,refunded_at",
         )
+
         .gte("created_at", since)
         .order("created_at", { ascending: false })
         .limit(500),
