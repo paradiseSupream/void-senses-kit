@@ -159,11 +159,16 @@ export const Route = createFileRoute("/api/public/whop-webhook")({
           // Close the order first so a replayed `payment.succeeded` cannot
           // silently re-grant access after a refund/cancellation.
           if (parsed.orderId) {
+            const refunded = parsed.type === "payment.refunded";
             await supabaseAdmin
               .from("vip_orders")
-              .update({ status: parsed.type === "payment.refunded" ? "refunded" : "cancelled" })
+              .update({
+                status: refunded ? "refunded" : "cancelled",
+                ...(refunded ? { refunded_at: new Date().toISOString() } : {}),
+              })
               .eq("order_id", parsed.orderId);
           }
+
           if (parsed.email) {
             await supabaseAdmin
               .from("vip_members")
