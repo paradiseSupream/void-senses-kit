@@ -66,7 +66,13 @@ function useMatrixCheckout() {
  */
 export function MatrixUpsellModal({ onDismiss }: { onDismiss: () => void }) {
   const { start, busy } = useMatrixCheckout();
+  const { isVip } = useVip();
   const [mounted, setMounted] = useState(false);
+  // VIP includes the matrix now — never upsell a paying VIP member.
+  const owned = useMatrix() || isVip;
+  useEffect(() => {
+    if (owned) onDismiss();
+  }, [owned, onDismiss]);
 
   // Portal to <body>: the dossier card is a transformed/blurred ancestor, which
   // would otherwise become the containing block for `fixed` and push the modal
