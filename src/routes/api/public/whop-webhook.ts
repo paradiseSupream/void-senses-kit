@@ -223,7 +223,14 @@ export const Route = createFileRoute("/api/public/whop-webhook")({
               paid_at: new Date().toISOString(),
             })
             .eq("order_id", order.order_id);
+
+          // Enrich the row with the provider's own billing record (card brand,
+          // last four, billing country, receipt link) so every real sale can be
+          // audited from the admin dashboard. Never fatal.
+          const { syncOrderPaymentDetails } = await import("@/lib/vip-reconcile.server");
+          await syncOrderPaymentDetails(order.order_id as string);
         }
+
 
         if (email) {
           const { grantVip } = await import("@/lib/vip-fulfil.server");
