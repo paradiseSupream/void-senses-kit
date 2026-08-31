@@ -86,6 +86,11 @@ export function VipOfferCard({
       <p className="mt-2.5 text-center text-xs text-muted-foreground">
         Secure checkout · instant access · nothing auto-renews
       </p>
+
+      {/* Not ready to pay is the majority case — capturing the email here turns
+          a one-shot paid visitor into someone we can bring back for free. */}
+      <EmailCapture toolSlug={toolSlug} source="offer_card" className="mt-5" />
     </section>
   );
 }
+
