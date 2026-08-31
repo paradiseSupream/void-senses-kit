@@ -215,6 +215,22 @@ function VipCheckoutPage() {
         </a>
       ) : null}
 
+      {/* Card not an option for everyone in the Gulf/South Asia — crypto stays
+          one tap away instead of only living inside the VIP modal. */}
+      <button
+        type="button"
+        onClick={() => {
+          track({ event_type: "click", slot: "vip_checkout_crypto", format: "crypto" });
+          openVipModal("monthly");
+          window.setTimeout(() => window.dispatchEvent(new Event("sov:vip-crypto")), 0);
+        }}
+        className="mt-3 inline-flex w-full items-center justify-center gap-1.5 text-center text-xs text-muted-foreground underline underline-offset-4 hover:text-foreground"
+      >
+        <Bitcoin className="size-3.5" aria-hidden="true" /> Pay with crypto instead (SOL / USDC)
+      </button>
+
+
+
 
       <p className="mt-4 text-xs text-muted-foreground">
         Payments are processed by Whop. We never see or store your card details.{" "}
