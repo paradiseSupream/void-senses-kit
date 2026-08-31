@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Check, Crown, Loader2, Lock, ShieldCheck, Users, Zap } from "lucide-react";
+import { Bitcoin, Check, Crown, Loader2, Lock, ShieldCheck, Users, Zap } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
 
 import { EmailCapture } from "@/components/monetization/EmailCapture";
@@ -178,13 +178,26 @@ export function VipOfferCard({
         </p>
       ) : null}
 
-      <button
-        type="button"
-        onClick={() => openVipModal("monthly")}
-        className="mt-2 w-full text-center text-xs text-muted-foreground underline underline-offset-4 hover:text-foreground"
-      >
-        Compare plans or restore a purchase
-      </button>
+      <div className="mt-2 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
+        <button
+          type="button"
+          onClick={() => openVipModal("monthly")}
+          className="underline underline-offset-4 hover:text-foreground"
+        >
+          Compare plans or restore a purchase
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            openVipModal("monthly");
+            window.setTimeout(() => window.dispatchEvent(new Event("sov:vip-crypto")), 0);
+          }}
+          className="inline-flex items-center gap-1.5 underline underline-offset-4 hover:text-foreground"
+        >
+          <Bitcoin className="size-3.5" aria-hidden="true" /> Pay with crypto (SOL / USDC)
+        </button>
+      </div>
+
 
       {/* Not ready to pay is the majority case — capturing the email here turns
           a one-shot paid visitor into someone we can bring back for free. */}

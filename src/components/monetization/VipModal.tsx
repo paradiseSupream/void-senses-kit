@@ -68,6 +68,15 @@ export function VipModal() {
     }
   }, [vipModalOpen, preferredPlan]);
 
+  // Crypto buyers can deep-link straight into the wallet tab from any offer
+  // card, so the option stays one tap away instead of hidden behind the card UI.
+  useEffect(() => {
+    const openCrypto = () => setTab("crypto");
+    window.addEventListener("sov:vip-crypto", openCrypto);
+    return () => window.removeEventListener("sov:vip-crypto", openCrypto);
+  }, []);
+
+
   const persistEmail = async () => {
     if (!email.includes("@")) {
       toast.error("Enter a valid email address.");
