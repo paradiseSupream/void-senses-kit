@@ -35,6 +35,7 @@ export function ExitIntentOffer() {
     }
 
     let done = false;
+    let resultSeen = false;
     const fire = () => {
       if (done) return;
       done = true;
@@ -57,20 +58,60 @@ export function ExitIntentOffer() {
     };
 
     // Touch fallback: only after real dwell and scrolling, never on arrival.
-    const touchTimer = window.setTimeout(() => {
+    const armScroll = () => {
       const onScroll = () => {
         const scrolled = window.scrollY / Math.max(1, document.body.scrollHeight - window.innerHeight);
         if (scrolled > 0.4) fire();
       };
       window.addEventListener("scroll", onScroll, { passive: true });
       cleanupScroll = () => window.removeEventListener("scroll", onScroll);
-    }, isRetarget ? 12_000 : 45_000);
+    };
+    let touchTimer = window.setTimeout(armScroll, isRetarget ? 12_000 : 45_000);
+
+    // Finishing a quiz is the highest-intent moment on the site: the result
+    // screen announces itself and the offer arms within seconds instead of
+    // waiting out the generic browsing dwell.
+    const onResult = () => {
+      resultSeen = true;
+      window.clearTimeout(touchTimer);
+      touchTimer = window.setTimeout(armScroll, 6_000);
+      window.setTimeout(() => fire(), 20_000);
+    };
+    window.addEventListener("sov:result-ready", onResult);
+
+    // Mobile has no mouseout: trap one history entry so the back gesture after
+    // the result shows the one-time offer instead of silently losing the visit.
+    let trapped = false;
+    const onPopState = () => {
+      if (!resultSeen || done) return;
+      fire();
+    };
+    const trap = () => {
+      if (trapped) return;
+      trapped = true;
+      try {
+        window.history.pushState({ sovExit: 1 }, "");
+      } catch {
+        /* history unavailable */
+      }
+    };
+    window.addEventListener("sov:result-ready", trap);
+    window.addEventListener("popstate", onPopState);
+
+    const onHide = () => {
+      if (document.visibilityState === "hidden" && resultSeen) fire();
+    };
+    document.addEventListener("visibilitychange", onHide);
 
     let cleanupScroll = () => undefined as void;
     document.addEventListener("mouseout", onMouseOut);
 
     function cleanup() {
       document.removeEventListener("mouseout", onMouseOut);
+      window.removeEventListener("sov:result-ready", onResult);
+      window.removeEventListener("sov:result-ready", trap);
+      window.removeEventListener("popstate", onPopState);
+      document.removeEventListener("visibilitychange", onHide);
       window.clearTimeout(touchTimer);
       cleanupScroll();
     }
