@@ -19,7 +19,7 @@ const SEEN_KEY = "sov.exitOfferSeen";
 export function ExitIntentOffer() {
   const { isVip, openVipModal } = useVip();
   const { monthly, lifetime: offer, lifetimeFull: full } = useVipPrices();
-  const { site, tracking } = useSiteConfig();
+  const { tracking } = useSiteConfig();
   const [open, setOpen] = useState(false);
   const [retarget, setRetarget] = useState(false);
 

@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { Crown, PlayCircle, X } from "lucide-react";
 
 import { useVip } from "@/lib/vip";
-import { useSiteConfig } from "@/lib/site-config";
 import { useActionGate } from "@/components/monetization/ActionGate";
 import { ScarcityTimer } from "@/components/monetization/ScarcityTimer";
 import { grantVipOffer } from "@/lib/vip-offer";
@@ -34,7 +33,6 @@ export function MidQuizOffer({
 }) {
   const { isVip, openVipModal } = useVip();
   const { monthly, lifetime: offer, lifetimeFull: full } = useVipPrices();
-  const { site } = useSiteConfig();
   const runGated = useActionGate();
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
