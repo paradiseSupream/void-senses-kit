@@ -166,6 +166,18 @@ export const adminOrdersReport = createServerFn({ method: "POST" })
       created_at: string;
       paid_at: string | null;
       fbp: string | null;
+      fbc: string | null;
+      user_agent: string | null;
+      payment_id: string | null;
+      payment_method: string | null;
+      card_brand: string | null;
+      card_last4: string | null;
+      billing_country: string | null;
+      billing_name: string | null;
+      receipt_url: string | null;
+      currency: string | null;
+      refunded_at: string | null;
+
     };
 
     const orders = (ordersRes.data ?? []) as OrderRow[];
