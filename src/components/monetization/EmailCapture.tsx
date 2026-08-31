@@ -8,6 +8,10 @@ import { useVip } from "@/lib/vip";
 
 const KEY = "sov.lead";
 
+/** Only one capture form may render per screen — several hosts now include it. */
+let mounted = 0;
+
+
 /**
  * Return-visit loop. A visitor who leaves an email can be pulled back for the
  * next test for free, which is the single cheapest way to raise revenue per
