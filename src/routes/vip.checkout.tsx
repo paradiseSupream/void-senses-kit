@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 
-import { ShieldCheck } from "lucide-react";
+import { Bitcoin, ShieldCheck } from "lucide-react";
 
 import { LogoMark } from "@/components/brand/LogoMark";
 import { track } from "@/lib/monetization";
+import { useVip } from "@/lib/vip";
+
 
 type Search = { s?: string; p?: string; order?: string; amount?: string; m?: string };
 
