@@ -469,16 +469,17 @@ function Home() {
           />
         </div>
 
-        <div className="mt-5 grid grid-cols-2 gap-3 sm:mt-8 sm:gap-4">
+        <div className="mt-5 grid auto-rows-fr grid-flow-row-dense grid-cols-2 gap-3 sm:mt-8 sm:grid-cols-1 sm:gap-4">
           {slots.map((slot, i) =>
             "ad" in slot ? (
-              <div key={`ad-${i}`} className="col-span-2 grid">
+              <div key={`ad-${i}`} className="col-span-2 grid sm:col-span-1">
                 <NativeAdCard index={slot.ad} />
               </div>
             ) : (
               <ToolRow key={slot.item.slug} tool={slot.item} />
             ),
           )}
+
           {results.length === 0 ? (
             <p className="col-span-full py-14 text-center text-sm text-muted-foreground">
               Nothing matches "{query}".
