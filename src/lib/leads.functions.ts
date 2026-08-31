@@ -36,5 +36,40 @@ export const subscribeLead = createServerFn({ method: "POST" })
       },
       { onConflict: "email", ignoreDuplicates: true },
     );
-    return { ok: !error };
+    if (error) return { ok: false };
+
+    // Confirmation email for this signup. Sent once per address — the row is
+    // only marked after a successful send, so a failure can be retried later
+    // from the admin panel.
+    const { data: row } = await supabaseAdmin
+      .from("email_leads")
+      .select("id, welcome_sent_at")
+      .eq("email", data.email)
+      .maybeSingle();
+
+    if (row && !row.welcome_sent_at) {
+      let status = "sent";
+      try {
+        const { sendTemplateEmail } = await import("@/lib/email-templates/send-email");
+        const result = await sendTemplateEmail("lead-welcome", data.email, {
+          templateData: { toolSlug: data.toolSlug },
+          idempotencyKey: `lead-welcome-${row.id}`,
+        });
+        if (!result.sent) status = result.reason;
+      } catch (sendError) {
+        status = `failed: ${sendError instanceof Error ? sendError.message : "unknown"}`.slice(
+          0,
+          200,
+        );
+      }
+      await supabaseAdmin
+        .from("email_leads")
+        .update({
+          welcome_status: status,
+          ...(status.startsWith("failed") ? {} : { welcome_sent_at: new Date().toISOString() }),
+        })
+        .eq("id", row.id);
+    }
+
+    return { ok: true };
   });
