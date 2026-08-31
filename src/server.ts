@@ -83,15 +83,29 @@ function withSecurityHeaders(request: Request, response: Response): Response {
   // Camera stays available to the provider only, so mobile buyers can scan a
   // card instead of typing 16 digits; clipboard-write keeps paste-to-copy
   // affordances alive inside the same frame.
+  // Whop nests further origins inside its iframe — Stripe for the card element,
+  // Basis Theory for hosted fields and Sardine for fraud scoring — so each one
+  // has to be named or the nested frame still reports a violation. Sardine
+  // reads the accelerometer as a bot/fraud signal; blocking it makes legitimate
+  // Gulf card payments look riskier and raises the decline rate.
+  const provider = [
+    '"https://whop.com"',
+    '"https://checkout.whop.com"',
+    '"https://js.stripe.com"',
+    '"https://m.stripe.network"',
+    '"https://js.basistheory.com"',
+  ].join(" ");
   headers.set(
     "Permissions-Policy",
     [
-      'camera=(self "https://whop.com")',
+      `camera=(self ${provider})`,
       "microphone=()",
       "geolocation=()",
-      'payment=(self "https://whop.com" "https://js.stripe.com" "https://checkout.whop.com")',
-      'publickey-credentials-get=(self "https://whop.com")',
-      'clipboard-write=(self "https://whop.com")',
+      `accelerometer=(self ${provider})`,
+      `gyroscope=(self ${provider})`,
+      `payment=(self ${provider})`,
+      `publickey-credentials-get=(self ${provider})`,
+      `clipboard-write=(self ${provider})`,
     ].join(", "),
   );
   headers.set("Cross-Origin-Opener-Policy", "same-origin-allow-popups");
