@@ -84,7 +84,8 @@ function VipCheckoutPage() {
         setSlow(true);
         track({ event_type: "funnel", slot: "checkout_embed_timeout", format: "whop" });
       }
-    }, 4000);
+    }, 2500);
+
     if (!document.getElementById("whop-checkout-loader")) {
       const script = document.createElement("script");
       script.id = "whop-checkout-loader";
