@@ -3,7 +3,6 @@ import { Crown, Lock, Sparkles, Swords } from "lucide-react";
 import { toast } from "sonner";
 
 import { useVip } from "@/lib/vip";
-import { useSiteConfig } from "@/lib/site-config";
 import { useActionGate } from "@/components/monetization/ActionGate";
 import { AdSlot } from "@/components/monetization/AdSlot";
 import { EmailCapture } from "@/components/monetization/EmailCapture";
@@ -38,7 +37,6 @@ export function LockedReport({
   children: React.ReactNode;
 }) {
   const { isVip, openVipModal } = useVip();
-  const { site } = useSiteConfig();
   const runGated = useActionGate();
   const offerActive = useVipOffer();
   const [open, setOpen] = useState(false);
