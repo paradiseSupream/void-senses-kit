@@ -4,6 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 
 import { EmailCapture } from "@/components/monetization/EmailCapture";
 import { ScarcityTimer } from "@/components/monetization/ScarcityTimer";
+import { VipStatusCard } from "@/components/monetization/VipStatusCard";
 import { useVip } from "@/lib/vip";
 
 import { track, visitorCountry } from "@/lib/monetization";
@@ -73,7 +74,8 @@ export function VipOfferCard({
     };
   }, [isVip, loadProof]);
 
-  if (isVip) return null;
+  // Paid visitors never see a price again — only what they now own.
+  if (isVip) return <VipStatusCard className={className} />;
 
   const region = proof?.country ? (REGION_NAME[proof.country] ?? null) : null;
   const localCount = proof?.reportsTodayLocal ?? 0;
