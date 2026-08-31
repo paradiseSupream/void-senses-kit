@@ -394,3 +394,80 @@ export const adminReconcileOrders = createServerFn({ method: "POST" })
       };
     },
   );
+
+/**
+ * Refunds or cancels one order from the admin dashboard.
+ *
+ * Both actions are admin-token gated and idempotent:
+ *  - `refund` asks Whop to return a captured payment, then closes the order and
+ *    deactivates the buyer's VIP row. A refunded order can never flip back to
+ *    paid, because the webhook treats refunded/cancelled as terminal.
+ *  - `cancel` only closes a checkout that never captured money, so an abandoned
+ *    order stops being reconciled and stops polluting the paid-rate metric.
+ *
+ * Nothing here re-reports anything to Meta: a refunded conversion is corrected
+ * on Meta's side by the refund itself, and inventing a second Purchase event
+ * would double-count the sale.
+ */
+export const adminCloseOrder = createServerFn({ method: "POST" })
+  .inputValidator((input: { token: string; orderId: string; action: "refund" | "cancel"; reason?: string }) => ({
+    token: String(input?.token ?? ""),
+    orderId: String(input?.orderId ?? "").slice(0, 80),
+    action: input?.action === "refund" ? ("refund" as const) : ("cancel" as const),
+    reason: String(input?.reason ?? "").slice(0, 200),
+  }))
+  .handler(async ({ data }): Promise<{ ok: boolean; status: string; detail: string }> => {
+    const { requireAdmin, admin } = await import("@/lib/admin-core.server");
+    await requireAdmin(data.token);
+    if (!data.orderId) return { ok: false, status: "unknown", detail: "No order id." };
+
+    const db = admin();
+    const { data: order } = await db
+      .from("vip_orders")
+      .select("order_id,email,status,payment_id")
+      .eq("order_id", data.orderId)
+      .maybeSingle();
+
+    if (!order) return { ok: false, status: "unknown", detail: "Order not found." };
+    if (order.status === "refunded" || order.status === "cancelled") {
+      return { ok: true, status: order.status as string, detail: `Order was already ${order.status}.` };
+    }
+
+    if (data.action === "cancel") {
+      if (order.status === "paid") {
+        return {
+          ok: false,
+          status: "paid",
+          detail: "This order was paid — use Refund instead of Cancel.",
+        };
+      }
+      await db
+        .from("vip_orders")
+        .update({ status: "cancelled", refund_reason: data.reason || "Cancelled by admin" })
+        .eq("order_id", data.orderId);
+      return { ok: true, status: "cancelled", detail: "Abandoned checkout closed." };
+    }
+
+    // --- refund ---
+    if (order.status !== "paid") {
+      return { ok: false, status: order.status as string, detail: "Only a paid order can be refunded." };
+    }
+    const { refundWhopPayment } = await import("@/lib/whop.server");
+    const result = await refundWhopPayment(String(order.payment_id ?? ""));
+    if (!result.ok) return { ok: false, status: "paid", detail: result.detail };
+
+    await db
+      .from("vip_orders")
+      .update({
+        status: "refunded",
+        refunded_at: new Date().toISOString(),
+        refund_reason: data.reason || "Refunded by admin",
+      })
+      .eq("order_id", data.orderId);
+
+    if (order.email) {
+      await db.from("vip_members").update({ active: false }).ilike("email", String(order.email));
+    }
+
+    return { ok: true, status: "refunded", detail: "Refunded and VIP access revoked." };
+  });
