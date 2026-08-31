@@ -163,3 +163,29 @@ export async function lookupVip(email: string): Promise<VipAccess> {
     licenseKey: expired ? null : (row.license_key ?? null),
   };
 }
+
+/**
+ * Burns the one-time exit offer *on the server*, so the discount is auditable
+ * and cannot be revived by clearing browser storage. Only called once the order
+ * is actually paid; idempotent.
+ */
+export async function burnOrderOffer(orderId: string): Promise<string | null> {
+  if (!orderId) return null;
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { data: row } = await supabaseAdmin
+    .from("vip_orders")
+    .select("offer_applied,offer_burned_at,status")
+    .eq("order_id", orderId)
+    .maybeSingle();
+
+  if (!row || !row.offer_applied || row.status !== "paid") return row?.offer_burned_at ?? null;
+  if (row.offer_burned_at) return row.offer_burned_at;
+
+  const burnedAt = new Date().toISOString();
+  await supabaseAdmin
+    .from("vip_orders")
+    .update({ offer_burned_at: burnedAt })
+    .eq("order_id", orderId)
+    .is("offer_burned_at", null);
+  return burnedAt;
+}
