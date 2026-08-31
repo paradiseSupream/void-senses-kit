@@ -345,7 +345,12 @@ export function pixelTrack(event: PixelEvent, payload: PixelPayload = {}) {
   };
 
   if (pixelsAllowed && pixelsEnabled()) {
-    fireBrowser();
+    // A third-party tag that throws must not propagate into the caller.
+    try {
+      fireBrowser();
+    } catch {
+      /* browser pixel failure is reported, never fatal */
+    }
   } else {
     // Consent and runtime pixel ids can resolve in either order. Queue until
     // both are ready instead of logging a false "Pixel not loaded" failure.
@@ -354,7 +359,11 @@ export function pixelTrack(event: PixelEvent, payload: PixelPayload = {}) {
 
   // Server-side CAPI fires immediately (deduped by event_id) so the conversion
   // is captured even if the visitor bounces before the geo check resolves.
-  void sendServerEvent(event, { ...payload, eventId, currency });
+  try {
+    void sendServerEvent(event, { ...payload, eventId, currency });
+  } catch {
+    /* CAPI delivery is best effort */
+  }
 }
 
 /**
