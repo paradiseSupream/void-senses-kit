@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { Check, Crown, Zap } from "lucide-react";
 
+import { EmailCapture } from "@/components/monetization/EmailCapture";
 import { useVip } from "@/lib/vip";
 import { useSiteConfig } from "@/lib/site-config";
 import { track } from "@/lib/monetization";
