@@ -32,11 +32,24 @@ export async function grantVip(grant: VipGrant): Promise<VipAccess> {
 
   const { data: existing } = await supabaseAdmin
     .from("vip_members")
-    .select("id,plan,expires_at,license_key")
+    .select("id,plan,expires_at,license_key,payment_ref")
     .ilike("email", email)
     .maybeSingle();
 
   if (existing) {
+    // Same payment delivered twice (Whop sends both `membership.activated` and
+    // `payment.succeeded`) must never stack a second billing period — a 30-day
+    // plan grants exactly 30 days.
+    const samePayment = Boolean(grant.paymentRef && existing.payment_ref === grant.paymentRef);
+    if (samePayment) {
+      return {
+        active: true,
+        plan: (existing.plan as VipPlanName) ?? grant.plan,
+        expiresAt: existing.expires_at ?? null,
+        licenseKey: existing.license_key ?? null,
+      };
+    }
+
     // Monthly renewals stack on the remaining time; lifetime never expires.
     const base =
       grant.plan === "monthly" &&
@@ -149,4 +162,30 @@ export async function lookupVip(email: string): Promise<VipAccess> {
     expiresAt: row.expires_at ?? null,
     licenseKey: expired ? null : (row.license_key ?? null),
   };
+}
+
+/**
+ * Burns the one-time exit offer *on the server*, so the discount is auditable
+ * and cannot be revived by clearing browser storage. Only called once the order
+ * is actually paid; idempotent.
+ */
+export async function burnOrderOffer(orderId: string): Promise<string | null> {
+  if (!orderId) return null;
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { data: row } = await supabaseAdmin
+    .from("vip_orders")
+    .select("offer_applied,offer_burned_at,status")
+    .eq("order_id", orderId)
+    .maybeSingle();
+
+  if (!row || !row.offer_applied || row.status !== "paid") return row?.offer_burned_at ?? null;
+  if (row.offer_burned_at) return row.offer_burned_at;
+
+  const burnedAt = new Date().toISOString();
+  await supabaseAdmin
+    .from("vip_orders")
+    .update({ offer_burned_at: burnedAt })
+    .eq("order_id", orderId)
+    .is("offer_burned_at", null);
+  return burnedAt;
 }

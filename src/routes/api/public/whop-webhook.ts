@@ -238,6 +238,12 @@ export const Route = createFileRoute("/api/public/whop-webhook")({
         }
 
 
+        if (parsed.orderId) {
+          // Paid discounted order → burn the one-time offer server-side.
+          const { burnOrderOffer } = await import("@/lib/vip-fulfil.server");
+          await burnOrderOffer(parsed.orderId);
+        }
+
         if (email) {
           const { grantVip } = await import("@/lib/vip-fulfil.server");
           await grantVip({
