@@ -202,8 +202,21 @@ export const adminOrdersReport = createServerFn({ method: "POST" })
         abandoned: pending && ageMinutes >= ABANDON_MINUTES,
         atRisk: pending && ageMinutes < ABANDON_MINUTES,
         hasFbp: Boolean(row.fbp),
+        paymentId: row.payment_id,
+        paymentMethod: row.payment_method,
+        cardBrand: row.card_brand,
+        cardLast4: row.card_last4,
+        billingCountry: row.billing_country,
+        billingName: row.billing_name,
+        receiptUrl: row.receipt_url,
+        currency: row.currency ?? "USD",
+        refundedAt: row.refunded_at,
+        // A well-matched Meta Purchase needs the click identifier, the browser
+        // agent and a country; anything missing weakens attribution.
+        trackingComplete: Boolean(row.fbp && row.user_agent && row.country),
       };
     });
+
 
     const paidOrders = rows.filter((row) => row.status === "paid");
     const revenueCents = paidOrders.reduce((sum, row) => sum + row.amountCents, 0);
