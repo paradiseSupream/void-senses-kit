@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import { useActionGate } from "@/components/monetization/ActionGate";
 import { AdSlot } from "@/components/monetization/AdSlot";
 import { NativeAdCard } from "@/components/monetization/NativeAdCard";
+import { VipOfferCard } from "@/components/monetization/VipOfferCard";
 import {
   accentFor,
   downloadCanvas,
@@ -204,6 +205,10 @@ export function ResultActions({
 
   return (
     <>
+    {/* Every result shows the offer — this is the highest-intent moment and
+        previously most result views never saw a price at all. */}
+    <VipOfferCard toolSlug={toolSlug} className="mt-7" />
+
     {/* Free users monetise here: the result is the highest-intent moment, and
         the placement sits above the actions without covering the score. */}
     <AdSlot id={`result-${toolSlug}`} toolSlug={toolSlug} className="mt-7" />
