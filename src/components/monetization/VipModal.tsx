@@ -34,6 +34,7 @@ const PERKS = [
 
 export function VipModal() {
   const { vipModalOpen, closeVipModal, setVip, isVip, preferredPlan } = useVip();
+  const { plan: activePlan } = useVip();
   const saveLead = useServerFn(subscribeLead);
   const beginCheckout = useServerFn(startVipCheckout);
   const restoreVip = useServerFn(restoreVipAccess);
