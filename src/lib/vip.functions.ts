@@ -60,7 +60,7 @@ export const startVipCheckout = createServerFn({ method: "POST" })
   .handler(async ({ data }): Promise<CheckoutStart> => {
     const PRICES: Record<VipPlanName, { full: number; offer: number }> = {
       lifetime: { full: 1900, offer: 900 },
-      monthly: { full: 499, offer: 299 },
+      monthly: { full: 299, offer: 199 },
     };
     const { createWhopCheckout, isWhopPrice, whopConfigured } = await import("@/lib/whop.server");
     if (!whopConfigured()) {

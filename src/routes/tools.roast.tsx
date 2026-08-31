@@ -4,6 +4,7 @@ import { Flame, Square } from "lucide-react";
 import { toast } from "sonner";
 
 import { ToolShell } from "@/components/layout/ToolShell";
+import { VipOfferCard } from "@/components/monetization/VipOfferCard";
 
 export const Route = createFileRoute("/tools/roast")({
   head: () => ({
@@ -217,6 +218,8 @@ function RoastMe() {
           {busy && output ? <span className="animate-pulse">▌</span> : null}
         </pre>
       </div>
+
+      {output && !busy ? <VipOfferCard toolSlug="roast" className="mt-6" /> : null}
     </ToolShell>
   );
 }
