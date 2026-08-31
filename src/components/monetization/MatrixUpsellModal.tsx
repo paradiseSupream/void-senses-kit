@@ -147,7 +147,10 @@ export function MatrixUpsellModal({ onDismiss }: { onDismiss: () => void }) {
  * dossier once the add-on is owned, teased with a buy button when it is not.
  */
 export function MatrixModule({ dossier }: { dossier: Dossier }) {
-  const owned = useMatrix();
+  // VIP members already paid for the full dossier — the add-on is included for
+  // them, so the $9 tease must never appear after a VIP purchase.
+  const { isVip } = useVip();
+  const owned = useMatrix() || isVip;
   const { start, busy } = useMatrixCheckout();
   const matrix = dossier.archetype.matrix;
 
