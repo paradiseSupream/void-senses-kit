@@ -1,13 +1,15 @@
 import { useEffect } from "react";
-import { Check, Crown, Zap } from "lucide-react";
+import { Check, Crown, Loader2, Zap } from "lucide-react";
 
 import { EmailCapture } from "@/components/monetization/EmailCapture";
 import { useVip } from "@/lib/vip";
 import { useSiteConfig } from "@/lib/site-config";
 import { track } from "@/lib/monetization";
 import { trackFunnel } from "@/lib/funnel";
+import { useDirectCheckout } from "@/lib/use-direct-checkout";
 import { MONTHLY_OFFER_CENTS, useVipOffer } from "@/lib/vip-offer";
 import { VIP_MONTHLY_CENTS } from "@/lib/vip-pricing";
+
 
 /**
  * Always-visible entry offer on every result screen.
