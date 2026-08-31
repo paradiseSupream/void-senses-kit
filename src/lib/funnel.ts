@@ -84,31 +84,47 @@ export function trackFunnel(
     // admin dashboard counts real VIP money, not just ad revenue.
     ...(opts?.revenueCents ? { revenue_cents: opts.revenueCents } : {}),
   });
-  // Mirror the funnel into GA4 so SEO traffic can be measured end to end.
-  gaEvent(`funnel_${step}`, { tool_slug: toolSlug ?? undefined, dwell_ms: dwellMs() });
+  // Everything below is best-effort mirroring into third-party tags. A pixel
+  // script that throws (blocked, half-loaded, or hostile) must never abort the
+  // caller's effect — that is how `vip_gate_shown` silently disappeared while
+  // `result_view` kept arriving from the very same effect.
+  try {
+    // Mirror the funnel into GA4 so SEO traffic can be measured end to end.
+    gaEvent(`funnel_${step}`, { tool_slug: toolSlug ?? undefined, dwell_ms: dwellMs() });
+  } catch {
+    /* analytics must never break the funnel */
+  }
 
   // Mirror the money steps into Meta / TikTok / Google Ads (Purchase is fired
   // on the success page where the real order value is known).
   const mapped = PIXEL_STEPS[step];
   if (mapped) {
-    pixelTrack(mapped.event, {
-      contentName: toolSlug ?? step,
-      ...(mapped.valueCents ? { value: mapped.valueCents / 100, currency: "USD" } : {}),
-      // Stable per step + session so the browser fire and the server-side
-      // Conversions API delivery de-duplicate into one conversion.
-      eventId: stableEventId(`funnel:${step}:${toolSlug ?? "none"}`),
-    });
+    try {
+      pixelTrack(mapped.event, {
+        contentName: toolSlug ?? step,
+        ...(mapped.valueCents ? { value: mapped.valueCents / 100, currency: "USD" } : {}),
+        // Stable per step + session so the browser fire and the server-side
+        // Conversions API delivery de-duplicate into one conversion.
+        eventId: stableEventId(`funnel:${step}:${toolSlug ?? "none"}`),
+      });
+    } catch {
+      /* pixel failure must not stop the funnel */
+    }
   }
 
-  // The moment an offer is on screen, warm the hosted checkout so the buyer
-  // never waits for its script after tapping "Unlock".
-  if (step === "vip_gate_shown" || step === "checkout_start") preloadWhopCheckout();
+  try {
+    // The moment an offer is on screen, warm the hosted checkout so the buyer
+    // never waits for its script after tapping "Unlock".
+    if (step === "vip_gate_shown" || step === "checkout_start") preloadWhopCheckout();
 
-
-  // Remember the furthest step so returning non-buyers can be retargeted.
-  const segment = segmentForFunnelStep(step);
-  if (segment) markRetarget(segment);
+    // Remember the furthest step so returning non-buyers can be retargeted.
+    const segment = segmentForFunnelStep(step);
+    if (segment) markRetarget(segment);
+  } catch {
+    /* best effort */
+  }
 }
+
 
 let startedAt = 0;
 let timers: number[] = [];
