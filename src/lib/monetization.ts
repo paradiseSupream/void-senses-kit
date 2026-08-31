@@ -360,6 +360,11 @@ function ensureCountry() {
 }
 
 /** Current best-known client country (null until the geo lookup resolves). */
+export function visitorCountry(): string | null {
+  return clientGeo();
+}
+
+/** Current best-known client country (null until the geo lookup resolves). */
 function clientGeo(): string | null {
   ensureCountry();
   return clientCountry;
