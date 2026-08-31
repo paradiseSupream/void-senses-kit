@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 
-import { ShieldCheck } from "lucide-react";
+import { Bitcoin, ShieldCheck } from "lucide-react";
 
 import { LogoMark } from "@/components/brand/LogoMark";
 import { track } from "@/lib/monetization";
+import { useVip } from "@/lib/vip";
+
 
 type Search = { s?: string; p?: string; order?: string; amount?: string; m?: string };
 
@@ -52,6 +54,8 @@ export const Route = createFileRoute("/vip/checkout")({
 
 function VipCheckoutPage() {
   const { s, p, order, amount, m } = Route.useSearch();
+  const { openVipModal } = useVip();
+
   // The embedded checkout reads its data-attributes when the loader boots, so
   // the mount target is rendered only once the real return URL is known.
   const [origin, setOrigin] = useState("");
@@ -210,6 +214,22 @@ function VipCheckoutPage() {
           Payment form not opening? Use secure hosted checkout
         </a>
       ) : null}
+
+      {/* Card not an option for everyone in the Gulf/South Asia — crypto stays
+          one tap away instead of only living inside the VIP modal. */}
+      <button
+        type="button"
+        onClick={() => {
+          track({ event_type: "click", slot: "vip_checkout_crypto", format: "crypto" });
+          openVipModal("monthly");
+          window.setTimeout(() => window.dispatchEvent(new Event("sov:vip-crypto")), 0);
+        }}
+        className="mt-3 inline-flex w-full items-center justify-center gap-1.5 text-center text-xs text-muted-foreground underline underline-offset-4 hover:text-foreground"
+      >
+        <Bitcoin className="size-3.5" aria-hidden="true" /> Pay with crypto instead (SOL / USDC)
+      </button>
+
+
 
 
       <p className="mt-4 text-xs text-muted-foreground">

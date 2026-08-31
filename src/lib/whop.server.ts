@@ -65,7 +65,11 @@ export async function createWhopCheckout(input: {
     plan: {
       company_id: accountId,
       currency: "usd",
-      initial_price: input.amountCents / 100,
+      // Whop treats `initial_price` as a joining fee that is charged ON TOP of
+      // the first renewal, so a $1.99 monthly plan with both fields set billed
+      // $3.98 today. Recurring plans must therefore charge nothing extra up
+      // front — the renewal price alone is the amount due today.
+      initial_price: shape.type === "renewal" ? 0 : input.amountCents / 100,
       plan_type: shape.type,
       title,
       product: {
