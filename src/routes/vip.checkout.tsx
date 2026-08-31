@@ -155,33 +155,37 @@ function VipCheckoutPage() {
       track({ event_type: "funnel", slot: "checkout_embed_timeout", format: "whop" });
     }, 9000);
 
-    // Whop's loader boots exactly once: it guards on `window.wco` and its
-    // checkout bundle only scans the DOM it saw at boot. After any client-side
-    // navigation (offer → checkout, "Retry in-page form", back-and-forth) the
-    // bundle is already loaded, so the freshly rendered mount node is never
-    // picked up and the frame can never appear — the single biggest source of
-    // "checkout_embed_timeout". Tearing the loader state down and re-injecting
-    // it forces a full re-initialisation for every checkout page view.
+    // Whop's loader boots exactly once (it guards on `window.wco`) and its
+    // checkout bundle only ever mounts the nodes it saw during that boot. After
+    // any client-side re-entry — retrying checkout, going back and picking
+    // another plan, switching monthly → lifetime — the bundle is already live,
+    // never sees the freshly rendered mount node, and the frame can never
+    // appear. Re-injecting the script does not help (verified: `wco.frames`
+    // stays empty), so the only reliable recovery is one hard reload of the
+    // same checkout URL, which boots the loader against the real DOM.
     const w = window as unknown as { wco?: unknown };
+    const RELOAD_KEY = "sov.checkout.reboot";
     if (w.wco) {
-      delete w.wco;
-      document
-        .querySelectorAll('script[src*="js.whop.com/static/checkout"]')
-        .forEach((node) => node.remove());
-      track({ event_type: "funnel", slot: "checkout_embed_reinit", format: "whop" });
+      const already = window.sessionStorage.getItem(RELOAD_KEY);
+      const marker = `${p ?? ""}:${s ?? ""}`;
+      if (already !== marker) {
+        window.sessionStorage.setItem(RELOAD_KEY, marker);
+        track({ event_type: "funnel", slot: "checkout_embed_reboot", format: "whop" });
+        window.location.reload();
+        return;
+      }
+    } else {
+      window.sessionStorage.removeItem(RELOAD_KEY);
+      const script = document.createElement("script");
+      script.id = "whop-checkout-loader";
+      script.src = "https://js.whop.com/static/checkout/loader.js";
+      script.async = true;
+      script.onerror = () => {
+        setSlow(true);
+        track({ event_type: "funnel", slot: "checkout_loader_failed", format: "whop" });
+      };
+      document.body.appendChild(script);
     }
-    document.getElementById("whop-checkout-loader")?.remove();
-    const script = document.createElement("script");
-    script.id = "whop-checkout-loader";
-    // No query string: the loader derives its bundle URL from its own `src`
-    // with a `/loader\.js$/` replace, so any suffix breaks the boot.
-    script.src = "https://js.whop.com/static/checkout/loader.js";
-    script.async = true;
-    script.onerror = () => {
-      setSlow(true);
-      track({ event_type: "funnel", slot: "checkout_loader_failed", format: "whop" });
-    };
-    document.body.appendChild(script);
     return () => {
       observer.disconnect();
       window.clearTimeout(timer);
