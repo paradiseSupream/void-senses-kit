@@ -34,6 +34,14 @@ export const Route = createFileRoute("/admin/orders")({
 const TOKEN_KEY = "sov.adminToken";
 const WINDOWS = [1, 7, 14, 30, 60] as const;
 const money = (cents: number) => `$${(cents / 100).toFixed(2)}`;
+
+/**
+ * Whop's platform cut plus card processing (≈5.9% + $0.30) — this is why a
+ * $1.99 sale pays out around $1.51, and why the payout line is shown next to
+ * every gross amount instead of being discovered later in the Whop dashboard.
+ */
+const netCents = (cents: number) => Math.max(0, Math.round(cents * 0.941 - 30));
+
 const pct = (value: number) => `${value.toFixed(1)}%`;
 
 function age(minutes: number) {
