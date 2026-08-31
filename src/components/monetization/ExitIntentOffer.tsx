@@ -36,6 +36,21 @@ export function ExitIntentOffer() {
 
     let done = false;
     let resultSeen = false;
+
+    // How many tests this visitor has finished (persistent). The discount is a
+    // genuine leaving offer, so the passive fallbacks only arm once they have
+    // actually used the site (2+ finished tests). Everyone else keeps seeing
+    // the regular $4.99 / $20.49 prices in the VIP tab.
+    const RESULTS_KEY = "sov.resultsDone";
+    const readResults = () => {
+      try {
+        return Number(window.localStorage.getItem(RESULTS_KEY) ?? "0") || 0;
+      } catch {
+        return 0;
+      }
+    };
+    let resultsDone = readResults();
+
     const fire = () => {
       if (done) return;
       done = true;
@@ -57,8 +72,12 @@ export function ExitIntentOffer() {
       if (event.clientY <= 0 && !event.relatedTarget) fire();
     };
 
-    // Touch fallback: only after real dwell and scrolling, never on arrival.
+    // Touch fallback: only for invested visitors (2+ finished tests) and only
+    // after real dwell plus scrolling — never on arrival, never on a first
+    // visit, so the "one-time" price stays a real leaving offer.
+    let cleanupScroll = () => undefined as void;
     const armScroll = () => {
+      if (resultsDone < 2) return;
       const onScroll = () => {
         const scrolled = window.scrollY / Math.max(1, document.body.scrollHeight - window.innerHeight);
         if (scrolled > 0.4) fire();
@@ -66,16 +85,20 @@ export function ExitIntentOffer() {
       window.addEventListener("scroll", onScroll, { passive: true });
       cleanupScroll = () => window.removeEventListener("scroll", onScroll);
     };
-    let touchTimer = window.setTimeout(armScroll, isRetarget ? 12_000 : 45_000);
+    let touchTimer = window.setTimeout(armScroll, isRetarget ? 45_000 : 90_000);
 
-    // Finishing a quiz is the highest-intent moment on the site: the result
-    // screen announces itself and the offer arms within seconds instead of
-    // waiting out the generic browsing dwell.
     const onResult = () => {
       resultSeen = true;
+      resultsDone += 1;
+      try {
+        window.localStorage.setItem(RESULTS_KEY, String(resultsDone));
+      } catch {
+        /* storage unavailable */
+      }
+      // No auto-fire here: the offer must wait for a real leaving signal
+      // (back gesture, tab hide, or pointer to the top edge).
       window.clearTimeout(touchTimer);
-      touchTimer = window.setTimeout(armScroll, 6_000);
-      window.setTimeout(() => fire(), 20_000);
+      touchTimer = window.setTimeout(armScroll, 30_000);
     };
     window.addEventListener("sov:result-ready", onResult);
 
@@ -102,9 +125,8 @@ export function ExitIntentOffer() {
       if (document.visibilityState === "hidden" && resultSeen) fire();
     };
     document.addEventListener("visibilitychange", onHide);
-
-    let cleanupScroll = () => undefined as void;
     document.addEventListener("mouseout", onMouseOut);
+
 
     function cleanup() {
       document.removeEventListener("mouseout", onMouseOut);
