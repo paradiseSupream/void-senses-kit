@@ -2,12 +2,14 @@ import { useEffect, useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 
-import { Bitcoin, ShieldCheck } from "lucide-react";
+import { Bitcoin, Loader2, ShieldCheck } from "lucide-react";
 
 import { LogoMark } from "@/components/brand/LogoMark";
 import { track } from "@/lib/monetization";
 import { useVip } from "@/lib/vip";
 import { vipOrderStatus } from "@/lib/vip.functions";
+import { useDirectCheckout } from "@/lib/use-direct-checkout";
+import { VIP_LIFETIME_CENTS, usd } from "@/lib/vip-pricing";
 
 
 type Search = { s?: string; p?: string; order?: string; amount?: string; m?: string };
@@ -59,6 +61,7 @@ function VipCheckoutPage() {
   const { openVipModal } = useVip();
   const navigate = useNavigate();
   const checkOrder = useServerFn(vipOrderStatus);
+  const { busy: busyLifetime, go: goLifetime } = useDirectCheckout();
 
   // Whop's embed sometimes paints its success tick without ever firing the
   // return-url redirect (in-app browsers block the top-level navigation). We
@@ -180,11 +183,27 @@ function VipCheckoutPage() {
         countries, or pay in crypto below. VIP unlocks the moment the payment clears.
       </p>
       {isMonthly ? (
-        <p className="mt-1 text-xs text-muted-foreground">
-          Monthly passes are billed as a subscription, so the form shows card and bank only. For
-          crypto or wallet payment, use the crypto option below or choose lifetime VIP.
-        </p>
+        <div className="glass mt-4 rounded-2xl border border-primary/25 p-3">
+          <p className="text-xs text-muted-foreground">
+            Monthly passes are billed as a subscription, so Whop shows card and bank (ACH) only.
+            Apple&nbsp;Pay, Google&nbsp;Pay and crypto are available on the one-payment Lifetime
+            plan.
+          </p>
+          <button
+            type="button"
+            disabled={busyLifetime}
+            onClick={() => {
+              track({ event_type: "click", slot: "vip_checkout_switch_lifetime", format: "lifetime" });
+              void goLifetime("lifetime");
+            }}
+            className="mt-2 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-4 text-sm font-semibold text-primary disabled:opacity-60"
+          >
+            {busyLifetime ? <Loader2 className="size-4 animate-spin" aria-hidden="true" /> : null}
+            Switch to Lifetime VIP · {usd(VIP_LIFETIME_CENTS, 0)} one payment
+          </button>
+        </div>
       ) : null}
+
 
       {/* What the buyer is paying for, restated at the moment of payment —
           the cheapest anti-drop-off move on a hosted checkout page. */}
