@@ -59,6 +59,9 @@ export function VipOfferCard({
     trackFunnel("vip_gate_shown", toolSlug);
     // The buyer's next tap is checkout — warm it now so the page is instant.
     preloadWhopCheckout();
+    // Tell the exit offer the visitor just reached a finished result, so the
+    // one-time price can appear at the real leaving moment.
+    window.dispatchEvent(new Event("sov:result-ready"));
   }, [isVip, toolSlug]);
 
   useEffect(() => {
