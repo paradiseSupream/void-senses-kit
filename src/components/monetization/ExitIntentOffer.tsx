@@ -18,6 +18,7 @@ const SEEN_KEY = "sov.exitOfferSeen";
  */
 export function ExitIntentOffer() {
   const { isVip, openVipModal } = useVip();
+  const { monthly, lifetime: offer, lifetimeFull: full } = useVipPrices();
   const { site, tracking } = useSiteConfig();
   const [open, setOpen] = useState(false);
   const [retarget, setRetarget] = useState(false);
@@ -42,6 +43,9 @@ export function ExitIntentOffer() {
       } catch {
         /* storage unavailable */
       }
+      // Grant the downsell before showing it so the discounted price on
+      // screen is the exact price the checkout will charge.
+      grantVipOffer();
       setOpen(true);
       track({ event_type: "impression", slot: "exit_intent" });
       trackFunnel("vip_gate_shown");

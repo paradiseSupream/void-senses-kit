@@ -33,6 +33,7 @@ export function MidQuizOffer({
   showFrom?: number;
 }) {
   const { isVip, openVipModal } = useVip();
+  const { monthly, lifetime: offer, lifetimeFull: full } = useVipPrices();
   const { site } = useSiteConfig();
   const runGated = useActionGate();
   const [open, setOpen] = useState(false);
@@ -48,6 +49,8 @@ export function MidQuizOffer({
     } catch {
       /* storage unavailable */
     }
+    // Same discount the dialog advertises must be live before it renders.
+    grantVipOffer();
     setOpen(true);
     track({ event_type: "impression", slot: "midquiz_offer", tool_slug: toolSlug ?? null });
     trackFunnel("vip_gate_shown", toolSlug);
