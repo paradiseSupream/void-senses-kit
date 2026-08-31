@@ -248,26 +248,24 @@ export function VipModal() {
 
         <div className="mt-4 flex items-center gap-3 rounded-xl border border-primary/30 bg-primary/10 p-3">
           <span className="rounded-full bg-primary px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary-foreground">
-            {plan === "monthly" ? "Entry offer" : "Lifetime"}
+            {offerActive ? "One-time offer" : plan === "monthly" ? "1 month" : "Lifetime"}
           </span>
           <div className="flex items-baseline gap-2">
-            {/* Only strike through a price we actually charge otherwise —
-                a fake anchor is what made the numbers look inconsistent. */}
+            {/* Strike ONLY the real regular price of the same plan. Never anchor
+                a monthly price against the lifetime price — that read as a fake
+                discount and made the numbers look inconsistent. */}
             {offerActive ? (
               <span className="font-display text-lg text-muted-foreground line-through decoration-muted-foreground/60">
                 {plan === "monthly" ? monthlyFull : lifetimeFull}
               </span>
-            ) : plan === "monthly" ? (
-              <span className="font-display text-lg text-muted-foreground line-through decoration-muted-foreground/60">
-                {lifetimeFull}
-              </span>
             ) : null}
             <span className="font-display text-3xl font-bold text-primary">{price}</span>
             <span className="text-xs font-semibold text-emerald-400">
-              {plan === "monthly" ? "Best way to start" : "One payment, forever"}
+              {plan === "monthly" ? "Cancel anytime" : "One payment, forever"}
             </span>
           </div>
         </div>
+
 
         <div className="mt-5 grid gap-2 sm:grid-cols-2">
           {[
