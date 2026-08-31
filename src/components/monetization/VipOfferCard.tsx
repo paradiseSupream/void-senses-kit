@@ -45,15 +45,12 @@ export function VipOfferCard({
 }) {
   const { isVip, openVipModal } = useVip();
   const { busy, error, go } = useDirectCheckout();
-  const { site } = useSiteConfig();
   const loadProof = useServerFn(getSocialProof);
   const [proof, setProof] = useState<SocialProof | null>(null);
 
-  const offerActive = useVipOffer();
-
-  const monthlyCents = offerActive ? MONTHLY_OFFER_CENTS : VIP_MONTHLY_CENTS;
-  const monthly = `$${(monthlyCents / 100).toFixed(2)}`;
-  const lifetime = `$${(site.vip_price_cents / 100).toFixed(0)}`;
+  // One shared price source — the card, the modal and the checkout page all
+  // read the same numbers, so the quoted price is the charged price.
+  const { monthly, lifetime, lifetimeFull, offerActive } = useVipPrices();
 
   useEffect(() => {
     if (isVip) return;
