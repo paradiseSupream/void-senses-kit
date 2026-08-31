@@ -100,8 +100,17 @@ export async function reconcileOrder(orderId: string): Promise<ReconcileResult> 
       email,
       payment_id: payment.paymentId,
       paid_at: new Date().toISOString(),
+      payment_method: payment.method,
+      card_brand: payment.cardBrand,
+      card_last4: payment.cardLast4,
+      billing_country: payment.billingCountry,
+      billing_name: payment.billingName,
+      receipt_url: payment.receiptUrl,
+      currency: payment.currency ?? "USD",
+      synced_at: new Date().toISOString(),
     })
     .eq("order_id", orderId);
+
 
   if (email) {
     const { grantVip } = await import("@/lib/vip-fulfil.server");
