@@ -5,7 +5,8 @@ import { useVip } from "@/lib/vip";
 import { useSiteConfig } from "@/lib/site-config";
 import { useActionGate } from "@/components/monetization/ActionGate";
 import { ScarcityTimer } from "@/components/monetization/ScarcityTimer";
-import { grantVipOffer, MONTHLY_OFFER_CENTS, OFFER_CENTS } from "@/lib/vip-offer";
+import { grantVipOffer } from "@/lib/vip-offer";
+import { useVipPrices } from "@/lib/vip-pricing";
 import { track } from "@/lib/monetization";
 import { trackFunnel } from "@/lib/funnel";
 
@@ -54,9 +55,6 @@ export function MidQuizOffer({
 
   if (!open || isVip) return null;
 
-  const full = `$${(site.vip_price_cents / 100).toFixed(0)}`;
-  const offer = `$${(OFFER_CENTS / 100).toFixed(0)}`;
-  const monthly = `$${(MONTHLY_OFFER_CENTS / 100).toFixed(2)}`;
 
   const continueFree = async () => {
     if (busy) return;
