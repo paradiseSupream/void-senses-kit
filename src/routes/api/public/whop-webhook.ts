@@ -216,7 +216,7 @@ export const Route = createFileRoute("/api/public/whop-webhook")({
 
         const email = parsed.email ?? order?.email ?? null;
         const plan = (order?.plan as "lifetime" | "monthly") ?? parsed.plan;
-        const amountCents = order?.amount_cents ?? (plan === "monthly" ? 499 : 1900);
+        const amountCents = order?.amount_cents ?? (plan === "monthly" ? 299 : 1900);
 
         if (order) {
           await supabaseAdmin
