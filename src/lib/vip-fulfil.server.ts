@@ -32,11 +32,24 @@ export async function grantVip(grant: VipGrant): Promise<VipAccess> {
 
   const { data: existing } = await supabaseAdmin
     .from("vip_members")
-    .select("id,plan,expires_at,license_key")
+    .select("id,plan,expires_at,license_key,payment_ref")
     .ilike("email", email)
     .maybeSingle();
 
   if (existing) {
+    // Same payment delivered twice (Whop sends both `membership.activated` and
+    // `payment.succeeded`) must never stack a second billing period — a 30-day
+    // plan grants exactly 30 days.
+    const samePayment = Boolean(grant.paymentRef && existing.payment_ref === grant.paymentRef);
+    if (samePayment) {
+      return {
+        active: true,
+        plan: (existing.plan as VipPlanName) ?? grant.plan,
+        expiresAt: existing.expires_at ?? null,
+        licenseKey: existing.license_key ?? null,
+      };
+    }
+
     // Monthly renewals stack on the remaining time; lifetime never expires.
     const base =
       grant.plan === "monthly" &&
