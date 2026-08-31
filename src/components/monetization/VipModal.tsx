@@ -254,7 +254,76 @@ export function VipModal() {
           })}
         </div>
 
-        <ul className="mt-5 space-y-2">
+        {/* The pay button sits directly under the plan cards on purpose: mobile
+            analytics showed only ~5% of gate openers ever scrolled far enough
+            to reach it when perks and the email field came first. */}
+        {tab === "card" ? (
+          <>
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => void startCheckout()}
+              className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-4 text-base font-bold text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-60"
+            >
+              {busy ? <Loader2 className="size-4 animate-spin" aria-hidden="true" /> : null}
+              {copy.cta} — {price}
+            </button>
+            <p className="mt-2 text-center text-xs text-muted-foreground">{copy.reassurance}</p>
+            <p className="mt-1 text-center text-xs text-muted-foreground">
+              Card, Apple&nbsp;Pay and Google&nbsp;Pay — secured by Whop, we never see your card.
+            </p>
+          </>
+        ) : (
+          <div className="mt-5 rounded-lg border border-dashed border-border p-4">
+            {site.vip_sol_address ? (
+              <>
+                <p className="text-sm text-foreground">
+                  Send exactly {price} worth of SOL or USDC (Solana) to:
+                </p>
+                <code className="mt-2 block break-all rounded-md bg-surface-2 px-3 py-2 font-mono text-xs">
+                  {site.vip_sol_address}
+                </code>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (email.includes("@")) void persistEmail();
+                    void navigator.clipboard?.writeText(site.vip_sol_address);
+                    toast.success("Address copied — email your tx signature to unlock VIP.");
+                  }}
+                  className="mt-3 w-full rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground"
+                >
+                  Copy Solana address
+                </button>
+                <p className="mt-2 text-center text-xs text-muted-foreground">
+                  After paying, send the transaction signature and your email — VIP is activated
+                  within minutes.
+                </p>
+              </>
+            ) : (
+              <p className="text-center text-sm text-muted-foreground">
+                Crypto checkout opens as soon as the receiving wallet is configured.
+              </p>
+            )}
+          </div>
+        )}
+
+        <button
+          type="button"
+          onClick={() => setTab(tab === "card" ? "crypto" : "card")}
+          className="mt-3 flex w-full items-center justify-center gap-2 text-xs text-muted-foreground underline underline-offset-4 hover:text-foreground"
+        >
+          {tab === "card" ? (
+            <>
+              <Bitcoin className="size-3.5" aria-hidden="true" /> Pay with crypto instead
+            </>
+          ) : (
+            <>
+              <CreditCard className="size-3.5" aria-hidden="true" /> Pay by card instead
+            </>
+          )}
+        </button>
+
+        <ul className="mt-5 space-y-2 border-t border-hairline pt-5">
           {PERKS.map((perk) => (
             <li key={perk} className="flex items-start gap-2 text-sm text-foreground">
               <Check className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden="true" />
@@ -289,78 +358,6 @@ export function VipModal() {
           VIP on your other devices.
         </p>
 
-        <div className="mt-6 grid grid-cols-2 gap-1 rounded-lg border border-hairline bg-surface-2/60 p-1">
-          {(["card", "crypto"] as const).map((key) => (
-            <button
-              key={key}
-              type="button"
-              onClick={() => setTab(key)}
-              aria-pressed={tab === key}
-              className={`flex items-center justify-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
-                tab === key
-                  ? "bg-surface text-foreground"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              {key === "card" ? (
-                <CreditCard className="size-4" aria-hidden="true" />
-              ) : (
-                <Bitcoin className="size-4" aria-hidden="true" />
-              )}
-              {key === "card" ? "Card" : "Crypto"}
-            </button>
-          ))}
-        </div>
-
-        {tab === "card" ? (
-          <>
-            <button
-              type="button"
-              disabled={busy}
-              onClick={() => void startCheckout()}
-              className="mt-4 flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-60"
-            >
-              {busy ? <Loader2 className="size-4 animate-spin" aria-hidden="true" /> : null}
-              {copy.cta} — {price}
-            </button>
-            <p className="mt-2 text-center text-xs text-muted-foreground">{copy.reassurance}</p>
-            <p className="mt-1 text-center text-xs text-muted-foreground">
-              Secured by Whop — we never see your card details.
-            </p>
-          </>
-        ) : (
-          <div className="mt-4 rounded-lg border border-dashed border-border p-4">
-            {site.vip_sol_address ? (
-              <>
-                <p className="text-sm text-foreground">
-                  Send exactly {price} worth of SOL or USDC (Solana) to:
-                </p>
-                <code className="mt-2 block break-all rounded-md bg-surface-2 px-3 py-2 font-mono text-xs">
-                  {site.vip_sol_address}
-                </code>
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (email.includes("@")) void persistEmail();
-                    void navigator.clipboard?.writeText(site.vip_sol_address);
-                    toast.success("Address copied — email your tx signature to unlock VIP.");
-                  }}
-                  className="mt-3 w-full rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground"
-                >
-                  Copy Solana address
-                </button>
-                <p className="mt-2 text-center text-xs text-muted-foreground">
-                  After paying, send the transaction signature and your email — VIP is activated
-                  within minutes.
-                </p>
-              </>
-            ) : (
-              <p className="text-center text-sm text-muted-foreground">
-                Crypto checkout opens as soon as the receiving wallet is configured.
-              </p>
-            )}
-          </div>
-        )}
 
         <button
           type="button"
