@@ -176,9 +176,15 @@ function VipCheckoutPage() {
 
       <h1 className="mt-6 font-display text-2xl font-bold">Secure checkout</h1>
       <p className="mt-1 text-sm text-muted-foreground">
-        {price ? `${price} — ` : ""}card, Apple&nbsp;Pay, Google&nbsp;Pay and local methods in 195
-        countries. VIP unlocks the moment the payment clears.
+        {price ? `${price} — ` : ""}card, Apple&nbsp;Pay, Google&nbsp;Pay and bank (ACH) in 195
+        countries, or pay in crypto below. VIP unlocks the moment the payment clears.
       </p>
+      {isMonthly ? (
+        <p className="mt-1 text-xs text-muted-foreground">
+          Monthly passes are billed as a subscription, so the form shows card and bank only. For
+          crypto or wallet payment, use the crypto option below or choose lifetime VIP.
+        </p>
+      ) : null}
 
       {/* What the buyer is paying for, restated at the moment of payment —
           the cheapest anti-drop-off move on a hosted checkout page. */}
