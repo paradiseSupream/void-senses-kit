@@ -1,7 +1,9 @@
 import { Crown } from "lucide-react";
 
 import { useVip } from "@/lib/vip";
-import { useSiteConfig } from "@/lib/site-config";
+import { VIP_MONTHLY_CENTS } from "@/lib/vip-pricing";
+
+const ENTRY_PRICE = `$${(VIP_MONTHLY_CENTS / 100).toFixed(2)}`;
 
 /**
  * Soft in-quiz upsell. Only appears once the user is already invested in the
