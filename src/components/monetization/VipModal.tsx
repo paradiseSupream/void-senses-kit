@@ -186,6 +186,54 @@ export function VipModal() {
 
   if (!vipModalOpen) return null;
 
+  // Already paid: show ownership, never a price or a discount again.
+  if (isVip) {
+    return (
+      <div
+        className="fixed inset-0 z-50 grid place-items-center overflow-y-auto bg-background/85 p-4 backdrop-blur-sm"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="vip-title"
+      >
+        <div className="glass relative w-full max-w-md rounded-2xl p-7">
+          <button
+            type="button"
+            onClick={closeVipModal}
+            aria-label="Close"
+            className="absolute top-4 right-4 grid size-8 place-items-center rounded-full text-muted-foreground hover:bg-surface-2 hover:text-foreground"
+          >
+            <X className="size-4" aria-hidden="true" />
+          </button>
+          <span className="label-mono text-primary">VIP active</span>
+          <h2 id="vip-title" className="mt-2 font-display text-2xl font-bold">
+            {activePlan === "monthly" ? "Monthly VIP" : "Lifetime VIP"}
+          </h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {activePlan === "monthly"
+              ? "Ad-free access renews monthly — cancel anytime."
+              : "One payment — every current and future tool stays unlocked."}
+          </p>
+          <ul className="mt-4 grid gap-2 text-sm text-muted-foreground">
+            {PERKS.map((perk) => (
+              <li key={perk} className="flex items-start gap-2">
+                <Check className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden="true" />
+                {perk}
+              </li>
+            ))}
+          </ul>
+          <button
+            type="button"
+            onClick={closeVipModal}
+            className="mt-6 w-full rounded-xl bg-primary px-4 py-3 text-sm font-bold text-primary-foreground"
+          >
+            Back to my report
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+
   return (
     <div
       className="fixed inset-0 z-50 grid place-items-center overflow-y-auto bg-background/85 p-4 backdrop-blur-sm"
