@@ -11,6 +11,7 @@ import { attribution, sessionId } from "@/lib/monetization";
 import { trackFunnel } from "@/lib/funnel";
 import { cookie } from "@/lib/pixels";
 import { grantMatrix, useMatrix } from "@/lib/vip-unlock";
+import { useVip } from "@/lib/vip";
 import type { Dossier } from "@/lib/archetype-core";
 
 /** Shared checkout kick-off for the $9 Shadow Matrix add-on. */
@@ -65,13 +66,19 @@ function useMatrixCheckout() {
  */
 export function MatrixUpsellModal({ onDismiss }: { onDismiss: () => void }) {
   const { start, busy } = useMatrixCheckout();
+  const { isVip } = useVip();
   const [mounted, setMounted] = useState(false);
+  // VIP includes the matrix now — never upsell a paying VIP member.
+  const owned = useMatrix() || isVip;
+  useEffect(() => {
+    if (owned) onDismiss();
+  }, [owned, onDismiss]);
 
   // Portal to <body>: the dossier card is a transformed/blurred ancestor, which
   // would otherwise become the containing block for `fixed` and push the modal
   // out of the viewport.
   useEffect(() => setMounted(true), []);
-  if (!mounted) return null;
+  if (!mounted || owned) return null;
 
   return createPortal(
     <div
@@ -146,7 +153,10 @@ export function MatrixUpsellModal({ onDismiss }: { onDismiss: () => void }) {
  * dossier once the add-on is owned, teased with a buy button when it is not.
  */
 export function MatrixModule({ dossier }: { dossier: Dossier }) {
-  const owned = useMatrix();
+  // VIP members already paid for the full dossier — the add-on is included for
+  // them, so the $9 tease must never appear after a VIP purchase.
+  const { isVip } = useVip();
+  const owned = useMatrix() || isVip;
   const { start, busy } = useMatrixCheckout();
   const matrix = dossier.archetype.matrix;
 

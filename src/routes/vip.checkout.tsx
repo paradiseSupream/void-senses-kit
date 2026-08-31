@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 
 import { Bitcoin, ShieldCheck } from "lucide-react";
 
 import { LogoMark } from "@/components/brand/LogoMark";
 import { track } from "@/lib/monetization";
 import { useVip } from "@/lib/vip";
+import { vipOrderStatus } from "@/lib/vip.functions";
 
 
 type Search = { s?: string; p?: string; order?: string; amount?: string; m?: string };
@@ -55,6 +57,45 @@ export const Route = createFileRoute("/vip/checkout")({
 function VipCheckoutPage() {
   const { s, p, order, amount, m } = Route.useSearch();
   const { openVipModal } = useVip();
+  const navigate = useNavigate();
+  const checkOrder = useServerFn(vipOrderStatus);
+
+  // Whop's embed sometimes paints its success tick without ever firing the
+  // return-url redirect (in-app browsers block the top-level navigation). We
+  // poll the order ourselves so a paid buyer flips to VIP within seconds.
+  useEffect(() => {
+    if (!order || m === "1") return;
+    let cancelled = false;
+    let attempts = 0;
+    const tick = async () => {
+      attempts += 1;
+      try {
+        const result = await checkOrder({ data: { orderId: order } });
+        if (cancelled) return;
+        if (result.status === "paid") {
+          track({ event_type: "funnel", slot: "checkout_autoswitch", format: "poll" });
+          void navigate({ to: "/vip/success", search: { order } });
+          return;
+        }
+      } catch {
+        /* keep polling */
+      }
+      if (!cancelled && attempts < 90) window.setTimeout(tick, 2500);
+    };
+    const first = window.setTimeout(tick, 4000);
+    // Whop posts a completion message from the iframe — jump immediately on it.
+    const onMessage = (event: MessageEvent) => {
+      if (typeof event.origin === "string" && !event.origin.includes("whop.com")) return;
+      const raw = typeof event.data === "string" ? event.data : JSON.stringify(event.data ?? "");
+      if (/complete|success|succeeded|paid/i.test(raw)) void tick();
+    };
+    window.addEventListener("message", onMessage);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(first);
+      window.removeEventListener("message", onMessage);
+    };
+  }, [order, m, checkOrder, navigate]);
 
   // The embedded checkout reads its data-attributes when the loader boots, so
   // the mount target is rendered only once the real return URL is known.
