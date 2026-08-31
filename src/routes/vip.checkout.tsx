@@ -84,7 +84,8 @@ function VipCheckoutPage() {
         setSlow(true);
         track({ event_type: "funnel", slot: "checkout_embed_timeout", format: "whop" });
       }
-    }, 4000);
+    }, 2500);
+
     if (!document.getElementById("whop-checkout-loader")) {
       const script = document.createElement("script");
       script.id = "whop-checkout-loader";
@@ -117,8 +118,12 @@ function VipCheckoutPage() {
     ? `https://whop.com/checkout/${encodeURIComponent(p)}?session=${encodeURIComponent(s)}`
     : null;
 
+  // When the embed never paints we must not leave a 560px black hole on the
+  // screen — collapse it and lead with the hosted-checkout button instead.
+  const embedFailed = slow && !embedded;
+
   return (
-    <main className="mx-auto w-full max-w-lg px-4 py-10">
+    <main className="mx-auto w-full max-w-lg px-4 py-10 pb-32">
       <Link to="/" className="inline-flex items-center gap-2">
         <LogoMark className="size-7" />
         <span className="font-display text-sm font-semibold">Senses of Void</span>
@@ -145,9 +150,37 @@ function VipCheckoutPage() {
         ))}
       </ul>
 
+      {hostedCheckoutUrl && embedFailed ? (
+        <div className="glass mt-6 rounded-2xl p-4">
+          <p className="text-sm text-muted-foreground">
+            Your secure payment page is ready. Tap below to pay {price ?? ""} — your order stays
+            the same.
+          </p>
+          <a
+            href={hostedCheckoutUrl}
+            onClick={() =>
+              track({ event_type: "click", slot: "vip_checkout_fallback", format: "hosted" })
+            }
+            className="mt-3 block rounded-xl bg-primary px-4 py-3 text-center text-sm font-semibold text-primary-foreground"
+          >
+            Pay securely {price ? `— ${price}` : ""}
+          </a>
+          <button
+            type="button"
+            onClick={() => window.location.reload()}
+            className="mt-2 block w-full rounded-xl border border-hairline px-4 py-2 text-center text-sm font-medium"
+          >
+            Retry in-page form
+          </button>
+        </div>
+      ) : null}
 
       {s && p ? (
-        <div className="glass mt-6 overflow-hidden rounded-2xl p-2">
+        <div
+          className={
+            embedFailed ? "hidden" : "glass mt-6 overflow-hidden rounded-2xl p-2"
+          }
+        >
           {origin ? (
             <div
               data-whop-checkout-plan-id={p}
@@ -157,7 +190,7 @@ function VipCheckoutPage() {
               className="min-h-[560px] w-full"
             />
           ) : (
-            <div className="grid min-h-[560px] w-full place-items-center text-sm text-muted-foreground">
+            <div className="grid min-h-[240px] w-full place-items-center text-sm text-muted-foreground">
               Loading secure checkout…
             </div>
           )}
@@ -168,32 +201,7 @@ function VipCheckoutPage() {
         </div>
       )}
 
-      {s && p && slow ? (
-        <div className="glass mt-4 rounded-2xl p-4 text-sm">
-          <p className="text-muted-foreground">
-            Taking too long on your network? Open the same secure payment page directly — your
-            order stays the same.
-          </p>
-          <div className="mt-3 flex flex-wrap gap-2">
-            <a
-              href={hostedCheckoutUrl ?? undefined}
-              onClick={() => track({ event_type: "click", slot: "vip_checkout_fallback", format: "hosted" })}
-              className="rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground"
-            >
-              Open secure checkout
-            </a>
-            <button
-              type="button"
-              onClick={() => window.location.reload()}
-              className="rounded-xl border border-hairline px-4 py-2 text-sm font-medium"
-            >
-              Retry
-            </button>
-          </div>
-        </div>
-      ) : null}
-
-      {hostedCheckoutUrl && !slow ? (
+      {hostedCheckoutUrl && !embedFailed ? (
         <a
           href={hostedCheckoutUrl}
           onClick={() => track({ event_type: "click", slot: "vip_checkout_hosted", format: embedded ? "embed_ready" : "embed_loading" })}
@@ -202,6 +210,7 @@ function VipCheckoutPage() {
           Payment form not opening? Use secure hosted checkout
         </a>
       ) : null}
+
 
       <p className="mt-4 text-xs text-muted-foreground">
         Payments are processed by Whop. We never see or store your card details.{" "}
