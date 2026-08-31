@@ -133,6 +133,13 @@ function VipCheckoutPage() {
       if (!frame || loaded) return Boolean(frame);
       loaded = true;
       setEmbedded(true);
+      // Only a frame that really mounted clears the reboot guard, so a page
+      // that keeps failing can never reload in a loop.
+      try {
+        window.sessionStorage.removeItem("sov.checkout.reboot");
+      } catch {
+        /* storage unavailable */
+      }
       track({
         event_type: "funnel",
         slot: timedOut ? "checkout_embed_recovered" : "checkout_embed_loaded",
@@ -155,20 +162,36 @@ function VipCheckoutPage() {
       track({ event_type: "funnel", slot: "checkout_embed_timeout", format: "whop" });
     }, 9000);
 
-    // The loader scans the DOM once when it boots. On a client-side navigation
-    // (offer → checkout) a cached loader has already booted, so it never sees
-    // this mount node and the frame can never appear. Re-injecting a fresh
-    // script node forces a rescan for every checkout page view.
-    document.getElementById("whop-checkout-loader")?.remove();
-    const script = document.createElement("script");
-    script.id = "whop-checkout-loader";
-    script.src = "https://js.whop.com/static/checkout/loader.js";
-    script.async = true;
-    script.onerror = () => {
-      setSlow(true);
-      track({ event_type: "funnel", slot: "checkout_loader_failed", format: "whop" });
-    };
-    document.body.appendChild(script);
+    // Whop's loader boots exactly once (it guards on `window.wco`) and its
+    // checkout bundle only ever mounts the nodes it saw during that boot. After
+    // any client-side re-entry — retrying checkout, going back and picking
+    // another plan, switching monthly → lifetime — the bundle is already live,
+    // never sees the freshly rendered mount node, and the frame can never
+    // appear. Re-injecting the script does not help (verified: `wco.frames`
+    // stays empty), so the only reliable recovery is one hard reload of the
+    // same checkout URL, which boots the loader against the real DOM.
+    const w = window as unknown as { wco?: unknown };
+    const RELOAD_KEY = "sov.checkout.reboot";
+    if (w.wco) {
+      const already = window.sessionStorage.getItem(RELOAD_KEY);
+      const marker = `${p ?? ""}:${s ?? ""}`;
+      if (already !== marker) {
+        window.sessionStorage.setItem(RELOAD_KEY, marker);
+        track({ event_type: "funnel", slot: "checkout_embed_reboot", format: "whop" });
+        window.location.reload();
+        return;
+      }
+    } else {
+      const script = document.createElement("script");
+      script.id = "whop-checkout-loader";
+      script.src = "https://js.whop.com/static/checkout/loader.js";
+      script.async = true;
+      script.onerror = () => {
+        setSlow(true);
+        track({ event_type: "funnel", slot: "checkout_loader_failed", format: "whop" });
+      };
+      document.body.appendChild(script);
+    }
     return () => {
       observer.disconnect();
       window.clearTimeout(timer);
