@@ -101,6 +101,7 @@ export const startVipCheckout = createServerFn({ method: "POST" })
       email: data.email,
       plan: data.plan,
       amount_cents: amountCents,
+      offer_applied: data.offer,
       status: "pending",
       provider: "whop",
       checkout_id: checkout.checkoutId,
@@ -148,12 +149,13 @@ export const vipOrderStatus = createServerFn({ method: "POST" })
       licenseKey: string | null;
       expiresAt: string | null;
       amountCents: number | null;
+      offerBurnedAt?: string | null;
       reason?: string | null;
     }> => {
       const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
       const { data: row } = await supabaseAdmin
         .from("vip_orders")
-        .select("status,plan,email,amount_cents")
+        .select("status,plan,email,amount_cents,offer_applied,offer_burned_at")
         .eq("order_id", data.orderId)
         .maybeSingle();
 
@@ -176,6 +178,7 @@ export const vipOrderStatus = createServerFn({ method: "POST" })
         }
         const { lookupVip } = await import("@/lib/vip-fulfil.server");
         const granted = recon.email ? await lookupVip(recon.email) : null;
+        const { burnOrderOffer } = await import("@/lib/vip-fulfil.server");
         return {
           status: "paid",
           plan,
@@ -183,11 +186,12 @@ export const vipOrderStatus = createServerFn({ method: "POST" })
           licenseKey: granted?.licenseKey ?? null,
           expiresAt: granted?.expiresAt ?? null,
           amountCents: row.amount_cents ?? null,
+          offerBurnedAt: await burnOrderOffer(data.orderId),
         };
       }
 
 
-      const { lookupVip } = await import("@/lib/vip-fulfil.server");
+      const { lookupVip, burnOrderOffer } = await import("@/lib/vip-fulfil.server");
       const access = row.email ? await lookupVip(row.email) : null;
       return {
         status: "paid",
@@ -196,6 +200,7 @@ export const vipOrderStatus = createServerFn({ method: "POST" })
         licenseKey: access?.licenseKey ?? null,
         expiresAt: access?.expiresAt ?? null,
         amountCents: row.amount_cents ?? null,
+        offerBurnedAt: row.offer_burned_at ?? (await burnOrderOffer(data.orderId)),
       };
     },
   );
