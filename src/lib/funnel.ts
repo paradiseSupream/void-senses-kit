@@ -12,13 +12,20 @@ import { gaEvent } from "@/lib/ga4";
 import { pixelTrack, stableEventId, type PixelEvent } from "@/lib/pixels";
 import { markRetarget, segmentForFunnelStep } from "@/lib/retarget";
 
-/** Which funnel steps are worth reporting to the ad networks as conversions. */
-const PIXEL_STEPS: Partial<Record<string, PixelEvent>> = {
-  test_start: "ViewContent",
-  result_view: "Lead",
-  vip_gate_shown: "AddToCart",
-  checkout_start: "InitiateCheckout",
+/**
+ * Which funnel steps are worth reporting to the ad networks as conversions.
+ *
+ * The money steps carry the real entry price. Meta cannot bid toward value on
+ * a valueless AddToCart, and the Gulf campaigns optimise on exactly that event
+ * while purchase volume is still too thin to learn from.
+ */
+const PIXEL_STEPS: Partial<Record<string, { event: PixelEvent; valueCents?: number }>> = {
+  test_start: { event: "ViewContent" },
+  result_view: { event: "Lead" },
+  vip_gate_shown: { event: "AddToCart", valueCents: VIP_MONTHLY_CENTS },
+  checkout_start: { event: "InitiateCheckout", valueCents: VIP_MONTHLY_CENTS },
 };
+
 
 export const FUNNEL_STEPS = [
   "visit",
