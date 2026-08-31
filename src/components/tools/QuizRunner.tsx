@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ChevronLeft, RefreshCw } from "lucide-react";
 
 import { QuizVipNudge } from "@/components/monetization/QuizVipNudge";
-import { MidQuizOffer } from "@/components/monetization/MidQuizOffer";
+
 import { AdSlot } from "@/components/monetization/AdSlot";
 import { markQuizInteraction, setQuizActive } from "@/lib/engagement";
 import { SCALE, type Likert } from "@/lib/quiz-engine";
@@ -232,9 +232,10 @@ export function QuizRunner({
       {index >= 3 && index < 9 ? <AdSlot id="quiz-inline" className="mt-4" /> : null}
       {index >= 9 ? <AdSlot id="quiz-inline-late" className="mt-4" /> : null}
 
+      {/* Soft inline nudge only — no modal, no rewarded ad gate during the test.
+          The quiz now runs Start → Complete → Result → VIP uninterrupted; the
+          paid offer lives on the result surface (VipOfferCard / ExitIntent). */}
       <QuizVipNudge step={index} total={items.length} />
-      {/* One-time mid-test downsell with countdown + rewarded "see ads" path. */}
-      <MidQuizOffer step={index} total={items.length} />
     </div>
   );
 }
