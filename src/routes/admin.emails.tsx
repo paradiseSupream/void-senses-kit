@@ -148,6 +148,10 @@ function EmailsPage() {
           >
             <Download className="size-3.5" aria-hidden="true" /> Export CSV
           </button>
+        </div>
+      </header>
+
+
 
 
       <section className="mt-5 grid gap-3 sm:grid-cols-4">
