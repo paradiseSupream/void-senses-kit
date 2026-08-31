@@ -248,7 +248,7 @@ function Home() {
     const active = GOALS.find((g) => g.id === goal) ?? GOALS[0]!;
     return searchTools(query).filter((t) => active.slugs.includes(t.slug));
   }, [query, goal]);
-  const slots = useMemo(() => withNativeAds(results), [results]);
+  const slots = useMemo(() => withNativeAds(results, 4), [results]);
 
   return (
     <div>
@@ -469,10 +469,10 @@ function Home() {
           />
         </div>
 
-        <div className="mt-5 grid auto-rows-fr grid-flow-row-dense grid-cols-2 gap-3 sm:mt-8 sm:grid-cols-1 sm:gap-4">
+        <div className="mt-5 grid auto-rows-fr grid-flow-row-dense grid-cols-2 gap-3 sm:mt-8 sm:gap-4">
           {slots.map((slot, i) =>
             "ad" in slot ? (
-              <div key={`ad-${i}`} className="col-span-2 grid sm:col-span-1">
+              <div key={`ad-${i}`} className="col-span-2 grid">
                 <NativeAdCard index={slot.ad} />
               </div>
             ) : (
