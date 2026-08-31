@@ -78,15 +78,17 @@ export function trackFunnel(step: FunnelStep, toolSlug?: string | null) {
 
   // Mirror the money steps into Meta / TikTok / Google Ads (Purchase is fired
   // on the success page where the real order value is known).
-  const pixelEvent = PIXEL_STEPS[step];
-  if (pixelEvent) {
-    pixelTrack(pixelEvent, {
+  const mapped = PIXEL_STEPS[step];
+  if (mapped) {
+    pixelTrack(mapped.event, {
       contentName: toolSlug ?? step,
+      ...(mapped.valueCents ? { value: mapped.valueCents / 100, currency: "USD" } : {}),
       // Stable per step + session so the browser fire and the server-side
       // Conversions API delivery de-duplicate into one conversion.
       eventId: stableEventId(`funnel:${step}:${toolSlug ?? "none"}`),
     });
   }
+
 
   // Remember the furthest step so returning non-buyers can be retargeted.
   const segment = segmentForFunnelStep(step);
