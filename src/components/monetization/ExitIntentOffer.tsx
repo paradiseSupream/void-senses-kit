@@ -125,10 +125,8 @@ export function ExitIntentOffer() {
       if (document.visibilityState === "hidden" && resultSeen) fire();
     };
     document.addEventListener("visibilitychange", onHide);
-
-
-    let cleanupScroll = () => undefined as void;
     document.addEventListener("mouseout", onMouseOut);
+
 
     function cleanup() {
       document.removeEventListener("mouseout", onMouseOut);
