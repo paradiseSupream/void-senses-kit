@@ -78,7 +78,7 @@ export function MatrixUpsellModal({ onDismiss }: { onDismiss: () => void }) {
   // would otherwise become the containing block for `fixed` and push the modal
   // out of the viewport.
   useEffect(() => setMounted(true), []);
-  if (!mounted) return null;
+  if (!mounted || owned) return null;
 
   return createPortal(
     <div
