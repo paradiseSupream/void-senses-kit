@@ -19,6 +19,7 @@ import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AdminApplePayRouteImport } from './routes/admin.apple-pay'
 import { Route as AdminAttributionRouteImport } from './routes/admin.attribution'
 import { Route as AdminComplianceRouteImport } from './routes/admin.compliance'
+import { Route as AdminEmailsRouteImport } from './routes/admin.emails'
 import { Route as AdminMonetizationRouteImport } from './routes/admin.monetization'
 import { Route as AdminOrdersRouteImport } from './routes/admin.orders'
 import { Route as ApiDossierPdfRouteImport } from './routes/api/dossier-pdf'
@@ -93,6 +94,11 @@ const AdminAttributionRoute = AdminAttributionRouteImport.update({
 const AdminComplianceRoute = AdminComplianceRouteImport.update({
   id: '/admin/compliance',
   path: '/admin/compliance',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminEmailsRoute = AdminEmailsRouteImport.update({
+  id: '/admin/emails',
+  path: '/admin/emails',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminMonetizationRoute = AdminMonetizationRouteImport.update({
@@ -232,6 +238,7 @@ export interface FileRoutesByFullPath {
   '/admin/apple-pay': typeof AdminApplePayRoute
   '/admin/attribution': typeof AdminAttributionRoute
   '/admin/compliance': typeof AdminComplianceRoute
+  '/admin/emails': typeof AdminEmailsRoute
   '/admin/monetization': typeof AdminMonetizationRoute
   '/admin/orders': typeof AdminOrdersRoute
   '/api/dossier-pdf': typeof ApiDossierPdfRoute
@@ -269,6 +276,7 @@ export interface FileRoutesByTo {
   '/admin/apple-pay': typeof AdminApplePayRoute
   '/admin/attribution': typeof AdminAttributionRoute
   '/admin/compliance': typeof AdminComplianceRoute
+  '/admin/emails': typeof AdminEmailsRoute
   '/admin/monetization': typeof AdminMonetizationRoute
   '/admin/orders': typeof AdminOrdersRoute
   '/api/dossier-pdf': typeof ApiDossierPdfRoute
@@ -307,6 +315,7 @@ export interface FileRoutesById {
   '/admin/apple-pay': typeof AdminApplePayRoute
   '/admin/attribution': typeof AdminAttributionRoute
   '/admin/compliance': typeof AdminComplianceRoute
+  '/admin/emails': typeof AdminEmailsRoute
   '/admin/monetization': typeof AdminMonetizationRoute
   '/admin/orders': typeof AdminOrdersRoute
   '/api/dossier-pdf': typeof ApiDossierPdfRoute
@@ -346,6 +355,7 @@ export interface FileRouteTypes {
     | '/admin/apple-pay'
     | '/admin/attribution'
     | '/admin/compliance'
+    | '/admin/emails'
     | '/admin/monetization'
     | '/admin/orders'
     | '/api/dossier-pdf'
@@ -383,6 +393,7 @@ export interface FileRouteTypes {
     | '/admin/apple-pay'
     | '/admin/attribution'
     | '/admin/compliance'
+    | '/admin/emails'
     | '/admin/monetization'
     | '/admin/orders'
     | '/api/dossier-pdf'
@@ -420,6 +431,7 @@ export interface FileRouteTypes {
     | '/admin/apple-pay'
     | '/admin/attribution'
     | '/admin/compliance'
+    | '/admin/emails'
     | '/admin/monetization'
     | '/admin/orders'
     | '/api/dossier-pdf'
@@ -458,6 +470,7 @@ export interface RootRouteChildren {
   AdminApplePayRoute: typeof AdminApplePayRoute
   AdminAttributionRoute: typeof AdminAttributionRoute
   AdminComplianceRoute: typeof AdminComplianceRoute
+  AdminEmailsRoute: typeof AdminEmailsRoute
   AdminMonetizationRoute: typeof AdminMonetizationRoute
   AdminOrdersRoute: typeof AdminOrdersRoute
   ApiDossierPdfRoute: typeof ApiDossierPdfRoute
@@ -556,6 +569,13 @@ declare module '@tanstack/react-router' {
       path: '/admin/compliance'
       fullPath: '/admin/compliance'
       preLoaderRoute: typeof AdminComplianceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/emails': {
+      id: '/admin/emails'
+      path: '/admin/emails'
+      fullPath: '/admin/emails'
+      preLoaderRoute: typeof AdminEmailsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/monetization': {
@@ -746,6 +766,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminApplePayRoute: AdminApplePayRoute,
   AdminAttributionRoute: AdminAttributionRoute,
   AdminComplianceRoute: AdminComplianceRoute,
+  AdminEmailsRoute: AdminEmailsRoute,
   AdminMonetizationRoute: AdminMonetizationRoute,
   AdminOrdersRoute: AdminOrdersRoute,
   ApiDossierPdfRoute: ApiDossierPdfRoute,

@@ -244,6 +244,12 @@ function AdminPanel() {
             Orders
           </Link>
           <Link
+            to="/admin/emails"
+            className="rounded-lg border border-hairline px-3 py-2 text-xs font-medium text-muted-foreground hover:text-foreground"
+          >
+            Emails
+          </Link>
+          <Link
             to="/admin/attribution"
             className="rounded-lg border border-hairline px-3 py-2 text-xs font-medium text-muted-foreground hover:text-foreground"
           >
