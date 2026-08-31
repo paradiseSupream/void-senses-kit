@@ -91,7 +91,7 @@ export async function reconcileOrder(orderId: string): Promise<ReconcileResult> 
 
   // Real captured payment the webhook never told us about → fulfil now.
   const plan = (order.plan as "lifetime" | "monthly") ?? "lifetime";
-  const amountCents = order.amount_cents ?? payment.amountCents ?? (plan === "monthly" ? 299 : 1900);
+  const amountCents = order.amount_cents ?? payment.amountCents ?? (plan === "monthly" ? 349 : 2049);
 
   await supabaseAdmin
     .from("vip_orders")

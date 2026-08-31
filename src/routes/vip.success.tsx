@@ -71,7 +71,7 @@ function VipSuccessPage() {
           trackFunnel("vip_purchase");
           pixelTrack("Purchase", {
             eventId: purchaseEventId(order),
-            value: result.plan === "monthly" ? 2.99 : 19,
+            value: (result.amountCents ?? (result.plan === "monthly" ? 349 : 2049)) / 100,
             currency: "USD",
             contentName: `vip_${result.plan ?? "lifetime"}`,
             ...(result.email ? { email: result.email } : {}),
@@ -103,7 +103,9 @@ function VipSuccessPage() {
           <span className="mx-auto grid size-14 place-items-center rounded-2xl border border-hairline bg-surface-2">
             <CheckCircle2 className="size-7 text-primary" aria-hidden="true" />
           </span>
-          <h1 className="mt-5 font-display text-2xl font-bold">VIP is active</h1>
+          <h1 className="mt-5 font-display text-2xl font-bold">
+            {resultPlan === "monthly" ? "Monthly VIP is active" : "Lifetime VIP is active"}
+          </h1>
           <p className="mt-2 text-sm text-muted-foreground">
             Ads, interstitials and export gates are off on this device. On any other device, open
             the VIP panel and enter this purchase email — access returns instantly, no code to keep.

@@ -11,11 +11,14 @@
 import { useVipOffer } from "@/lib/vip-offer";
 import { MONTHLY_OFFER_CENTS, OFFER_CENTS } from "@/lib/vip-offer";
 
-/** Entry-priced monthly no-ads pass — the first offer cold traffic sees. */
-export const VIP_MONTHLY_CENTS = 299;
+/**
+ * Customer-facing totals. Provider/processing cost is folded into these
+ * amounts, so checkout never adds a surprise line after the CTA price.
+ */
+export const VIP_MONTHLY_CENTS = 349;
 
 /** Standard lifetime pass. */
-export const VIP_LIFETIME_CENTS = 1900;
+export const VIP_LIFETIME_CENTS = 2049;
 
 /** Discounted amounts once the one-visit downsell has been granted. */
 export const VIP_MONTHLY_OFFER_CENTS = MONTHLY_OFFER_CENTS;

@@ -16,10 +16,10 @@ const USED_KEY = "sov.vipOffer.used";
 const EVENT = "sov:vip-offer";
 
 /** Discounted lifetime price while the exit offer is active. */
-export const OFFER_CENTS = 900;
+export const OFFER_CENTS = 999;
 
 /** Discounted monthly pass price while the exit offer is active. */
-export const MONTHLY_OFFER_CENTS = 199;
+export const MONTHLY_OFFER_CENTS = 249;
 
 function read(key: string): boolean {
   if (typeof window === "undefined") return false;
