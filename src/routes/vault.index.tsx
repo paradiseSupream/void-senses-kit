@@ -20,7 +20,7 @@ const DESCRIPTION =
 const COVER =
   "https://sensesofvoid.app/__l5e/assets-v1/3694b7f0-d5cc-4c5f-9a94-74e3fa5ea65c/cover-vault.jpg";
 
-export const Route = createFileRoute("/vault")({
+export const Route = createFileRoute("/vault/")({
   head: () => ({
     meta: [
       { title: TITLE },
