@@ -30,6 +30,15 @@ export function EmailCapture({
   const submit = useServerFn(subscribeLead);
   const [email, setEmail] = useState("");
   const [state, setState] = useState<"idle" | "busy" | "done">("idle");
+  const [primary, setPrimary] = useState(false);
+
+  useEffect(() => {
+    mounted += 1;
+    setPrimary(mounted === 1);
+    return () => {
+      mounted -= 1;
+    };
+  }, []);
 
   useEffect(() => {
     try {
@@ -39,7 +48,8 @@ export function EmailCapture({
     }
   }, []);
 
-  if (isVip) return null;
+  if (isVip || !primary) return null;
+
 
   if (state === "done") {
     return (
