@@ -375,6 +375,8 @@ export type Database = {
           fbc: string | null
           fbp: string | null
           id: string
+          offer_applied: boolean
+          offer_burned_at: string | null
           order_id: string
           paid_at: string | null
           payment_id: string | null
@@ -406,6 +408,8 @@ export type Database = {
           fbc?: string | null
           fbp?: string | null
           id?: string
+          offer_applied?: boolean
+          offer_burned_at?: string | null
           order_id: string
           paid_at?: string | null
           payment_id?: string | null
@@ -437,6 +441,8 @@ export type Database = {
           fbc?: string | null
           fbp?: string | null
           id?: string
+          offer_applied?: boolean
+          offer_burned_at?: string | null
           order_id?: string
           paid_at?: string | null
           payment_id?: string | null
