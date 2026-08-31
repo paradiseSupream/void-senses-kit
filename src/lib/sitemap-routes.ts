@@ -15,7 +15,15 @@ export type SitemapEntry = {
 };
 
 /** Routes intentionally kept out of the sitemap (private, API, utility). */
-export const EXCLUDED_ROUTE_PREFIXES = ["/admin", "/api", "/compare", "/vip"] as const;
+// `/lovable/*` are platform-internal email preview/webhook endpoints — never
+// public pages, so they must stay out of the sitemap.
+export const EXCLUDED_ROUTE_PREFIXES = [
+  "/admin",
+  "/api",
+  "/compare",
+  "/vip",
+  "/lovable",
+] as const;
 
 /**
  * Prefixes served by a dynamic route (`$slug`). Their concrete URLs are
