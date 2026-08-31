@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Check, Crown, Loader2, Lock, ShieldCheck, Users, Zap } from "lucide-react";
+import { Bitcoin, Check, Crown, Loader2, Lock, ShieldCheck, Users, Zap } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
 
 import { EmailCapture } from "@/components/monetization/EmailCapture";
