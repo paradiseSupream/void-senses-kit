@@ -27,7 +27,9 @@ export function VipOfferCard({
   className?: string;
 }) {
   const { isVip, openVipModal } = useVip();
+  const { busy, go } = useDirectCheckout();
   const { site } = useSiteConfig();
+
   const offerActive = useVipOffer();
 
   const monthlyCents = offerActive ? MONTHLY_OFFER_CENTS : VIP_MONTHLY_CENTS;
@@ -73,15 +75,22 @@ export function VipOfferCard({
       <div className="mt-5 flex flex-col gap-2.5 sm:flex-row">
         <button
           type="button"
-          onClick={() => openVipModal("monthly")}
-          className="inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-full bg-primary px-5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
+          disabled={busy}
+          onClick={() => void go("monthly")}
+          className="inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-full bg-primary px-5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-60"
         >
-          <Zap className="size-4" aria-hidden="true" /> Unlock now · {monthly}
+          {busy ? (
+            <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+          ) : (
+            <Zap className="size-4" aria-hidden="true" />
+          )}
+          Unlock now · {monthly}
         </button>
         <button
           type="button"
-          onClick={() => openVipModal("lifetime")}
-          className="inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-5 text-sm font-semibold text-primary transition-colors hover:bg-primary/15"
+          disabled={busy}
+          onClick={() => void go("lifetime")}
+          className="inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-5 text-sm font-semibold text-primary transition-colors hover:bg-primary/15 disabled:opacity-60"
         >
           <Crown className="size-4" aria-hidden="true" /> Lifetime · {lifetime}
         </button>
@@ -89,6 +98,14 @@ export function VipOfferCard({
       <p className="mt-2.5 text-center text-xs text-muted-foreground">
         Secure checkout · instant access · nothing auto-renews
       </p>
+      <button
+        type="button"
+        onClick={() => openVipModal("monthly")}
+        className="mt-2 w-full text-center text-xs text-muted-foreground underline underline-offset-4 hover:text-foreground"
+      >
+        Compare plans or restore a purchase
+      </button>
+
 
       {/* Not ready to pay is the majority case — capturing the email here turns
           a one-shot paid visitor into someone we can bring back for free. */}
