@@ -1,3 +1,4 @@
+import { VIP_PRICE_TABLE } from "@/lib/vip-prices";
 import { createFileRoute } from "@tanstack/react-router";
 
 import { purchaseEventId } from "@/lib/purchase-event";
@@ -216,7 +217,7 @@ export const Route = createFileRoute("/api/public/whop-webhook")({
 
         const email = parsed.email ?? order?.email ?? null;
         const plan = (order?.plan as "lifetime" | "monthly") ?? parsed.plan;
-        const amountCents = order?.amount_cents ?? (plan === "monthly" ? 349 : 2049);
+        const amountCents = order?.amount_cents ?? VIP_PRICE_TABLE[plan === "monthly" ? "monthly" : "lifetime"].full;
 
         if (order) {
           await supabaseAdmin

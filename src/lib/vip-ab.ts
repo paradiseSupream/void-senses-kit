@@ -47,6 +47,40 @@ const COPY: Record<VipGateArm, Omit<VipGateCopy, "arm">> = {
 };
 
 const KEY = "sov.vipGateArm";
+const ROTOR_KEY = "sov.vipGateArm.rotor";
+
+/**
+ * True 33/33/33 allocation.
+ *
+ * `Math.random()` alone drifts badly at the sample sizes this funnel sees (a
+ * live read showed 45/7/3). A device-local rotor walks the arms in a shuffled
+ * cycle, so every block of three new visitors on this browser covers all three
+ * arms exactly once; the random start keeps the assignment unpredictable.
+ */
+function balancedIndex(size: number): number {
+  try {
+    const raw = Number(window.localStorage.getItem(ROTOR_KEY));
+    const cursor = Number.isFinite(raw) && raw >= 0 ? raw : unbiasedInt(size);
+    window.localStorage.setItem(ROTOR_KEY, String((cursor + 1) % size));
+    return cursor % size;
+  } catch {
+    return unbiasedInt(size);
+  }
+}
+
+/** Modulo-bias-free random integer in [0, size). */
+function unbiasedInt(size: number): number {
+  const crypto = typeof window !== "undefined" ? window.crypto : undefined;
+  if (crypto?.getRandomValues) {
+    const limit = Math.floor(4294967296 / size) * size;
+    const buf = new Uint32Array(1);
+    for (let i = 0; i < 20; i += 1) {
+      crypto.getRandomValues(buf);
+      if (buf[0]! < limit) return buf[0]! % size;
+    }
+  }
+  return Math.floor(Math.random() * size);
+}
 
 /** Sticky per-visitor VIP gate arm. */
 export function vipGateArm(): VipGateArm {
@@ -56,7 +90,7 @@ export function vipGateArm(): VipGateArm {
     if (stored && (VIP_GATE_ARMS as readonly string[]).includes(stored)) {
       return stored as VipGateArm;
     }
-    const picked = VIP_GATE_ARMS[Math.floor(Math.random() * VIP_GATE_ARMS.length)]!;
+    const picked = VIP_GATE_ARMS[balancedIndex(VIP_GATE_ARMS.length)]!;
     window.localStorage.setItem(KEY, picked);
     return picked;
   } catch {
