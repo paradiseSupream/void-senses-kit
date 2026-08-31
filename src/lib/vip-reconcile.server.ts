@@ -12,6 +12,7 @@
  * and the browser, so no conversion is ever counted twice.
  */
 
+import { VIP_PRICE_TABLE } from "@/lib/vip-prices";
 import { purchaseEventId } from "@/lib/purchase-event";
 
 export type ReconcileResult = {
@@ -91,7 +92,8 @@ export async function reconcileOrder(orderId: string): Promise<ReconcileResult> 
 
   // Real captured payment the webhook never told us about → fulfil now.
   const plan = (order.plan as "lifetime" | "monthly") ?? "lifetime";
-  const amountCents = order.amount_cents ?? payment.amountCents ?? (plan === "monthly" ? 349 : 2049);
+  const amountCents =
+    order.amount_cents ?? payment.amountCents ?? VIP_PRICE_TABLE[plan === "monthly" ? "monthly" : "lifetime"].full;
 
   await supabaseAdmin
     .from("vip_orders")

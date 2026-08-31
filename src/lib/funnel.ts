@@ -64,7 +64,11 @@ function remember(state: Record<string, number>) {
 }
 
 /** Records a funnel step at most once per session. */
-export function trackFunnel(step: FunnelStep, toolSlug?: string | null) {
+export function trackFunnel(
+  step: FunnelStep,
+  toolSlug?: string | null,
+  opts?: { revenueCents?: number },
+) {
   if (typeof window === "undefined") return;
   const state = seen();
   if (state[step]) return;
@@ -76,6 +80,9 @@ export function trackFunnel(step: FunnelStep, toolSlug?: string | null) {
     tool_slug: toolSlug ?? null,
     format: "funnel",
     duration_ms: dwellMs(),
+    // Purchase revenue rides on the funnel row, so revenue-per-visitor in the
+    // admin dashboard counts real VIP money, not just ad revenue.
+    ...(opts?.revenueCents ? { revenue_cents: opts.revenueCents } : {}),
   });
   // Mirror the funnel into GA4 so SEO traffic can be measured end to end.
   gaEvent(`funnel_${step}`, { tool_slug: toolSlug ?? undefined, dwell_ms: dwellMs() });

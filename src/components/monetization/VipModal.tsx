@@ -21,7 +21,6 @@ import { useSiteConfig } from "@/lib/site-config";
 import { trackFunnel } from "@/lib/funnel";
 import { cookie } from "@/lib/pixels";
 import { useVipPrices } from "@/lib/vip-pricing";
-import { markVipOfferUsed } from "@/lib/vip-offer";
 import { VipStatusCard } from "@/components/monetization/VipStatusCard";
 
 export { VIP_MONTHLY_CENTS } from "@/lib/vip-pricing";
@@ -137,8 +136,8 @@ export function VipModal() {
       }
       track({ event_type: "funnel", slot: "checkout_session_created", format: plan });
       trackFunnel("checkout_start");
-      // One-time means one time: the discount is burned as soon as it is used.
-      if (offerActive) markVipOfferUsed();
+      // The discount is burned on the success page, not here — a created
+      // session that is never paid must not cost the visitor their offer.
       if (result.orderId) rememberOrder(result.orderId, email || null);
       closeVipModal();
       const search = {

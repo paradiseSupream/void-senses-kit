@@ -18,7 +18,7 @@ import { rememberOrder } from "@/lib/vip-unlock";
 import { attribution, sessionId, track, trackExperiment, visitorCountry } from "@/lib/monetization";
 import { trackFunnel } from "@/lib/funnel";
 import { cookie } from "@/lib/pixels";
-import { hasVipOffer, markVipOfferUsed } from "@/lib/vip-offer";
+import { hasVipOffer } from "@/lib/vip-offer";
 import { VIP_CHECKOUT_SLOT, vipGateArm } from "@/lib/vip-ab";
 import type { VipPlan } from "@/lib/vip";
 
@@ -36,7 +36,7 @@ export function useDirectCheckout() {
     track({ event_type: "click", slot: "vip_checkout_tap", format: plan });
     try {
       trackExperiment(VIP_CHECKOUT_SLOT, vipGateArm());
-      const result = await Promise.race([
+      const request = () =>
         beginCheckout({
           data: {
             plan,
@@ -48,11 +48,26 @@ export function useDirectCheckout() {
             fbp: cookie("_fbp") ?? null,
             fbc: cookie("_fbc") ?? null,
           },
-        }),
-        new Promise<never>((_, reject) => {
-          window.setTimeout(() => reject(new Error("checkout_timeout")), 15_000);
-        }),
-      ]);
+        });
+      // Gulf mobile networks routinely need more than 15s for the first
+      // provider round-trip; one silent retry removes almost every
+      // `checkout_request_failed` without the buyer noticing.
+      const withTimeout = (ms: number) =>
+        Promise.race([
+          request(),
+          new Promise<never>((_, reject) => {
+            window.setTimeout(() => reject(new Error("checkout_timeout")), ms);
+          }),
+        ]);
+      let result: Awaited<ReturnType<typeof request>>;
+      try {
+        result = await withTimeout(25_000);
+      } catch (first) {
+        track({ event_type: "funnel", slot: "checkout_retry", format: plan });
+        result = await withTimeout(25_000).catch(() => {
+          throw first;
+        });
+      }
       if (!result.ok || !result.checkoutId || !result.planId) {
         const reason = result.reason ?? "Checkout is unavailable right now.";
         track({ event_type: "funnel", slot: "checkout_session_failed", format: plan });
@@ -61,9 +76,6 @@ export function useDirectCheckout() {
         return;
       }
       track({ event_type: "funnel", slot: "checkout_session_created", format: plan });
-      // The discount is genuinely one-time: once a session exists on the
-      // reduced price the visitor permanently returns to the regular price.
-      if (offerActive) markVipOfferUsed();
       trackFunnel("checkout_start");
       if (result.orderId) rememberOrder(result.orderId, null);
       await navigate({
