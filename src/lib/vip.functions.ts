@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 
 import { purchaseEventId } from "@/lib/purchase-event";
+import { VIP_PRICE_TABLE } from "@/lib/vip-prices";
 
 /**
  * VIP checkout + access server functions.
@@ -63,8 +64,8 @@ export const startVipCheckout = createServerFn({ method: "POST" })
   )
   .handler(async ({ data }): Promise<CheckoutStart> => {
     const PRICES: Record<VipPlanName, { full: number; offer: number }> = {
-      lifetime: { full: 2049, offer: 999 },
-      monthly: { full: 349, offer: 249 },
+      lifetime: { full: VIP_PRICE_TABLE.lifetime.full, offer: VIP_PRICE_TABLE.lifetime.offer },
+      monthly: { full: VIP_PRICE_TABLE.monthly.full, offer: VIP_PRICE_TABLE.monthly.offer },
     };
     const { createWhopCheckout, isWhopPrice, whopConfigured } = await import("@/lib/whop.server");
     if (!whopConfigured()) {

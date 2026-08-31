@@ -69,8 +69,8 @@ describe("entitlement input surface", () => {
 
   it("prices are resolved server-side, never taken from the client", () => {
     expect(vipFns).toContain("const PRICES:");
-    expect(vipFns).toContain("lifetime: { full: 2049, offer: 999 }");
-    expect(vipFns).toContain("monthly: { full: 349, offer: 249 }");
+    expect(vipFns).toContain("VIP_PRICE_TABLE.lifetime.full");
+    expect(vipFns).toContain("VIP_PRICE_TABLE.monthly.full");
     expect(vipFns).toContain("const AMOUNT_CENTS = 999");
     expect(vipFns).not.toMatch(/amountCents:\s*(input|data)\.amountCents/);
   });

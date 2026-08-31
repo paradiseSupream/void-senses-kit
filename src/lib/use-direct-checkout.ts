@@ -18,7 +18,7 @@ import { rememberOrder } from "@/lib/vip-unlock";
 import { attribution, sessionId, track, trackExperiment, visitorCountry } from "@/lib/monetization";
 import { trackFunnel } from "@/lib/funnel";
 import { cookie } from "@/lib/pixels";
-import { hasVipOffer, markVipOfferUsed } from "@/lib/vip-offer";
+import { hasVipOffer } from "@/lib/vip-offer";
 import { VIP_CHECKOUT_SLOT, vipGateArm } from "@/lib/vip-ab";
 import type { VipPlan } from "@/lib/vip";
 
@@ -61,9 +61,6 @@ export function useDirectCheckout() {
         return;
       }
       track({ event_type: "funnel", slot: "checkout_session_created", format: plan });
-      // The discount is genuinely one-time: once a session exists on the
-      // reduced price the visitor permanently returns to the regular price.
-      if (offerActive) markVipOfferUsed();
       trackFunnel("checkout_start");
       if (result.orderId) rememberOrder(result.orderId, null);
       await navigate({

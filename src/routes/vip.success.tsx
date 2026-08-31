@@ -11,6 +11,8 @@ import { trackFunnel } from "@/lib/funnel";
 import { purchaseEventId } from "@/lib/purchase-event";
 import { pixelTrack } from "@/lib/pixels";
 import { track } from "@/lib/monetization";
+import { markVipOfferUsed } from "@/lib/vip-offer";
+import { VIP_PRICE_TABLE } from "@/lib/vip-prices";
 
 type Search = { order?: string; status?: string };
 
@@ -70,10 +72,14 @@ function VipSuccessPage() {
           rememberLicense(result.licenseKey);
           setVip(true, result.plan ?? "lifetime");
           setState("done");
-          trackFunnel("vip_purchase");
+          markVipOfferUsed();
+          trackFunnel("vip_purchase", null, {
+            revenueCents:
+              result.amountCents ?? VIP_PRICE_TABLE[result.plan ?? "lifetime"].full,
+          });
           pixelTrack("Purchase", {
             eventId: purchaseEventId(order),
-            value: (result.amountCents ?? (result.plan === "monthly" ? 349 : 2049)) / 100,
+            value: (result.amountCents ?? VIP_PRICE_TABLE[result.plan ?? "lifetime"].full) / 100,
             currency: "USD",
             contentName: `vip_${result.plan ?? "lifetime"}`,
             ...(result.email ? { email: result.email } : {}),

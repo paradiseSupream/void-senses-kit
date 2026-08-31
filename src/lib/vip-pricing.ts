@@ -10,15 +10,16 @@
 
 import { useVipOffer } from "@/lib/vip-offer";
 import { MONTHLY_OFFER_CENTS, OFFER_CENTS } from "@/lib/vip-offer";
+import { LIFETIME_FULL_CENTS, MONTHLY_FULL_CENTS } from "@/lib/vip-prices";
 
 /**
  * Customer-facing totals. Provider/processing cost is folded into these
  * amounts, so checkout never adds a surprise line after the CTA price.
  */
-export const VIP_MONTHLY_CENTS = 349;
+export const VIP_MONTHLY_CENTS = MONTHLY_FULL_CENTS;
 
 /** Standard lifetime pass. */
-export const VIP_LIFETIME_CENTS = 2049;
+export const VIP_LIFETIME_CENTS = LIFETIME_FULL_CENTS;
 
 /** Discounted amounts once the one-visit downsell has been granted. */
 export const VIP_MONTHLY_OFFER_CENTS = MONTHLY_OFFER_CENTS;

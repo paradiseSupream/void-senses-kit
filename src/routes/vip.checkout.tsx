@@ -10,6 +10,8 @@ import { useVip } from "@/lib/vip";
 import { vipOrderStatus } from "@/lib/vip.functions";
 import { useDirectCheckout } from "@/lib/use-direct-checkout";
 import { VIP_LIFETIME_CENTS, usd } from "@/lib/vip-pricing";
+import { isMonthlyAmount } from "@/lib/vip-prices";
+import { markVipOfferUsed } from "@/lib/vip-offer";
 
 
 type Search = { s?: string; p?: string; order?: string; amount?: string; m?: string };
@@ -76,6 +78,8 @@ function VipCheckoutPage() {
         const result = await checkOrder({ data: { orderId: order } });
         if (cancelled) return;
         if (result.status === "paid") {
+          // Burn the one-time discount only once money actually cleared.
+          markVipOfferUsed();
           track({ event_type: "funnel", slot: "checkout_autoswitch", format: "poll" });
           void navigate({ to: "/vip/success", search: { order } });
           return;
@@ -161,7 +165,7 @@ function VipCheckoutPage() {
     : "";
 
   const price = amount ? `$${(Number(amount) / 100).toFixed(2)}` : null;
-  const isMonthly = amount === "249" || amount === "349";
+  const isMonthly = isMonthlyAmount(amount);
   const hostedCheckoutUrl = s && p
     ? `https://whop.com/checkout/${encodeURIComponent(p)}?session=${encodeURIComponent(s)}`
     : null;
