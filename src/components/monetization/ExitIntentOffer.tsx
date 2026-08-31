@@ -35,6 +35,7 @@ export function ExitIntentOffer() {
     }
 
     let done = false;
+    let resultSeen = false;
     const fire = () => {
       if (done) return;
       done = true;
