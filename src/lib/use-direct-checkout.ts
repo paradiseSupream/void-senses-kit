@@ -54,12 +54,12 @@ export function useDirectCheckout() {
       ]);
       if (!result.ok || !result.checkoutId || !result.planId) {
         const reason = result.reason ?? "Checkout is unavailable right now.";
-        track({ event_type: "script_error", slot: "vip_checkout_session", format: plan });
+        track({ event_type: "funnel", slot: "checkout_session_failed", format: plan });
         setError(reason);
         toast.error(reason);
         return;
       }
-      track({ event_type: "script_load", slot: "vip_checkout_session", format: plan });
+      track({ event_type: "funnel", slot: "checkout_session_created", format: plan });
       trackFunnel("checkout_start");
       if (result.orderId) rememberOrder(result.orderId, null);
       await navigate({
@@ -77,7 +77,7 @@ export function useDirectCheckout() {
       const reason = caught instanceof Error && caught.message === "checkout_timeout"
         ? "Checkout took too long. Check your connection and try again."
         : "Could not open checkout — please try again.";
-      track({ event_type: "script_error", slot: "vip_checkout_request", format: plan });
+      track({ event_type: "funnel", slot: "checkout_request_failed", format: plan });
       setError(reason);
       toast.error(reason);
     } finally {

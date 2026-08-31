@@ -66,7 +66,7 @@ function VipCheckoutPage() {
       const frame = mount?.querySelector("iframe");
       if (!frame) return false;
       setEmbedded(true);
-      track({ event_type: "script_load", slot: "vip_checkout_embed", format: "whop" });
+      track({ event_type: "funnel", slot: "checkout_embed_loaded", format: "whop" });
       return true;
     };
     const observer = new MutationObserver(() => observeFrame());
@@ -75,7 +75,7 @@ function VipCheckoutPage() {
       const frame = document.querySelector("[data-whop-checkout-plan-id] iframe");
       if (!frame) {
         setSlow(true);
-        track({ event_type: "script_error", slot: "vip_checkout_embed", format: "timeout" });
+        track({ event_type: "funnel", slot: "checkout_embed_timeout", format: "whop" });
       }
     }, 4000);
     if (!document.getElementById("whop-checkout-loader")) {
@@ -86,7 +86,7 @@ function VipCheckoutPage() {
       script.defer = true;
       script.onerror = () => {
         setSlow(true);
-        track({ event_type: "script_error", slot: "vip_checkout_loader", format: "whop" });
+        track({ event_type: "funnel", slot: "checkout_loader_failed", format: "whop" });
       };
       document.body.appendChild(script);
     }

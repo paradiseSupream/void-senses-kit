@@ -120,11 +120,11 @@ export function VipModal() {
         },
       });
       if (!result.ok || !result.checkoutId || !result.planId) {
-        track({ event_type: "script_error", slot: "vip_checkout_session", format: plan });
+        track({ event_type: "funnel", slot: "checkout_session_failed", format: plan });
         toast.error(result.reason ?? "Checkout is unavailable right now.");
         return;
       }
-      track({ event_type: "script_load", slot: "vip_checkout_session", format: plan });
+      track({ event_type: "funnel", slot: "checkout_session_created", format: plan });
       trackFunnel("checkout_start");
       if (result.orderId) rememberOrder(result.orderId, email || null);
       closeVipModal();
@@ -139,7 +139,7 @@ export function VipModal() {
         search,
       });
     } catch {
-      track({ event_type: "script_error", slot: "vip_checkout_request", format: plan });
+      track({ event_type: "funnel", slot: "checkout_request_failed", format: plan });
       toast.error("Could not open checkout — please try again.");
     } finally {
       setBusy(false);

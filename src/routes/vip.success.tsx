@@ -85,7 +85,7 @@ function VipSuccessPage() {
       }
       if (!cancelled && attempts < 20) window.setTimeout(poll, 3000);
       else if (!cancelled) {
-        track({ event_type: "script_error", slot: "vip_payment_confirmation", format: "poll_exhausted" });
+        track({ event_type: "funnel", slot: "payment_confirmation_failed", format: "poll_exhausted" });
         setState("failed");
       }
     };
