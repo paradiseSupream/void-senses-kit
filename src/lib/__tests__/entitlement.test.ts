@@ -70,7 +70,7 @@ describe("entitlement input surface", () => {
   it("prices are resolved server-side, never taken from the client", () => {
     expect(vipFns).toContain("const PRICES:");
     expect(vipFns).toContain("lifetime: { full: 1900, offer: 900 }");
-    expect(vipFns).toContain("monthly: { full: 499, offer: 299 }");
+    expect(vipFns).toContain("monthly: { full: 299, offer: 199 }");
     expect(vipFns).toContain("const AMOUNT_CENTS = 900");
     expect(vipFns).not.toMatch(/amountCents:\s*(input|data)\.amountCents/);
   });

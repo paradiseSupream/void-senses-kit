@@ -10,6 +10,7 @@ import { rememberLicense, rememberOrder } from "@/lib/vip-unlock";
 import { trackFunnel } from "@/lib/funnel";
 import { purchaseEventId } from "@/lib/purchase-event";
 import { pixelTrack } from "@/lib/pixels";
+import { track } from "@/lib/monetization";
 
 type Search = { order?: string; status?: string };
 
@@ -83,7 +84,10 @@ function VipSuccessPage() {
         /* keep polling */
       }
       if (!cancelled && attempts < 20) window.setTimeout(poll, 3000);
-      else if (!cancelled) setState("failed");
+      else if (!cancelled) {
+        track({ event_type: "funnel", slot: "payment_confirmation_failed", format: "poll_exhausted" });
+        setState("failed");
+      }
     };
 
     void poll();

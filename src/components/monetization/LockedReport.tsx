@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Crown, Lock, Sparkles, Swords } from "lucide-react";
+import { Crown, Loader2, Lock, Sparkles, Swords } from "lucide-react";
 import { toast } from "sonner";
 
 import { useVip } from "@/lib/vip";
@@ -13,6 +13,7 @@ import { trackFunnel } from "@/lib/funnel";
 import { compareUrl, type ComparePayload } from "@/lib/compare-link";
 import { MONTHLY_OFFER_CENTS, useVipOffer } from "@/lib/vip-offer";
 import { VIP_MONTHLY_CENTS } from "@/lib/vip-pricing";
+import { useDirectCheckout } from "@/lib/use-direct-checkout";
 
 
 /**
@@ -36,8 +37,9 @@ export function LockedReport({
   share?: ComparePayload;
   children: React.ReactNode;
 }) {
-  const { isVip, openVipModal } = useVip();
+  const { isVip } = useVip();
   const runGated = useActionGate();
+  const { busy: checkoutBusy, error: checkoutError, go } = useDirectCheckout();
   const offerActive = useVipOffer();
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -135,13 +137,19 @@ export function LockedReport({
         </h3>
         <p className="mx-auto mt-1 max-w-sm text-sm text-muted-foreground">{blurb}</p>
         <ScarcityTimer className="mt-3" label="This price ends in" />
-        <div className="mt-5 flex flex-col gap-2.5 sm:flex-row sm:justify-center">
+        <div className="relative z-50 mt-5 flex flex-col gap-2.5 sm:flex-row sm:justify-center">
           <button
             type="button"
-            onClick={() => openVipModal("monthly")}
+            onClick={() => void go("monthly")}
+            disabled={checkoutBusy}
             className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-primary px-5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
           >
-            <Crown className="size-4" aria-hidden="true" /> Unlock now · {price}
+            {checkoutBusy ? (
+              <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+            ) : (
+              <Crown className="size-4" aria-hidden="true" />
+            )}
+            Unlock now · {price}
           </button>
           {share ? (
             <button
@@ -163,6 +171,11 @@ export function LockedReport({
             {busy ? "Unlocking…" : "Continue free"}
           </button>
         </div>
+        {checkoutError ? (
+          <p role="alert" className="mt-2 text-xs text-destructive">
+            {checkoutError} Tap Unlock to retry.
+          </p>
+        ) : null}
         <p className="mt-3 text-xs text-muted-foreground">
           {share
             ? "Share with one friend to unlock instantly, or open one sponsor page — VIP skips both, forever."

@@ -8,7 +8,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { subscribeLead } from "@/lib/leads.functions";
 import { restoreVipAccess, startVipCheckout } from "@/lib/vip.functions";
 import { rememberLicense, rememberOrder } from "@/lib/vip-unlock";
-import { attribution, sessionId, trackExperiment } from "@/lib/monetization";
+import { attribution, sessionId, track, trackExperiment, visitorCountry } from "@/lib/monetization";
 import {
   VIP_CHECKOUT_SLOT,
   VIP_GATE_VIEW_SLOT,
@@ -105,7 +105,7 @@ export function VipModal() {
     setBusy(true);
     try {
       if (hasEmail) await persistEmail();
-      trackFunnel("checkout_start");
+      track({ event_type: "click", slot: "vip_checkout_tap", format: plan });
       trackExperiment(VIP_CHECKOUT_SLOT, arm);
       const result = await beginCheckout({
         data: {
@@ -114,14 +114,18 @@ export function VipModal() {
           email: hasEmail ? email : null,
           sessionId: sessionId(),
           utmSource: attribution().utm_source ?? null,
+          country: visitorCountry(),
           fbp: cookie("_fbp") ?? null,
           fbc: cookie("_fbc") ?? null,
         },
       });
       if (!result.ok || !result.checkoutId || !result.planId) {
+        track({ event_type: "funnel", slot: "checkout_session_failed", format: plan });
         toast.error(result.reason ?? "Checkout is unavailable right now.");
         return;
       }
+      track({ event_type: "funnel", slot: "checkout_session_created", format: plan });
+      trackFunnel("checkout_start");
       if (result.orderId) rememberOrder(result.orderId, email || null);
       closeVipModal();
       const search = {
@@ -135,6 +139,7 @@ export function VipModal() {
         search,
       });
     } catch {
+      track({ event_type: "funnel", slot: "checkout_request_failed", format: plan });
       toast.error("Could not open checkout — please try again.");
     } finally {
       setBusy(false);
@@ -220,7 +225,7 @@ export function VipModal() {
               amount: monthlyPrice,
               note: offerActive
                 ? `one-visit offer — normally $${(VIP_MONTHLY_CENTS / 100).toFixed(2)}`
-                : "cancel anytime — nothing auto-renews",
+                : "renews monthly — cancel anytime",
             },
             {
               key: "lifetime" as const,

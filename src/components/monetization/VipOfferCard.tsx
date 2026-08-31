@@ -45,7 +45,7 @@ export function VipOfferCard({
   className?: string;
 }) {
   const { isVip, openVipModal } = useVip();
-  const { busy, go } = useDirectCheckout();
+  const { busy, error, go } = useDirectCheckout();
   const { site } = useSiteConfig();
   const loadProof = useServerFn(getSocialProof);
   const [proof, setProof] = useState<SocialProof | null>(null);
@@ -136,7 +136,7 @@ export function VipOfferCard({
         device, so you&apos;d have to sit the whole test again.
       </p>
 
-      <div className="mt-5 flex flex-col gap-2.5 sm:flex-row">
+      <div className="relative z-50 mt-5 flex flex-col gap-2.5 sm:flex-row">
         <button
           type="button"
           disabled={busy}
@@ -160,9 +160,15 @@ export function VipOfferCard({
         </button>
       </div>
 
+      {error ? (
+        <p role="alert" className="mt-2 text-center text-xs text-destructive">
+          {error} Tap the button to retry.
+        </p>
+      ) : null}
+
       <p className="mt-2.5 flex items-center justify-center gap-1.5 text-center text-xs text-muted-foreground">
         <ShieldCheck className="size-3.5 text-primary" aria-hidden="true" />
-        Apple Pay / Google Pay in one tap · no account needed · nothing auto-renews
+        Apple Pay / Google Pay in one tap · no account needed · monthly plan renews until cancelled
       </p>
 
       {proofLine ? (

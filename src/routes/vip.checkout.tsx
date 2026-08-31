@@ -4,6 +4,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { ShieldCheck } from "lucide-react";
 
 import { LogoMark } from "@/components/brand/LogoMark";
+import { track } from "@/lib/monetization";
 
 type Search = { s?: string; p?: string; order?: string; amount?: string; m?: string };
 
@@ -55,12 +56,27 @@ function VipCheckoutPage() {
   // Slow Gulf mobile networks sometimes never finish the embed. After 6s we
   // surface a one-tap hosted-checkout fallback instead of a dead frame.
   const [slow, setSlow] = useState(false);
+  const [embedded, setEmbedded] = useState(false);
 
   useEffect(() => {
     if (!origin) return;
+    track({ event_type: "impression", slot: "vip_checkout_page", format: "checkout" });
+    const mount = document.querySelector("[data-whop-checkout-plan-id]");
+    const observeFrame = () => {
+      const frame = mount?.querySelector("iframe");
+      if (!frame) return false;
+      setEmbedded(true);
+      track({ event_type: "funnel", slot: "checkout_embed_loaded", format: "whop" });
+      return true;
+    };
+    const observer = new MutationObserver(() => observeFrame());
+    if (mount && !observeFrame()) observer.observe(mount, { childList: true, subtree: true });
     const timer = window.setTimeout(() => {
       const frame = document.querySelector("[data-whop-checkout-plan-id] iframe");
-      if (!frame) setSlow(true);
+      if (!frame) {
+        setSlow(true);
+        track({ event_type: "funnel", slot: "checkout_embed_timeout", format: "whop" });
+      }
     }, 4000);
     if (!document.getElementById("whop-checkout-loader")) {
       const script = document.createElement("script");
@@ -68,10 +84,16 @@ function VipCheckoutPage() {
       script.src = "https://js.whop.com/static/checkout/loader.js";
       script.async = true;
       script.defer = true;
-      script.onerror = () => setSlow(true);
+      script.onerror = () => {
+        setSlow(true);
+        track({ event_type: "funnel", slot: "checkout_loader_failed", format: "whop" });
+      };
       document.body.appendChild(script);
     }
-    return () => window.clearTimeout(timer);
+    return () => {
+      observer.disconnect();
+      window.clearTimeout(timer);
+    };
   }, [origin]);
 
   // The $9 Shadow Matrix add-on returns straight into the dossier; VIP plans go
@@ -83,6 +105,10 @@ function VipCheckoutPage() {
     : "";
 
   const price = amount ? `$${(Number(amount) / 100).toFixed(2)}` : null;
+  const isMonthly = amount === "199" || amount === "299";
+  const hostedCheckoutUrl = s && p
+    ? `https://whop.com/checkout/${encodeURIComponent(p)}?session=${encodeURIComponent(s)}`
+    : null;
 
   return (
     <main className="mx-auto w-full max-w-lg px-4 py-10">
@@ -102,7 +128,7 @@ function VipCheckoutPage() {
       <ul className="mt-4 grid gap-1.5 text-sm text-muted-foreground">
         {[
           "Every ad and export gate removed instantly",
-          "One payment — nothing renews, no account needed",
+          isMonthly ? "Monthly access — cancel anytime" : "One payment — lifetime access",
           "Access restores on any device with your purchase email",
         ].map((line) => (
           <li key={line} className="flex items-start gap-2">
@@ -143,9 +169,8 @@ function VipCheckoutPage() {
           </p>
           <div className="mt-3 flex flex-wrap gap-2">
             <a
-              href={`https://whop.com/checkout/${encodeURIComponent(p)}?session=${encodeURIComponent(s)}`}
-              target="_blank"
-              rel="noopener noreferrer"
+              href={hostedCheckoutUrl ?? undefined}
+              onClick={() => track({ event_type: "click", slot: "vip_checkout_fallback", format: "hosted" })}
               className="rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground"
             >
               Open secure checkout
@@ -159,6 +184,16 @@ function VipCheckoutPage() {
             </button>
           </div>
         </div>
+      ) : null}
+
+      {hostedCheckoutUrl && !slow ? (
+        <a
+          href={hostedCheckoutUrl}
+          onClick={() => track({ event_type: "click", slot: "vip_checkout_hosted", format: embedded ? "embed_ready" : "embed_loading" })}
+          className="mt-3 block text-center text-xs text-muted-foreground underline underline-offset-4 hover:text-foreground"
+        >
+          Payment form not opening? Use secure hosted checkout
+        </a>
       ) : null}
 
       <p className="mt-4 text-xs text-muted-foreground">

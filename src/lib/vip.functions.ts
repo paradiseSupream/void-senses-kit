@@ -44,6 +44,7 @@ export const startVipCheckout = createServerFn({ method: "POST" })
       sessionId?: string | null;
       toolSlug?: string | null;
       utmSource?: string | null;
+      country?: string | null;
       fbp?: string | null;
       fbc?: string | null;
     }) => ({
@@ -53,6 +54,9 @@ export const startVipCheckout = createServerFn({ method: "POST" })
       sessionId: input?.sessionId ? String(input.sessionId).slice(0, 80) : null,
       toolSlug: input?.toolSlug ? String(input.toolSlug).slice(0, 60) : null,
       utmSource: input?.utmSource ? String(input.utmSource).slice(0, 80) : null,
+      country: input?.country && /^[a-z]{2}$/i.test(input.country)
+        ? input.country.toUpperCase()
+        : null,
       fbp: input?.fbp ? String(input.fbp).slice(0, 120) : null,
       fbc: input?.fbc ? String(input.fbc).slice(0, 200) : null,
     }),
@@ -73,7 +77,7 @@ export const startVipCheckout = createServerFn({ method: "POST" })
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { getRequestHeader } = await import("@tanstack/react-start/server");
-    const country = getRequestHeader("cf-ipcountry") ?? null;
+    const country = getRequestHeader("cf-ipcountry") ?? data.country;
     const userAgent = getRequestHeader("user-agent") ?? null;
     const orderId = `sov_${crypto.randomUUID()}`;
 
@@ -91,7 +95,7 @@ export const startVipCheckout = createServerFn({ method: "POST" })
       return { ok: false, reason: "Could not open checkout — please try again." };
     }
 
-    await supabaseAdmin.from("vip_orders").insert({
+    const { error: orderError } = await supabaseAdmin.from("vip_orders").insert({
       order_id: orderId,
       email: data.email,
       plan: data.plan,
@@ -108,6 +112,10 @@ export const startVipCheckout = createServerFn({ method: "POST" })
       fbc: data.fbc,
       event_id: purchaseEventId(orderId),
     });
+    if (orderError) {
+      console.error("[vip] order insert failed", orderError.message);
+      return { ok: false, reason: "Checkout could not be secured — please retry." };
+    }
 
     return {
       ok: true,
