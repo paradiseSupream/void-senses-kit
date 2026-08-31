@@ -112,10 +112,26 @@ export function copyVariant(): CopyVariant {
   }
 }
 
-/** Records an experiment exposure or interaction (slot = `hero_view` etc.). */
+/**
+ * Records an experiment exposure or interaction (slot = `hero_view` etc.).
+ *
+ * Exposures are de-duplicated per session so one visitor counts once per
+ * slot+arm — otherwise a re-render inflates the arm and the A/B read is wrong.
+ */
 export function trackExperiment(slot: string, arm: string) {
+  if (typeof window !== "undefined" && slot.endsWith("_view")) {
+
+    const key = `sov.exp.${slot}.${arm}`;
+    try {
+      if (window.sessionStorage.getItem(key)) return;
+      window.sessionStorage.setItem(key, "1");
+    } catch {
+      /* storage unavailable — fall through and log once per render */
+    }
+  }
   track({ event_type: "experiment", slot, format: arm, zone: arm });
 }
+
 
 /* --------------------------------------------------------- frequency capping */
 

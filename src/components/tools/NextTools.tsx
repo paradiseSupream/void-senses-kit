@@ -1,22 +1,24 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { ArrowUpRight, Play } from "lucide-react";
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 
 import { AdSlot } from "@/components/monetization/AdSlot";
 import { track } from "@/lib/monetization";
-import { trackFunnel } from "@/lib/funnel";
 import { relatedTools } from "@/lib/tools";
 
-/** Chains the session after a result: two accent-themed suggestions. */
+/**
+ * Chains the session after a result: two accent-themed suggestions.
+ *
+ * Note: this block is part of the tool shell, so it mounts as soon as the tool
+ * page loads — it must NOT emit completion signals. `result_view` /
+ * `tool_complete` are fired from the result surface itself (VipOfferCard),
+ * which only renders once the visitor actually finished the test.
+ */
 export function NextTools({ slug, heading = "Try next" }: { slug: string; heading?: string }) {
   const next = relatedTools(slug);
   const navigate = useNavigate();
   const firedRef = useRef(false);
 
-  useEffect(() => {
-    track({ event_type: "tool_complete", slot: `result-${slug}`, tool_slug: slug });
-    trackFunnel("result_view", slug);
-  }, [slug]);
 
   const upNext = next[0];
   const goNext = () => {
