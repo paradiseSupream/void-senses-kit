@@ -25,7 +25,7 @@ export const Route = createFileRoute("/vip/checkout")({
     if (typeof search["p"] === "string") parsed.p = search["p"];
     if (typeof search["order"] === "string") parsed.order = search["order"];
     // The router serialises string search params as JSON, so `amount` can
-    // arrive quoted ("299"). Unquoting keeps the displayed price — and the
+    // arrive quoted (for example "349"). Unquoting keeps the displayed price — and the
     // monthly-plan copy — from silently falling back to NaN.
     const rawAmount = search["amount"];
     if (typeof rawAmount === "string" || typeof rawAmount === "number") {

@@ -146,7 +146,7 @@ export const vipOrderStatus = createServerFn({ method: "POST" })
       email: string | null;
       licenseKey: string | null;
       expiresAt: string | null;
-       amountCents: number | null;
+      amountCents: number | null;
       reason?: string | null;
     }> => {
       const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -236,7 +236,7 @@ export const restoreVipAccess = createServerFn({ method: "POST" })
   });
 
 /**
- * $9 Shadow Matrix add-on checkout (one-time). The price is fixed server-side;
+ * Shadow Matrix add-on checkout (one-time). The price is fixed server-side;
  * the client can only ask for it, never name it.
  */
 export const startMatrixCheckout = createServerFn({ method: "POST" })
