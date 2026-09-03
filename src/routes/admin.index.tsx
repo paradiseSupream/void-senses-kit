@@ -41,6 +41,7 @@ import { RoiCalculatorTab } from "@/components/admin/RoiCalculatorTab";
 import { CreativeTestsTab } from "@/components/admin/CreativeTestsTab";
 import { PixelDebugTab } from "@/components/admin/PixelDebugTab";
 import { RetargetTab } from "@/components/admin/RetargetTab";
+import { GrowthTab } from "@/components/admin/GrowthTab";
 
 
 export const Route = createFileRoute("/admin/")({
@@ -73,6 +74,7 @@ const TABS = [
   "ROI",
   "Creatives",
   "Retarget",
+  "Growth",
   "Tracking",
   "Monitor",
   "Pixel debug",
@@ -302,6 +304,7 @@ function AdminPanel() {
         {tab === "ROI" ? <RoiCalculatorTab token={token} /> : null}
         {tab === "Creatives" ? <CreativeTestsTab token={token} /> : null}
         {tab === "Retarget" ? <RetargetTab token={token} /> : null}
+        {tab === "Growth" ? <GrowthTab token={token} /> : null}
         {tab === "Tracking" ? <TrackingTab token={token} /> : null}
         {tab === "Monitor" ? <TrackingMonitorTab token={token} /> : null}
         {tab === "Pixel debug" ? <PixelDebugTab token={token} /> : null}
