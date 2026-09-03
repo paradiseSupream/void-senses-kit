@@ -10,8 +10,7 @@ import { newSeed, pickBalanced, rngFrom, SCALE, scoreDimensions } from "@/lib/qu
 import { RF_BANK, RF_PER_AXIS, RF_SESSION_SIZE, rfProfile } from "@/lib/banks/red-flag";
 
 const URL = "https://sensesofvoid.app/tools/red-flag";
-const OG =
-  "https://sensesofvoid.app/__l5e/assets-v1/053c4668-7074-4003-b960-9c801cb16d90/cover-love-match.jpg";
+const OG = "https://sensesofvoid.app/og/red-flag.jpg";
 
 export const Route = createFileRoute("/tools/red-flag")({
   head: () => ({

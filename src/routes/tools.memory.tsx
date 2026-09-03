@@ -8,8 +8,7 @@ import { useAutoStart } from "@/lib/autostart";
 import { percentileOf } from "@/lib/quiz-engine";
 
 const URL = "https://sensesofvoid.app/tools/memory";
-const OG =
-  "https://sensesofvoid.app/__l5e/assets-v1/053c4668-7074-4003-b960-9c801cb16d90/cover-iq.jpg";
+const OG = "https://sensesofvoid.app/og/memory.jpg";
 
 const GRID = 9;
 

@@ -58,7 +58,7 @@ export const Route = createFileRoute("/")({
       {
         property: "og:description",
         content:
-          "Seven free tools: IQ, trauma, dark personality, love match, AI roast, prompt maker and a free asset vault. Results in minutes, no signup.",
+          "Thirteen free tools: IQ, memory, logic, trauma, dark personality, love match, friend quiz, compatibility battle, AI roast, prompt maker and a free asset vault. Results in minutes, no signup.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -133,7 +133,7 @@ const HERO_COPY: Record<
     accent: "that actually show you something",
     sub: "Answer for 2–5 minutes and get a radar map of your mind, written analysis and an HD card you can share — scored entirely in your browser, with fresh randomised questions every single time.",
     cta: "Start the free IQ test",
-    second: "See all 7 tools",
+    second: "See all 13 tools",
   },
   curiosity: {
     badge: "7 free tests · results in 3 minutes",

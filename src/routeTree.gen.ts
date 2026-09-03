@@ -28,8 +28,10 @@ import { Route as GuidesIndexRouteImport } from './routes/guides.index'
 import { Route as GuidesSlugRouteImport } from './routes/guides.$slug'
 import { Route as RTokenRouteImport } from './routes/r.$token'
 import { Route as ToolsIndexRouteImport } from './routes/tools.index'
+import { Route as ToolsBattleRouteImport } from './routes/tools.battle'
 import { Route as ToolsChildTraumaRouteImport } from './routes/tools.child-trauma'
 import { Route as ToolsDarkPersonalityRouteImport } from './routes/tools.dark-personality'
+import { Route as ToolsFriendQuizRouteImport } from './routes/tools.friend-quiz'
 import { Route as ToolsIqRouteImport } from './routes/tools.iq'
 import { Route as ToolsLogicRouteImport } from './routes/tools.logic'
 import { Route as ToolsLoveMatchRouteImport } from './routes/tools.love-match'
@@ -150,6 +152,11 @@ const ToolsIndexRoute = ToolsIndexRouteImport.update({
   path: '/tools/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ToolsBattleRoute = ToolsBattleRouteImport.update({
+  id: '/tools/battle',
+  path: '/tools/battle',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ToolsChildTraumaRoute = ToolsChildTraumaRouteImport.update({
   id: '/tools/child-trauma',
   path: '/tools/child-trauma',
@@ -158,6 +165,11 @@ const ToolsChildTraumaRoute = ToolsChildTraumaRouteImport.update({
 const ToolsDarkPersonalityRoute = ToolsDarkPersonalityRouteImport.update({
   id: '/tools/dark-personality',
   path: '/tools/dark-personality',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ToolsFriendQuizRoute = ToolsFriendQuizRouteImport.update({
+  id: '/tools/friend-quiz',
+  path: '/tools/friend-quiz',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ToolsIqRoute = ToolsIqRouteImport.update({
@@ -298,8 +310,10 @@ export interface FileRoutesByFullPath {
   '/archetypes/$slug': typeof ArchetypesSlugRoute
   '/guides/$slug': typeof GuidesSlugRoute
   '/r/$token': typeof RTokenRoute
+  '/tools/battle': typeof ToolsBattleRoute
   '/tools/child-trauma': typeof ToolsChildTraumaRoute
   '/tools/dark-personality': typeof ToolsDarkPersonalityRoute
+  '/tools/friend-quiz': typeof ToolsFriendQuizRoute
   '/tools/iq': typeof ToolsIqRoute
   '/tools/logic': typeof ToolsLogicRoute
   '/tools/love-match': typeof ToolsLoveMatchRoute
@@ -345,8 +359,10 @@ export interface FileRoutesByTo {
   '/archetypes/$slug': typeof ArchetypesSlugRoute
   '/guides/$slug': typeof GuidesSlugRoute
   '/r/$token': typeof RTokenRoute
+  '/tools/battle': typeof ToolsBattleRoute
   '/tools/child-trauma': typeof ToolsChildTraumaRoute
   '/tools/dark-personality': typeof ToolsDarkPersonalityRoute
+  '/tools/friend-quiz': typeof ToolsFriendQuizRoute
   '/tools/iq': typeof ToolsIqRoute
   '/tools/logic': typeof ToolsLogicRoute
   '/tools/love-match': typeof ToolsLoveMatchRoute
@@ -393,8 +409,10 @@ export interface FileRoutesById {
   '/archetypes/$slug': typeof ArchetypesSlugRoute
   '/guides/$slug': typeof GuidesSlugRoute
   '/r/$token': typeof RTokenRoute
+  '/tools/battle': typeof ToolsBattleRoute
   '/tools/child-trauma': typeof ToolsChildTraumaRoute
   '/tools/dark-personality': typeof ToolsDarkPersonalityRoute
+  '/tools/friend-quiz': typeof ToolsFriendQuizRoute
   '/tools/iq': typeof ToolsIqRoute
   '/tools/logic': typeof ToolsLogicRoute
   '/tools/love-match': typeof ToolsLoveMatchRoute
@@ -442,8 +460,10 @@ export interface FileRouteTypes {
     | '/archetypes/$slug'
     | '/guides/$slug'
     | '/r/$token'
+    | '/tools/battle'
     | '/tools/child-trauma'
     | '/tools/dark-personality'
+    | '/tools/friend-quiz'
     | '/tools/iq'
     | '/tools/logic'
     | '/tools/love-match'
@@ -489,8 +509,10 @@ export interface FileRouteTypes {
     | '/archetypes/$slug'
     | '/guides/$slug'
     | '/r/$token'
+    | '/tools/battle'
     | '/tools/child-trauma'
     | '/tools/dark-personality'
+    | '/tools/friend-quiz'
     | '/tools/iq'
     | '/tools/logic'
     | '/tools/love-match'
@@ -536,8 +558,10 @@ export interface FileRouteTypes {
     | '/archetypes/$slug'
     | '/guides/$slug'
     | '/r/$token'
+    | '/tools/battle'
     | '/tools/child-trauma'
     | '/tools/dark-personality'
+    | '/tools/friend-quiz'
     | '/tools/iq'
     | '/tools/logic'
     | '/tools/love-match'
@@ -584,8 +608,10 @@ export interface RootRouteChildren {
   ArchetypesSlugRoute: typeof ArchetypesSlugRoute
   GuidesSlugRoute: typeof GuidesSlugRoute
   RTokenRoute: typeof RTokenRoute
+  ToolsBattleRoute: typeof ToolsBattleRoute
   ToolsChildTraumaRoute: typeof ToolsChildTraumaRoute
   ToolsDarkPersonalityRoute: typeof ToolsDarkPersonalityRoute
+  ToolsFriendQuizRoute: typeof ToolsFriendQuizRoute
   ToolsIqRoute: typeof ToolsIqRoute
   ToolsLogicRoute: typeof ToolsLogicRoute
   ToolsLoveMatchRoute: typeof ToolsLoveMatchRoute
@@ -751,6 +777,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ToolsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/tools/battle': {
+      id: '/tools/battle'
+      path: '/tools/battle'
+      fullPath: '/tools/battle'
+      preLoaderRoute: typeof ToolsBattleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/tools/child-trauma': {
       id: '/tools/child-trauma'
       path: '/tools/child-trauma'
@@ -763,6 +796,13 @@ declare module '@tanstack/react-router' {
       path: '/tools/dark-personality'
       fullPath: '/tools/dark-personality'
       preLoaderRoute: typeof ToolsDarkPersonalityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tools/friend-quiz': {
+      id: '/tools/friend-quiz'
+      path: '/tools/friend-quiz'
+      fullPath: '/tools/friend-quiz'
+      preLoaderRoute: typeof ToolsFriendQuizRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/tools/iq': {
@@ -952,8 +992,10 @@ const rootRouteChildren: RootRouteChildren = {
   ArchetypesSlugRoute: ArchetypesSlugRoute,
   GuidesSlugRoute: GuidesSlugRoute,
   RTokenRoute: RTokenRoute,
+  ToolsBattleRoute: ToolsBattleRoute,
   ToolsChildTraumaRoute: ToolsChildTraumaRoute,
   ToolsDarkPersonalityRoute: ToolsDarkPersonalityRoute,
+  ToolsFriendQuizRoute: ToolsFriendQuizRoute,
   ToolsIqRoute: ToolsIqRoute,
   ToolsLogicRoute: ToolsLogicRoute,
   ToolsLoveMatchRoute: ToolsLoveMatchRoute,

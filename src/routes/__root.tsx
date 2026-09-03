@@ -107,14 +107,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Senses of Void — Seven Tools for the Curious Mind" },
+      { title: "Senses of Void — Free Tools for the Curious Mind" },
       {
         name: "description",
         content:
           "Fast, dark, free tools: trauma reflection, quick IQ, dark personality, vibe matching, AI roasts, prompt building, and a free asset vault.",
       },
       { name: "author", content: "Senses of Void" },
-      { property: "og:title", content: "Senses of Void — Seven Tools for the Curious Mind" },
+      { property: "og:title", content: "Senses of Void — Free Tools for the Curious Mind" },
       {
         property: "og:description",
         content:
