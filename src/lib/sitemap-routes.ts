@@ -44,6 +44,7 @@ export const SITEMAP_ENTRIES: SitemapEntry[] = [
   { path: "/tools/love-match", changefreq: "weekly", priority: "0.9" },
   { path: "/tools/roast", changefreq: "weekly", priority: "0.8" },
   { path: "/tools/prompt-maker", changefreq: "weekly", priority: "0.8" },
+  { path: "/tools/this-or-that", changefreq: "weekly", priority: "0.9" },
   { path: "/archetypes", changefreq: "weekly", priority: "0.8" },
   ...ARCHETYPE_PATHS.map((path) => ({
     path,
