@@ -1,10 +1,30 @@
+import { useEffect, useState } from "react";
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { ArrowLeft, Check, Download, ExternalLink, ShieldCheck } from "lucide-react";
+import {
+  ArrowLeft,
+  ArrowRight,
+  Check,
+  Crown,
+  Download,
+  ExternalLink,
+  ShieldCheck,
+} from "lucide-react";
 
 import { AdSlot } from "@/components/monetization/AdSlot";
 import { NativeAdCard } from "@/components/monetization/NativeAdCard";
+import { EmailCapture } from "@/components/monetization/EmailCapture";
 import { useActionGate } from "@/components/monetization/ActionGate";
-import { vaultBySlug, vaultRelated, type VaultItem } from "@/lib/vault-catalog";
+import { useVip } from "@/lib/vip";
+import { useVipPrices } from "@/lib/vip-pricing";
+import { markSeen, recordUnlock, trackVaultLoop } from "@/lib/vault-loop";
+import {
+  categorySlug,
+  vaultAlsoGrabbed,
+  vaultBySlug,
+  vaultNext,
+  vaultRelated,
+  type VaultItem,
+} from "@/lib/vault-catalog";
 
 export const Route = createFileRoute("/vault/$slug")({
   loader: ({ params }) => {
@@ -15,7 +35,10 @@ export const Route = createFileRoute("/vault/$slug")({
   head: ({ loaderData }) => {
     if (!loaderData) {
       return {
-        meta: [{ title: "Resource unavailable — Senses of Void" }, { name: "robots", content: "noindex" }],
+        meta: [
+          { title: "Resource unavailable — Senses of Void" },
+          { name: "robots", content: "noindex" },
+        ],
       };
     }
     const { item } = loaderData;
@@ -94,19 +117,61 @@ function VaultNotFound() {
   );
 }
 
+/** Small pack card used by both recommendation rows — each one can unlock inline. */
+function PackCard({ item, onUnlock }: { item: VaultItem; onUnlock: (item: VaultItem) => void }) {
+  return (
+    <article className="glass flex flex-col rounded-xl p-5">
+      <span className="label-mono text-primary">{item.category}</span>
+      <Link
+        to="/vault/$slug"
+        params={{ slug: item.slug }}
+        className="mt-2 block font-display text-lg text-foreground hover:text-primary"
+      >
+        {item.title}
+      </Link>
+      <p className="mt-2 flex-1 text-sm text-muted-foreground">{item.tagline}</p>
+      <p className="label-mono mt-3 flex items-center gap-1.5 text-[0.6rem] text-muted-foreground">
+        <ShieldCheck className="size-3 text-primary" aria-hidden="true" />
+        {item.format} · {item.license}
+      </p>
+      <button
+        type="button"
+        onClick={() => onUnlock(item)}
+        className="mt-4 inline-flex items-center justify-center gap-2 rounded-lg border border-primary/40 bg-primary/10 px-4 py-2.5 text-sm font-semibold text-primary hover:bg-primary/20"
+      >
+        <Download className="size-4" aria-hidden="true" /> Unlock free
+      </button>
+    </article>
+  );
+}
+
 function VaultDetail() {
   const { item } = Route.useLoaderData();
-  const related = vaultRelated(item);
+  const related = vaultRelated(item, 6);
+  const alsoGrabbed = vaultAlsoGrabbed(item, 3);
+  const next = vaultNext(item);
   const runGated = useActionGate();
+  const { isVip, openVipModal } = useVip();
+  const { monthly: ENTRY_PRICE } = useVipPrices();
+  const [unlocks, setUnlocks] = useState(0);
+
+  useEffect(() => {
+    markSeen(item.slug);
+    trackVaultLoop("vault_view", item.slug);
+  }, [item.slug]);
 
   // Free users pass the sponsor smartlink before the resource opens; VIPs skip.
   const unlock = async (target: VaultItem) => {
+    trackVaultLoop("vault_unlock_start", target.slug);
     await runGated({ toolSlug: "vault", force: true });
+    const total = recordUnlock(target.slug);
+    setUnlocks(total);
+    trackVaultLoop("vault_unlock", target.slug, total);
     window.open(target.url, "_blank", "noopener,noreferrer");
   };
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-12 sm:px-6">
+    <div className="mx-auto max-w-5xl px-4 py-12 pb-24 sm:px-6 lg:pb-12">
       <Link
         to="/vault"
         className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
@@ -116,7 +181,13 @@ function VaultDetail() {
 
       <div className="mt-6 grid gap-8 lg:grid-cols-[1.6fr_1fr]">
         <article>
-          <span className="label-mono text-primary">{item.category}</span>
+          <Link
+            to="/vault/c/$category"
+            params={{ category: categorySlug(item.category) }}
+            className="label-mono text-primary hover:underline"
+          >
+            {item.category}
+          </Link>
           <h1 className="mt-2 text-section">{item.title}</h1>
           <p className="mt-3 text-lg text-muted-foreground">{item.tagline}</p>
 
@@ -147,6 +218,28 @@ function VaultDetail() {
               No signup, no email wall, no download manager.
             </li>
           </ul>
+
+          <AdSlot id="result-vault-mid" toolSlug="vault" className="mt-8" />
+
+          {unlocks > 0 ? (
+            <EmailCapture toolSlug="vault" source="vault" className="mt-8" />
+          ) : null}
+
+          {!isVip && unlocks >= 3 ? (
+            <div className="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-primary/30 bg-primary/5 px-4 py-3">
+              <p className="flex items-center gap-2 text-xs text-muted-foreground">
+                <Crown className="size-3.5 shrink-0 text-primary" aria-hidden="true" />
+                {unlocks} packs unlocked — skip every sponsor step and browse ad-free?
+              </p>
+              <button
+                type="button"
+                onClick={() => openVipModal("monthly")}
+                className="rounded-full border border-primary/40 bg-primary/10 px-3 py-1.5 text-xs font-semibold text-primary hover:bg-primary/20"
+              >
+                Instant unlock · {ENTRY_PRICE}
+              </button>
+            </div>
+          ) : null}
         </article>
 
         <aside className="lg:sticky lg:top-24 lg:self-start">
@@ -175,7 +268,7 @@ function VaultDetail() {
             </a>
           </div>
           <div className="mt-4">
-            <NativeAdCard index={0} />
+            <NativeAdCard index={0} toolSlug="vault" />
           </div>
         </aside>
       </div>
@@ -185,26 +278,54 @@ function VaultDetail() {
           <h2 id="vault-related" className="font-display text-xl">
             More free {item.category} resources
           </h2>
-          <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {related.map((other) => (
-              <Link
-                key={other.slug}
-                to="/vault/$slug"
-                params={{ slug: other.slug }}
-                className="glass lift rounded-xl p-5"
-              >
-                <span className="label-mono">{other.category}</span>
-                <span className="mt-3 block font-display text-lg text-foreground">
-                  {other.title}
-                </span>
-                <span className="mt-2 block text-sm text-muted-foreground">{other.tagline}</span>
-              </Link>
+          <div className="mt-4 grid auto-rows-fr gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {related.slice(0, 3).map((other) => (
+              <PackCard key={other.slug} item={other} onUnlock={(t) => void unlock(t)} />
+            ))}
+            <NativeAdCard index={1} toolSlug="vault" />
+            {related.slice(3).map((other) => (
+              <PackCard key={other.slug} item={other} onUnlock={(t) => void unlock(t)} />
+            ))}
+          </div>
+          <Link
+            to="/vault/c/$category"
+            params={{ category: categorySlug(item.category) }}
+            className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline"
+          >
+            See the full {item.category} collection{" "}
+            <ArrowRight className="size-4" aria-hidden="true" />
+          </Link>
+        </section>
+      ) : null}
+
+      {alsoGrabbed.length ? (
+        <section className="mt-14" aria-labelledby="vault-also">
+          <h2 id="vault-also" className="font-display text-xl">
+            People also grabbed
+          </h2>
+          <div className="mt-4 grid auto-rows-fr gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {alsoGrabbed.map((other) => (
+              <PackCard key={other.slug} item={other} onUnlock={(t) => void unlock(t)} />
             ))}
           </div>
         </section>
       ) : null}
 
       <AdSlot id="result-vault-footer" toolSlug="vault" className="mt-12" />
+
+      {/* Mobile loop: one tap to the next pack, so a visit never ends at one page. */}
+      <Link
+        to="/vault/$slug"
+        params={{ slug: next.slug }}
+        onClick={() => trackVaultLoop("vault_next", next.slug)}
+        className="glass fixed inset-x-3 bottom-3 z-30 flex items-center justify-between gap-3 rounded-xl border border-primary/30 px-4 py-3 lg:hidden"
+      >
+        <span className="min-w-0">
+          <span className="label-mono block text-[0.6rem] text-muted-foreground">Next pack</span>
+          <span className="block truncate text-sm font-semibold">{next.title}</span>
+        </span>
+        <ArrowRight className="size-4 shrink-0 text-primary" aria-hidden="true" />
+      </Link>
     </div>
   );
 }

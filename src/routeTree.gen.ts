@@ -43,6 +43,7 @@ import { Route as ApiPublicRoastRouteImport } from './routes/api/public/roast'
 import { Route as ApiPublicTrackRouteImport } from './routes/api/public/track'
 import { Route as ApiPublicWeeklyReportRouteImport } from './routes/api/public/weekly-report'
 import { Route as ApiPublicWhopWebhookRouteImport } from './routes/api/public/whop-webhook'
+import { Route as VaultCCategoryRouteImport } from './routes/vault.c.$category'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
@@ -217,6 +218,11 @@ const ApiPublicWhopWebhookRoute = ApiPublicWhopWebhookRouteImport.update({
   path: '/api/public/whop-webhook',
   getParentRoute: () => rootRouteImport,
 } as any)
+const VaultCCategoryRoute = VaultCCategoryRouteImport.update({
+  id: '/vault/c/$category',
+  path: '/vault/c/$category',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LovableEmailAuthPreviewRoute = LovableEmailAuthPreviewRouteImport.update({
   id: '/lovable/email/auth/preview',
   path: '/lovable/email/auth/preview',
@@ -269,6 +275,7 @@ export interface FileRoutesByFullPath {
   '/api/public/track': typeof ApiPublicTrackRoute
   '/api/public/weekly-report': typeof ApiPublicWeeklyReportRoute
   '/api/public/whop-webhook': typeof ApiPublicWhopWebhookRoute
+  '/vault/c/$category': typeof VaultCCategoryRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
@@ -308,6 +315,7 @@ export interface FileRoutesByTo {
   '/api/public/track': typeof ApiPublicTrackRoute
   '/api/public/weekly-report': typeof ApiPublicWeeklyReportRoute
   '/api/public/whop-webhook': typeof ApiPublicWhopWebhookRoute
+  '/vault/c/$category': typeof VaultCCategoryRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
@@ -348,6 +356,7 @@ export interface FileRoutesById {
   '/api/public/track': typeof ApiPublicTrackRoute
   '/api/public/weekly-report': typeof ApiPublicWeeklyReportRoute
   '/api/public/whop-webhook': typeof ApiPublicWhopWebhookRoute
+  '/vault/c/$category': typeof VaultCCategoryRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
@@ -389,6 +398,7 @@ export interface FileRouteTypes {
     | '/api/public/track'
     | '/api/public/weekly-report'
     | '/api/public/whop-webhook'
+    | '/vault/c/$category'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/transactional/preview'
@@ -428,6 +438,7 @@ export interface FileRouteTypes {
     | '/api/public/track'
     | '/api/public/weekly-report'
     | '/api/public/whop-webhook'
+    | '/vault/c/$category'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/transactional/preview'
@@ -467,6 +478,7 @@ export interface FileRouteTypes {
     | '/api/public/track'
     | '/api/public/weekly-report'
     | '/api/public/whop-webhook'
+    | '/vault/c/$category'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/transactional/preview'
@@ -507,6 +519,7 @@ export interface RootRouteChildren {
   ApiPublicTrackRoute: typeof ApiPublicTrackRoute
   ApiPublicWeeklyReportRoute: typeof ApiPublicWeeklyReportRoute
   ApiPublicWhopWebhookRoute: typeof ApiPublicWhopWebhookRoute
+  VaultCCategoryRoute: typeof VaultCCategoryRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
   LovableEmailTransactionalPreviewRoute: typeof LovableEmailTransactionalPreviewRoute
@@ -752,6 +765,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicWhopWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/vault/c/$category': {
+      id: '/vault/c/$category'
+      path: '/vault/c/$category'
+      fullPath: '/vault/c/$category'
+      preLoaderRoute: typeof VaultCCategoryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/lovable/email/auth/preview': {
       id: '/lovable/email/auth/preview'
       path: '/lovable/email/auth/preview'
@@ -811,6 +831,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicTrackRoute: ApiPublicTrackRoute,
   ApiPublicWeeklyReportRoute: ApiPublicWeeklyReportRoute,
   ApiPublicWhopWebhookRoute: ApiPublicWhopWebhookRoute,
+  VaultCCategoryRoute: VaultCCategoryRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
   LovableEmailTransactionalPreviewRoute: LovableEmailTransactionalPreviewRoute,
