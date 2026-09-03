@@ -24,6 +24,7 @@ import {
   type CardMetric,
 } from "@/lib/canvas-card";
 import { resultUrl } from "@/lib/compare-link";
+import { BadgeShelf } from "@/components/tools/BadgeShelf";
 import { ReferralCard } from "@/components/tools/ReferralCard";
 import { trackReferralStage } from "@/lib/referral";
 import { ShareRow } from "@/components/tools/ShareRow";
