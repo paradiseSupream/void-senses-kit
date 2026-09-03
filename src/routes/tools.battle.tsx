@@ -33,7 +33,7 @@ const DESC =
 
 export const Route = createFileRoute("/tools/battle")({
   validateSearch: (search: Record<string, unknown>) => ({
-    k: typeof search.k === "string" ? search.k : undefined,
+    k: typeof search["k"] === "string" ? (search["k"] as string) : undefined,
   }),
   head: () => ({
     meta: [

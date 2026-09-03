@@ -26,8 +26,8 @@ const DESC =
 
 export const Route = createFileRoute("/tools/friend-quiz")({
   validateSearch: (search: Record<string, unknown>) => ({
-    k: typeof search.k === "string" ? search.k : undefined,
-    n: typeof search.n === "string" ? search.n.slice(0, 16) : undefined,
+    k: typeof search["k"] === "string" ? (search["k"] as string) : undefined,
+    n: typeof search["n"] === "string" ? (search["n"] as string).slice(0, 16) : undefined,
   }),
   head: () => ({
     meta: [
