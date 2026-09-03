@@ -101,7 +101,7 @@ export function NextTools({
                   <span className="truncate">{tool.name}</span>
                 </span>
                 <span className="mt-0.5 block truncate text-xs text-muted-foreground">
-                  {tool.promise}
+                  {journeyReason(ctx, tool)}
                 </span>
               </span>
               <ArrowUpRight
