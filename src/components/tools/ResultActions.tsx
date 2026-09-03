@@ -157,6 +157,7 @@ export function ResultActions({
       content: "challenge_button",
       toolSlug,
     });
+    trackReferralStage("share", toolSlug);
     if (navigator.share) {
       try {
         await navigator.share({ title: payload.title, text, url });
