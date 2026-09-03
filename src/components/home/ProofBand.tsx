@@ -23,7 +23,7 @@ const FACTS = [
   { icon: Gauge, k: "< 1.5s", v: "first paint" },
   { icon: Fingerprint, k: "On-device", v: "test scoring" },
   { icon: Download, k: "PDF · PNG", v: "instant export" },
-  { icon: Sparkles, k: "7 tools", v: "one suite" },
+  { icon: Sparkles, k: "13 tools", v: "one suite" },
 ];
 
 const TRUST = [

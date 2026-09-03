@@ -22,7 +22,7 @@ export const Route = createFileRoute("/tools/")({
       {
         property: "og:description",
         content:
-          "Seven free tools: IQ, trauma, dark personality, love match, AI roast, prompt maker and a free asset vault.",
+          "Thirteen free tools: IQ, memory, logic, trauma, dark personality, love match, friend quiz, compatibility battle, AI roast, prompt maker and a free asset vault.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -82,7 +82,7 @@ function ToolsIndex() {
         <div className="relative mx-auto max-w-7xl px-4 pt-10 pb-10 sm:px-6 sm:pt-16 sm:pb-14">
           <span className="label-mono inline-flex items-center gap-1.5 rounded-full border border-hairline bg-surface/60 px-3 py-1">
             <Sparkles className="size-3.5 text-primary" aria-hidden="true" />
-            7 tools · 100% free · no signup
+            {TOOLS.length} tools · 100% free · no signup
           </span>
           <h1 className="mt-4 max-w-3xl text-display">
             Every test and tool, in one place
