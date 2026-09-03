@@ -14,7 +14,7 @@ export function Footer() {
             <span className="font-display text-lg">Senses of Void</span>
           </div>
           <p className="mt-3 max-w-xs text-sm leading-relaxed text-muted-foreground">
-            Seven fast, private tools for curiosity — plus an always-free asset vault. Scored on your
+            Fast, private tools for curiosity — plus an always-free asset vault. Scored on your
             device, exported in full resolution.
           </p>
           <p className="label-mono mt-5">sensesofvoid.app</p>
