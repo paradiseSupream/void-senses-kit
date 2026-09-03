@@ -7,7 +7,7 @@
 export const SITE_BASE_URL = "https://sensesofvoid.app";
 
 import { ARCHETYPE_PATHS } from "@/lib/archetype-seo";
-import { VAULT_PATHS } from "@/lib/vault-catalog";
+import { VAULT_CATEGORY_PATHS, VAULT_PATHS } from "@/lib/vault-catalog";
 
 export type SitemapEntry = {
   path: string;
@@ -49,6 +49,11 @@ export const SITEMAP_ENTRIES: SitemapEntry[] = [
     priority: "0.7",
   })),
   { path: "/vault", changefreq: "weekly", priority: "0.8" },
+  ...VAULT_CATEGORY_PATHS.map((path) => ({
+    path,
+    changefreq: "weekly" as const,
+    priority: "0.7",
+  })),
   ...VAULT_PATHS.map((path) => ({
     path,
     changefreq: "monthly" as const,
