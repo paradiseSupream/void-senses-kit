@@ -300,6 +300,11 @@ export function ResultActions({
       inviteUrl={challengeLink("referral_card", "referral_invite")}
     />
 
+    {/* Local achievement shelf — pulls the visitor into the next test. */}
+    <div className="mt-6">
+      <BadgeShelf toolSlug={toolSlug} />
+    </div>
+
     {/* Second, lighter placement after the share row — end of the page, so it
         never competes with the primary actions. */}
     <NativeAdCard index={0} toolSlug={toolSlug} className="mt-8" />
