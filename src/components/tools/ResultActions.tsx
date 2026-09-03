@@ -23,7 +23,9 @@ import {
   shareCanvasImage,
   type CardMetric,
 } from "@/lib/canvas-card";
-import { compareUrl } from "@/lib/compare-link";
+import { resultUrl } from "@/lib/compare-link";
+import { ReferralCard } from "@/components/tools/ReferralCard";
+import { trackReferralStage } from "@/lib/referral";
 import { ShareRow } from "@/components/tools/ShareRow";
 import { track } from "@/lib/monetization";
 import { trackShare, withUtm } from "@/lib/share-link";
@@ -133,10 +135,10 @@ export function ResultActions({
     toast.success("Card saved — post it and tag the link.");
   };
 
-  /** Compare deeplink, always UTM-tagged so inbound sessions are attributable. */
+  /** Challenge deeplink, UTM + referral tagged so inbound sessions are attributable. */
   const challengeLink = (source: string, content: string) =>
     withUtm(
-      compareUrl({
+      resultUrl({
         t: toolSlug,
         n: payload.toolName ?? payload.title,
         h: payload.headline,
