@@ -24,6 +24,7 @@ import {
   type CardMetric,
 } from "@/lib/canvas-card";
 import { resultUrl } from "@/lib/compare-link";
+import { BadgeShelf } from "@/components/tools/BadgeShelf";
 import { ReferralCard } from "@/components/tools/ReferralCard";
 import { trackReferralStage } from "@/lib/referral";
 import { ShareRow } from "@/components/tools/ShareRow";
@@ -299,6 +300,11 @@ export function ResultActions({
       toolSlug={toolSlug}
       inviteUrl={challengeLink("referral_card", "referral_invite")}
     />
+
+    {/* Local achievement shelf — pulls the visitor into the next test. */}
+    <div className="mt-6">
+      <BadgeShelf toolSlug={toolSlug} />
+    </div>
 
     {/* Second, lighter placement after the share row — end of the page, so it
         never competes with the primary actions. */}
