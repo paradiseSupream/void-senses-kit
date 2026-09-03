@@ -22,6 +22,8 @@ export const EXCLUDED_ROUTE_PREFIXES = [
   "/admin",
   "/api",
   "/compare",
+  // Personal shared-result links — noindex by design, never in the sitemap.
+  "/r",
   "/vip",
   "/lovable",
 ] as const;
