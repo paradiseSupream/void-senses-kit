@@ -118,7 +118,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       {
         property: "og:description",
         content:
-          "Seven fast tools for self-reflection, cognition and creativity, plus a free Drive vault of design and developer assets.",
+          "Fast, private tools for self-reflection, cognition and creativity, plus a free Drive vault of design and developer assets.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

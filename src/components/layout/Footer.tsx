@@ -14,7 +14,7 @@ export function Footer() {
             <span className="font-display text-lg">Senses of Void</span>
           </div>
           <p className="mt-3 max-w-xs text-sm leading-relaxed text-muted-foreground">
-            Seven fast, private tools for curiosity — plus an always-free asset vault. Scored on your
+            Fast, private tools for curiosity — plus an always-free asset vault. Scored on your
             device, exported in full resolution.
           </p>
           <p className="label-mono mt-5">sensesofvoid.app</p>
@@ -57,7 +57,24 @@ export function Footer() {
                 The 8 Shadow Archetypes
               </Link>
             </li>
+            <li>
+              <Link
+                to="/guides"
+                className="text-sm text-muted-foreground transition-colors hover:text-primary"
+              >
+                Guides & explainers
+              </Link>
+            </li>
+            <li>
+              <Link
+                to="/vault"
+                className="text-sm text-muted-foreground transition-colors hover:text-primary"
+              >
+                Free Drive Vault
+              </Link>
+            </li>
           </ul>
+
         </div>
 
         <div>

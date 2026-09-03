@@ -39,6 +39,9 @@ export const VAULT_CATEGORIES = [
   "Media",
   "Business",
   "Learning",
+  "Templates",
+  "Productivity",
+  "Creator",
 ] as const;
 
 export type VaultCategory = (typeof VAULT_CATEGORIES)[number];
@@ -804,6 +807,183 @@ export const VAULT_ITEMS: VaultItem[] = [
     license: CCBY,
     tags: ["learning", "memory", "science"],
     url: "https://www.learningscientists.org/downloadable-materials",
+  },
+
+  /* ------------------------------------------------------------ Templates */
+  {
+    slug: "html5up-site-templates",
+    title: "HTML5 UP Responsive Site Templates",
+    category: "Templates",
+    tagline: "Dozens of polished, fully responsive site templates.",
+    detail:
+      "A long-running collection of hand-built HTML/CSS site templates released under Creative Commons. Every template is responsive, dependency-light and easy to strip down into a landing page. Attribution is required by the licence and takes one line in the footer.",
+    format: "HTML/CSS template pack",
+    license: CCBY,
+    tags: ["template", "landing page", "html", "css"],
+    url: "https://html5up.net",
+    featured: true,
+  },
+  {
+    slug: "cruip-tailwind-templates",
+    title: "Open-Source Tailwind Landing Templates",
+    category: "Templates",
+    tagline: "Production-grade marketing pages in Tailwind.",
+    detail:
+      "Free Tailwind landing page templates with real conversion structure — hero, social proof, feature grid, pricing and FAQ. Clone one, replace the copy, and you have a launch page in an afternoon rather than a weekend.",
+    format: "Git repository",
+    license: MIT,
+    tags: ["tailwind", "landing page", "template", "marketing"],
+    url: "https://github.com/cruip/open-react-template",
+  },
+  {
+    slug: "resume-latex-templates",
+    title: "Awesome CV — Résumé Templates",
+    category: "Templates",
+    tagline: "Clean, ATS-friendly résumé and cover-letter templates.",
+    detail:
+      "A well-maintained LaTeX résumé and CV template set that renders to crisp, single-column PDFs recruiters' parsers can actually read. Includes cover letter and reference page layouts in the same typographic system.",
+    format: "LaTeX templates",
+    license: MIT,
+    tags: ["resume", "cv", "career", "template"],
+    url: "https://github.com/posquit0/Awesome-CV",
+  },
+  {
+    slug: "notion-style-docs-template",
+    title: "Docusaurus Documentation Starter",
+    category: "Templates",
+    tagline: "Versioned docs site with search, dark mode and MDX.",
+    detail:
+      "The documentation framework behind hundreds of open-source projects, ready to deploy. Ships with versioning, local search, MDX components and dark mode, so product docs stop being a spreadsheet of links.",
+    format: "Git repository template",
+    license: MIT,
+    tags: ["docs", "template", "mdx", "site"],
+    url: "https://github.com/facebook/docusaurus",
+  },
+  {
+    slug: "pitch-deck-outline",
+    title: "Y Combinator Seed Deck Outline",
+    category: "Templates",
+    tagline: "The ten slides investors actually read.",
+    detail:
+      "YC's own guidance on what belongs in a seed pitch deck, slide by slide, with the phrasing that survives a first skim. Use it as an outline rather than a design template — the structure is the valuable part.",
+    format: "Guide + outline",
+    license: FREE,
+    tags: ["startup", "pitch", "fundraising", "template"],
+    url: "https://www.ycombinator.com/library/4T-how-to-design-a-better-pitch-deck",
+  },
+
+  /* --------------------------------------------------------- Productivity */
+  {
+    slug: "obsidian-knowledge-base",
+    title: "Obsidian — Local-First Knowledge Base",
+    category: "Productivity",
+    tagline: "Markdown notes with backlinks, graph view and no lock-in.",
+    detail:
+      "Your notes stay as plain Markdown files on your own disk, which means no export migration when you change tools. Backlinks and the graph view make it genuinely good for research, and personal use is free.",
+    format: "Desktop + mobile app",
+    license: FREE,
+    tags: ["notes", "markdown", "knowledge", "offline"],
+    url: "https://obsidian.md",
+    featured: true,
+  },
+  {
+    slug: "syncthing-file-sync",
+    title: "Syncthing — Private File Sync",
+    category: "Productivity",
+    tagline: "Continuous device-to-device sync with no cloud in the middle.",
+    detail:
+      "Open-source, encrypted file synchronisation between your own devices, with no storage quota because there is no server. Ideal for keeping a project folder identical across a laptop, desktop and phone.",
+    format: "Cross-platform app",
+    license: MIT,
+    tags: ["sync", "backup", "privacy", "files"],
+    url: "https://syncthing.net",
+  },
+  {
+    slug: "keepassxc-passwords",
+    title: "KeePassXC — Offline Password Manager",
+    category: "Productivity",
+    tagline: "An encrypted vault file you actually own.",
+    detail:
+      "A local, audited password manager storing everything in one encrypted database file you can back up yourself. Browser integration and TOTP support are built in, with no subscription and no breach surface on someone else's server.",
+    format: "Desktop app",
+    license: MIT,
+    tags: ["security", "passwords", "privacy", "offline"],
+    url: "https://keepassxc.org",
+  },
+  {
+    slug: "libreoffice-suite",
+    title: "LibreOffice — Full Office Suite",
+    category: "Productivity",
+    tagline: "Documents, spreadsheets and slides, permanently free.",
+    detail:
+      "A mature office suite that reads and writes the Microsoft formats most workplaces send you. Genuinely useful when you need to open a .docx or fix a spreadsheet formula without paying a monthly fee to do it.",
+    format: "Desktop suite",
+    license: MIT,
+    tags: ["office", "documents", "spreadsheet", "free"],
+    url: "https://www.libreoffice.org",
+  },
+
+  /* -------------------------------------------------------------- Creator */
+  {
+    slug: "davinci-resolve-free",
+    title: "DaVinci Resolve — Free Video Editor",
+    category: "Creator",
+    tagline: "Hollywood-grade colour and editing at no cost.",
+    detail:
+      "The free edition of Resolve is a complete NLE with professional colour grading, Fairlight audio and Fusion compositing. For most creators it removes every reason to pay a subscription for editing software.",
+    format: "Desktop app",
+    license: FREE,
+    tags: ["video", "editing", "colour", "youtube"],
+    url: "https://www.blackmagicdesign.com/products/davinciresolve",
+    featured: true,
+  },
+  {
+    slug: "audacity-audio",
+    title: "Audacity — Audio Editor",
+    category: "Creator",
+    tagline: "Record, clean and master voice tracks for free.",
+    detail:
+      "The long-standing open-source audio editor: multi-track recording, noise reduction, compression and normalisation. Enough to make a podcast or voiceover sound broadcast-clean with three effects.",
+    format: "Desktop app",
+    license: MIT,
+    tags: ["audio", "podcast", "voiceover", "editing"],
+    url: "https://www.audacityteam.org",
+  },
+  {
+    slug: "obs-studio",
+    title: "OBS Studio — Streaming & Screen Capture",
+    category: "Creator",
+    tagline: "The standard for recording and live streaming.",
+    detail:
+      "Scene-based capture, multi-source compositing and direct streaming to any platform. Also the fastest way to record a clean product demo with a webcam overlay and no watermark.",
+    format: "Desktop app",
+    license: MIT,
+    tags: ["streaming", "screen recording", "video", "demo"],
+    url: "https://obsproject.com",
+  },
+  {
+    slug: "pexels-stock",
+    title: "Pexels — Free Stock Photos & Video",
+    category: "Creator",
+    tagline: "Commercial-use imagery with no attribution required.",
+    detail:
+      "A large library of photos and short video clips released under a permissive licence that allows commercial use without attribution. Good enough for ad creative, thumbnails and landing page heroes.",
+    format: "Image + video library",
+    license: CC0,
+    tags: ["stock", "photos", "video", "creative"],
+    url: "https://www.pexels.com",
+  },
+  {
+    slug: "fontsource-webfonts",
+    title: "Fontsource — Self-Hosted Open Fonts",
+    category: "Creator",
+    tagline: "Open-licence typefaces you can bundle and self-host.",
+    detail:
+      "Every major open-source typeface packaged for self-hosting, so your fonts load from your own domain instead of a third party. Better privacy, fewer render-blocking requests and no layout shift on first paint.",
+    format: "npm packages",
+    license: MIT,
+    tags: ["fonts", "typography", "performance", "web"],
+    url: "https://fontsource.org",
   },
 ];
 

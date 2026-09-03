@@ -24,13 +24,18 @@ import { Route as AdminOrdersRouteImport } from './routes/admin.orders'
 import { Route as ApiDossierPdfRouteImport } from './routes/api/dossier-pdf'
 import { Route as ArchetypesIndexRouteImport } from './routes/archetypes.index'
 import { Route as ArchetypesSlugRouteImport } from './routes/archetypes.$slug'
+import { Route as GuidesIndexRouteImport } from './routes/guides.index'
+import { Route as GuidesSlugRouteImport } from './routes/guides.$slug'
 import { Route as RTokenRouteImport } from './routes/r.$token'
 import { Route as ToolsIndexRouteImport } from './routes/tools.index'
 import { Route as ToolsChildTraumaRouteImport } from './routes/tools.child-trauma'
 import { Route as ToolsDarkPersonalityRouteImport } from './routes/tools.dark-personality'
 import { Route as ToolsIqRouteImport } from './routes/tools.iq'
+import { Route as ToolsLogicRouteImport } from './routes/tools.logic'
 import { Route as ToolsLoveMatchRouteImport } from './routes/tools.love-match'
+import { Route as ToolsMemoryRouteImport } from './routes/tools.memory'
 import { Route as ToolsPromptMakerRouteImport } from './routes/tools.prompt-maker'
+import { Route as ToolsRedFlagRouteImport } from './routes/tools.red-flag'
 import { Route as ToolsRoastRouteImport } from './routes/tools.roast'
 import { Route as ToolsThisOrThatRouteImport } from './routes/tools.this-or-that'
 import { Route as VaultIndexRouteImport } from './routes/vault.index'
@@ -125,6 +130,16 @@ const ArchetypesSlugRoute = ArchetypesSlugRouteImport.update({
   path: '/archetypes/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GuidesIndexRoute = GuidesIndexRouteImport.update({
+  id: '/guides/',
+  path: '/guides/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GuidesSlugRoute = GuidesSlugRouteImport.update({
+  id: '/guides/$slug',
+  path: '/guides/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RTokenRoute = RTokenRouteImport.update({
   id: '/r/$token',
   path: '/r/$token',
@@ -150,14 +165,29 @@ const ToolsIqRoute = ToolsIqRouteImport.update({
   path: '/tools/iq',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ToolsLogicRoute = ToolsLogicRouteImport.update({
+  id: '/tools/logic',
+  path: '/tools/logic',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ToolsLoveMatchRoute = ToolsLoveMatchRouteImport.update({
   id: '/tools/love-match',
   path: '/tools/love-match',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ToolsMemoryRoute = ToolsMemoryRouteImport.update({
+  id: '/tools/memory',
+  path: '/tools/memory',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ToolsPromptMakerRoute = ToolsPromptMakerRouteImport.update({
   id: '/tools/prompt-maker',
   path: '/tools/prompt-maker',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ToolsRedFlagRoute = ToolsRedFlagRouteImport.update({
+  id: '/tools/red-flag',
+  path: '/tools/red-flag',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ToolsRoastRoute = ToolsRoastRouteImport.update({
@@ -266,12 +296,16 @@ export interface FileRoutesByFullPath {
   '/admin/orders': typeof AdminOrdersRoute
   '/api/dossier-pdf': typeof ApiDossierPdfRoute
   '/archetypes/$slug': typeof ArchetypesSlugRoute
+  '/guides/$slug': typeof GuidesSlugRoute
   '/r/$token': typeof RTokenRoute
   '/tools/child-trauma': typeof ToolsChildTraumaRoute
   '/tools/dark-personality': typeof ToolsDarkPersonalityRoute
   '/tools/iq': typeof ToolsIqRoute
+  '/tools/logic': typeof ToolsLogicRoute
   '/tools/love-match': typeof ToolsLoveMatchRoute
+  '/tools/memory': typeof ToolsMemoryRoute
   '/tools/prompt-maker': typeof ToolsPromptMakerRoute
+  '/tools/red-flag': typeof ToolsRedFlagRoute
   '/tools/roast': typeof ToolsRoastRoute
   '/tools/this-or-that': typeof ToolsThisOrThatRoute
   '/vault/$slug': typeof VaultSlugRoute
@@ -279,6 +313,7 @@ export interface FileRoutesByFullPath {
   '/vip/success': typeof VipSuccessRoute
   '/admin/': typeof AdminIndexRoute
   '/archetypes/': typeof ArchetypesIndexRoute
+  '/guides/': typeof GuidesIndexRoute
   '/tools/': typeof ToolsIndexRoute
   '/vault/': typeof VaultIndexRoute
   '/api/public/capi': typeof ApiPublicCapiRoute
@@ -308,12 +343,16 @@ export interface FileRoutesByTo {
   '/admin/orders': typeof AdminOrdersRoute
   '/api/dossier-pdf': typeof ApiDossierPdfRoute
   '/archetypes/$slug': typeof ArchetypesSlugRoute
+  '/guides/$slug': typeof GuidesSlugRoute
   '/r/$token': typeof RTokenRoute
   '/tools/child-trauma': typeof ToolsChildTraumaRoute
   '/tools/dark-personality': typeof ToolsDarkPersonalityRoute
   '/tools/iq': typeof ToolsIqRoute
+  '/tools/logic': typeof ToolsLogicRoute
   '/tools/love-match': typeof ToolsLoveMatchRoute
+  '/tools/memory': typeof ToolsMemoryRoute
   '/tools/prompt-maker': typeof ToolsPromptMakerRoute
+  '/tools/red-flag': typeof ToolsRedFlagRoute
   '/tools/roast': typeof ToolsRoastRoute
   '/tools/this-or-that': typeof ToolsThisOrThatRoute
   '/vault/$slug': typeof VaultSlugRoute
@@ -321,6 +360,7 @@ export interface FileRoutesByTo {
   '/vip/success': typeof VipSuccessRoute
   '/admin': typeof AdminIndexRoute
   '/archetypes': typeof ArchetypesIndexRoute
+  '/guides': typeof GuidesIndexRoute
   '/tools': typeof ToolsIndexRoute
   '/vault': typeof VaultIndexRoute
   '/api/public/capi': typeof ApiPublicCapiRoute
@@ -351,12 +391,16 @@ export interface FileRoutesById {
   '/admin/orders': typeof AdminOrdersRoute
   '/api/dossier-pdf': typeof ApiDossierPdfRoute
   '/archetypes/$slug': typeof ArchetypesSlugRoute
+  '/guides/$slug': typeof GuidesSlugRoute
   '/r/$token': typeof RTokenRoute
   '/tools/child-trauma': typeof ToolsChildTraumaRoute
   '/tools/dark-personality': typeof ToolsDarkPersonalityRoute
   '/tools/iq': typeof ToolsIqRoute
+  '/tools/logic': typeof ToolsLogicRoute
   '/tools/love-match': typeof ToolsLoveMatchRoute
+  '/tools/memory': typeof ToolsMemoryRoute
   '/tools/prompt-maker': typeof ToolsPromptMakerRoute
+  '/tools/red-flag': typeof ToolsRedFlagRoute
   '/tools/roast': typeof ToolsRoastRoute
   '/tools/this-or-that': typeof ToolsThisOrThatRoute
   '/vault/$slug': typeof VaultSlugRoute
@@ -364,6 +408,7 @@ export interface FileRoutesById {
   '/vip/success': typeof VipSuccessRoute
   '/admin/': typeof AdminIndexRoute
   '/archetypes/': typeof ArchetypesIndexRoute
+  '/guides/': typeof GuidesIndexRoute
   '/tools/': typeof ToolsIndexRoute
   '/vault/': typeof VaultIndexRoute
   '/api/public/capi': typeof ApiPublicCapiRoute
@@ -395,12 +440,16 @@ export interface FileRouteTypes {
     | '/admin/orders'
     | '/api/dossier-pdf'
     | '/archetypes/$slug'
+    | '/guides/$slug'
     | '/r/$token'
     | '/tools/child-trauma'
     | '/tools/dark-personality'
     | '/tools/iq'
+    | '/tools/logic'
     | '/tools/love-match'
+    | '/tools/memory'
     | '/tools/prompt-maker'
+    | '/tools/red-flag'
     | '/tools/roast'
     | '/tools/this-or-that'
     | '/vault/$slug'
@@ -408,6 +457,7 @@ export interface FileRouteTypes {
     | '/vip/success'
     | '/admin/'
     | '/archetypes/'
+    | '/guides/'
     | '/tools/'
     | '/vault/'
     | '/api/public/capi'
@@ -437,12 +487,16 @@ export interface FileRouteTypes {
     | '/admin/orders'
     | '/api/dossier-pdf'
     | '/archetypes/$slug'
+    | '/guides/$slug'
     | '/r/$token'
     | '/tools/child-trauma'
     | '/tools/dark-personality'
     | '/tools/iq'
+    | '/tools/logic'
     | '/tools/love-match'
+    | '/tools/memory'
     | '/tools/prompt-maker'
+    | '/tools/red-flag'
     | '/tools/roast'
     | '/tools/this-or-that'
     | '/vault/$slug'
@@ -450,6 +504,7 @@ export interface FileRouteTypes {
     | '/vip/success'
     | '/admin'
     | '/archetypes'
+    | '/guides'
     | '/tools'
     | '/vault'
     | '/api/public/capi'
@@ -479,12 +534,16 @@ export interface FileRouteTypes {
     | '/admin/orders'
     | '/api/dossier-pdf'
     | '/archetypes/$slug'
+    | '/guides/$slug'
     | '/r/$token'
     | '/tools/child-trauma'
     | '/tools/dark-personality'
     | '/tools/iq'
+    | '/tools/logic'
     | '/tools/love-match'
+    | '/tools/memory'
     | '/tools/prompt-maker'
+    | '/tools/red-flag'
     | '/tools/roast'
     | '/tools/this-or-that'
     | '/vault/$slug'
@@ -492,6 +551,7 @@ export interface FileRouteTypes {
     | '/vip/success'
     | '/admin/'
     | '/archetypes/'
+    | '/guides/'
     | '/tools/'
     | '/vault/'
     | '/api/public/capi'
@@ -522,12 +582,16 @@ export interface RootRouteChildren {
   AdminOrdersRoute: typeof AdminOrdersRoute
   ApiDossierPdfRoute: typeof ApiDossierPdfRoute
   ArchetypesSlugRoute: typeof ArchetypesSlugRoute
+  GuidesSlugRoute: typeof GuidesSlugRoute
   RTokenRoute: typeof RTokenRoute
   ToolsChildTraumaRoute: typeof ToolsChildTraumaRoute
   ToolsDarkPersonalityRoute: typeof ToolsDarkPersonalityRoute
   ToolsIqRoute: typeof ToolsIqRoute
+  ToolsLogicRoute: typeof ToolsLogicRoute
   ToolsLoveMatchRoute: typeof ToolsLoveMatchRoute
+  ToolsMemoryRoute: typeof ToolsMemoryRoute
   ToolsPromptMakerRoute: typeof ToolsPromptMakerRoute
+  ToolsRedFlagRoute: typeof ToolsRedFlagRoute
   ToolsRoastRoute: typeof ToolsRoastRoute
   ToolsThisOrThatRoute: typeof ToolsThisOrThatRoute
   VaultSlugRoute: typeof VaultSlugRoute
@@ -535,6 +599,7 @@ export interface RootRouteChildren {
   VipSuccessRoute: typeof VipSuccessRoute
   AdminIndexRoute: typeof AdminIndexRoute
   ArchetypesIndexRoute: typeof ArchetypesIndexRoute
+  GuidesIndexRoute: typeof GuidesIndexRoute
   ToolsIndexRoute: typeof ToolsIndexRoute
   VaultIndexRoute: typeof VaultIndexRoute
   ApiPublicCapiRoute: typeof ApiPublicCapiRoute
@@ -658,6 +723,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ArchetypesSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/guides/': {
+      id: '/guides/'
+      path: '/guides'
+      fullPath: '/guides/'
+      preLoaderRoute: typeof GuidesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/guides/$slug': {
+      id: '/guides/$slug'
+      path: '/guides/$slug'
+      fullPath: '/guides/$slug'
+      preLoaderRoute: typeof GuidesSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/r/$token': {
       id: '/r/$token'
       path: '/r/$token'
@@ -693,6 +772,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ToolsIqRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/tools/logic': {
+      id: '/tools/logic'
+      path: '/tools/logic'
+      fullPath: '/tools/logic'
+      preLoaderRoute: typeof ToolsLogicRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/tools/love-match': {
       id: '/tools/love-match'
       path: '/tools/love-match'
@@ -700,11 +786,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ToolsLoveMatchRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/tools/memory': {
+      id: '/tools/memory'
+      path: '/tools/memory'
+      fullPath: '/tools/memory'
+      preLoaderRoute: typeof ToolsMemoryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/tools/prompt-maker': {
       id: '/tools/prompt-maker'
       path: '/tools/prompt-maker'
       fullPath: '/tools/prompt-maker'
       preLoaderRoute: typeof ToolsPromptMakerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tools/red-flag': {
+      id: '/tools/red-flag'
+      path: '/tools/red-flag'
+      fullPath: '/tools/red-flag'
+      preLoaderRoute: typeof ToolsRedFlagRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/tools/roast': {
@@ -850,12 +950,16 @@ const rootRouteChildren: RootRouteChildren = {
   AdminOrdersRoute: AdminOrdersRoute,
   ApiDossierPdfRoute: ApiDossierPdfRoute,
   ArchetypesSlugRoute: ArchetypesSlugRoute,
+  GuidesSlugRoute: GuidesSlugRoute,
   RTokenRoute: RTokenRoute,
   ToolsChildTraumaRoute: ToolsChildTraumaRoute,
   ToolsDarkPersonalityRoute: ToolsDarkPersonalityRoute,
   ToolsIqRoute: ToolsIqRoute,
+  ToolsLogicRoute: ToolsLogicRoute,
   ToolsLoveMatchRoute: ToolsLoveMatchRoute,
+  ToolsMemoryRoute: ToolsMemoryRoute,
   ToolsPromptMakerRoute: ToolsPromptMakerRoute,
+  ToolsRedFlagRoute: ToolsRedFlagRoute,
   ToolsRoastRoute: ToolsRoastRoute,
   ToolsThisOrThatRoute: ToolsThisOrThatRoute,
   VaultSlugRoute: VaultSlugRoute,
@@ -863,6 +967,7 @@ const rootRouteChildren: RootRouteChildren = {
   VipSuccessRoute: VipSuccessRoute,
   AdminIndexRoute: AdminIndexRoute,
   ArchetypesIndexRoute: ArchetypesIndexRoute,
+  GuidesIndexRoute: GuidesIndexRoute,
   ToolsIndexRoute: ToolsIndexRoute,
   VaultIndexRoute: VaultIndexRoute,
   ApiPublicCapiRoute: ApiPublicCapiRoute,
