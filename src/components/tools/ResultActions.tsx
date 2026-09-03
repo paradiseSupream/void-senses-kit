@@ -23,7 +23,9 @@ import {
   shareCanvasImage,
   type CardMetric,
 } from "@/lib/canvas-card";
-import { compareUrl } from "@/lib/compare-link";
+import { resultUrl } from "@/lib/compare-link";
+import { ReferralCard } from "@/components/tools/ReferralCard";
+import { trackReferralStage } from "@/lib/referral";
 import { ShareRow } from "@/components/tools/ShareRow";
 import { track } from "@/lib/monetization";
 import { trackShare, withUtm } from "@/lib/share-link";
@@ -133,10 +135,10 @@ export function ResultActions({
     toast.success("Card saved — post it and tag the link.");
   };
 
-  /** Compare deeplink, always UTM-tagged so inbound sessions are attributable. */
+  /** Challenge deeplink, UTM + referral tagged so inbound sessions are attributable. */
   const challengeLink = (source: string, content: string) =>
     withUtm(
-      compareUrl({
+      resultUrl({
         t: toolSlug,
         n: payload.toolName ?? payload.title,
         h: payload.headline,
@@ -155,6 +157,7 @@ export function ResultActions({
       content: "challenge_button",
       toolSlug,
     });
+    trackReferralStage("share", toolSlug);
     if (navigator.share) {
       try {
         await navigator.share({ title: payload.title, text, url });
@@ -287,6 +290,14 @@ export function ResultActions({
       content="result_share_row"
       url={challengeLink("share_row", "result_share_row")}
       text={`I scored ${payload.headline} on ${payload.toolName ?? payload.title}. Beat me:`}
+    />
+
+    {/* Referral loop: progress + invite link, and it credits the friend whose
+        link brought this visitor here. */}
+    <ReferralCard
+      className="mt-6"
+      toolSlug={toolSlug}
+      inviteUrl={challengeLink("referral_card", "referral_invite")}
     />
 
     {/* Second, lighter placement after the share row — end of the page, so it
