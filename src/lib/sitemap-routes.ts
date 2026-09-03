@@ -49,6 +49,8 @@ export const SITEMAP_ENTRIES: SitemapEntry[] = [
   { path: "/tools/red-flag", changefreq: "weekly", priority: "0.9" },
   { path: "/tools/memory", changefreq: "weekly", priority: "0.9" },
   { path: "/tools/logic", changefreq: "weekly", priority: "0.9" },
+  { path: "/tools/friend-quiz", changefreq: "weekly", priority: "0.9" },
+  { path: "/tools/battle", changefreq: "weekly", priority: "0.9" },
   { path: "/guides", changefreq: "weekly", priority: "0.8" },
   ...GUIDE_PATHS.map((path) => ({ path, changefreq: "monthly" as const, priority: "0.7" })),
   { path: "/archetypes", changefreq: "weekly", priority: "0.8" },
