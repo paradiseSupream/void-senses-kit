@@ -8,7 +8,7 @@
  */
 
 import { referralCredits } from "@/lib/referral";
-import { seenVaultSlugs, unlockedVaultSlugs } from "@/lib/vault-loop";
+import { seenSlugs, unlockedSlugs } from "@/lib/vault-loop";
 
 const TOOLS_KEY = "sov.badges.tools";
 const AWARDED_KEY = "sov.badges.awarded";
@@ -72,8 +72,8 @@ export function badges(totalTools: number): Badge[] {
   const tools = completedTools().length;
   const runs = Math.max(tools, resultsDone());
   const invites = referralCredits();
-  const unlocks = unlockedVaultSlugs().length;
-  const browsed = seenVaultSlugs().length;
+  const unlocks = unlockedSlugs().length;
+  const browsed = seenSlugs().length;
 
   const list: Badge[] = [
     {
