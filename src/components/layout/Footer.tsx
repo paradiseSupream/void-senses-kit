@@ -57,7 +57,24 @@ export function Footer() {
                 The 8 Shadow Archetypes
               </Link>
             </li>
+            <li>
+              <Link
+                to="/guides"
+                className="text-sm text-muted-foreground transition-colors hover:text-primary"
+              >
+                Guides & explainers
+              </Link>
+            </li>
+            <li>
+              <Link
+                to="/vault"
+                className="text-sm text-muted-foreground transition-colors hover:text-primary"
+              >
+                Free Drive Vault
+              </Link>
+            </li>
           </ul>
+
         </div>
 
         <div>
