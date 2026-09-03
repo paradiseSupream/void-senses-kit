@@ -24,6 +24,7 @@ import { Route as AdminOrdersRouteImport } from './routes/admin.orders'
 import { Route as ApiDossierPdfRouteImport } from './routes/api/dossier-pdf'
 import { Route as ArchetypesIndexRouteImport } from './routes/archetypes.index'
 import { Route as ArchetypesSlugRouteImport } from './routes/archetypes.$slug'
+import { Route as RTokenRouteImport } from './routes/r.$token'
 import { Route as ToolsIndexRouteImport } from './routes/tools.index'
 import { Route as ToolsChildTraumaRouteImport } from './routes/tools.child-trauma'
 import { Route as ToolsDarkPersonalityRouteImport } from './routes/tools.dark-personality'
@@ -121,6 +122,11 @@ const ArchetypesIndexRoute = ArchetypesIndexRouteImport.update({
 const ArchetypesSlugRoute = ArchetypesSlugRouteImport.update({
   id: '/archetypes/$slug',
   path: '/archetypes/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RTokenRoute = RTokenRouteImport.update({
+  id: '/r/$token',
+  path: '/r/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ToolsIndexRoute = ToolsIndexRouteImport.update({
@@ -254,6 +260,7 @@ export interface FileRoutesByFullPath {
   '/admin/orders': typeof AdminOrdersRoute
   '/api/dossier-pdf': typeof ApiDossierPdfRoute
   '/archetypes/$slug': typeof ArchetypesSlugRoute
+  '/r/$token': typeof RTokenRoute
   '/tools/child-trauma': typeof ToolsChildTraumaRoute
   '/tools/dark-personality': typeof ToolsDarkPersonalityRoute
   '/tools/iq': typeof ToolsIqRoute
@@ -294,6 +301,7 @@ export interface FileRoutesByTo {
   '/admin/orders': typeof AdminOrdersRoute
   '/api/dossier-pdf': typeof ApiDossierPdfRoute
   '/archetypes/$slug': typeof ArchetypesSlugRoute
+  '/r/$token': typeof RTokenRoute
   '/tools/child-trauma': typeof ToolsChildTraumaRoute
   '/tools/dark-personality': typeof ToolsDarkPersonalityRoute
   '/tools/iq': typeof ToolsIqRoute
@@ -335,6 +343,7 @@ export interface FileRoutesById {
   '/admin/orders': typeof AdminOrdersRoute
   '/api/dossier-pdf': typeof ApiDossierPdfRoute
   '/archetypes/$slug': typeof ArchetypesSlugRoute
+  '/r/$token': typeof RTokenRoute
   '/tools/child-trauma': typeof ToolsChildTraumaRoute
   '/tools/dark-personality': typeof ToolsDarkPersonalityRoute
   '/tools/iq': typeof ToolsIqRoute
@@ -377,6 +386,7 @@ export interface FileRouteTypes {
     | '/admin/orders'
     | '/api/dossier-pdf'
     | '/archetypes/$slug'
+    | '/r/$token'
     | '/tools/child-trauma'
     | '/tools/dark-personality'
     | '/tools/iq'
@@ -417,6 +427,7 @@ export interface FileRouteTypes {
     | '/admin/orders'
     | '/api/dossier-pdf'
     | '/archetypes/$slug'
+    | '/r/$token'
     | '/tools/child-trauma'
     | '/tools/dark-personality'
     | '/tools/iq'
@@ -457,6 +468,7 @@ export interface FileRouteTypes {
     | '/admin/orders'
     | '/api/dossier-pdf'
     | '/archetypes/$slug'
+    | '/r/$token'
     | '/tools/child-trauma'
     | '/tools/dark-personality'
     | '/tools/iq'
@@ -498,6 +510,7 @@ export interface RootRouteChildren {
   AdminOrdersRoute: typeof AdminOrdersRoute
   ApiDossierPdfRoute: typeof ApiDossierPdfRoute
   ArchetypesSlugRoute: typeof ArchetypesSlugRoute
+  RTokenRoute: typeof RTokenRoute
   ToolsChildTraumaRoute: typeof ToolsChildTraumaRoute
   ToolsDarkPersonalityRoute: typeof ToolsDarkPersonalityRoute
   ToolsIqRoute: typeof ToolsIqRoute
@@ -630,6 +643,13 @@ declare module '@tanstack/react-router' {
       path: '/archetypes/$slug'
       fullPath: '/archetypes/$slug'
       preLoaderRoute: typeof ArchetypesSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/r/$token': {
+      id: '/r/$token'
+      path: '/r/$token'
+      fullPath: '/r/$token'
+      preLoaderRoute: typeof RTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/tools/': {
@@ -810,6 +830,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminOrdersRoute: AdminOrdersRoute,
   ApiDossierPdfRoute: ApiDossierPdfRoute,
   ArchetypesSlugRoute: ArchetypesSlugRoute,
+  RTokenRoute: RTokenRoute,
   ToolsChildTraumaRoute: ToolsChildTraumaRoute,
   ToolsDarkPersonalityRoute: ToolsDarkPersonalityRoute,
   ToolsIqRoute: ToolsIqRoute,

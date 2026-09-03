@@ -11,6 +11,7 @@ import {
 import { useEffect, type ReactNode } from "react";
 
 import { captureShareLanding } from "@/lib/share-link";
+import { captureReferral } from "@/lib/referral";
 import { Toaster } from "sonner";
 
 import appCss from "../styles.css?url";
@@ -172,9 +173,11 @@ function RootComponent() {
   const pathname = useRouterState({ select: (state) => state.location.pathname });
   const isAdmin = pathname.startsWith("/admin");
 
-  // Attribute inbound share deeplinks (utm_* + sid) once per session.
+  // Attribute inbound share deeplinks (utm_* + sid) once per session, plus the
+  // referral code (?ref=) that powers the friend-challenge loop.
   useEffect(() => {
     captureShareLanding();
+    captureReferral();
   }, [pathname]);
 
   return (

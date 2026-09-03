@@ -53,8 +53,19 @@ export function decodeCompare(token: string): ComparePayload | null {
   }
 }
 
+function siteOrigin(): string {
+  return typeof window === "undefined" ? "https://sensesofvoid.app" : window.location.origin;
+}
+
 export function compareUrl(payload: ComparePayload): string {
-  const origin =
-    typeof window === "undefined" ? "https://sensesofvoid.app" : window.location.origin;
-  return `${origin}/compare?r=${encodeCompare(payload)}`;
+  return `${siteOrigin()}/compare?r=${encodeCompare(payload)}`;
+}
+
+/**
+ * Shareable result page. Same token as `/compare`, but on a path-based URL so
+ * Facebook, WhatsApp and X can render a per-result link preview (the query
+ * form is kept working for links already in the wild).
+ */
+export function resultUrl(payload: ComparePayload): string {
+  return `${siteOrigin()}/r/${encodeCompare(payload)}`;
 }
