@@ -7,6 +7,7 @@
  */
 
 import { track } from "@/lib/monetization";
+import { referralCode } from "@/lib/referral";
 
 export type ShareContext = {
   /** Network or surface the link was handed to: "whatsapp", "native_image"… */
@@ -40,6 +41,9 @@ export function withUtm(rawUrl: string, ctx: ShareContext): string {
     url.searchParams.set("utm_campaign", ctx.campaign ?? SITE);
     if (ctx.content) url.searchParams.set("utm_content", ctx.content);
     url.searchParams.set("sid", shareId());
+    // Viral loop: every outbound link carries the sharer's anonymous code so
+    // referral visits, starts and completions are attributable.
+    if (!url.searchParams.has("ref")) url.searchParams.set("ref", referralCode());
     return url.toString();
   } catch {
     return rawUrl;
