@@ -19,12 +19,13 @@ export type JourneyContext = {
 
 /** Ordered preferences per source tool; first existing tools win. */
 const JOURNEYS: Record<string, string[]> = {
+  "red-flag": ["love-match", "child-trauma", "this-or-that"],
   iq: ["memory", "logic", "prompt-maker"],
   memory: ["logic", "iq", "this-or-that"],
   logic: ["iq", "memory", "dark-personality"],
   "dark-personality": ["child-trauma", "this-or-that", "love-match"],
-  "child-trauma": ["dark-personality", "love-match", "this-or-that"],
-  "love-match": ["this-or-that", "dark-personality", "roast"],
+  "child-trauma": ["red-flag", "dark-personality", "love-match"],
+  "love-match": ["red-flag", "this-or-that", "dark-personality"],
   "this-or-that": ["dark-personality", "love-match", "memory"],
   roast: ["dark-personality", "this-or-that", "prompt-maker"],
   "prompt-maker": ["iq", "roast", "vault"],
