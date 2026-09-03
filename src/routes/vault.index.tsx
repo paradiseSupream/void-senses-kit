@@ -1,11 +1,13 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight, Download, FolderOpen, ShieldCheck, Sparkles } from "lucide-react";
 
 import { NativeAdCard, withNativeAds } from "@/components/monetization/NativeAdCard";
 import { useActionGate } from "@/components/monetization/ActionGate";
 import { AdSlot } from "@/components/monetization/AdSlot";
+import { recordUnlock, seenSlugs, trackVaultLoop } from "@/lib/vault-loop";
 import {
+  categorySlug,
   VAULT_CATEGORIES,
   VAULT_COUNT,
   VAULT_ITEMS,
@@ -203,6 +205,20 @@ function Vault() {
           />
         </div>
       </div>
+
+      {/* Indexable collection hubs — each one is its own ad landing page. */}
+      <nav aria-label="Free collections" className="mt-8 flex flex-wrap gap-2">
+        {VAULT_CATEGORIES.map((cat) => (
+          <Link
+            key={cat}
+            to="/vault/c/$category"
+            params={{ category: categorySlug(cat) }}
+            className="label-mono rounded-full border border-hairline px-3 py-1.5 hover:border-primary/50 hover:text-primary"
+          >
+            Top free {cat}
+          </Link>
+        ))}
+      </nav>
 
       <AdSlot id="result-vault" toolSlug="vault" className="mt-8" />
 
