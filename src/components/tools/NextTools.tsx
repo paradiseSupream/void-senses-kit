@@ -4,7 +4,7 @@ import { useRef } from "react";
 
 import { AdSlot } from "@/components/monetization/AdSlot";
 import { track } from "@/lib/monetization";
-import { relatedTools } from "@/lib/tools";
+import { journeyReason, nextTools } from "@/lib/journeys";
 
 /**
  * Chains the session after a result: two accent-themed suggestions.
@@ -14,8 +14,21 @@ import { relatedTools } from "@/lib/tools";
  * `tool_complete` are fired from the result surface itself (VipOfferCard),
  * which only renders once the visitor actually finished the test.
  */
-export function NextTools({ slug, heading = "Try next" }: { slug: string; heading?: string }) {
-  const next = relatedTools(slug);
+export function NextTools({
+  slug,
+  heading = "Try next",
+  headline,
+  score,
+}: {
+  slug: string;
+  heading?: string;
+  /** Result headline (archetype / band), used to pick a relevant next step. */
+  headline?: string;
+  /** Numeric result, when the tool produces one. */
+  score?: number;
+}) {
+  const ctx = { slug, headline, score };
+  const next = nextTools(ctx);
   const navigate = useNavigate();
   const firedRef = useRef(false);
 
