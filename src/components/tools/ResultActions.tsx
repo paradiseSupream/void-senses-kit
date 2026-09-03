@@ -292,6 +292,14 @@ export function ResultActions({
       text={`I scored ${payload.headline} on ${payload.toolName ?? payload.title}. Beat me:`}
     />
 
+    {/* Referral loop: progress + invite link, and it credits the friend whose
+        link brought this visitor here. */}
+    <ReferralCard
+      className="mt-6"
+      toolSlug={toolSlug}
+      inviteUrl={challengeLink("referral_card", "referral_invite")}
+    />
+
     {/* Second, lighter placement after the share row — end of the page, so it
         never competes with the primary actions. */}
     <NativeAdCard index={0} toolSlug={toolSlug} className="mt-8" />
