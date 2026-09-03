@@ -1,11 +1,13 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight, Download, FolderOpen, ShieldCheck, Sparkles } from "lucide-react";
 
 import { NativeAdCard, withNativeAds } from "@/components/monetization/NativeAdCard";
 import { useActionGate } from "@/components/monetization/ActionGate";
 import { AdSlot } from "@/components/monetization/AdSlot";
+import { recordUnlock, seenSlugs, trackVaultLoop } from "@/lib/vault-loop";
 import {
+  categorySlug,
   VAULT_CATEGORIES,
   VAULT_COUNT,
   VAULT_ITEMS,
