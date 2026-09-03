@@ -845,3 +845,40 @@ export function vaultCategoryCounts(): Array<{ category: VaultCategory; count: n
 }
 
 export const VAULT_PATHS = VAULT_ITEMS.map((item) => `/vault/${item.slug}`);
+
+/* ------------------------------------------------------------- loop helpers */
+
+/** Cross-category recommendations — keeps the browse loop from dead-ending. */
+export function vaultAlsoGrabbed(item: VaultItem, limit = 3): VaultItem[] {
+  const pool = VAULT_ITEMS.filter(
+    (other) => other.slug !== item.slug && other.category !== item.category,
+  );
+  // Deterministic rotation so SSR and hydration agree, but varies per item.
+  let hash = 0;
+  for (const ch of item.slug) hash = (hash * 31 + ch.charCodeAt(0)) >>> 0;
+  const start = pool.length ? hash % pool.length : 0;
+  return [...pool.slice(start), ...pool.slice(0, start)].slice(0, limit);
+}
+
+/** The next pack in catalog order — powers the mobile "Next pack" strip. */
+export function vaultNext(item: VaultItem): VaultItem {
+  const i = VAULT_ITEMS.findIndex((other) => other.slug === item.slug);
+  return VAULT_ITEMS[(i + 1) % VAULT_ITEMS.length]!;
+}
+
+export function categorySlug(category: VaultCategory): string {
+  return category.toLowerCase();
+}
+
+export function categoryFromSlug(slug: string): VaultCategory | undefined {
+  return VAULT_CATEGORIES.find((category) => categorySlug(category) === slug.toLowerCase());
+}
+
+export const VAULT_CATEGORY_PATHS = VAULT_CATEGORIES.map(
+  (category) => `/vault/c/${categorySlug(category)}`,
+);
+
+/** Ad landing URL for one pack, with campaign attribution baked in. */
+export function vaultAdUrl(slug: string, source = "facebook", campaign = "vault") {
+  return `https://sensesofvoid.app/vault/${slug}?utm_source=${source}&utm_medium=cpc&utm_campaign=${campaign}&utm_content=${slug}`;
+}
