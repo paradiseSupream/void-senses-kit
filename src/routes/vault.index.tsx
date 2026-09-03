@@ -86,22 +86,33 @@ function Vault() {
   const counts = useMemo(() => vaultCategoryCounts(), []);
   const featured = useMemo(() => vaultFeatured(), []);
 
+  // Return visitors get packs they have not opened yet at the top — the single
+  // cheapest way to raise pages and unlocks per visit on repeat traffic.
+  const [seen, setSeen] = useState<string[]>([]);
+  useEffect(() => setSeen(seenSlugs()), []);
+
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return VAULT_ITEMS.filter(
+    const list = VAULT_ITEMS.filter(
       (a) =>
         (category === "All" || a.category === category) &&
         (!q ||
           `${a.title} ${a.tagline} ${a.category} ${a.tags.join(" ")}`.toLowerCase().includes(q)),
     );
-  }, [category, query]);
+    if (seen.length === 0) return list;
+    return [...list].sort(
+      (a, b) => Number(seen.includes(a.slug)) - Number(seen.includes(b.slug)),
+    );
+  }, [category, query, seen]);
 
   const slots = useMemo(() => withNativeAds(filtered), [filtered]);
 
   // Every unlock passes the sponsor smartlink step for free users — this is the
   // highest-RPM surface on the site. VIPs skip it inside runGated.
   const unlock = async (item: VaultItem) => {
+    trackVaultLoop("vault_unlock_start", item.slug);
     await runGated({ toolSlug: "vault", force: true });
+    trackVaultLoop("vault_unlock", item.slug, recordUnlock(item.slug));
     window.open(item.url, "_blank", "noopener,noreferrer");
   };
 
