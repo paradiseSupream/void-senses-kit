@@ -206,6 +206,20 @@ function Vault() {
         </div>
       </div>
 
+      {/* Indexable collection hubs — each one is its own ad landing page. */}
+      <nav aria-label="Free collections" className="mt-8 flex flex-wrap gap-2">
+        {VAULT_CATEGORIES.map((cat) => (
+          <Link
+            key={cat}
+            to="/vault/c/$category"
+            params={{ category: categorySlug(cat) }}
+            className="label-mono rounded-full border border-hairline px-3 py-1.5 hover:border-primary/50 hover:text-primary"
+          >
+            Top free {cat}
+          </Link>
+        ))}
+      </nav>
+
       <AdSlot id="result-vault" toolSlug="vault" className="mt-8" />
 
       <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
