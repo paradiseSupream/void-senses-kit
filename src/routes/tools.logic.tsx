@@ -4,6 +4,7 @@ import { Timer } from "lucide-react";
 
 import { ToolShell } from "@/components/layout/ToolShell";
 import { ResultActions } from "@/components/tools/ResultActions";
+import { DailyChallengeEntry } from "@/components/tools/DailyChallengeEntry";
 import { useAutoStart } from "@/lib/autostart";
 import { IQ_BANK } from "@/lib/banks/iq";
 import { newSeed, percentileOf, rngFrom, shuffle, shuffleOptions } from "@/lib/quiz-engine";
@@ -177,6 +178,8 @@ function LogicSprint() {
               percentile of runs on this test.
             </p>
           </div>
+
+          <DailyChallengeEntry toolSlug="logic" score={Math.round(score)} />
 
           <ResultActions
             toolSlug="logic"

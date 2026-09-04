@@ -32,6 +32,7 @@ import {
 } from "@/lib/analytics.functions";
 import type { WeeklyReport } from "@/lib/weekly-report.types";
 import type { SlotStat } from "@/lib/analytics-agg";
+import { RpmTab } from "@/components/admin/RpmTab";
 
 export const Route = createFileRoute("/admin/monetization")({
   head: () => ({
@@ -433,6 +434,8 @@ function MonetizationDashboard() {
               </ul>
             ) : null}
           </div>
+
+          <RpmTab token={activeToken} days={filters.days} />
 
           <StatTable title="By country" rows={stats.byCountry} />
           <StatTable title="A/B variants (result page vs download gate)" rows={stats.byVariant} />

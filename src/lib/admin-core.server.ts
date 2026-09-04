@@ -96,6 +96,7 @@ export const DEFAULT_ADS: AdsSettings = {
   caps: DEFAULT_CAPS,
   privacy: DEFAULT_PRIVACY,
   rpm_estimate_cents: 120,
+  unlock_value_cents: 4,
 };
 
 export const DEFAULT_SITE: SiteSettings = {
