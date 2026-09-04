@@ -34,6 +34,8 @@ export type AdsSettings = {
   caps: AdCapSettings;
   privacy: PrivacySettings;
   rpm_estimate_cents: number;
+  /** Estimated payout per completed smartlink unlock, in cents. */
+  unlock_value_cents?: number;
 };
 
 export type SiteSettings = {

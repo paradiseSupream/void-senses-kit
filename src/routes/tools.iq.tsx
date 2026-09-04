@@ -7,6 +7,7 @@ import { useAutoStart } from "@/lib/autostart";
 import { markQuizInteraction } from "@/lib/engagement";
 import { QuizVipNudge } from "@/components/monetization/QuizVipNudge";
 import { ResultActions } from "@/components/tools/ResultActions";
+import { DailyChallengeEntry } from "@/components/tools/DailyChallengeEntry";
 import { TraitBars } from "@/components/tools/TraitBars";
 import { LockedReport } from "@/components/monetization/LockedReport";
 import { IQ_BANK, IQ_SESSION_SIZE } from "@/lib/banks/iq";
@@ -330,6 +331,8 @@ function IqTest() {
             </div>
             </LockedReport>
           </div>
+
+          <DailyChallengeEntry toolSlug="iq" score={Math.round(result.estimate)} />
 
           <ResultActions
             toolSlug="iq"

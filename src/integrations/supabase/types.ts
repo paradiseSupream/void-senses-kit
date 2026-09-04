@@ -161,6 +161,42 @@ export type Database = {
         }
         Relationships: []
       }
+      daily_scores: {
+        Row: {
+          alias: string
+          country: string | null
+          created_at: string
+          day: string
+          id: string
+          score: number
+          session_id: string
+          tool_slug: string
+          updated_at: string
+        }
+        Insert: {
+          alias: string
+          country?: string | null
+          created_at?: string
+          day: string
+          id?: string
+          score: number
+          session_id: string
+          tool_slug: string
+          updated_at?: string
+        }
+        Update: {
+          alias?: string
+          country?: string | null
+          created_at?: string
+          day?: string
+          id?: string
+          score?: number
+          session_id?: string
+          tool_slug?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       email_leads: {
         Row: {
           country: string | null

@@ -4,6 +4,7 @@ import { Grid3X3 } from "lucide-react";
 
 import { ToolShell } from "@/components/layout/ToolShell";
 import { ResultActions } from "@/components/tools/ResultActions";
+import { DailyChallengeEntry } from "@/components/tools/DailyChallengeEntry";
 import { useAutoStart } from "@/lib/autostart";
 import { percentileOf } from "@/lib/quiz-engine";
 
@@ -177,6 +178,8 @@ function MemoryTool() {
               on this test.
             </p>
           </div>
+
+          <DailyChallengeEntry toolSlug="memory" score={Math.round(best)} />
 
           <ResultActions
             toolSlug="memory"

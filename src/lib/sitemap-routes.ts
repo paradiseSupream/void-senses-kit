@@ -39,6 +39,7 @@ export const DYNAMIC_ROUTE_PREFIXES = ["/archetypes/", "/vault/", "/guides/"] as
 export const SITEMAP_ENTRIES: SitemapEntry[] = [
   { path: "/", changefreq: "daily", priority: "1.0" },
   { path: "/tools", changefreq: "weekly", priority: "0.9" },
+  { path: "/challenge", changefreq: "daily", priority: "0.8" },
   { path: "/tools/iq", changefreq: "weekly", priority: "0.9" },
   { path: "/tools/child-trauma", changefreq: "weekly", priority: "0.9" },
   { path: "/tools/dark-personality", changefreq: "weekly", priority: "0.9" },
