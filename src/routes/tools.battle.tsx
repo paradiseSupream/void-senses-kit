@@ -14,17 +14,22 @@ import { toast } from "sonner";
 import { ToolShell } from "@/components/layout/ToolShell";
 import { ResultActions } from "@/components/tools/ResultActions";
 import { TraitBars } from "@/components/tools/TraitBars";
+import { RadarChart } from "@/components/tools/RadarChart";
+import { LockedReport } from "@/components/monetization/LockedReport";
 import { decodeDuel, duelUrl, type DuelPayload } from "@/lib/duel-link";
 import { trackShare, withUtm } from "@/lib/share-link";
+import { bandOf } from "@/lib/quiz-engine";
 import {
   BATTLE_AXES,
   BATTLE_BANK,
+  BATTLE_NOTES,
   BATTLE_PER_AXIS,
   BATTLE_SESSION_SIZE,
   battleItem,
   battleVerdict,
   type BattleItem,
 } from "@/lib/banks/battle";
+
 
 const SITE = "https://sensesofvoid.app";
 const OG = `${SITE}/og/battle.jpg`;
@@ -127,6 +132,21 @@ function Battle() {
     ? Math.round(axisScores.reduce((sum, s) => sum + s.value, 0) / axisScores.length)
     : 0;
   const verdict = battleVerdict(pct);
+  const axisNotes = useMemo(
+    () =>
+      Object.fromEntries(
+        axisScores.map((s) => [s.dim, BATTLE_NOTES[s.dim]?.[bandOf(s.value)] ?? ""]),
+      ),
+    [axisScores],
+  );
+  const strongest = useMemo(
+    () => [...axisScores].sort((a, b) => b.value - a.value)[0],
+    [axisScores],
+  );
+  const weakest = useMemo(
+    () => [...axisScores].sort((a, b) => a.value - b.value)[0],
+    [axisScores],
+  );
   const partner = invite?.n || "them";
   const clash = useMemo(() => {
     if (!invite || !done) return null;
@@ -270,8 +290,32 @@ function Battle() {
             <h3 className="mt-4 font-display text-2xl">{verdict.name}</h3>
             <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{verdict.blurb}</p>
 
-            <div className="mt-7">
-              <TraitBars data={axisScores} />
+            <div className="mt-7 rounded-2xl border border-hairline bg-surface-2/30 p-4">
+              <RadarChart data={axisScores} />
+              {strongest && weakest ? (
+                <p className="mt-2 text-center font-mono text-xs text-muted-foreground">
+                  Strongest {strongest.dim} {strongest.value}% · weakest {weakest.dim}{" "}
+                  {weakest.value}%
+                </p>
+              ) : null}
+            </div>
+
+            <div className="mt-8">
+              <LockedReport
+                toolSlug="battle"
+                title="Axis-by-axis match report"
+                share={{
+                  t: "battle",
+                  n: "Compatibility Battle",
+                  h: `${pct}% · ${verdict.name}`,
+                  l: [verdict.blurb],
+                  p: "/tools/battle",
+                }}
+              >
+                <div className="mt-6">
+                  <TraitBars data={axisScores} notes={axisNotes} />
+                </div>
+              </LockedReport>
             </div>
 
             {clash ? (

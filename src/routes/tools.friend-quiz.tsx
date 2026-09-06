@@ -13,10 +13,19 @@ import { toast } from "sonner";
 
 import { ToolShell } from "@/components/layout/ToolShell";
 import { ResultActions } from "@/components/tools/ResultActions";
+import { TraitBars } from "@/components/tools/TraitBars";
 import { newSeed, rngFrom } from "@/lib/quiz-engine";
 import { decodeDuel, duelUrl, type DuelPayload } from "@/lib/duel-link";
 import { trackShare, withUtm } from "@/lib/share-link";
-import { FQ_BANK, FQ_SESSION_SIZE, fqItem, fqVerdict, type FqItem } from "@/lib/banks/friend-quiz";
+import {
+  FQ_AREAS,
+  FQ_AREA_NOTES,
+  FQ_BANK,
+  FQ_SESSION_SIZE,
+  fqItem,
+  fqVerdict,
+  type FqItem,
+} from "@/lib/banks/friend-quiz";
 
 const SITE = "https://sensesofvoid.app";
 const OG = `${SITE}/og/friend-quiz.jpg`;
@@ -267,6 +276,20 @@ function PlayInvite({ invite }: { invite: DuelPayload }) {
   const hits = guesses.filter((g, i) => g === invite.a[i]).length;
   const pct = items.length ? Math.round((hits / items.length) * 100) : 0;
   const verdict = fqVerdict(pct, invite.n);
+
+  // Where the guesses landed: knowing someone's breakfast is not the same as
+  // knowing how they argue, so the areas are reported separately.
+  const areaScores = useMemo(
+    () =>
+      FQ_AREAS.map((area) => {
+        const inArea = items
+          .map((item, i) => ({ item, i }))
+          .filter(({ item }) => item.area === area);
+        const right = inArea.filter(({ i }) => guesses[i] === invite.a[i]).length;
+        return { dim: area, value: inArea.length ? Math.round((right / inArea.length) * 100) : 0 };
+      }).filter((entry) => items.some((item) => item.area === entry.dim)),
+    [items, guesses, invite],
+  );
   const who = invite.n || "your friend";
 
   const choose = (optIndex: number) => {
@@ -325,6 +348,10 @@ function PlayInvite({ invite }: { invite: DuelPayload }) {
             </div>
             <h3 className="mt-4 font-display text-2xl">{verdict.name}</h3>
             <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{verdict.blurb}</p>
+
+            <div className="mt-7">
+              <TraitBars data={areaScores} notes={FQ_AREA_NOTES} />
+            </div>
 
             <ul className="mt-6 grid gap-2">
               {items.map((item, i) => {

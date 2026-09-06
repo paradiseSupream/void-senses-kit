@@ -3,11 +3,19 @@ import { createFileRoute } from "@tanstack/react-router";
 import { AlertTriangle } from "lucide-react";
 
 import { ToolShell } from "@/components/layout/ToolShell";
+import { QuizRunner } from "@/components/tools/QuizRunner";
+import { QualityBadge } from "@/components/tools/QualityBadge";
+import { RadarChart } from "@/components/tools/RadarChart";
 import { ResultActions } from "@/components/tools/ResultActions";
 import { TraitBars } from "@/components/tools/TraitBars";
+import { LockedReport } from "@/components/monetization/LockedReport";
 import { useAutoStart } from "@/lib/autostart";
-import { newSeed, pickBalanced, rngFrom, SCALE, scoreDimensions } from "@/lib/quiz-engine";
-import { RF_BANK, RF_PER_AXIS, RF_SESSION_SIZE, rfProfile } from "@/lib/banks/red-flag";
+import { bandOf, newSeed, pickBalanced, rngFrom, scoreDimensions, type Likert } from "@/lib/quiz-engine";
+import { responseQuality } from "@/lib/psychometrics";
+import { evaluateAttention, scorableItems, withAttentionChecks } from "@/lib/attention";
+import { useNorms } from "@/hooks/use-norms";
+import { RF_ACTIONS, RF_BANK, RF_NOTES, RF_PER_AXIS, RF_SESSION_SIZE, rfProfile } from "@/lib/banks/red-flag";
+
 
 const URL = "https://sensesofvoid.app/tools/red-flag";
 const OG = "https://sensesofvoid.app/og/red-flag.jpg";
@@ -54,33 +62,55 @@ export const Route = createFileRoute("/tools/red-flag")({
 function RedFlag() {
   const [seed, setSeed] = useState(() => newSeed());
   const [phase, setPhase] = useState<"intro" | "quiz" | "result">("intro");
-  const [index, setIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, number>>({});
+  const [timings, setTimings] = useState<Record<string, number>>({});
 
   useAutoStart(() => setPhase("quiz"));
 
-  const items = useMemo(
-    () => pickBalanced(RF_BANK, (i) => i.dim, RF_PER_AXIS, rngFrom(seed)),
+  // Drawn set plus two instructed-response traps, which never score an axis.
+  const items: Likert[] = useMemo(
+    () =>
+      withAttentionChecks(
+        pickBalanced(RF_BANK, (i) => i.dim, RF_PER_AXIS, rngFrom(seed)),
+        rngFrom(seed + 1),
+      ),
     [seed],
   );
+  const scored = useMemo(() => scorableItems(items), [items]);
 
   const restart = useCallback(() => {
     setSeed(newSeed());
     setAnswers({});
-    setIndex(0);
+    setTimings({});
     setPhase("quiz");
   }, []);
 
-  const scores = useMemo(() => scoreDimensions(items, answers), [items, answers]);
+  const scores = useMemo(() => scoreDimensions(scored, answers), [scored, answers]);
   const profile = useMemo(() => rfProfile(scores), [scores]);
+  const overall = useMemo(
+    () =>
+      scores.length ? Math.round(scores.reduce((a, b) => a + b.value, 0) / scores.length) : 0,
+    [scores],
+  );
 
-  const answer = (id: string, weight: number) => {
-    setAnswers((prev) => ({ ...prev, [id]: weight }));
-    if (index + 1 >= items.length) setPhase("result");
-    else setIndex(index + 1);
-  };
+  const quality = useMemo(
+    () => responseQuality(scored, answers, timings, evaluateAttention(items, answers)),
+    [items, scored, answers, timings],
+  );
 
-  const current = items[index];
+  const norms = useNorms("red-flag", scores, phase === "result");
+
+  const notes = useMemo(
+    () =>
+      Object.fromEntries(scores.map((s) => [s.dim, RF_NOTES[s.dim]?.[bandOf(s.value)] ?? ""])),
+    [scores],
+  );
+
+  const action = useMemo(() => {
+    const top = [...scores].sort((a, b) => b.value - a.value)[0];
+    return top ? (RF_ACTIONS[top.dim] ?? "") : "";
+  }, [scores]);
+
 
   return (
     <ToolShell
@@ -96,7 +126,7 @@ function RedFlag() {
           </span>
           <p className="mt-3 text-sm text-muted-foreground">
             Not a diagnosis and not a way to judge a partner — a mirror for your own patterns.
-            Twenty statements, about three minutes, ends in a green / amber / red share card.
+            Twenty-five statements plus two attention checks, about three minutes, ends in a green / amber / red share card with a confidence rating.
           </p>
           <button
             type="button"
@@ -108,37 +138,19 @@ function RedFlag() {
         </div>
       ) : null}
 
-      {phase === "quiz" && current ? (
-        <div className="glass rounded-2xl p-6 sm:p-8">
-          <div className="flex items-center justify-between">
-            <span className="label-mono">
-              {index + 1} / {items.length}
-            </span>
-            <span className="label-mono">{current.dim}</span>
-          </div>
-          <div className="mt-2 h-1 overflow-hidden rounded-full bg-surface-2">
-            <div
-              className="h-full rounded-full bg-primary transition-[width] duration-300"
-              style={{ width: `${((index + 1) / items.length) * 100}%` }}
-            />
-          </div>
-
-          <p className="mt-6 text-lg font-medium leading-snug">{current.text}</p>
-
-          <div className="mt-6 grid gap-2">
-            {SCALE.map((option) => (
-              <button
-                key={option.label}
-                type="button"
-                onClick={() => answer(current.id, option.weight)}
-                className="min-h-12 rounded-xl border border-hairline px-4 text-left text-sm transition-colors hover:border-primary/50 hover:bg-surface-2"
-              >
-                {option.label}
-              </button>
-            ))}
-          </div>
-        </div>
+      {phase === "quiz" ? (
+        <QuizRunner
+          items={items}
+          intro="How true is this of you — not of them?"
+          onReshuffle={restart}
+          onComplete={(all, meta) => {
+            setAnswers(all);
+            setTimings(meta?.timingsMs ?? {});
+            setPhase("result");
+          }}
+        />
       ) : null}
+
 
       {phase === "result" ? (
         <div className="reveal">
@@ -147,14 +159,59 @@ function RedFlag() {
             <h2 className="mt-1 font-display text-4xl">{profile.name}</h2>
             <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{profile.blurb}</p>
 
-            <div className="mt-7">
-              <TraitBars data={scores} />
+            <QualityBadge
+              className="mt-6"
+              score={quality.score}
+              label={quality.label}
+              flags={quality.flags}
+              notes={quality.notes}
+              errorBand={quality.errorBand}
+              answered={quality.answered}
+              total={quality.total}
+            />
+
+            <div className="mt-7 rounded-2xl border border-hairline bg-surface-2/30 p-4">
+              <RadarChart data={scores} />
+              <p className="mt-2 text-center font-mono text-xs text-muted-foreground">
+                Overall friction {overall}/100 · lower is calmer
+              </p>
+            </div>
+
+            <div className="mt-8">
+              <LockedReport
+                toolSlug="red-flag"
+                title="Axis-by-axis breakdown"
+                share={{
+                  t: "red-flag",
+                  n: "Red Flag Radar",
+                  h: `${profile.band} · ${profile.name}`,
+                  l: [profile.blurb],
+                  p: "/tools/red-flag",
+                }}
+              >
+                <div className="mt-6">
+                  <TraitBars
+                    data={scores}
+                    notes={notes}
+                    percentiles={norms.percentiles}
+                    liveNorms={norms.live}
+                  />
+                  {action ? (
+                    <p className="mt-6 rounded-xl border border-hairline bg-surface-2/40 p-4 text-sm leading-relaxed">
+                      <span className="label-mono block">Your one change</span>
+                      {action}
+                    </p>
+                  ) : null}
+                </div>
+              </LockedReport>
             </div>
 
             <p className="mt-6 text-xs text-muted-foreground">
-              For reflection and entertainment only — not a clinical or diagnostic assessment.
+              Research-informed scoring for self-reflection — not a clinical or diagnostic
+              assessment.
             </p>
           </div>
+
 
           <ResultActions
             toolSlug="red-flag"
