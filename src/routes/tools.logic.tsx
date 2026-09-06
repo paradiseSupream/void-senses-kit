@@ -4,6 +4,8 @@ import { Timer } from "lucide-react";
 
 import { ToolShell } from "@/components/layout/ToolShell";
 import { ResultActions } from "@/components/tools/ResultActions";
+import { TraitBars } from "@/components/tools/TraitBars";
+import { LockedReport } from "@/components/monetization/LockedReport";
 import { DailyChallengeEntry } from "@/components/tools/DailyChallengeEntry";
 import { useAutoStart } from "@/lib/autostart";
 import { IQ_BANK } from "@/lib/banks/iq";
@@ -53,6 +55,13 @@ export const Route = createFileRoute("/tools/logic")({
   component: LogicSprint,
 });
 
+/** Fixed reading for each reasoning category shown in the locked report. */
+const LOGIC_NOTES: Record<string, string> = {
+  Logic: "Deductive items: word problems and syllogisms where the trap is the obvious answer. Strength here predicts good judgement under time pressure.",
+  Pattern: "Sequence items: letters, symbols and alternating rules. This is the closest thing on the test to raw fluid reasoning.",
+  Number: "Numeric series and arithmetic relations. Weakness here is usually speed, not ability — the rule is normally spotted a second too late.",
+};
+
 function LogicSprint() {
   const [seed, setSeed] = useState(() => newSeed());
   const [phase, setPhase] = useState<"intro" | "run" | "result">("intro");
@@ -60,6 +69,9 @@ function LogicSprint() {
   const [correct, setCorrect] = useState(0);
   const [wrong, setWrong] = useState(0);
   const [left, setLeft] = useState(DURATION);
+  // Per-category hits/attempts, so the report can separate "slow but accurate"
+  // from "fast and wrong" instead of collapsing both into one number.
+  const [byCat, setByCat] = useState<Record<string, { hit: number; seen: number }>>({});
 
   useAutoStart(() => begin());
 
@@ -76,6 +88,7 @@ function LogicSprint() {
     setCorrect(0);
     setWrong(0);
     setLeft(DURATION);
+    setByCat({});
     setPhase("run");
   }, []);
 
@@ -97,8 +110,14 @@ function LogicSprint() {
   const answer = (picked: number) => {
     const current = items[index];
     if (!current) return;
-    if (picked === current.answer) setCorrect((c) => c + 1);
+    const hit = picked === current.answer;
+    if (hit) setCorrect((c) => c + 1);
     else setWrong((w) => w + 1);
+    setByCat((prev) => {
+      const cat = current.item.cat;
+      const bucket = prev[cat] ?? { hit: 0, seen: 0 };
+      return { ...prev, [cat]: { hit: bucket.hit + (hit ? 1 : 0), seen: bucket.seen + 1 } };
+    });
     if (index + 1 >= items.length) setPhase("result");
     else setIndex(index + 1);
   };
@@ -108,6 +127,20 @@ function LogicSprint() {
   const score = correct * 10 + Math.round(accuracy / 5);
   const percentile = percentileOf(Math.min(1, correct / 14));
   const band = correct >= 12 ? "Lightning" : correct >= 8 ? "Fast" : correct >= 5 ? "Steady" : "Warming up";
+
+  const breakdown = useMemo(
+    () =>
+      ["Logic", "Pattern", "Number"].map((cat) => {
+        const bucket = byCat[cat];
+        return {
+          dim: cat,
+          value: bucket && bucket.seen ? Math.round((bucket.hit / bucket.seen) * 100) : 0,
+        };
+      }),
+    [byCat],
+  );
+
+  const speed = attempted ? Math.round((DURATION / attempted) * 10) / 10 : 0;
 
   const current = items[index];
 
@@ -177,6 +210,27 @@ function LogicSprint() {
               {correct} solved in 60 seconds at {accuracy}% accuracy — around the {percentile}th
               percentile of runs on this test.
             </p>
+            <p className="mt-2 font-mono text-xs text-muted-foreground">
+              {speed}s average per item · {attempted} attempted
+            </p>
+
+            <div className="mt-8 text-left">
+              <LockedReport
+                toolSlug="logic"
+                title="Reasoning breakdown by category"
+                share={{
+                  t: "logic",
+                  n: "Logic Sprint",
+                  h: `${score} · ${band}`,
+                  l: [`${correct} solved at ${accuracy}% accuracy`],
+                  p: "/tools/logic",
+                }}
+              >
+                <div className="mt-6">
+                  <TraitBars data={breakdown} notes={LOGIC_NOTES} />
+                </div>
+              </LockedReport>
+            </div>
           </div>
 
           <DailyChallengeEntry toolSlug="logic" score={Math.round(score)} />

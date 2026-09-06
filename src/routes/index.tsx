@@ -544,7 +544,7 @@ function Home() {
             </button>
           </div>
           <p className="mt-6 text-xs text-muted-foreground">
-            All tests are for entertainment and self-reflection only, not clinical psychological or
+            All tests use research-informed scoring and percentile comparisons for self-reflection — not clinical, psychological or
             medical assessment.
           </p>
         </div>

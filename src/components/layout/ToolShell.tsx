@@ -147,7 +147,7 @@ export function ToolShell({
 
         <p className="mt-12 flex items-start gap-2 rounded-xl border border-hairline bg-void-1/50 p-4 text-xs leading-relaxed text-muted-foreground">
           <ShieldCheck className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden="true" />
-          Everything is scored on your device — no answers are uploaded. For entertainment and
+          Everything is scored on your device — no answers are uploaded. Research-informed scoring for
           self-reflection only, not clinical psychological or medical assessment.
         </p>
       </div>

@@ -17,7 +17,7 @@ export type BattleItem = {
 };
 
 export const BATTLE_AXES: BattleAxis[] = ["Rhythm", "Values", "Conflict", "Play"];
-export const BATTLE_PER_AXIS = 3;
+export const BATTLE_PER_AXIS = 4;
 export const BATTLE_SESSION_SIZE = BATTLE_AXES.length * BATTLE_PER_AXIS;
 
 export const BATTLE_BANK: BattleItem[] = [
@@ -75,3 +75,30 @@ export function battleVerdict(pct: number): BattleVerdict {
     blurb: "Almost nothing lines up. That can be electric or exhausting — usually both, in that order.",
   };
 }
+
+/**
+ * How to read each axis of a match. Value = share of identical answers on that
+ * axis, so High means the two of you already run the same way there.
+ */
+export const BATTLE_NOTES: Record<string, { High: string; Moderate: string; Low: string }> = {
+  Rhythm: {
+    High: "Your daily tempo matches — same pace, same appetite for people, same recovery style. This is the axis couples fight about most and you are already aligned on it.",
+    Moderate: "Your pace mostly matches with a gap around plans or social energy. Name whose week sets the rhythm and the friction disappears.",
+    Low: "One of you plans and one improvises. Not fatal, but every weekend is a negotiation until you build a default.",
+  },
+  Values: {
+    High: "You want the same things from money, honesty and the next five years. Long-term compatibility lives here more than anywhere else.",
+    Moderate: "Broadly the same direction, different priorities on security versus adventure. Worth an explicit conversation once a year.",
+    Low: "You are optimising for different futures. Deep affection can survive this; unspoken assumptions cannot.",
+  },
+  Conflict: {
+    High: "You repair the same way — same timing, same need for space. Arguments end instead of accumulating.",
+    Moderate: "One of you wants resolution sooner than the other. Agree on a cool-off length in advance and use it.",
+    Low: "One pursues, one withdraws. That single pattern explains most repeat arguments; the fix is a scheduled return time, not more talking.",
+  },
+  Play: {
+    High: "Same humour, same idea of a good night. This is the axis that keeps things light when the rest is heavy.",
+    Moderate: "You enjoy each other with a couple of blind spots around teasing or risk.",
+    Low: "You relax in different ways. Alternate whose version of fun wins instead of averaging them into something neither likes.",
+  },
+};

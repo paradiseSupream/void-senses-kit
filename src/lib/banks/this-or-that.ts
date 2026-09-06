@@ -28,6 +28,8 @@ export const TOT_BANK: TotItem[] = [
   { id: "i6", axis: "Impulse", a: "Start today, badly", b: "Start Monday, properly" },
   { id: "i7", axis: "Impulse", a: "Move city on a feeling", b: "Move for a signed offer" },
   { id: "i8", axis: "Impulse", a: "Buy the ticket now", b: "Wait for the price to drop" },
+  { id: "i9", axis: "Impulse", a: "Say the idea before it's ready", b: "Polish it in private" },
+  { id: "i10", axis: "Impulse", a: "Change the plan mid-way", b: "Finish what was agreed" },
 
   // Loyalty — people first vs outcome first
   { id: "l1", axis: "Loyalty", a: "Cover for a friend", b: "Tell the truth" },
@@ -38,6 +40,8 @@ export const TOT_BANK: TotItem[] = [
   { id: "l6", axis: "Loyalty", a: "Answer the 2am call", b: "Answer in the morning" },
   { id: "l7", axis: "Loyalty", a: "Give the credit away", b: "Take the credit you earned" },
   { id: "l8", axis: "Loyalty", a: "Forgive once more", b: "Close the door" },
+  { id: "l9", axis: "Loyalty", a: "Defend them in public", b: "Correct them in public" },
+  { id: "l10", axis: "Loyalty", a: "Stay for the people", b: "Leave for the work" },
 
   // Risk — exposure vs safety
   { id: "r1", axis: "Risk", a: "All of it on one bet", b: "Small, boring, certain" },
@@ -48,6 +52,8 @@ export const TOT_BANK: TotItem[] = [
   { id: "r6", axis: "Risk", a: "Ask and be rejected", b: "Never know" },
   { id: "r7", axis: "Risk", a: "Post it unedited", b: "Draft it for a week" },
   { id: "r8", axis: "Risk", a: "Ten percent chance, huge", b: "Ninety percent chance, small" },
+  { id: "r9", axis: "Risk", a: "Say yes to the stage", b: "Say yes to the back row" },
+  { id: "r10", axis: "Risk", a: "Double down", b: "Cut the loss" },
 
   // Candour — say it vs hold it
   { id: "c1", axis: "Candour", a: "Blunt honesty", b: "Kind vagueness" },
@@ -58,9 +64,11 @@ export const TOT_BANK: TotItem[] = [
   { id: "c6", axis: "Candour", a: "Ask what they really meant", b: "Let it slide" },
   { id: "c7", axis: "Candour", a: "Show the messy draft", b: "Show the finished thing" },
   { id: "c8", axis: "Candour", a: "Admit you were wrong out loud", b: "Quietly change course" },
+  { id: "c9", axis: "Candour", a: "Give the real reason", b: "Give the easy reason" },
+  { id: "c10", axis: "Candour", a: "Ask for the number", b: "Avoid the awkward question" },
 ];
 
-export const TOT_PER_AXIS = 5;
+export const TOT_PER_AXIS = 6;
 export const TOT_SESSION_SIZE = TOT_PER_AXIS * TOT_AXES.length;
 
 /** Short profile name from the two dominant poles. */
@@ -90,3 +98,27 @@ export function totProfile(scores: { dim: string; value: number }[]): {
     blurb: `${blurbs[top] ?? ""} Your quietest side is ${low.toLowerCase()} — that's where you hedge.`,
   };
 }
+
+/** Written interpretation per axis and band. Axis value = share of "This" picks. */
+export const TOT_NOTES: Record<string, { High: string; Moderate: string; Low: string }> = {
+  Impulse: {
+    High: "You commit before the information is complete, so you learn faster than most and pay for it occasionally.",
+    Moderate: "You move quickly on small things and slowly on expensive ones, which is the cheapest way to be wrong.",
+    Low: "You wait for evidence. You rarely regret a decision, but you sometimes miss the window entirely.",
+  },
+  Loyalty: {
+    High: "You stay. People count on that, and the cost is the room you keep for relationships that stopped giving anything back.",
+    Moderate: "You are loyal until it becomes unreasonable, and you can usually name the line.",
+    Low: "You optimise for what works now. Clean, efficient, and occasionally read as cold by people who expected more.",
+  },
+  Risk: {
+    High: "Exposure doesn't scare you; stagnation does. You collect outsized outcomes at the price of a louder failure rate.",
+    Moderate: "You take the risk once the downside is survivable — the profile most long-term winners actually have.",
+    Low: "You protect the base first. Slow compounding beats a blow-up, and you have never had a blow-up.",
+  },
+  Candour: {
+    High: "You say the real thing. It builds unusual trust and costs you a few rooms along the way.",
+    Moderate: "You tell the truth in the right dose to the right person.",
+    Low: "You choose comfort over precision, which keeps the peace and leaves people guessing what you actually think.",
+  },
+};

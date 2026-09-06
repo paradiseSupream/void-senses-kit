@@ -3,11 +3,15 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Split } from "lucide-react";
 
 import { ToolShell } from "@/components/layout/ToolShell";
+import { RadarChart } from "@/components/tools/RadarChart";
 import { ResultActions } from "@/components/tools/ResultActions";
 import { TraitBars } from "@/components/tools/TraitBars";
+import { LockedReport } from "@/components/monetization/LockedReport";
+import { useNorms } from "@/hooks/use-norms";
 import { useAutoStart } from "@/lib/autostart";
-import { newSeed, pickBalanced, rngFrom } from "@/lib/quiz-engine";
+import { bandOf, newSeed, pickBalanced, rngFrom } from "@/lib/quiz-engine";
 import {
+  TOT_NOTES,
   TOT_BANK,
   TOT_PER_AXIS,
   TOT_SESSION_SIZE,
@@ -95,6 +99,21 @@ function ThisOrThat() {
 
   const profile = useMemo(() => totProfile(scores), [scores]);
 
+  const norms = useNorms("this-or-that", scores, phase === "result");
+
+  const notes = useMemo(
+    () => Object.fromEntries(scores.map((s) => [s.dim, TOT_NOTES[s.dim]?.[bandOf(s.value)] ?? ""])),
+    [scores],
+  );
+
+  // How often the two sides were split rather than swept: a decisive profile
+  // sweeps its axes, a conflicted one lands near 50 on several of them.
+  const decisiveness = useMemo(() => {
+    if (!scores.length) return 0;
+    const spread = scores.reduce((a, s) => a + Math.abs(s.value - 50), 0) / scores.length;
+    return Math.round(Math.min(100, (spread / 50) * 100));
+  }, [scores]);
+
   const choose = (item: TotItem, side: "a" | "b") => {
     setPicks((prev) => ({ ...prev, [item.id]: side }));
     if (index + 1 >= items.length) setPhase("result");
@@ -167,9 +186,40 @@ function ThisOrThat() {
             <h2 className="mt-1 font-display text-4xl">{profile.name}</h2>
             <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{profile.blurb}</p>
 
-            <div className="mt-7">
-              <TraitBars data={scores} />
+            <div className="mt-7 rounded-2xl border border-hairline bg-surface-2/30 p-4">
+              <RadarChart data={scores} />
+              <p className="mt-2 text-center font-mono text-xs text-muted-foreground">
+                Decisiveness {decisiveness}/100 · how hard you leaned rather than split
+              </p>
             </div>
+
+            <div className="mt-8">
+              <LockedReport
+                toolSlug="this-or-that"
+                title="What each axis says about you"
+                share={{
+                  t: "this-or-that",
+                  n: "This or That",
+                  h: profile.name,
+                  l: [profile.blurb],
+                  p: "/tools/this-or-that",
+                }}
+              >
+                <div className="mt-6">
+                  <TraitBars
+                    data={scores}
+                    notes={notes}
+                    percentiles={norms.percentiles}
+                    liveNorms={norms.live}
+                  />
+                </div>
+              </LockedReport>
+            </div>
+
+            <p className="mt-6 text-xs text-muted-foreground">
+              Forced-choice scoring compared against the live answer pool — for self-reflection,
+              not a clinical assessment.
+            </p>
           </div>
 
           <ResultActions

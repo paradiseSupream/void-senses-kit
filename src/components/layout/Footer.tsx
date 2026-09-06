@@ -119,9 +119,12 @@ export function Footer() {
 
       <div className="border-t border-hairline px-4 py-6 sm:px-6">
         <p className="mx-auto max-w-3xl text-center text-xs leading-relaxed text-muted-foreground">
-          All tests and tools are for entertainment and self-reflection only, not clinical
-          psychological or medical assessment.
+          Our tests use research-informed scoring, balanced item banks, attention and consistency
+          checks, and percentile comparisons against live results — built to be genuinely
+          informative about your own patterns. They are still not clinical, psychological or
+          medical assessments, and are not a substitute for professional advice.
         </p>
+
         <p className="mt-2 text-center text-xs text-muted-foreground">
           © {new Date().getFullYear()} Senses of Void · sensesofvoid.app
         </p>

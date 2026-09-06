@@ -4,6 +4,8 @@ import { Grid3X3 } from "lucide-react";
 
 import { ToolShell } from "@/components/layout/ToolShell";
 import { ResultActions } from "@/components/tools/ResultActions";
+import { TraitBars } from "@/components/tools/TraitBars";
+import { LockedReport } from "@/components/monetization/LockedReport";
 import { DailyChallengeEntry } from "@/components/tools/DailyChallengeEntry";
 import { useAutoStart } from "@/lib/autostart";
 import { percentileOf } from "@/lib/quiz-engine";
@@ -54,6 +56,14 @@ export const Route = createFileRoute("/tools/memory")({
 
 type Phase = "intro" | "show" | "input" | "result";
 
+/** Fixed reading for each working-memory sub-metric. */
+const MEMORY_NOTES: Record<string, string> = {
+  Span: "The longest sequence you repeated perfectly. Adult working memory typically holds 5–9 items; anything above that is trained, not innate.",
+  Accuracy: "Share of taps that landed on the right tile. High accuracy with a short span means the ceiling is real; low accuracy means slips, and slowing down adds two tiles for free.",
+  "Recall speed": "How quickly you reproduced the order. Fast recall suggests you chunked the sequence rather than replaying it one tile at a time.",
+  Stamina: "How many rounds you cleared before the first error. This tracks attention endurance more than memory itself.",
+};
+
 function MemoryTool() {
   const [phase, setPhase] = useState<Phase>("intro");
   const [sequence, setSequence] = useState<number[]>([]);
@@ -62,6 +72,12 @@ function MemoryTool() {
   const [round, setRound] = useState(1);
   const [best, setBest] = useState(0);
   const timers = useRef<number[]>([]);
+  // Tap-level stats power the breakdown: raw span alone hides whether a run
+  // ended from a slip or from genuinely hitting the ceiling.
+  const [taps, setTaps] = useState(0);
+  const [misses, setMisses] = useState(0);
+  const tapClock = useRef<number>(0);
+  const [tapMs, setTapMs] = useState<number[]>([]);
 
   useAutoStart(() => start());
 
@@ -89,6 +105,9 @@ function MemoryTool() {
   const start = useCallback(() => {
     const first = [Math.floor(Math.random() * GRID), Math.floor(Math.random() * GRID)];
     setRound(1);
+    setTaps(0);
+    setMisses(0);
+    setTapMs([]);
     setSequence(first);
     playSequence(first);
   }, [playSequence]);
@@ -96,8 +115,13 @@ function MemoryTool() {
   const tap = (tile: number) => {
     if (phase !== "input") return;
     const next = [...entered, tile];
+    const now = Date.now();
+    if (tapClock.current) setTapMs((prev) => [...prev, now - tapClock.current]);
+    tapClock.current = now;
+    setTaps((t) => t + 1);
     const correct = sequence[next.length - 1] === tile;
     if (!correct) {
+      setMisses((m) => m + 1);
       setBest(sequence.length - 1);
       setPhase("result");
       return;
@@ -114,6 +138,22 @@ function MemoryTool() {
   };
 
   const percentile = useMemo(() => percentileOf(Math.min(1, best / 12)), [best]);
+  const breakdown = useMemo(() => {
+    const attempts = taps || 1;
+    const accuracy = Math.round(((taps - misses) / attempts) * 100);
+    const spanScore = Math.round(Math.min(1, best / 12) * 100);
+    const avgMs = tapMs.length ? tapMs.reduce((a, b) => a + b, 0) / tapMs.length : 0;
+    // 1.5s per tap is a comfortable pace; faster than that scores higher.
+    const pace = avgMs ? Math.round(Math.max(0, Math.min(100, (1500 / avgMs) * 60))) : 0;
+    const stamina = Math.round(Math.min(100, ((round - 1) / 10) * 100));
+    return [
+      { dim: "Span", value: spanScore },
+      { dim: "Accuracy", value: accuracy },
+      { dim: "Recall speed", value: pace },
+      { dim: "Stamina", value: stamina },
+    ];
+  }, [best, taps, misses, tapMs, round]);
+
   const band = best >= 9 ? "Elite recall" : best >= 7 ? "Sharp" : best >= 5 ? "Average" : "Warming up";
 
   return (
@@ -177,6 +217,24 @@ function MemoryTool() {
               You repeated {best} tiles in order — roughly the {percentile}th percentile of players
               on this test.
             </p>
+
+            <div className="mt-8 text-left">
+              <LockedReport
+                toolSlug="memory"
+                title="Working-memory breakdown"
+                share={{
+                  t: "memory",
+                  n: "Memory Challenge",
+                  h: `${best} tiles · ${band}`,
+                  l: [`Span ${best}, ${percentile}th percentile`],
+                  p: "/tools/memory",
+                }}
+              >
+                <div className="mt-6">
+                  <TraitBars data={breakdown} notes={MEMORY_NOTES} />
+                </div>
+              </LockedReport>
+            </div>
           </div>
 
           <DailyChallengeEntry toolSlug="memory" score={Math.round(best)} />
