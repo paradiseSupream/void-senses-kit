@@ -29,7 +29,7 @@ export type ResultVariant =
 export type ResultMetric = {
   label: string;
   value: number;
-  note?: string;
+  note?: string | undefined;
 };
 
 type ResultExperienceProps = {

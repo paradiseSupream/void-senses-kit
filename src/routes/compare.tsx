@@ -3,6 +3,7 @@ import { ArrowRight, Swords, Trophy } from "lucide-react";
 
 import { decodeCompare } from "@/lib/compare-link";
 import { AdSlot } from "@/components/monetization/AdSlot";
+import { TOOLS } from "@/lib/tools";
 
 export const Route = createFileRoute("/compare")({
   validateSearch: (search: Record<string, unknown>) => ({
@@ -102,7 +103,7 @@ function ComparePage() {
                 to="/tools"
                 className="inline-flex min-h-13 items-center justify-center gap-2 rounded-full border border-hairline bg-surface/60 px-7 text-base font-semibold backdrop-blur-xl transition-colors hover:bg-surface-2"
               >
-                See all 7 free tests
+                See all {TOOLS.length} free tools
               </Link>
             </div>
           </>
