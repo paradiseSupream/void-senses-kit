@@ -3,8 +3,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Split } from "lucide-react";
 
 import { ToolShell } from "@/components/layout/ToolShell";
-import { RadarChart } from "@/components/tools/RadarChart";
 import { ResultActions } from "@/components/tools/ResultActions";
+import { ResultExperience } from "@/components/tools/ResultExperience";
 import { TraitBars } from "@/components/tools/TraitBars";
 import { LockedReport } from "@/components/monetization/LockedReport";
 import { useNorms } from "@/hooks/use-norms";
@@ -181,19 +181,8 @@ function ThisOrThat() {
 
       {phase === "result" ? (
         <div className="reveal">
-          <div className="glass rounded-2xl p-6 sm:p-8">
-            <span className="label-mono">Your decision profile</span>
-            <h2 className="mt-1 font-display text-4xl">{profile.name}</h2>
-            <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{profile.blurb}</p>
-
-            <div className="mt-7 rounded-2xl border border-hairline bg-surface-2/30 p-4">
-              <RadarChart data={scores} />
-              <p className="mt-2 text-center font-mono text-xs text-muted-foreground">
-                Decisiveness {decisiveness}/100 · how hard you leaned rather than split
-              </p>
-            </div>
-
-            <div className="mt-8">
+          <ResultExperience variant="choice-spectrum" eyebrow="decision profile" title={profile.name} score={decisiveness} scoreSuffix="/100" status="Choice fingerprint" description={profile.blurb} metrics={scores.map((metric) => ({ label: metric.dim, value: metric.value, note: notes[metric.dim] }))}>
+            <div>
               <LockedReport
                 toolSlug="this-or-that"
                 title="What each axis says about you"
@@ -220,7 +209,7 @@ function ThisOrThat() {
               Forced-choice scoring compared against the live answer pool — for self-reflection,
               not a clinical assessment.
             </p>
-          </div>
+          </ResultExperience>
 
           <ResultActions
             toolSlug="this-or-that"

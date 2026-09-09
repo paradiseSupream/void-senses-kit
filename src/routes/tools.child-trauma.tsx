@@ -1,13 +1,12 @@
 import { useCallback, useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { Sparkles } from "lucide-react";
 
 import { ToolShell } from "@/components/layout/ToolShell";
 import { useAutoStart } from "@/lib/autostart";
 import { QuizRunner } from "@/components/tools/QuizRunner";
 import { QualityBadge } from "@/components/tools/QualityBadge";
-import { RadarChart } from "@/components/tools/RadarChart";
 import { ResultActions } from "@/components/tools/ResultActions";
+import { ResultExperience } from "@/components/tools/ResultExperience";
 import { TraitBars } from "@/components/tools/TraitBars";
 import { LockedReport } from "@/components/monetization/LockedReport";
 import {
@@ -184,17 +183,10 @@ function ChildTrauma() {
       ) : null}
 
       {phase === "result" ? (
-        <div className="glass reveal rounded-2xl p-6 sm:p-8">
-          <span className="label-mono flex items-center gap-2">
-            <Sparkles className="size-3.5 text-primary" aria-hidden="true" /> your reflection
-          </span>
-          <h2 className="mt-3 font-display text-3xl leading-tight font-bold text-primary sm:text-4xl">
-            {result.archetype.name}
-          </h2>
-          <p className="mt-2 text-sm text-muted-foreground">{result.archetype.punch}</p>
-
+        <div className="reveal">
+        <ResultExperience variant="impact-map" eyebrow="childhood pattern map" title={result.archetype.name} score={result.overall} scoreSuffix="/100" status="Reflective, not diagnostic" description={result.archetype.punch} metrics={result.scores.map((metric) => ({ label: metric.dim, value: metric.value, note: notes[metric.dim] }))}>
           <QualityBadge
-            className="mt-6"
+            className="result-quality"
             score={quality.score}
             label={quality.label}
             flags={quality.flags}
@@ -204,15 +196,7 @@ function ChildTrauma() {
             total={quality.total}
           />
 
-          <div className="mt-7 rounded-2xl border border-hairline bg-surface-2/30 p-4">
-            <RadarChart data={result.scores} />
-            <p className="mt-2 text-center font-mono text-xs text-muted-foreground">
-              Overall responsiveness {result.overall}/100 · higher means the dimension felt more
-              dependable
-            </p>
-          </div>
-
-          <div className="mt-8">
+          <div>
             <LockedReport
               toolSlug="child-trauma"
               title="Dimension-by-dimension breakdown"
@@ -235,6 +219,7 @@ function ChildTrauma() {
             </LockedReport>
           </div>
 
+        </ResultExperience>
           <ResultActions
             toolSlug="child-trauma"
             onRetake={reshuffle}

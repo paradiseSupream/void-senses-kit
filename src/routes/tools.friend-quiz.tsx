@@ -13,6 +13,7 @@ import { toast } from "sonner";
 
 import { ToolShell } from "@/components/layout/ToolShell";
 import { ResultActions } from "@/components/tools/ResultActions";
+import { ResultExperience } from "@/components/tools/ResultExperience";
 import { TraitBars } from "@/components/tools/TraitBars";
 import { newSeed, rngFrom } from "@/lib/quiz-engine";
 import { decodeDuel, duelUrl, type DuelPayload } from "@/lib/duel-link";
@@ -338,21 +339,7 @@ function PlayInvite({ invite }: { invite: DuelPayload }) {
 
       {done ? (
         <div className="reveal">
-          <div className="glass rounded-2xl p-6 sm:p-8">
-            <span className="label-mono">Your score</span>
-            <div className="mt-1 flex items-end gap-3">
-              <h2 className="font-display text-6xl leading-none">{pct}%</h2>
-              <span className="mb-2 rounded-full border border-hairline px-3 py-1 text-xs">
-                {verdict.badge}
-              </span>
-            </div>
-            <h3 className="mt-4 font-display text-2xl">{verdict.name}</h3>
-            <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{verdict.blurb}</p>
-
-            <div className="mt-7">
-              <TraitBars data={areaScores} notes={FQ_AREA_NOTES} />
-            </div>
-
+          <ResultExperience variant="friend-fingerprint" eyebrow={`knowledge of ${who}`} title={verdict.name} score={pct} scoreSuffix="%" status={verdict.badge} description={verdict.blurb} metrics={areaScores.map((metric) => ({ label: metric.dim, value: metric.value, note: FQ_AREA_NOTES[metric.dim] }))} meta={[`${hits} of ${items.length} correct`]}>
             <ul className="mt-6 grid gap-2">
               {items.map((item, i) => {
                 const right = guesses[i] === invite.a[i];
@@ -370,7 +357,7 @@ function PlayInvite({ invite }: { invite: DuelPayload }) {
                 );
               })}
             </ul>
-          </div>
+          </ResultExperience>
 
           <ResultActions
             toolSlug="friend-quiz"

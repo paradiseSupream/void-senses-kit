@@ -4,6 +4,7 @@ import { Grid3X3 } from "lucide-react";
 
 import { ToolShell } from "@/components/layout/ToolShell";
 import { ResultActions } from "@/components/tools/ResultActions";
+import { ResultExperience } from "@/components/tools/ResultExperience";
 import { TraitBars } from "@/components/tools/TraitBars";
 import { LockedReport } from "@/components/monetization/LockedReport";
 import { DailyChallengeEntry } from "@/components/tools/DailyChallengeEntry";
@@ -209,16 +210,8 @@ function MemoryTool() {
 
       {phase === "result" ? (
         <div className="reveal">
-          <div className="glass rounded-2xl p-6 sm:p-8 text-center">
-            <span className="label-mono">Memory span</span>
-            <p className="mt-1 font-display text-6xl">{best}</p>
-            <h2 className="mt-2 font-display text-2xl">{band}</h2>
-            <p className="mt-3 text-sm text-muted-foreground">
-              You repeated {best} tiles in order — roughly the {percentile}th percentile of players
-              on this test.
-            </p>
-
-            <div className="mt-8 text-left">
+          <ResultExperience variant="memory-console" eyebrow="working-memory telemetry" title={band} score={best} scoreSuffix=" tiles" status={`${percentile}th percentile`} description={`You repeated ${best} tiles in exact order before the first miss.`} metrics={breakdown.map((metric) => ({ label: metric.dim, value: metric.value, note: MEMORY_NOTES[metric.dim] }))}>
+            <div>
               <LockedReport
                 toolSlug="memory"
                 title="Working-memory breakdown"
@@ -235,7 +228,7 @@ function MemoryTool() {
                 </div>
               </LockedReport>
             </div>
-          </div>
+          </ResultExperience>
 
           <DailyChallengeEntry toolSlug="memory" score={Math.round(best)} />
 
