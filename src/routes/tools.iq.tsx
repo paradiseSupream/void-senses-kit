@@ -7,6 +7,7 @@ import { useAutoStart } from "@/lib/autostart";
 import { markQuizInteraction } from "@/lib/engagement";
 import { QuizVipNudge } from "@/components/monetization/QuizVipNudge";
 import { ResultActions } from "@/components/tools/ResultActions";
+import { ResultExperience } from "@/components/tools/ResultExperience";
 import { DailyChallengeEntry } from "@/components/tools/DailyChallengeEntry";
 import { TraitBars } from "@/components/tools/TraitBars";
 import { LockedReport } from "@/components/monetization/LockedReport";
@@ -283,29 +284,10 @@ function IqTest() {
         title="Cognitive performance certificate"
         intro="A difficulty-weighted estimate from twenty-five timed items across five reasoning categories, reported with its margin of error."
       >
-        <div className="glass reveal rounded-2xl p-6 text-center sm:p-8">
-          <span className="label-mono">Verified performance estimate</span>
-          <p className="mt-4 font-display text-6xl font-bold text-primary">{result.estimate}</p>
-          <p className="mt-2 text-sm text-muted-foreground">
-            68% band {result.low}–{result.high} (±{result.sem}) · approx. {result.percentile}th
-            percentile
-          </p>
-          <p className="mt-1 text-sm text-muted-foreground">
-            {result.correct} of {items.length} correct · difficulty-weighted accuracy{" "}
-            {result.weighted}%
-          </p>
-          <p className="mt-2 font-mono text-[0.7rem] tracking-wide text-muted-foreground uppercase">
-            {result.tiers
-              .filter((t) => t.value !== null)
-              .map((t) => `T${t.tier} ${t.value}%`)
-              .join(" · ")}
-          </p>
-          <p className="mt-1 font-mono text-xs text-muted-foreground">
-            {name.trim() || "Anonymous Participant"} · strongest area: {result.strongest}
-          </p>
-
+        <div className="reveal">
+        <ResultExperience variant="certificate" eyebrow="verified performance" title={name.trim() || "Cognitive performance certificate"} score={result.estimate} status={`${result.percentile}th percentile`} description={`Estimated range ${result.low}–${result.high} (±${result.sem}). ${result.correct} of ${items.length} solved with ${result.weighted}% difficulty-weighted accuracy.`} metrics={result.breakdown.map((metric) => ({ label: metric.dim, value: metric.value }))} meta={[`Strongest · ${result.strongest}`, ...result.tiers.filter((tier) => tier.value !== null).map((tier) => `T${tier.tier} ${tier.value}%`)]}>
           <QualityBadge
-            className="mt-6 text-left"
+            className="result-quality"
             score={result.quality.score}
             label={result.quality.label}
             flags={result.quality.flags}
@@ -314,7 +296,7 @@ function IqTest() {
             total={items.length}
           />
 
-          <div className="mt-8">
+          <div>
             <LockedReport
               toolSlug="iq"
               title="Category-by-category score breakdown"
@@ -332,6 +314,7 @@ function IqTest() {
             </LockedReport>
           </div>
 
+        </ResultExperience>
           <DailyChallengeEntry toolSlug="iq" score={Math.round(result.estimate)} />
 
           <ResultActions

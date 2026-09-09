@@ -14,7 +14,7 @@ import { toast } from "sonner";
 import { ToolShell } from "@/components/layout/ToolShell";
 import { ResultActions } from "@/components/tools/ResultActions";
 import { TraitBars } from "@/components/tools/TraitBars";
-import { RadarChart } from "@/components/tools/RadarChart";
+import { ResultExperience } from "@/components/tools/ResultExperience";
 import { LockedReport } from "@/components/monetization/LockedReport";
 import { decodeDuel, duelUrl, type DuelPayload } from "@/lib/duel-link";
 import { trackShare, withUtm } from "@/lib/share-link";
@@ -284,23 +284,8 @@ function Battle() {
 
       {done && invite ? (
         <div className="reveal">
-          <div className="glass rounded-2xl p-6 sm:p-8">
-            <span className="label-mono">Match with {partner}</span>
-            <h2 className="mt-1 font-display text-6xl leading-none">{pct}%</h2>
-            <h3 className="mt-4 font-display text-2xl">{verdict.name}</h3>
-            <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{verdict.blurb}</p>
-
-            <div className="mt-7 rounded-2xl border border-hairline bg-surface-2/30 p-4">
-              <RadarChart data={axisScores} />
-              {strongest && weakest ? (
-                <p className="mt-2 text-center font-mono text-xs text-muted-foreground">
-                  Strongest {strongest.dim} {strongest.value}% · weakest {weakest.dim}{" "}
-                  {weakest.value}%
-                </p>
-              ) : null}
-            </div>
-
-            <div className="mt-8">
+          <ResultExperience variant="duel-field" eyebrow={`match with ${partner}`} title={verdict.name} score={pct} scoreSuffix="%" status="Two-player result" description={verdict.blurb} metrics={axisScores.map((metric) => ({ label: metric.dim, value: metric.value, note: axisNotes[metric.dim] }))} meta={strongest && weakest ? [`Strongest · ${strongest.dim} ${strongest.value}%`, `Weakest · ${weakest.dim} ${weakest.value}%`] : []}>
+            <div>
               <LockedReport
                 toolSlug="battle"
                 title="Axis-by-axis match report"
@@ -331,7 +316,7 @@ function Battle() {
                 Not a single disagreement across all {items.length} scenarios.
               </p>
             )}
-          </div>
+          </ResultExperience>
 
           <ResultActions
             toolSlug="battle"

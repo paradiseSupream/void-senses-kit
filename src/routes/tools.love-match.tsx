@@ -1,13 +1,12 @@
 import { useCallback, useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { HeartPulse } from "lucide-react";
 
 import { ToolShell } from "@/components/layout/ToolShell";
 import { useAutoStart } from "@/lib/autostart";
 import { QuizRunner } from "@/components/tools/QuizRunner";
 import { QualityBadge } from "@/components/tools/QualityBadge";
-import { RadarChart } from "@/components/tools/RadarChart";
 import { ResultActions } from "@/components/tools/ResultActions";
+import { ResultExperience } from "@/components/tools/ResultExperience";
 import { TraitBars } from "@/components/tools/TraitBars";
 import { LockedReport } from "@/components/monetization/LockedReport";
 import { LOVE_BANK, LOVE_PER_DIM, LOVE_SESSION_SIZE, loveVerdict } from "@/lib/banks/love";
@@ -180,20 +179,10 @@ function LoveMatch() {
       ) : null}
 
       {phase === "result" ? (
-        <div className="glass reveal rounded-2xl p-6 sm:p-8">
-          <span className="label-mono flex items-center gap-2">
-            <HeartPulse className="size-3.5 text-secondary" aria-hidden="true" /> {pair}
-          </span>
-          <p className="mt-4 font-display text-6xl font-bold text-primary">{result.score}%</p>
-          <h2 className="mt-2 font-display text-2xl font-semibold">{result.verdict.title}</h2>
-          <p className="mt-2 text-sm text-muted-foreground">{result.verdict.line}</p>
-          <p className="mt-2 text-sm text-foreground/80">
-            Strongest together in <strong>{result.strongest}</strong>; the one to protect is{" "}
-            <strong>{result.weakest}</strong>.
-          </p>
-
+        <div className="reveal">
+        <ResultExperience variant="resonance" eyebrow={pair} title={result.verdict.title} score={result.score} scoreSuffix="%" status="Pair resonance" description={result.verdict.line} metrics={result.scores.map((metric) => ({ label: metric.dim, value: metric.value }))} meta={[`Strongest · ${result.strongest}`, `Protect · ${result.weakest}`]}>
           <QualityBadge
-            className="mt-6"
+            className="result-quality"
             score={quality.score}
             label={quality.label}
             flags={quality.flags}
@@ -203,11 +192,7 @@ function LoveMatch() {
             total={quality.total}
           />
 
-          <div className="mt-7 rounded-2xl border border-hairline bg-surface-2/30 p-4">
-            <RadarChart data={result.scores} />
-          </div>
-
-          <div className="mt-8">
+          <div>
             <LockedReport
               toolSlug="love-match"
               title="Full compatibility breakdown"
@@ -229,6 +214,7 @@ function LoveMatch() {
             </LockedReport>
           </div>
 
+        </ResultExperience>
           <ResultActions
             toolSlug="love-match"
             onRetake={reshuffle}
