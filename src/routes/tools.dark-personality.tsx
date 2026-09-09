@@ -1,14 +1,14 @@
 import { useCallback, useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { Ghost, Loader2, Lock } from "lucide-react";
+import { Loader2, Lock } from "lucide-react";
 
 import { ToolShell } from "@/components/layout/ToolShell";
 import { useAutoStart } from "@/lib/autostart";
 import { takeCarriedAnswer } from "@/lib/entry-carry";
 import { QuizRunner } from "@/components/tools/QuizRunner";
 import { QualityBadge } from "@/components/tools/QualityBadge";
-import { RadarChart } from "@/components/tools/RadarChart";
 import { ResultActions } from "@/components/tools/ResultActions";
+import { ResultExperience } from "@/components/tools/ResultExperience";
 import { TraitBars } from "@/components/tools/TraitBars";
 import { LockedReport } from "@/components/monetization/LockedReport";
 import { ShadowDossier } from "@/components/tools/ShadowDossier";
@@ -160,7 +160,7 @@ function DarkPersonality() {
       intro="Twenty-four statements pulled fresh from a 48-item bank, scored across six psychometric axes. No two attempts share the same set, so the archetype you get is earned, not memorised."
     >
       {phase === "intro" ? (
-        <div className="glass reveal rounded-2xl p-6 sm:p-8">
+        <div className="reveal">
           <span className="label-mono">What you'll get</span>
           <ul className="mt-4 space-y-2.5 text-sm text-muted-foreground">
             <li>
@@ -203,20 +203,9 @@ function DarkPersonality() {
         <div className="glass reveal rounded-2xl p-6 sm:p-8">
           {showUpsell ? <MatrixUpsellModal onDismiss={dismissUpsell} /> : null}
 
-          <span className="label-mono flex items-center gap-2">
-            <Ghost className="size-3.5 text-secondary" aria-hidden="true" /> shadow archetype
-          </span>
-          <h2 className="mt-3 font-display text-3xl leading-tight font-bold text-primary sm:text-4xl">
-            {summary.archetype.name}
-          </h2>
-          <p className="mt-1 font-mono text-xs tracking-wide text-muted-foreground uppercase">
-            {summary.archetype.tagline}
-          </p>
-          <p className="mt-3 text-sm text-muted-foreground">{summary.archetype.blurb}</p>
-          <p className="mt-2 text-sm text-foreground/80">{summary.archetype.edge}</p>
-
+          <ResultExperience variant="shadow-sigil" eyebrow="shadow archetype" title={summary.archetype.name} score={summary.intensity} scoreSuffix="/100" status={summary.archetype.tagline} description={`${summary.archetype.blurb} ${summary.archetype.edge}`} metrics={scores.map((metric) => ({ label: DARK_SHORT[metric.dim] ?? metric.dim, value: metric.value, note: DARK_NOTES[metric.dim] }))} meta={[`Dominant · ${summary.dominant}`, `Support · ${summary.support}`]}>
           <QualityBadge
-            className="mt-6"
+            className="result-quality"
             score={quality.score}
             label={quality.label}
             flags={quality.flags}
@@ -226,15 +215,7 @@ function DarkPersonality() {
             total={quality.total}
           />
 
-          <div className="mt-7 rounded-2xl border border-hairline bg-surface-2/30 p-4">
-            <RadarChart data={scores} labels={DARK_SHORT} />
-            <p className="mt-2 text-center font-mono text-xs text-muted-foreground">
-              Shadow intensity {summary.intensity}/100 · dominant {summary.dominant}, backed by{" "}
-              {summary.support}
-            </p>
-          </div>
-
-          <div className="mt-8">
+          <div>
             <LockedReport
               toolSlug="dark-personality"
               title="Full six-axis dossier"
@@ -284,6 +265,7 @@ function DarkPersonality() {
             </LockedReport>
           </div>
 
+          </ResultExperience>
           <ResultActions
             toolSlug="dark-personality"
             onRetake={reshuffle}

@@ -4,6 +4,7 @@ import { Timer } from "lucide-react";
 
 import { ToolShell } from "@/components/layout/ToolShell";
 import { ResultActions } from "@/components/tools/ResultActions";
+import { ResultExperience } from "@/components/tools/ResultExperience";
 import { TraitBars } from "@/components/tools/TraitBars";
 import { LockedReport } from "@/components/monetization/LockedReport";
 import { DailyChallengeEntry } from "@/components/tools/DailyChallengeEntry";
@@ -202,19 +203,8 @@ function LogicSprint() {
 
       {phase === "result" ? (
         <div className="reveal">
-          <div className="glass rounded-2xl p-6 text-center sm:p-8">
-            <span className="label-mono">Sprint score</span>
-            <p className="mt-1 font-display text-6xl">{score}</p>
-            <h2 className="mt-2 font-display text-2xl">{band}</h2>
-            <p className="mt-3 text-sm text-muted-foreground">
-              {correct} solved in 60 seconds at {accuracy}% accuracy — around the {percentile}th
-              percentile of runs on this test.
-            </p>
-            <p className="mt-2 font-mono text-xs text-muted-foreground">
-              {speed}s average per item · {attempted} attempted
-            </p>
-
-            <div className="mt-8 text-left">
+          <ResultExperience variant="logic-trace" eyebrow="60-second reasoning trace" title={band} score={score} status={`${percentile}th percentile`} description={`${correct} solved at ${accuracy}% accuracy, averaging ${speed}s across ${attempted} attempts.`} metrics={breakdown.map((metric) => ({ label: metric.dim, value: metric.value, note: LOGIC_NOTES[metric.dim] }))} meta={[`${correct} solved`, `${accuracy}% accuracy`, `${speed}s/item`]}>
+            <div>
               <LockedReport
                 toolSlug="logic"
                 title="Reasoning breakdown by category"
@@ -231,7 +221,7 @@ function LogicSprint() {
                 </div>
               </LockedReport>
             </div>
-          </div>
+          </ResultExperience>
 
           <DailyChallengeEntry toolSlug="logic" score={Math.round(score)} />
 

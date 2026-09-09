@@ -9,6 +9,8 @@ import {
   Timer,
 } from "lucide-react";
 
+import { TOOLS } from "@/lib/tools";
+
 const STEPS = [
   {
     icon: MousePointerClick,
@@ -23,7 +25,7 @@ const FACTS = [
   { icon: Gauge, k: "< 1.5s", v: "first paint" },
   { icon: Fingerprint, k: "On-device", v: "test scoring" },
   { icon: Download, k: "PDF · PNG", v: "instant export" },
-  { icon: Sparkles, k: "13 tools", v: "one suite" },
+  { icon: Sparkles, k: `${TOOLS.length} tools`, v: "one suite" },
 ];
 
 const TRUST = [

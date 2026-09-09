@@ -5,8 +5,8 @@ import { AlertTriangle } from "lucide-react";
 import { ToolShell } from "@/components/layout/ToolShell";
 import { QuizRunner } from "@/components/tools/QuizRunner";
 import { QualityBadge } from "@/components/tools/QualityBadge";
-import { RadarChart } from "@/components/tools/RadarChart";
 import { ResultActions } from "@/components/tools/ResultActions";
+import { ResultExperience } from "@/components/tools/ResultExperience";
 import { TraitBars } from "@/components/tools/TraitBars";
 import { LockedReport } from "@/components/monetization/LockedReport";
 import { useAutoStart } from "@/lib/autostart";
@@ -154,13 +154,9 @@ function RedFlag() {
 
       {phase === "result" ? (
         <div className="reveal">
-          <div className="glass rounded-2xl p-6 sm:p-8">
-            <span className="label-mono">{profile.band} flag</span>
-            <h2 className="mt-1 font-display text-4xl">{profile.name}</h2>
-            <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{profile.blurb}</p>
-
+          <ResultExperience variant="alert-radar" eyebrow="relationship behaviour scan" title={profile.name} score={overall} scoreSuffix="/100" status={`${profile.band} flag`} description={profile.blurb} metrics={scores.map((metric) => ({ label: metric.dim, value: metric.value, note: notes[metric.dim] }))} meta={["Lower friction is calmer", `Confidence · ${quality.label}`]}>
             <QualityBadge
-              className="mt-6"
+              className="result-quality"
               score={quality.score}
               label={quality.label}
               flags={quality.flags}
@@ -170,14 +166,7 @@ function RedFlag() {
               total={quality.total}
             />
 
-            <div className="mt-7 rounded-2xl border border-hairline bg-surface-2/30 p-4">
-              <RadarChart data={scores} />
-              <p className="mt-2 text-center font-mono text-xs text-muted-foreground">
-                Overall friction {overall}/100 · lower is calmer
-              </p>
-            </div>
-
-            <div className="mt-8">
+            <div>
               <LockedReport
                 toolSlug="red-flag"
                 title="Axis-by-axis breakdown"
@@ -210,7 +199,7 @@ function RedFlag() {
               Research-informed scoring for self-reflection — not a clinical or diagnostic
               assessment.
             </p>
-          </div>
+          </ResultExperience>
 
 
           <ResultActions

@@ -133,15 +133,15 @@ const HERO_COPY: Record<
     accent: "that actually show you something",
     sub: "Answer for 2–5 minutes and get a radar map of your mind, written analysis and an HD card you can share — scored entirely in your browser, with fresh randomised questions every single time.",
     cta: "Start the free IQ test",
-    second: "See all 13 tools",
+    second: `See all ${TOOLS.length} tools`,
   },
   curiosity: {
-    badge: "7 free tests · results in 3 minutes",
+    badge: `${TOOLS.length} free tools · results in minutes`,
     title: "What does your mind",
     accent: "actually look like?",
     sub: "One question at a time, a radar map of your traits at the end, and an HD card worth screenshotting. No signup, no email, nothing saved.",
     cta: "Reveal my results — free",
-    second: "Browse all 7 tests",
+    second: `Browse all ${TOOLS.length} tools`,
   },
   speed: {
     badge: "No signup · starts instantly",
@@ -301,7 +301,7 @@ function Home() {
                 onClick={() => trackExperiment("hero_secondary", heroArm)}
                 className="btn-ghost inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-full px-7 text-sm font-semibold sm:min-h-13 sm:w-auto sm:text-base"
               >
-                {focusTool ? "See all 7 tests" : copy.second}
+                {focusTool ? `See all ${TOOLS.length} tools` : copy.second}
               </a>
             </div>
 
