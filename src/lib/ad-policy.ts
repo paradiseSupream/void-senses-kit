@@ -59,13 +59,12 @@ export function plannedAdScripts(ads: PolicyInput, ctx: PolicyContext): AdFormat
   if (ads.lean_mode) return [];
   if (ctx.campaignSafe) return [];
   if (ctx.quizActive) return [];
-  if (ctx.isMobile) return [];
-
   const planned: AdFormat[] = [];
   if (ads.monetag_inpage_push) planned.push("inpage_push");
   if (ads.monetag_vignette) planned.push("vignette");
   if (ads.monetag_popunder) planned.push("popunder");
   if (ads.adsterra_social_bar && ads.adsterra_social_bar_src) planned.push("adsterra_social_bar");
+  if (ctx.isMobile) return planned.filter((format) => MOBILE_SAFE.includes(format));
   return planned;
 }
 
