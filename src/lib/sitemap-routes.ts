@@ -8,6 +8,7 @@ export const SITE_BASE_URL = "https://sensesofvoid.app";
 
 import { ARCHETYPE_PATHS } from "@/lib/archetype-seo";
 import { GUIDE_PATHS } from "@/lib/guides";
+import { IQ_SCORE_PATHS } from "@/lib/iq-score-seo";
 import { VAULT_CATEGORY_PATHS, VAULT_PATHS } from "@/lib/vault-catalog";
 
 export type SitemapEntry = {
