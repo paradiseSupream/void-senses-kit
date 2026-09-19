@@ -18,6 +18,7 @@ import {
 
 
 import { TOOLS, searchTools, type ToolMeta } from "@/lib/tools";
+import { HOME_FAQ } from "@/components/home/HomeFaq";
 import { ToolRow } from "@/components/tools/ToolRow";
 import { LiveEntry } from "@/components/home/LiveEntry";
 import { SignatureCard } from "@/components/home/SignatureCard";
@@ -58,7 +59,7 @@ export const Route = createFileRoute("/")({
       {
         property: "og:description",
         content:
-          "Thirteen free tools: IQ, memory, logic, trauma, dark personality, love match, friend quiz, compatibility battle, AI roast, prompt maker and a free asset vault. Results in minutes, no signup.",
+          "Sixteen free tools: IQ, memory, logic, trauma, dark personality, love match, red flags, friend quiz, compatibility battle, AI roast, prompt maker and a free asset vault. Results in minutes, no signup.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -80,6 +81,42 @@ export const Route = createFileRoute("/")({
           "query-input": "required name=search_term_string",
         },
       }),
+      },
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          name: "Senses of Void",
+          url: "https://sensesofvoid.app",
+          logo: "https://sensesofvoid.app/apple-touch-icon.png",
+        }),
+      },
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "ItemList",
+          name: "Free psychology tests and tools",
+          itemListElement: TOOLS.map((tool, index) => ({
+            "@type": "ListItem",
+            position: index + 1,
+            name: tool.name,
+            url: `https://sensesofvoid.app${tool.path}`,
+          })),
+        }),
+      },
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          mainEntity: HOME_FAQ.map((item) => ({
+            "@type": "Question",
+            name: item.q,
+            acceptedAnswer: { "@type": "Answer", text: item.a },
+          })),
+        }),
       },
     ],
   }),

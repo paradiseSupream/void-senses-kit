@@ -1,6 +1,6 @@
 import { ChevronDown } from "lucide-react";
 
-const FAQ = [
+export const HOME_FAQ = [
   {
     q: "Is Senses of Void really free?",
     a: "Yes. Every test, every result and the whole asset vault are free to use with no signup. The site is paid for by ads. Lifetime VIP ($19, one payment) simply removes the ads and export gates — it never unlocks extra tests.",
@@ -26,7 +26,7 @@ const FAQ = [
 export function HomeFaq() {
   return (
     <div className="grid gap-2.5">
-      {FAQ.map((item) => (
+      {HOME_FAQ.map((item) => (
         <details key={item.q} className="bento group px-5 py-4">
           <summary className="flex cursor-pointer list-none items-center justify-between gap-4">
             <span className="font-display text-lg">{item.q}</span>

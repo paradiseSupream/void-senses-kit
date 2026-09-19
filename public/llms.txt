@@ -1,0 +1,28 @@
+Senses of Void (sensesofvoid.app) — free, fast, browser-scored psychology
+tests and personality tools with instant visual results and shareable cards.
+No signup. Answers are scored on-device for privacy.
+
+## Key pages
+- Home: https://sensesofvoid.app/
+- All tools: https://sensesofvoid.app/tools
+- Free asset vault: https://sensesofvoid.app/vault
+- Guides: https://sensesofvoid.app/guides
+- Archetype library: https://sensesofvoid.app/archetypes
+
+## Tools
+- Quick IQ Test: https://sensesofvoid.app/tools/iq
+- Childhood Trauma Test: https://sensesofvoid.app/tools/child-trauma
+- Dark Personality Test: https://sensesofvoid.app/tools/dark-personality
+- Love & Vibe Match: https://sensesofvoid.app/tools/love-match
+- Red Flag Radar: https://sensesofvoid.app/tools/red-flag
+- Memory Challenge: https://sensesofvoid.app/tools/memory
+- Logic Sprint: https://sensesofvoid.app/tools/logic
+- This or That: https://sensesofvoid.app/tools/this-or-that
+- Friend Knowledge Quiz: https://sensesofvoid.app/tools/friend-quiz
+- Compatibility Battle: https://sensesofvoid.app/tools/battle
+- AI Roast Me: https://sensesofvoid.app/tools/roast
+- AI Prompt Maker: https://sensesofvoid.app/tools/prompt-maker
+
+## Notes
+- Results are for self-reflection and entertainment, not clinical diagnosis.
+- Every tool ends with an HD share card; challenge links let friends compare.
