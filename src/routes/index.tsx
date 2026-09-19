@@ -18,6 +18,7 @@ import {
 
 
 import { TOOLS, searchTools, type ToolMeta } from "@/lib/tools";
+import { HOME_FAQ } from "@/components/home/HomeFaq";
 import { ToolRow } from "@/components/tools/ToolRow";
 import { LiveEntry } from "@/components/home/LiveEntry";
 import { SignatureCard } from "@/components/home/SignatureCard";
