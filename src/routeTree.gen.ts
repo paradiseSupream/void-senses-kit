@@ -27,6 +27,8 @@ import { Route as ArchetypesIndexRouteImport } from './routes/archetypes.index'
 import { Route as ArchetypesSlugRouteImport } from './routes/archetypes.$slug'
 import { Route as GuidesIndexRouteImport } from './routes/guides.index'
 import { Route as GuidesSlugRouteImport } from './routes/guides.$slug'
+import { Route as IqScoreIndexRouteImport } from './routes/iq-score.index'
+import { Route as IqScoreScoreRouteImport } from './routes/iq-score.$score'
 import { Route as RTokenRouteImport } from './routes/r.$token'
 import { Route as ToolsIndexRouteImport } from './routes/tools.index'
 import { Route as ToolsBattleRouteImport } from './routes/tools.battle'
@@ -146,6 +148,16 @@ const GuidesIndexRoute = GuidesIndexRouteImport.update({
 const GuidesSlugRoute = GuidesSlugRouteImport.update({
   id: '/guides/$slug',
   path: '/guides/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const IqScoreIndexRoute = IqScoreIndexRouteImport.update({
+  id: '/iq-score/',
+  path: '/iq-score/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const IqScoreScoreRoute = IqScoreScoreRouteImport.update({
+  id: '/iq-score/$score',
+  path: '/iq-score/$score',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RTokenRoute = RTokenRouteImport.update({
@@ -316,6 +328,7 @@ export interface FileRoutesByFullPath {
   '/api/dossier-pdf': typeof ApiDossierPdfRoute
   '/archetypes/$slug': typeof ArchetypesSlugRoute
   '/guides/$slug': typeof GuidesSlugRoute
+  '/iq-score/$score': typeof IqScoreScoreRoute
   '/r/$token': typeof RTokenRoute
   '/tools/battle': typeof ToolsBattleRoute
   '/tools/child-trauma': typeof ToolsChildTraumaRoute
@@ -335,6 +348,7 @@ export interface FileRoutesByFullPath {
   '/admin/': typeof AdminIndexRoute
   '/archetypes/': typeof ArchetypesIndexRoute
   '/guides/': typeof GuidesIndexRoute
+  '/iq-score/': typeof IqScoreIndexRoute
   '/tools/': typeof ToolsIndexRoute
   '/vault/': typeof VaultIndexRoute
   '/api/public/capi': typeof ApiPublicCapiRoute
@@ -366,6 +380,7 @@ export interface FileRoutesByTo {
   '/api/dossier-pdf': typeof ApiDossierPdfRoute
   '/archetypes/$slug': typeof ArchetypesSlugRoute
   '/guides/$slug': typeof GuidesSlugRoute
+  '/iq-score/$score': typeof IqScoreScoreRoute
   '/r/$token': typeof RTokenRoute
   '/tools/battle': typeof ToolsBattleRoute
   '/tools/child-trauma': typeof ToolsChildTraumaRoute
@@ -385,6 +400,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminIndexRoute
   '/archetypes': typeof ArchetypesIndexRoute
   '/guides': typeof GuidesIndexRoute
+  '/iq-score': typeof IqScoreIndexRoute
   '/tools': typeof ToolsIndexRoute
   '/vault': typeof VaultIndexRoute
   '/api/public/capi': typeof ApiPublicCapiRoute
@@ -417,6 +433,7 @@ export interface FileRoutesById {
   '/api/dossier-pdf': typeof ApiDossierPdfRoute
   '/archetypes/$slug': typeof ArchetypesSlugRoute
   '/guides/$slug': typeof GuidesSlugRoute
+  '/iq-score/$score': typeof IqScoreScoreRoute
   '/r/$token': typeof RTokenRoute
   '/tools/battle': typeof ToolsBattleRoute
   '/tools/child-trauma': typeof ToolsChildTraumaRoute
@@ -436,6 +453,7 @@ export interface FileRoutesById {
   '/admin/': typeof AdminIndexRoute
   '/archetypes/': typeof ArchetypesIndexRoute
   '/guides/': typeof GuidesIndexRoute
+  '/iq-score/': typeof IqScoreIndexRoute
   '/tools/': typeof ToolsIndexRoute
   '/vault/': typeof VaultIndexRoute
   '/api/public/capi': typeof ApiPublicCapiRoute
@@ -469,6 +487,7 @@ export interface FileRouteTypes {
     | '/api/dossier-pdf'
     | '/archetypes/$slug'
     | '/guides/$slug'
+    | '/iq-score/$score'
     | '/r/$token'
     | '/tools/battle'
     | '/tools/child-trauma'
@@ -488,6 +507,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/archetypes/'
     | '/guides/'
+    | '/iq-score/'
     | '/tools/'
     | '/vault/'
     | '/api/public/capi'
@@ -519,6 +539,7 @@ export interface FileRouteTypes {
     | '/api/dossier-pdf'
     | '/archetypes/$slug'
     | '/guides/$slug'
+    | '/iq-score/$score'
     | '/r/$token'
     | '/tools/battle'
     | '/tools/child-trauma'
@@ -538,6 +559,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/archetypes'
     | '/guides'
+    | '/iq-score'
     | '/tools'
     | '/vault'
     | '/api/public/capi'
@@ -569,6 +591,7 @@ export interface FileRouteTypes {
     | '/api/dossier-pdf'
     | '/archetypes/$slug'
     | '/guides/$slug'
+    | '/iq-score/$score'
     | '/r/$token'
     | '/tools/battle'
     | '/tools/child-trauma'
@@ -588,6 +611,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/archetypes/'
     | '/guides/'
+    | '/iq-score/'
     | '/tools/'
     | '/vault/'
     | '/api/public/capi'
@@ -620,6 +644,7 @@ export interface RootRouteChildren {
   ApiDossierPdfRoute: typeof ApiDossierPdfRoute
   ArchetypesSlugRoute: typeof ArchetypesSlugRoute
   GuidesSlugRoute: typeof GuidesSlugRoute
+  IqScoreScoreRoute: typeof IqScoreScoreRoute
   RTokenRoute: typeof RTokenRoute
   ToolsBattleRoute: typeof ToolsBattleRoute
   ToolsChildTraumaRoute: typeof ToolsChildTraumaRoute
@@ -639,6 +664,7 @@ export interface RootRouteChildren {
   AdminIndexRoute: typeof AdminIndexRoute
   ArchetypesIndexRoute: typeof ArchetypesIndexRoute
   GuidesIndexRoute: typeof GuidesIndexRoute
+  IqScoreIndexRoute: typeof IqScoreIndexRoute
   ToolsIndexRoute: typeof ToolsIndexRoute
   VaultIndexRoute: typeof VaultIndexRoute
   ApiPublicCapiRoute: typeof ApiPublicCapiRoute
@@ -781,6 +807,20 @@ declare module '@tanstack/react-router' {
       path: '/guides/$slug'
       fullPath: '/guides/$slug'
       preLoaderRoute: typeof GuidesSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/iq-score/': {
+      id: '/iq-score/'
+      path: '/iq-score'
+      fullPath: '/iq-score/'
+      preLoaderRoute: typeof IqScoreIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/iq-score/$score': {
+      id: '/iq-score/$score'
+      path: '/iq-score/$score'
+      fullPath: '/iq-score/$score'
+      preLoaderRoute: typeof IqScoreScoreRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/r/$token': {
@@ -1012,6 +1052,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiDossierPdfRoute: ApiDossierPdfRoute,
   ArchetypesSlugRoute: ArchetypesSlugRoute,
   GuidesSlugRoute: GuidesSlugRoute,
+  IqScoreScoreRoute: IqScoreScoreRoute,
   RTokenRoute: RTokenRoute,
   ToolsBattleRoute: ToolsBattleRoute,
   ToolsChildTraumaRoute: ToolsChildTraumaRoute,
@@ -1031,6 +1072,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminIndexRoute: AdminIndexRoute,
   ArchetypesIndexRoute: ArchetypesIndexRoute,
   GuidesIndexRoute: GuidesIndexRoute,
+  IqScoreIndexRoute: IqScoreIndexRoute,
   ToolsIndexRoute: ToolsIndexRoute,
   VaultIndexRoute: VaultIndexRoute,
   ApiPublicCapiRoute: ApiPublicCapiRoute,
