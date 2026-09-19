@@ -68,9 +68,18 @@ describe("ad policy", () => {
     expect(plannedAdScripts(FULL, { ...CONSENTED, quizActive: true })).toEqual([]);
   });
 
-  it("never injects third-party scripts on mobile webviews", () => {
-    expect(plannedAdScripts(FULL, { ...CONSENTED, isMobile: true })).toEqual([]);
+  it("on mobile keeps only the lightweight formats (no vignette / pop-under)", () => {
+    expect(plannedAdScripts(FULL, { ...CONSENTED, isMobile: true })).toEqual([
+      "inpage_push",
+      "adsterra_social_bar",
+    ]);
     expect(smartlinkSurfacesAllowed(FULL, { ...CONSENTED, isMobile: true })).toBe(true);
+  });
+
+  it("mobile still respects VIP, consent and quiz gates", () => {
+    expect(plannedAdScripts(FULL, { ...CONSENTED, isMobile: true, isVip: true })).toEqual([]);
+    expect(plannedAdScripts(FULL, { ...CONSENTED, isMobile: true, quizActive: true })).toEqual([]);
+    expect(plannedAdScripts(FULL, { ...CONSENTED, isMobile: true, campaignSafe: true })).toEqual([]);
   });
 
   it("detects campaign entries from click ids, utm and ad-landing links", () => {
