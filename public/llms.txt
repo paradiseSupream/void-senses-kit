@@ -8,6 +8,7 @@ No signup. Answers are scored on-device for privacy.
 - Free asset vault: https://sensesofvoid.app/vault
 - Guides: https://sensesofvoid.app/guides
 - Archetype library: https://sensesofvoid.app/archetypes
+- IQ score meanings: https://sensesofvoid.app/iq-score
 
 ## Tools
 - Quick IQ Test: https://sensesofvoid.app/tools/iq

@@ -67,6 +67,14 @@ export function Footer() {
             </li>
             <li>
               <Link
+                to="/iq-score"
+                className="text-sm text-muted-foreground transition-colors hover:text-primary"
+              >
+                IQ score meanings
+              </Link>
+            </li>
+            <li>
+              <Link
                 to="/vault"
                 className="text-sm text-muted-foreground transition-colors hover:text-primary"
               >
