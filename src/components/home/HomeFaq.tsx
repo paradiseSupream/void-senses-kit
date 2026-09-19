@@ -1,6 +1,6 @@
 import { ChevronDown } from "lucide-react";
 
-const FAQ = [
+export const HOME_FAQ = [
   {
     q: "Is Senses of Void really free?",
     a: "Yes. Every test, every result and the whole asset vault are free to use with no signup. The site is paid for by ads. Lifetime VIP ($19, one payment) simply removes the ads and export gates — it never unlocks extra tests.",
