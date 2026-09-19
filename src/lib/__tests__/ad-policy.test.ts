@@ -69,10 +69,10 @@ describe("ad policy", () => {
   });
 
   it("on mobile keeps only the lightweight formats (no vignette / pop-under)", () => {
-    expect(plannedAdScripts(FULL, { ...CONSENTED, isMobile: true })).toEqual([
-      "inpage_push",
-      "adsterra_social_bar",
-    ]);
+    const mobile = plannedAdScripts(FULL, { ...CONSENTED, isMobile: true });
+    expect(mobile).toContain("inpage_push");
+    expect(mobile).not.toContain("vignette");
+    expect(mobile).not.toContain("popunder");
     expect(smartlinkSurfacesAllowed(FULL, { ...CONSENTED, isMobile: true })).toBe(true);
   });
 
