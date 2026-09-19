@@ -35,7 +35,7 @@ export const EXCLUDED_ROUTE_PREFIXES = [
  * generated from data, so they are listed in the sitemap even though the
  * generated route tree only knows the parameterised parent.
  */
-export const DYNAMIC_ROUTE_PREFIXES = ["/archetypes/", "/vault/", "/guides/"] as const;
+export const DYNAMIC_ROUTE_PREFIXES = ["/archetypes/", "/vault/", "/guides/", "/iq-score/"] as const;
 
 export const SITEMAP_ENTRIES: SitemapEntry[] = [
   { path: "/", changefreq: "daily", priority: "1.0" },
@@ -54,6 +54,12 @@ export const SITEMAP_ENTRIES: SitemapEntry[] = [
   { path: "/tools/friend-quiz", changefreq: "weekly", priority: "0.9" },
   { path: "/tools/battle", changefreq: "weekly", priority: "0.9" },
   { path: "/guides", changefreq: "weekly", priority: "0.8" },
+  { path: "/iq-score", changefreq: "weekly", priority: "0.8" },
+  ...IQ_SCORE_PATHS.map((path) => ({
+    path,
+    changefreq: "monthly" as const,
+    priority: "0.7",
+  })),
   ...GUIDE_PATHS.map((path) => ({ path, changefreq: "monthly" as const, priority: "0.7" })),
   { path: "/archetypes", changefreq: "weekly", priority: "0.8" },
   ...ARCHETYPE_PATHS.map((path) => ({
