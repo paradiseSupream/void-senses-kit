@@ -26,7 +26,7 @@ export const HOME_FAQ = [
 export function HomeFaq() {
   return (
     <div className="grid gap-2.5">
-      {FAQ.map((item) => (
+      {HOME_FAQ.map((item) => (
         <details key={item.q} className="bento group px-5 py-4">
           <summary className="flex cursor-pointer list-none items-center justify-between gap-4">
             <span className="font-display text-lg">{item.q}</span>

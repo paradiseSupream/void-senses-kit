@@ -58,7 +58,7 @@ export const Route = createFileRoute("/")({
       {
         property: "og:description",
         content:
-          "Thirteen free tools: IQ, memory, logic, trauma, dark personality, love match, friend quiz, compatibility battle, AI roast, prompt maker and a free asset vault. Results in minutes, no signup.",
+          "Sixteen free tools: IQ, memory, logic, trauma, dark personality, love match, red flags, friend quiz, compatibility battle, AI roast, prompt maker and a free asset vault. Results in minutes, no signup.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
