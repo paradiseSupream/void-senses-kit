@@ -37,9 +37,16 @@ export type PolicyContext = {
   campaignSafe?: boolean | undefined;
   /** The visitor is mid-quiz: never interrupt the flow with a script format. */
   quizActive?: boolean | undefined;
-  /** Mobile webviews are too fragile for vendor scripts; first-party surfaces remain available. */
+  /**
+   * Mobile: only the two lightweight, non-blocking formats (in-page push and
+   * the Adsterra social bar) may run. Vignette and pop-under stay desktop-only
+   * so Core Web Vitals / organic rankings are never put at risk.
+   */
   isMobile?: boolean | undefined;
 };
+
+/** Formats light enough to run on a phone without hurting page experience. */
+const MOBILE_SAFE: AdFormat[] = ["inpage_push", "adsterra_social_bar"];
 
 /**
  * The exact set of third-party script formats allowed to load right now.
