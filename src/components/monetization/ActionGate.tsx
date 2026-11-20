@@ -67,7 +67,7 @@ export function ActionGateProvider({ children }: { children: ReactNode }) {
   }, [open, finish]);
 
   const runGated = useCallback<GateContextValue["runGated"]>(
-    ({ openPartnerTab = true, toolSlug, force = false, seconds = REWARD_SECONDS } = {}) => {
+    ({ openPartnerTab = true, toolSlug, force = false, seconds = REWARD_SECONDS }: GateOptions = {}) => {
       if (isVip) return Promise.resolve();
 
       toolRef.current = toolSlug ?? null;
